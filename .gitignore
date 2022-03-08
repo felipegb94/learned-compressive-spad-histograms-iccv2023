@@ -1,3 +1,10 @@
+#### Custom gitignore
+
+data_gener/TrainData/raw
+data_gener/TrainData/processed
+
+#### Auto-generated gitignore
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
