@@ -2,6 +2,11 @@
 
 data_gener/TrainData/raw
 data_gener/TrainData/processed
+data_gener/TrainData/processed_test
+data_gener/TrainData/living_rooms*
+
+data_gener/TestData/middlebury/processed
+
 
 #### Auto-generated gitignore
 

@@ -14,6 +14,8 @@ camera_params;
 
 t_s = tic;
 for ss = 1:length(scenes) % original is parfor
+% parfor ss = 1:length(scenes) % original is parfor
+
     sceneName = scenes{ss};
     
     disp('starting!');
@@ -31,19 +33,34 @@ for ss = 1:length(scenes) % original is parfor
     % Displays each pair of synchronized RGB and Depth frames.
     idx = 1 : 10 : numel(frameList);
     
+    disp(outdir)
+
     for ii = 1:length(idx)
+        fprintf('    Processing: %04d\n', ii);
+
         % check if already exists
         depth_out = sprintf('%s/depth_%04d.mat', outdir, idx(ii));
         albedo_out = sprintf('%s/albedo_%04d.mat', outdir, idx(ii));
         intensity_out = sprintf('%s/intensity_%04d.mat', outdir, idx(ii));
         dist_out = sprintf('%s/dist_%04d.mat',outdir, idx(ii));
         dist_out_hr = sprintf('%s/dist_hr_%04d.mat',outdir, idx(ii));
-
-        if exist(depth_out,'file') && exist(albedo_out,'file') ...
+% 
+%         if exist(depth_out,'file') && exist(albedo_out,'file') ...
+%                 && exist(intensity_out,'file') && exist(dist_out,'file') ...
+%                 && exist(dist_out_hr,'file')
+%                 disp('continuing');
+%                 continue;
+%         end
+        if  exist(albedo_out,'file') ...
                 && exist(intensity_out,'file') && exist(dist_out,'file') ...
                 && exist(dist_out_hr,'file')
                 disp('continuing');
                 continue;
+        end
+
+        if(strcmp(sceneName, 'living_room_0059') && (ii==195))
+            disp('skipping living_room_0059_0195 for now')
+            continue;
         end
         
         try
