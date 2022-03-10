@@ -3,8 +3,7 @@
 clear all;close all;clc
 addpath(genpath('./intrinsic_texture'));
 addpath('./nyu_utils');
-datasetDir = './raw';
-% datasetDir = './raw_corrupted';
+datasetDir = './raw_corrupted';
 % datasetDir = './raw_new_download';
 
 % datasetDir = '../../raw';
@@ -24,8 +23,7 @@ for ss = 1:length(scenes) % original is parfor
     disp('starting!');
 
     % The name of the scene to demo.
-    outdir = ['./processed/' sceneName];
-%     outdir = ['./processed_test/' sceneName];
+    outdir = ['./processed_test/' sceneName];
 
     mkdir(outdir);
 
@@ -63,22 +61,22 @@ for ss = 1:length(scenes) % original is parfor
                 continue;
         end
 
-        if(strcmp(sceneName, 'living_room_0059'))
-            if((ii == 195) || (ii == 204) || (ii == 208))
-                fprintf('skipping living_room_0059_%04d for now\n', ii)
-                continue;
-            end
-        elseif(strcmp(sceneName, 'living_room_0057'))
-            if((ii == 123))
-                fprintf('skipping living_room_0057_%04d for now\n', ii)
-                continue;
-            end
-        elseif(strcmp(sceneName, 'office_0001c'))
-            if((ii == 83))
-                fprintf('skipping office_0001c_%04d for now\n', ii)
-                continue;
-            end
-        end
+%         if(strcmp(sceneName, 'living_room_0059'))
+%             if((ii == 195) || (ii == 204) || (ii == 208))
+%                 fprintf('skipping living_room_0059_%04d for now\n', ii)
+%                 continue;
+%             end
+%         elseif(strcmp(sceneName, 'living_room_0057'))
+%             if((ii == 123))
+%                 fprintf('skipping living_room_0057_%04d for now\n', ii)
+%                 continue;
+%             end
+%         elseif(strcmp(sceneName, 'office_0001c'))
+%             if((ii == 83))
+%                 fprintf('skipping office_0001c_%04d for now\n', ii)
+%                 continue;
+%             end
+%         end
         
         try
             imgRgb = imread([sceneDir '/' frameList(idx(ii)).rawRgbFilename]);

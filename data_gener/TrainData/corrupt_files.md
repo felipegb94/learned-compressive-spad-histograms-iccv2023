@@ -1,19 +1,37 @@
 Corrupt files in the nyuv2 dataset that we may need to re-download
 
 
-Scene: home_office_0002
-* 0010
+Scene: `home_office_0002`
+* `0010`
+  * Error Message: `ERROR: MATLAB:imagesci:pnmgeti:corruptFile Garbage found where image data was expected`
+  * The error happend in the `imgRgb = imread...` line trying to read `'r-1315165247.616626-1005556086.ppm'`
+  * Although, MATLAB can't read it, my Image Viewer software can, and I can read it with skimage.
+  * Could be fixed by reading the file, saving as PNG, and then saving back to PPM to replace it...
 
-Scene: living_room_0026
-* 0008
+Scene: `living_room_0026`
+* `0008`
+  * Same error as `home_office_0002_0010`
 
-Scene: living_room_0059
-* 0195 --> Seg Fauls
+Scene: `living_room_0060`
+* `0027`
+  * Same error as `home_office_0002_0010`
 
+Scene: `living_room_0059`
+* `0195` --> Seg Faults
+  * Seg Fault happens in line: `[albedo, ~] = intrinsic_decomp(I, S, imgDepthFilled, 0.0001, 0.8, 0.5);`
+  * Inside `intrinsic_decomp` seg fault happens in `nNeighbors = getGridLLEMatrix(nMap_p, vMap_p, 50, 6, 12);`
+* `0204` --> Seg Faults
+* `0208` --> Seg Faults
 
+Scene: living_room_0057
+* `0123` --> Seg Faults
+
+Scene: office_0001c
+* `0083` --> Seg Faults
+* 
 ----
 
-Crash on scene Living_room_0059_0195
+Crash on scene `living_room_0059_0195`
 * Segmentation violation:
   Crash Mode               : continue (default)
   Default Encoding         : UTF-8

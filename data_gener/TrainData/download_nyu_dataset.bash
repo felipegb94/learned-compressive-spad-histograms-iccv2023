@@ -5,11 +5,11 @@
 # # download living room scenes [DONE]
 # wget -P ./raw http://horatio.cs.nyu.edu/mit/silberman/nyu_depth_v2/living_rooms_part1.zip
 # wget -P ./raw http://horatio.cs.nyu.edu/mit/silberman/nyu_depth_v2/living_rooms_part2.zip
-wget -P ./ http://horatio.cs.nyu.edu/mit/silberman/nyu_depth_v2/living_rooms_part3.zip
-wget -P ./ http://horatio.cs.nyu.edu/mit/silberman/nyu_depth_v2/living_rooms_part4.zip
+# wget -P ./ http://horatio.cs.nyu.edu/mit/silberman/nyu_depth_v2/living_rooms_part3.zip
+# wget -P ./ http://horatio.cs.nyu.edu/mit/silberman/nyu_depth_v2/living_rooms_part4.zip
 
-# # download home offices [DONE]
-# wget -P ./raw http://horatio.cs.nyu.edu/mit/silberman/nyu_depth_v2/home_offices.zip
+# download home offices [DONE]
+wget -P ./raw http://horatio.cs.nyu.edu/mit/silberman/nyu_depth_v2/home_offices.zip
 
 # # download offices [DONE]
 # wget -P ./raw http://horatio.cs.nyu.edu/mit/silberman/nyu_depth_v2/offices_part1.zip
