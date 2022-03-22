@@ -15,6 +15,9 @@
   * I installed `libfreenect` using the [Ubuntu instruction here](https://github.com/OpenKinect/libfreenect). First I installed the pre-requisites, and then I used `sudo apt install freenect`. 
   * Since I installed `libfreenect` using `apt`, when compiling a program the include statement should be `#include "libfreenect.h"`, and not `<libfreenect/libfreenect.h>`. So, in `get_accel_data.cpp` I changed the `libfreenect` include statement. 
 
+2022-03-11:
+* 
+
 ## Libraries that I had to install
 
 ### For data generation
@@ -29,4 +32,4 @@
 * Does the `ConvertRGBD.m` script take a while to run?
 * How much total storage do I need to generate all the datasets?
 * How many corrupt files in the NYUv2 dataset? Did you have to download and re-download them multiple times?
-
+* In `ConvertRGBD.m` script why is line 40 skipping every 10 files?

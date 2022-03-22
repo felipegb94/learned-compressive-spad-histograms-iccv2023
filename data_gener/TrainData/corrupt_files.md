@@ -1,6 +1,8 @@
 Corrupt files in the nyuv2 dataset that we may need to re-download
 
 
+### Imread Problem Files
+
 Scene: `home_office_0002`
 * `0010`
   * Error Message: `ERROR: MATLAB:imagesci:pnmgeti:corruptFile Garbage found where image data was expected`
@@ -9,12 +11,38 @@ Scene: `home_office_0002`
   * Could be fixed by reading the file, saving as PNG, and then saving back to PPM to replace it...
 
 Scene: `living_room_0026`
-* `0008`
-  * Same error as `home_office_0002_0010`
+* `0008` -> Same error as `home_office_0002_0010`
+
+Scene: `living_room_0037`
+* `0014` -> Same error as `home_office_0002_0010`
 
 Scene: `living_room_0060`
-* `0027`
-  * Same error as `home_office_0002_0010`
+* `0027` -> Same error as `home_office_0002_0010`
+
+Scene: `living_room_0022`
+* `0123` -> Same error as `home_office_0002_0010`
+
+Scene: `living_room_0047a`
+* `0050` -> Same error as `home_office_0002_0010`
+
+Scene: `office_0001a`
+* `0020` -> Same error as `home_office_0002_0010`
+
+### MATLAB sizeDimensionsMustMatch
+
+Scene: `living_room_0001b`
+* `0003`
+
+### Empty Scenes
+
+Scene: `living_room_0023a`
+Scene: `living_room_0023b`
+Scene: `living_room_0024a`
+Scene: `living_room_0024b`
+Scene: `living_room_0024c`
+
+
+### SegFault Files
 
 Scene: `living_room_0059`
 * `0195` --> Seg Faults
@@ -28,7 +56,39 @@ Scene: living_room_0057
 
 Scene: office_0001c
 * `0083` --> Seg Faults
-* 
+
+Scene: dining_room_0010
+* `0027` --> Seg Faults
+
+Scene: living_room_0040
+* `0032` --> Seg Faults
+* `0061` --> Seg Faults
+* `0087` --> Seg Faults
+
+Scene: `living_room_0073`
+* `0060` --> Seg Faults
+
+Scene: `dining_room_0020`
+* `0120` --> Seg Faults
+
+Scene: `dining_room_0022`
+* `0030` --> Seg Faults
+
+Scene: `dining_room_0024`
+* `0025` --> Seg Faults
+* `0029` --> Seg Faults
+
+Scene: `study_room_0003`
+* `0001`, `0007`, `0008`, `0010`, `0024`, `0029`, `0061`, `0085`, `0097`, `0101` 
+  * Seg Faults
+
+Scene: `study_room_005b`
+* `0045`
+
+Scene: `study_room_0007`
+* `0017`
+
+
 ----
 
 Crash on scene `living_room_0059_0195`

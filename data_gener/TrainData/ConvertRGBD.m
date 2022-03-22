@@ -1,6 +1,6 @@
 
 % The directory where you extracted the raw dataset.
-clear all;close all;clc
+clear all;clc; clf;
 addpath(genpath('./intrinsic_texture'));
 addpath('./nyu_utils');
 datasetDir = './raw';
@@ -13,6 +13,8 @@ datasetDir = './raw';
 scenes = ls(datasetDir);
 scenes = regexp(scenes, '(\s+|\n)', 'split');
 scenes(end) = [];
+% scenes = [{'home_office_0002'}];
+scenes = [{'living_room_0001b'}];
 camera_params;
 
 t_s = tic;
@@ -37,7 +39,8 @@ for ss = 1:length(scenes) % original is parfor
 
     % Displays each pair of synchronized RGB and Depth frames.
     idx = 1 : 10 : numel(frameList);
-    
+%     idx = 841 : 10 : numel(frameList);
+
     disp(outdir)
 
     for ii = 1:length(idx)
@@ -49,35 +52,25 @@ for ss = 1:length(scenes) % original is parfor
         intensity_out = sprintf('%s/intensity_%04d.mat', outdir, idx(ii));
         dist_out = sprintf('%s/dist_%04d.mat',outdir, idx(ii));
         dist_out_hr = sprintf('%s/dist_hr_%04d.mat',outdir, idx(ii));
-% 
-%         if exist(depth_out,'file') && exist(albedo_out,'file') ...
-%                 && exist(intensity_out,'file') && exist(dist_out,'file') ...
-%                 && exist(dist_out_hr,'file')
-%                 disp('continuing');
-%                 continue;
-%         end
+
+
         if  exist(albedo_out,'file') ...
                 && exist(intensity_out,'file') && exist(dist_out,'file') ...
                 && exist(dist_out_hr,'file')
-                disp('continuing');
-                continue;
+            disp('continuing');
+            %%% Visualize for debugging
+%             a = load(albedo_out).albedo;
+%             d = load(dist_out).dist;
+%             clf;
+%             subplot(2,1,1); imshow(a); title(albedo_out); 
+%             subplot(2,1,2); imshow(d/max(d(:))); title(dist_out); 
+            continue;
         end
 
-        if(strcmp(sceneName, 'living_room_0059'))
-            if((ii == 195) || (ii == 204) || (ii == 208))
-                fprintf('skipping living_room_0059_%04d for now\n', ii)
-                continue;
-            end
-        elseif(strcmp(sceneName, 'living_room_0057'))
-            if((ii == 123))
-                fprintf('skipping living_room_0057_%04d for now\n', ii)
-                continue;
-            end
-        elseif(strcmp(sceneName, 'office_0001c'))
-            if((ii == 83))
-                fprintf('skipping office_0001c_%04d for now\n', ii)
-                continue;
-            end
+        %%%% In my configuration some files give segfaults so we skip them
+        if(CheckIfSkipFile(sceneName,ii))
+            fprintf('skipping %s_%04d for now\n', sceneName, ii)
+            continue;
         end
         
         try
