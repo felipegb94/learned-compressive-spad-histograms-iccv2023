@@ -81,6 +81,8 @@ for ss = 1:length(scenes) % original is parfor
             imgRgb = crop_image(imgRgb);
             imgDepthProj = project_depth_map(imgDepthRaw, imgRgb);
             imgDepthAbs = crop_image(imgDepthProj);
+            % The following line will crash if the image has 0 valid pixels
+            % this only happens on: living_room_0001b_0003
             imgDepthFilled = fill_depth_cross_bf(imgRgb, double(imgDepthAbs));
           
             % get distance from the depth image

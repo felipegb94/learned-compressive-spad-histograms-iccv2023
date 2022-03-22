@@ -32,6 +32,9 @@ Scene: `office_0001a`
 
 Scene: `living_room_0001b`
 * `0003`
+  * Crash on `ConvertRGBD.m` when calling `fill_depth_cross_bf`
+  * Inside `fill_depth_cross_bf` the crash happens in the line `imgDepth = imgDepthAbs ./ maxDepthObs;`
+  * The problem is that this file contains 0 valid pixels. So the `maxDepthObs` variable has 0 dimensions.
 
 ### Empty Scenes
 
