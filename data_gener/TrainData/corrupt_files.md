@@ -38,6 +38,8 @@ Scene: `living_room_0001b`
 
 ### Empty Scenes
 
+**NOTE:** I re-downloaded the files and they were still empty...
+
 Scene: `living_room_0023a`
 Scene: `living_room_0023b`
 Scene: `living_room_0024a`

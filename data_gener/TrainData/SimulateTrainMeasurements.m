@@ -5,7 +5,7 @@ function SimulateTrainMeasurements(param_idx)
 % 2: the 9 typical noise levels + 3 low SBR noise levels;
 
     addpath('./nyu_utils');
-    dataset_dir = './processed_test';
+    dataset_dir = './processed';
     
     bin_size = 80e-12; %approximately the bin size 
     num_bins = 1024; 
