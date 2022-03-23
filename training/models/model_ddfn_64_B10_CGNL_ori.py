@@ -4,6 +4,10 @@ import torch.nn.init as init
 from torch.autograd import Variable
 import torch.nn.functional as F
 
+## For debugging
+from IPython.core import debugger
+breakpoint = debugger.set_trace
+
 # feature extraction part
 class MsFeat(nn.Module):
     def __init__(self, in_channels):
@@ -194,7 +198,7 @@ class DeepBoosting(nn.Module):
         
     def forward(self, inputs):
         smax = torch.nn.Softmax2d()
-
+        
         msfeat = self.msfeat(inputs) 
         c1 = self.C1(msfeat)
         nlout = self.nl(c1)

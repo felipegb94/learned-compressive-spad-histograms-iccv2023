@@ -6,7 +6,7 @@ import os.path
 import sys
 
 # specify dataset folder here that contains the output of SimulateTrainMeasurements.m
-dataset_folder = os.path.abspath('xxx') + '/'
+dataset_folder = os.path.abspath('./data_gener/TrainData/processed') + '/'
 
 simulation_param_idx = 1    # 1 or 2 corresponding to that in SimulateTrainMeasurements.m
 

@@ -20,6 +20,11 @@ from pro.Train import train
 from pro.ParamCounter import ParamCounter
 from models import model_ddfn_64_B10_CGNL_ori
 
+## For debugging
+from IPython.core import debugger
+breakpoint = debugger.set_trace
+
+
     
 def main():
     
@@ -47,7 +52,6 @@ def main():
         "Train_loss: {}\n".format(opt["train_loss"]), 
         "Val_loss: {}".format(opt["val_loss"]), sep="")
     print("+++++++++++++++++++++++++++++++++++++++++++")
-    
     # load data
     print("Loading training data...")
     # data preprocessing
@@ -86,6 +90,7 @@ def main():
     logWriter = SummaryWriter(opt["log_file"] + "/")
     print("Parameters initialized")
     print("+++++++++++++++++++++++++++++++++++++++++++")
+
 
     if opt["resume"]:
         if os.path.exists(opt["resume_mod"]):
@@ -156,7 +161,7 @@ def main():
     print("Start training...")
     for epoch in range(start_epoch, opt["epoch"]):
         print("Epoch: {}, LR: {}".format(epoch, optimizer.param_groups[0]["lr"]))
-
+        
         Mod_Dict, optimizer, n_iter, train_loss, val_loss, logWriter = \
             train(model, train_loader, val_loader, optimizer, \
                 epoch, n_iter, train_loss, val_loss, opt, logWriter)

@@ -8,13 +8,16 @@ from pro.Validate import validate
 from util.SaveChkp import save_checkpoint
 from pro.Loss import criterion_KL,criterion_TV,criterion_L2
 
+## For debugging
+from IPython.core import debugger
+breakpoint = debugger.set_trace
+
 cudnn.benchmark = True
 lsmx = torch.nn.LogSoftmax(dim=1)
 dtype = torch.cuda.FloatTensor
 
 def train(model, train_loader, val_loader, optimer, epoch, n_iter,
             train_loss, val_loss, params, logWriter):
-
     for sample in tqdm(train_loader):
         # configure model state
         model.train()

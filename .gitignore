@@ -13,6 +13,8 @@ data_gener/TrainData/jiayong_data*
 data_gener/TestData/middlebury/processed
 
 training/output
+train_intensity.txt
+val_intensity.txt
 
 ### MATLAB
 *.asv
