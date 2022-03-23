@@ -94,6 +94,12 @@ function SimulateTrainMeasurements(param_idx)
         % Displays each pair of synchronized RGB and Depth frames.
         for ii = 1 : 1 : numel(dist_imgs)
             spad_out = sprintf('%s/spad_%s_p%d.mat', outdir, nums{ii}, param_idx);
+            % Skip file if it already exists
+            if exist(spad_out,'file')
+                fprintf("Continuiing. %s already exists \n", spad_out);
+                continue;
+            end
+            
             try        
                 dist_hr_mat = load(sprintf('%s/%s/%s',dataset_dir, scene_name, dist_imgs{ii}));
                 albedo_mat = load(sprintf('%s/%s/%s%s%s',dataset_dir, scene_name, 'albedo_', nums{ii}, '.mat'));
