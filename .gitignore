@@ -12,6 +12,8 @@ data_gener/TrainData/jiayong_data*
 
 data_gener/TestData/middlebury/processed
 
+training/output
+
 ### MATLAB
 *.asv
 

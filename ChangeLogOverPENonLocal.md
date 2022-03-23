@@ -1,5 +1,10 @@
 # Changes over PENonLocal
 
+2022-03-23: 
+* New setup instructions under new `README.md`. 
+  * The original `requirements.txt` file did not work for me, it had a bug setting `skimage==0.0` and also the `numpy` version set would not be compatible with the `matplotlib` version that would be automatically installed.
+  * Furthermore, `requirements.txt` would not install `cuda100` which is what is required according to the pytorch documentation.
+
 2022-03-07: 
 * Add Lindell et al. 2018 `README.txt` which has better guidelines for data generation. 
 
