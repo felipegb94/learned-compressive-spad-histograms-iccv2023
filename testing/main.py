@@ -17,6 +17,9 @@ from pro.Fn_Test import test_sm, test_inrw, test_outrw
 from models import model_ddfn_64_B10_CGNL_ori
 from util.ParseArgs import parse_args
 
+## For debugging
+from IPython.core import debugger
+breakpoint = debugger.set_trace
     
 def main():
     
@@ -35,7 +38,7 @@ def main():
     model = model_ddfn_64_B10_CGNL_ori.DeepBoosting()
     model.cuda()
     model.eval()
-    print(model)
+    # print(model)
 
     for iter, pre_model in enumerate(file_list):
 
@@ -47,19 +50,21 @@ def main():
 
         print('=> Loading checkpoint {}'.format(pre_model))
         ckpt = torch.load(pre_model) 
-        model_dict = model.state_dict()
-        try:
-            ckpt_dict = ckpt["state_dict"]
-        except KeyError:
-            print('Key error loading state_dict from checkpoint; assuming checkpoint contains only the state_dict')
-            ckpt_dict = ckpt
-
-        for key_iter, k in enumerate(ckpt_dict.keys()): # to update the model using the pretrained models
-            # model_dict.update({k[7:]: ckpt_dict[k]}) # use this for multi-GPU trained model
-            model_dict.update({k: ckpt_dict[k]})  # use this for single-GPU trained model
-            if key_iter == (len(ckpt_dict.keys()) - 1):
-                print('Model Parameter Update!')
-        model.load_state_dict(model_dict)
+        # Load model checkpoint
+        ckpt_state_dict = ckpt['state_dict']
+        model.load_state_dict(ckpt_state_dict)
+        # model_dict = model.state_dict()
+        # try:
+        #     ckpt_dict = ckpt["state_dict"]
+        # except KeyError:
+        #     print('Key error loading state_dict from checkpoint; assuming checkpoint contains only the state_dict')
+        #     ckpt_dict = ckpt
+        # for key_iter, k in enumerate(ckpt_dict.keys()): # to update the model using the pretrained models
+        #     # model_dict.update({k[7:]: ckpt_dict[k]}) # use this for multi-GPU trained model
+        #     model_dict.update({k: ckpt_dict[k]})  # use this for single-GPU trained model
+        #     if key_iter == (len(ckpt_dict.keys()) - 1):
+        #         print('Model Parameter Update!')
+        # model.load_state_dict(model_dict)
 
         # the test function for middlebury dataset
         rmse, runtime = test_sm(model, opt, outdir_m)

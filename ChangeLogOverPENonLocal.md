@@ -1,5 +1,14 @@
 # Changes over PENonLocal
 
+2022-03-29:
+* Fix bug in testing code related to incorrect reshaping of test inputs. See description: https://github.com/JiayongO-O/PENonLocal/issues/6
+* Added `training_debug` to over-fit models on smaller train set
+* Added `visualize_trained_model_outputs.py` script that loads an input trained model `.pth` file and visualizes the recovered depths  of the train inputs.
+* Comment out unused dataloader code.
+* Changed how models are loaded. No need to use for loop and copy parameter by parameter. Just use `load_state_dict`
+*    
+
+
 2022-03-23: 
 * New setup instructions under new `README.md`. 
   * The original `requirements.txt` file did not work for me, it had a bug setting `skimage==0.0` and also the `numpy` version set would not be compatible with the `matplotlib` version that would be automatically installed.
@@ -38,3 +47,6 @@
 * How much total storage do I need to generate all the datasets?
 * How many corrupt files in the NYUv2 dataset? Did you have to download and re-download them multiple times?
 * In `ConvertRGBD.m` script why is line 40 skipping every 10 files?
+* In testing script under `Fn_Test.py:test_sm()` the code runs out of memory because it keep allocating more gpu memory after each loop iteration.
+* What does *=> WARN: Non-local block uses '1' groups* mean?
+* 

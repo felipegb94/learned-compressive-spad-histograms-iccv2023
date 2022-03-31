@@ -5,60 +5,12 @@ import scipy.io
 import numpy as np
 import skimage.transform
 
-
-# class ToTensor(object):
-#     """Transfer the tensor to torch.tensor
-#     """
-
-#     def __init__(self):
-#         pass
-
-#     def __call__(self, sample):
-#         rates, spad, bins = sample['rates'],\
-#                             sample['spad'],\
-#                             sample['bins']
-
-#         rates = torch.from_numpy(rates)
-#         spad = torch.from_numpy(spad)
-#         bins = torch.from_numpy(bins)
-
-#         return {'rates': rates, 'spad': spad, 'bins': bins}
-
-
-# class RandomCrop(object):
-#     """Crop randomly the image in a sample.
-#     Args:
-#         output_size (tuple or int): Desired output size. If int, square crop
-#             is made.
-#     """
-
-#     def __init__(self, output_size):
-#         self.output_size = output_size
-
-#     def __call__(self, sample):
-#         rates, spad, bins = sample['rates'],\
-#                             sample['spad'],\
-#                             sample['bins']
-
-#         h, w = spad.shape[2:]
-#         new_h = self.output_size
-#         new_w = self.output_size
-
-#         top = np.random.randint(0, h - new_h)
-#         left = np.random.randint(0, w - new_w)
-
-#         rates = rates[:, :, top: top + new_h,
-#                       left: left + new_w]
-#         spad = spad[:, :, top: top + new_h,
-#                     left: left + new_w]
-#         bins = bins[:, top: top + new_h,
-#                     left: left + new_w]
-
-#         return {'rates': rates, 'spad': spad, 'bins': bins}
-
+## For debugging
+from IPython.core import debugger
+breakpoint = debugger.set_trace
 
 class SpadDataset(torch.utils.data.Dataset):
-    def __init__(self, datapath, noise_idx=1, output_size=32, disable_rand_crop=False):
+    def __init__(self, datapath, noise_idx=1, output_size=32):
         """__init__
         :param datapath: path to text file with list of
                         training files (intensity files)
@@ -73,7 +25,6 @@ class SpadDataset(torch.utils.data.Dataset):
                                     .replace('.mat', '_p{}.mat'.format(noise_idx))
                                     for intensity in self.intensity_files])
         self.output_size = output_size
-        self.disable_rand_crop = disable_rand_crop
 
     def __len__(self):
         return len(self.spad_files)
@@ -98,12 +49,12 @@ class SpadDataset(torch.utils.data.Dataset):
         new_h = self.output_size
         new_w = self.output_size
 
-        if(self.disable_rand_crop):
-            top = 16
-            left = 16        
-        else:
-            top = np.random.randint(0, h - new_h)
-            left = np.random.randint(0, w - new_w)
+        ## For debugging fix the patch we are looking at
+        top = 16
+        left = 16
+
+        # top = np.random.randint(0, h - new_h)
+        # left = np.random.randint(0, w - new_w)
 
         rates = rates[:, :, top: top + new_h,
                       left: left + new_w]

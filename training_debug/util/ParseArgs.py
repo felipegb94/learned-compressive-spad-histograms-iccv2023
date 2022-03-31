@@ -22,6 +22,8 @@ def parse_args(config_path = "./config.ini", is_train=True):
         opt["optimizer"] = config.get("params", "optimizer")
         opt["lri"] = config.getfloat("params", "lri")
         opt["p_tv"] = config.getfloat("params", "p_tv")
+        opt["lr_decay"] = config.getboolean("params", "lr_decay")
+        opt["add_tv_loss"] = config.getboolean("params", "add_tv_loss")
 
         opt["noise_idx"] = config.getint("params", "noise_idx")
         opt["model_name"] = config.get("params", "model_name")
@@ -51,7 +53,7 @@ def parse_args(config_path = "./config.ini", is_train=True):
             if not os.path.exists(opt["log_file"]):
                 os.makedirs(opt["log_file"])
             with open(config_bk_pth, "w") as cbk_pth:
-                config_bk.write(cbk_pth)
+                config_bk.write(cbk_pth)        
             print("Config file load complete! \nNew file saved to {}".format(config_bk_pth))
         
         return opt

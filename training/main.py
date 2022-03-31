@@ -23,13 +23,14 @@ from models import model_ddfn_64_B10_CGNL_ori
 ## For debugging
 from IPython.core import debugger
 breakpoint = debugger.set_trace
+import argparse
 
 
     
-def main():
+def main(cfg_fpath='./config.ini'):
     
     # parse arguments
-    opt = parse_args("./config.ini")
+    opt = parse_args(cfg_fpath)
     print("Number of assigned GPUs: {}".format(opt["gpu_num"]))
     print("Number of available GPUs: {} {}".format(torch.cuda.device_count(), \
         torch.cuda.get_device_name(torch.cuda.current_device())))
@@ -191,7 +192,14 @@ def main():
 if __name__=="__main__":
     print("+++++++++++++++++++++++++++++++++++++++++++")
     print("Execuating code...")
-    main()
+
+    parser = argparse.ArgumentParser(description='Process input args')
+    parser.add_argument('-cfg_fpath', type=str, default='config.ini')
+    args = parser.parse_args()
+
+    print(args)
+
+    main(args.cfg_fpath)
 
 
 
