@@ -133,6 +133,8 @@ for ss = 1:length(scenes)
         rates = zeros(bins1,bins2,num_bins);
 
         pulse_bins = (270e-12) / bin_size;
+        mu = (8*pulse_bins-1)/2;
+        sigma = pulse_bins/2;
         pulse = normpdf(1:8*pulse_bins,(8*pulse_bins-1)/2,pulse_bins/2);
 
         rates(:,:,1:length(pulse)) = repmat(reshape(pulse, [1, 1, length(pulse)]),[bins1,bins2,1]);

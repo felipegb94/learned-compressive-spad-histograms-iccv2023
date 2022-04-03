@@ -13,12 +13,18 @@ data_gener/TrainData/jiayong_data*
 
 data_gener/TestData/middlebury/processed
 
+data_gener/TrainData/SimSPADDataset*
+
 testing/preTrain
 testing/TestOut
 training/output
 training_debug/output
 train_intensity.txt
 val_intensity.txt
+
+2018_lindell_code/
+2018_rapp_code/
+2016_shin_code/
 
 ### MATLAB
 *.asv
