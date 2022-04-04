@@ -36,6 +36,8 @@ if param_idx == 1
                      10 50; 
                      5 50; 
                      2 50];
+%     simulation_params = [10 2; 
+%         10 50];
 elseif param_idx == 2
     fprintf('Simulating: 9 typical noise levels + 3 low SBR levels');
     simulation_params = [10 2;

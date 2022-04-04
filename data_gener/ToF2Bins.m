@@ -1,7 +1,12 @@
-function [range_bins] = ToF2Bins(tof, bin_size, num_bins)
+function [range_bins] = ToF2Bins(tof, bin_size, num_bins, round_bin)
 %ToF2Bins Convert tof to bin. Truncated to num_bins if bin > num_bins
     % Convert tof to bins
-    range_bins = round(tof ./ bin_size);
+    if(round_bin)
+        range_bins = round(tof ./ bin_size);
+    else
+        range_bins = tof ./ bin_size;
+    end
+        
     if any(reshape(range_bins > num_bins, 1, []))
         fprintf('some photon events out of range\n');
     end

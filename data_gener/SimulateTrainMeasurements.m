@@ -36,7 +36,8 @@ else
 end
 
 % For testing
-scenes = scenes(1:2);
+% scenes = scenes(1:2);
+scenes = scenes(1:5);
 
 fprintf('** Simulating dataset: %s *****\n', output_base_dir);
 fprintf('***********\n'); 
@@ -107,23 +108,8 @@ for ss = 1:length(scenes)
         albedo(albedo<0) = 0;  
         intensity(intensity<0) = 0;
         albedo_hr = albedo;
-        
-        % resize albedo and intensity to 64 x 64
-        albedo = imresize(albedo, [res res], 'bilinear');
-        intensity = imresize(intensity, [res res], 'bilinear');
-        dist = imresize(dist_hr, [res res], 'bilinear');
-        
-        % convert to time-of-flight
-        tof = Dist2ToF(dist, c);
-        tof_hr = Dist2ToF(dist_hr, c);
+        intensity_hr = intensity;
 
-        % convert to bin number
-        range_bins = ToF2Bins(tof, bin_size, num_bins);
-        range_bins_hr = ToF2Bins(tof_hr, bin_size, num_bins);
-
-        % set a number of signal photons per pixel
-        alpha = albedo .* 1./ dist.^2;
-        
         % randomly select the signal and background parameters from the
         % simulation params options
         rand_sim_param_idx = randi(size(simulation_params,1));
@@ -133,19 +119,8 @@ for ss = 1:length(scenes)
         SBR = mean_signal_photons / mean_background_photons;
         disp(['Selecting signal photons: ', num2str(mean_signal_photons), ' background photons: ', num2str(mean_background_photons), ' SBR: ', num2str(SBR)]);
 
-        % add albedo/range/lighting/dark count effects
-        [signal_ppp, ambient_ppp] = GeneratePhotonLevelImgs(alpha, intensity, mean_signal_photons, mean_background_photons, dark_img);
-            
-        % Scale and shift the PSFs to create the photon flux image
-        rates = Generate3DPhotonFluxImage(PSF_img, signal_ppp, ambient_ppp, range_bins, num_bins);
-                     
-        % sample the process
-        detections = poissrnd(rates);
-        detections = reshape(detections, res*res, []);
-        spad = sparse(detections);
-    
-        % normalize the rate function to 0 to 1
-        rates = NormalizePhotonRates(rates);
+        % Simulate the SPAD measuements at the correct resolution
+        [spad, detections, rates, norm_rates, range_bins, range_bins_hr] = SimulateSPADMeasurement(albedo_hr, intensity_hr, dist_hr, PSF_img, bin_size, num_bins, nr, nc, mean_signal_photons, mean_background_photons, dark_img, c);
 
         % Check if nan and skip if so
         if any(isnan(detections(:))) || any(isnan(rates(:)))
@@ -154,7 +129,7 @@ for ss = 1:length(scenes)
         end
             
         % save sparse spad detections to file
-        SaveSimulatedSPADImg(spad_out, spad, SBR, range_bins, range_bins_hr, mean_signal_photons, rates);
+        SaveSimulatedSPADImg(spad_out, spad, SBR, range_bins, range_bins_hr, rates, norm_rates, mean_signal_photons, mean_background_photons, bin_size);
 %         parsave(spad_out, spad, SBR, range_bins, range_bins_hr, mean_signal_photons, rates);
         
     end
