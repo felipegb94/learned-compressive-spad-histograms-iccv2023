@@ -36,8 +36,6 @@ if param_idx == 1
                      10 50; 
                      5 50; 
                      2 50];
-%     simulation_params = [10 2; 
-%         10 50];
 elseif param_idx == 2
     fprintf('Simulating: 9 typical noise levels + 3 low SBR levels');
     simulation_params = [10 2;
@@ -52,6 +50,13 @@ elseif param_idx == 2
                      3 100;
                      2 100;
                      1 100];
+elseif param_idx == 3
+    disp('Simulating: high flux noise levels');
+    simulation_params = [100 100;
+                        100 200;
+                        100 800;
+                        100 2000;
+                        100 10000];
 else
     error('Bad param_idx value');
 end

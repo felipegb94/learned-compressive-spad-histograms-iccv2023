@@ -23,6 +23,10 @@ print_vector_stats(dark_img, "Dark Img")
 [PSF_img, psf, pulse_len] = LoadAndPreprocessBrightPSFImg(psf_img_param_idx, res, res, num_bins);
 print_vector_stats(psf, "PSF")
 print_vector_stats(PSF_img, "PSF Img")
+psf_data_fname = 'PSF_used_for_simulation.mat';
+psf_data_fpath = fullfile(output_base_dir, psf_data_fname);
+save(psf_data_fpath, 'PSF_img', 'psf', 'pulse_len');
+
 
 % get the scene names
 scenes = ls(dataset_dir);
@@ -38,6 +42,7 @@ end
 % For testing
 % scenes = scenes(1:2);
 scenes = scenes(1:5);
+scenes = scenes(1:2);
 
 fprintf('** Simulating dataset: %s *****\n', output_base_dir);
 fprintf('***********\n'); 
@@ -67,12 +72,14 @@ for ss = 1:length(scenes)
     % Displays each pair of synchronized RGB and Depth frames.
     for ii = 1 : 1 : numel(dist_imgs)
         % Output fname, keep track of the noise param_idx used
-        spad_out = sprintf('%s/spad_%s_p%d.mat', outdir, nums{ii}, param_idx);
-%         % Skip file if it already exists
-%         if exist(spad_out,'file')
-%             fprintf("Continuiing. %s already exists \n", spad_out);
-%             continue;
-%         end
+        spad_out_fname = sprintf('spad_%s_p%d.mat', nums{ii}, param_idx);
+        spad_out = fullfile(outdir, spad_out_fname);
+        %         spad_out = sprintf('%s/spad_%s_p%d.mat', outdir, nums{ii}, param_idx);
+        % Skip file if it already exists
+        if exist(spad_out,'file')
+            fprintf("Continuiing. %s already exists \n", spad_out);
+            continue;
+        end
         % Load other files needed for simulation
         try        
             dist_hr_mat = load(sprintf('%s/%s/%s',dataset_dir, scene_name, dist_imgs{ii}));
