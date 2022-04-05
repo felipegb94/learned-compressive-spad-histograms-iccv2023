@@ -41,9 +41,7 @@ else
 end
 
 % For testing
-% scenes = scenes(1:2);
-scenes = scenes(1:5);
-scenes = scenes(1:1);
+scenes = scenes(1:3);
 
 fprintf('** Simulating dataset: %s *****\n', output_base_dir);
 fprintf('***********\n'); 
@@ -153,13 +151,14 @@ for ss = 1:length(scenes)
             subplot(2,3,2);
             imagesc(squeeze(sum(rates,3))); colorbar; title('Total Flux');
             subplot(2,3,3);
-            imagesc(squeeze(sum(rates_test,3))); colorbar; title('Total Meas. Photons');
+            imagesc(squeeze(sum(detections,3))); colorbar; title('Total Meas. Photons');
             subplot(2,3,4);
             imagesc(est_range_bins.est_range_bins_lmf); colorbar; caxis([zMin, zMax]); title('LMF Est. Depth Bins');
             subplot(2,3,5);
             imagesc(est_range_bins.est_range_bins_zncc); colorbar; caxis([zMin, zMax]); title('ZNCC Est. Depth Bins');
             subplot(2,3,6);
             imagesc(est_range_bins.est_range_bins_argmax); colorbar; caxis([zMin, zMax]); title('Argmax Est Depth Bins');
+            pause(0.1);
         end
 
         % save sparse spad detections to file
