@@ -1,8 +1,10 @@
 # Data Generation Code
 
-Adapted from Lindell et al., 2018 and Peng et al. 2020.
+Adapted from Lindell et al., 2018 and Peng et al. 2020. 
 
+There aren't significant changes over the core simulation code. I mainly re-organized the codebase to increase code re-usage between training and testing set simulations. I also try to make it easier to input different PSFs/laser waveforms to simulate the data. 
 
+Another major change is that I save additional information in each training instance including: baseline depth estimates, info about signal and background levels, and bin size.
 ## SPAD Measurement Simulation Pipeline
 
 ### Inputs
