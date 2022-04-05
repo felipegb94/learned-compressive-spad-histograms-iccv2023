@@ -56,8 +56,8 @@ for ii = 1 : 1 : numel(new_fnames)
         old_range_bins = old_spad_out.bin;
         old_range_bins_hr = old_spad_out.bin_hr;
 
-        new_rates = new_spad_out.norm_rates;
-        new_unorm_rates = new_spad_out.rates;
+        new_rates = new_spad_out.rates;
+        new_unorm_rates = InverseNormalizePhotonRates(new_rates, new_spad_out.rates_norm_params.rates_offset, new_spad_out.rates_norm_params.rates_scaling);
         new_spad = new_spad_out.spad;
         new_range_bins = new_spad_out.range_bins;
         new_range_bins_hr = new_spad_out.range_bins_hr;

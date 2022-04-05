@@ -1,4 +1,4 @@
-function [spad, detections, rates, norm_rates, range_bins, range_bins_hr] = SimulateSPADMeasurement(albedo_hr, intensity_hr, dist_hr, PSF_img, bin_size, num_bins, nr, nc, mean_signal_photons, mean_background_photons, dark_img, c)
+function [spad, detections, rates, range_bins, range_bins_hr] = SimulateSPADMeasurement(albedo_hr, intensity_hr, dist_hr, PSF_img, bin_size, num_bins, nr, nc, mean_signal_photons, mean_background_photons, dark_img, c)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -26,10 +26,6 @@ function [spad, detections, rates, norm_rates, range_bins, range_bins_hr] = Simu
 				 
 	% sample the process
 	detections = poissrnd(rates);
-	detections = reshape(detections, nr*nc, []);
-	spad = sparse(detections);
-
-	% normalize the rate function to 0 to 1
-	norm_rates = NormalizePhotonRates(rates);
+	spad = sparse(reshape(detections, nr*nc, []));
 		
 end

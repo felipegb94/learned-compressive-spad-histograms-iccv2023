@@ -6,6 +6,7 @@
 
 % Simulates the SPAD training data from the processed nyuv2 images.
 clear;
+visualize_data = true;
 
 % Set the same simulation parameters used in Lindell et al and Peng et al
 SetSimulateTrainParams
@@ -42,7 +43,7 @@ end
 % For testing
 % scenes = scenes(1:2);
 scenes = scenes(1:5);
-scenes = scenes(1:2);
+scenes = scenes(1:1);
 
 fprintf('** Simulating dataset: %s *****\n', output_base_dir);
 fprintf('***********\n'); 
@@ -76,10 +77,10 @@ for ss = 1:length(scenes)
         spad_out = fullfile(outdir, spad_out_fname);
         %         spad_out = sprintf('%s/spad_%s_p%d.mat', outdir, nums{ii}, param_idx);
         % Skip file if it already exists
-        if exist(spad_out,'file')
-            fprintf("Continuiing. %s already exists \n", spad_out);
-            continue;
-        end
+%         if exist(spad_out,'file')
+%             fprintf("Continuiing. %s already exists \n", spad_out);
+%             continue;
+%         end
         % Load other files needed for simulation
         try        
             dist_hr_mat = load(sprintf('%s/%s/%s',dataset_dir, scene_name, dist_imgs{ii}));
@@ -110,7 +111,6 @@ for ss = 1:length(scenes)
             dist_hr(mask) = nan;
             dist_hr = full(inpaint_nans(dist_hr));
         end
-        clf; imshow(dist_hr / max(dist_hr(:)));
         % Set to 0 any negative numbers 
         albedo(albedo<0) = 0;  
         intensity(intensity<0) = 0;
@@ -127,17 +127,45 @@ for ss = 1:length(scenes)
         disp(['Selecting signal photons: ', num2str(mean_signal_photons), ' background photons: ', num2str(mean_background_photons), ' SBR: ', num2str(SBR)]);
 
         % Simulate the SPAD measuements at the correct resolution
-        [spad, detections, rates, norm_rates, range_bins, range_bins_hr] = SimulateSPADMeasurement(albedo_hr, intensity_hr, dist_hr, PSF_img, bin_size, num_bins, nr, nc, mean_signal_photons, mean_background_photons, dark_img, c);
+        [spad, detections, rates, range_bins, range_bins_hr] = SimulateSPADMeasurement(albedo_hr, intensity_hr, dist_hr, PSF_img, bin_size, num_bins, nr, nc, mean_signal_photons, mean_background_photons, dark_img, c);
+	    % normalize the rate function to 0 to 1
+	    [norm_rates, rates_offset, rates_scaling] = NormalizePhotonRates(rates);
+        rates_norm_params.rates_offset = rates_offset;
+        rates_norm_params.rates_scaling = rates_scaling;
 
         % Check if nan and skip if so
-        if any(isnan(detections(:))) || any(isnan(rates(:)))
+        if any(isnan(detections(:))) || any(isnan(rates(:))) || any(isnan(norm_rates(:))) 
             warning('NAN!');
             continue;
         end
-            
+
+        % Estimate depths with some baseline methods
+        est_range_bins.est_range_bins_lmf = EstDepthBinsLogMatchedFilter(detections, PSF_img);
+        est_range_bins.est_range_bins_zncc = EstDepthBinsZNCC(detections, PSF_img);
+        est_range_bins.est_range_bins_argmax = EstDepthBinsArgmax(detections);
+
+        if(visualize_data)
+            zMin = min(range_bins(:));
+            zMax = max(range_bins(:));
+            clf;
+            subplot(2,3,1);
+            imagesc(range_bins); colorbar; caxis([zMin, zMax]); title('GT Depth Bins');
+            subplot(2,3,2);
+            imagesc(squeeze(sum(rates,3))); colorbar; title('Total Flux');
+            subplot(2,3,3);
+            imagesc(squeeze(sum(rates_test,3))); colorbar; title('Total Meas. Photons');
+            subplot(2,3,4);
+            imagesc(est_range_bins.est_range_bins_lmf); colorbar; caxis([zMin, zMax]); title('LMF Est. Depth Bins');
+            subplot(2,3,5);
+            imagesc(est_range_bins.est_range_bins_zncc); colorbar; caxis([zMin, zMax]); title('ZNCC Est. Depth Bins');
+            subplot(2,3,6);
+            imagesc(est_range_bins.est_range_bins_argmax); colorbar; caxis([zMin, zMax]); title('Argmax Est Depth Bins');
+        end
+
         % save sparse spad detections to file
-        SaveSimulatedSPADImg(spad_out, spad, SBR, range_bins, range_bins_hr, rates, norm_rates, mean_signal_photons, mean_background_photons, bin_size);
-%         parsave(spad_out, spad, SBR, range_bins, range_bins_hr, mean_signal_photons, rates);
+        SaveSimulatedSPADImg(spad_out, spad, SBR, range_bins, range_bins_hr, est_range_bins, rates_norm_params, norm_rates, mean_signal_photons, mean_background_photons, bin_size);
+
+        %         parsave(spad_out, spad, SBR, range_bins, range_bins_hr, mean_signal_photons, rates);
         
     end
 end

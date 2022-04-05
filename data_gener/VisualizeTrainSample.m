@@ -2,12 +2,12 @@
 clear;
 
 scene_id = 'living_room_0043a';
-scene_id = 'living_room_0042b';
-% scene_id = 'dining_room_0001a';
+% scene_id = 'living_room_0042b';
+scene_id = 'dining_room_0001a';
 dataset_dirpath = './TrainData/SimSPADDataset_nr-64_nc-64_nt-1024_tres-80ps_dark-1_psf-1/';
 scene_dirpath = fullfile(dataset_dirpath, scene_id);
 files = dir(fullfile(scene_dirpath, 'spad_*_p1.mat'));
-files = dir(fullfile(scene_dirpath, 'spad_*_p3.mat'));
+% files = dir(fullfile(scene_dirpath, 'spad_*_p3.mat'));
 n_files = numel(files);
 spad_data_fname = files(randi(n_files)).name;
 % spad_data_fname = 'spad_0001_p3.mat';
@@ -19,7 +19,9 @@ psf_data = load(fullfile(dataset_dirpath, 'PSF_used_for_simulation.mat'));
 
 % Set variables
 [nr, nc, num_bins] = size(data.rates);
-flux_rates = data.rates;
+flux_norm_rates = data.rates;
+flux_rates = InverseNormalizePhotonRates(flux_norm_rates, data.rates_norm_params.rates_offset, data.rates_norm_params.rates_scaling);
+% flux_rates = data.rates;
 PSF_img = psf_data.PSF_img;
 range_bins = data.range_bins;
 hist_sum = sum(flux_rates, 3);
