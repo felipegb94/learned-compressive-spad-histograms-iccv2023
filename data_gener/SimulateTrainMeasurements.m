@@ -6,7 +6,7 @@
 
 % Simulates the SPAD training data from the processed nyuv2 images.
 clear;
-visualize_data = true;
+visualize_data = false;
 
 % Set the same simulation parameters used in Lindell et al and Peng et al
 SetSimulateTrainParams

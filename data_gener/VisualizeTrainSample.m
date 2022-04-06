@@ -2,7 +2,8 @@
 clear;
 
 scene_id = 'living_room_0043a';
-% scene_id = 'living_room_0042b';
+scene_id = 'living_room_0012';
+scene_id = 'dining_room_0033';
 scene_id = 'dining_room_0001a';
 dataset_dirpath = './TrainData/SimSPADDataset_nr-64_nc-64_nt-1024_tres-80ps_dark-1_psf-1/';
 scene_dirpath = fullfile(dataset_dirpath, scene_id);

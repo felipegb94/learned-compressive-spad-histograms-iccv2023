@@ -18,6 +18,10 @@ function SaveSimulatedSPADImg(fname, spad, SBR, range_bins, range_bins_hr, est_r
 % save(fname, 'spad', 'SBR', 'range_bins', 'range_bins_hr', 'rates', 'norm_rates', 'mean_signal_photons', 'mean_background_photons', 'bin_size');
 % save(fname, 'spad', 'SBR', 'range_bins', 'range_bins_hr', 'norm_rates', 'mean_signal_photons', 'mean_background_photons', 'bin_size');
 
-save(fname, 'spad', 'SBR', 'range_bins', 'range_bins_hr', 'est_range_bins', 'rates_norm_params', 'rates', 'mean_signal_photons', 'mean_background_photons', 'bin_size');
+% For compatibility with previous code name the variables correctly
+bin = range_bins; 
+bin_hr = range_bins_hr;
+photons = mean_signal_photons;
+save(fname, 'spad', 'SBR', 'bin', 'range_bins', 'bin_hr', 'est_range_bins', 'rates_norm_params', 'rates', 'mean_signal_photons', 'mean_background_photons', 'bin_size', 'photons');
 
 end
