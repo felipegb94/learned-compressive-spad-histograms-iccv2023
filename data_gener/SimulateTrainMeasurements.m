@@ -33,7 +33,7 @@ save(psf_data_fpath, 'PSF_img', 'psf', 'pulse_len');
 scenes = GetFolderNamesInDir(dataset_dir);
 
 % For testing
-scenes = scenes(1:2);
+% scenes = scenes(1:2);
 
 fprintf('** Simulating dataset: %s *****\n', output_base_dir);
 fprintf('***********\n'); 
