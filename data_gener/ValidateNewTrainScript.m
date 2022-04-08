@@ -60,29 +60,29 @@ for ii = 1 : 1 : numel(new_fnames)
         new_unorm_rates = InverseNormalizePhotonRates(new_rates, new_spad_out.rates_norm_params.rates_offset, new_spad_out.rates_norm_params.rates_scaling);
         new_spad = new_spad_out.spad;
         new_range_bins = new_spad_out.range_bins;
-        new_range_bins_hr = new_spad_out.range_bins_hr;
+        new_range_bins_hr = new_spad_out.bin_hr;
 
-        if(isequal(new_rates, old_rates))
+        if(isequal(new_rates(:), old_rates(:)))
             disp('    [PASSED] Photon Flux Rates are EXACTLY equal');
         else
             disp('    [FAIL] Photon Flux Rates NOT EXACTLY equal');
         end
 
-        if(ismembertol(new_rates, old_rates, tolerance))
+        if(ismembertol(new_rates(:), old_rates(:), tolerance))
             disp('    [PASSED] Photon Flux Rates are APPROX equal');
         else
             disp('    [FAIL] Photon Flux Rates NOT APPROX equal');
             error('Bug in new dataset')
         end
 
-        if(isequal(new_range_bins, old_range_bins))
+        if(isequal(new_range_bins(:), old_range_bins(:)))
             disp('    [PASSED] Resized range bins are equal');
         else
             disp('    [FAIL] Resized range bins  NOT equal');
             error('Bug in new dataset')
         end
 
-        if(isequal(new_range_bins_hr, old_range_bins_hr))
+        if(isequal(new_range_bins_hr(:), old_range_bins_hr(:)))
             disp('    [PASSED] HRes range bins are equal');
         else
             disp('    [FAIL] HRes range bins  NOT equal');

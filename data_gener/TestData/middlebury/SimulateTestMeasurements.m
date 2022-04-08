@@ -179,7 +179,7 @@ for ss = 1:length(scenes)
         end
 
         H = size(spad,1); W = size(spad,2);
-        spad = reshape(spad, H*W, [];
+        spad = reshape(spad, H*W, []);
         spad = sparse(spad); 
 
         % save sparse spad detections to file

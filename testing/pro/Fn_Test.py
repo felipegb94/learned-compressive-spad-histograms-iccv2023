@@ -29,6 +29,9 @@ def test_sm(model, opt, outdir_m):
 
 	with torch.no_grad():
 		for name_test in glob(opt["testDataDir"] + "*.mat"):
+			if("PSF_used" in name_test):
+				# skip some of the files that are not testing instances.
+				continue
 			name_test_id, _ = os.path.splitext(os.path.split(name_test)[1])
 			name_test_save = outdir_m + "/" + name_test_id + "_rec.mat"
 
@@ -37,9 +40,16 @@ def test_sm(model, opt, outdir_m):
 			## if depth is in keys this means the data was generations with SimulateTestMeasurements.m
 			if("depth" in mat_data_file.keys()): 
 				dep = mat_data_file["depth"]
-			else:
+			elif("bin" in mat_data_file.keys()):
 				bin = mat_data_file["bin"] / 1023
 				dep = bin2depth(bin)
+			elif("range_bins" in mat_data_file.keys()):
+				bin = mat_data_file["range_bins"] / 1023
+				dep = bin2depth(bin)
+			else:
+				breakpoint()
+				assert(False), "Invalid input mat data file. It does not contain, depth, bin, or range_bins for GT."
+
 			dep = np.asarray(dep).astype(np.float32)
 			(h, w) = dep.shape
 

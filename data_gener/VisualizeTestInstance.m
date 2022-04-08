@@ -1,17 +1,17 @@
 % Load train instance, and compute depths
 clear;
 
-scene_id = 'living_room_0043a';
-scene_id = 'living_room_0012';
-scene_id = 'dining_room_0033';
-scene_id = 'dining_room_0001a';
-dataset_dirpath = './TrainData/SimSPADDataset_nr-64_nc-64_nt-1024_tres-80ps_dark-1_psf-1/';
-scene_dirpath = fullfile(dataset_dirpath, scene_id);
-files = dir(fullfile(scene_dirpath, 'spad_*_p1.mat'));
-% files = dir(fullfile(scene_dirpath, 'spad_*_p3.mat'));
+dataset_dirpath = './TestData/middlebury/processed/SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0';
+% scene_dirpath = fullfile(dataset_dirpath, scene_id);
+scene_dirpath = dataset_dirpath;
+files = dir(fullfile(scene_dirpath, 'spad_*.mat'));
 n_files = numel(files);
+
+% Select random file from dataset
 spad_data_fname = files(randi(n_files)).name;
-% spad_data_fname = 'spad_0001_p3.mat';
+% spad_data_fname = 'spad_Art_50_10.mat';
+% spad_data_fname = 'spad_Reindeer_10_10.mat';
+
 spad_data_fpath = fullfile(scene_dirpath, spad_data_fname);
 
 % Load data and PSF used;
@@ -68,7 +68,7 @@ clf;
 subplot(4,3,1);
 imagesc(range_bins); colorbar; caxis([zMin, zMax]); title('GT Depth Bins');
 subplot(4,3,2);
-imagesc(squeeze(sum(flux_rates,3))); colorbar; title('Total Flux');
+imagesc(squeeze(sum(flux_rates,3))); colorbar; title('Total GT Flux');
 subplot(4,3,3);
 imagesc(squeeze(sum(spad_meas,3))); colorbar; title('Total Meas. Photons');
 

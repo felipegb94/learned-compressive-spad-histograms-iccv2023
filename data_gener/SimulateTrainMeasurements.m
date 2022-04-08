@@ -24,24 +24,16 @@ print_vector_stats(dark_img, "Dark Img")
 [PSF_img, psf, pulse_len] = LoadAndPreprocessBrightPSFImg(psf_img_param_idx, res, res, num_bins);
 print_vector_stats(psf, "PSF")
 print_vector_stats(PSF_img, "PSF Img")
-psf_data_fname = 'PSF_used_for_simulation.mat';
+psf_data_fname = sprintf('PSF_used_for_simulation_nr-%d_nc-%d.mat', nr, nc);
 psf_data_fpath = fullfile(output_base_dir, psf_data_fname);
 save(psf_data_fpath, 'PSF_img', 'psf', 'pulse_len');
 
 
 % get the scene names
-scenes = ls(dataset_dir);
-tmp = cell(size(scenes,1),1);
-if ispc
-    % If we are on windows machine generate fnames differently
-    scenes = strtrim(string(scenes));
-else
-    scenes = regexp(scenes, '(\s+|\n)', 'split');
-    scenes(end) = [];
-end
+scenes = GetFolderNamesInDir(dataset_dir);
 
 % For testing
-scenes = scenes(1:3);
+scenes = scenes(1:2);
 
 fprintf('** Simulating dataset: %s *****\n', output_base_dir);
 fprintf('***********\n'); 
@@ -124,9 +116,15 @@ for ss = 1:length(scenes)
         SBR = mean_signal_photons / mean_background_photons;
         disp(['Selecting signal photons: ', num2str(mean_signal_photons), ' background photons: ', num2str(mean_background_photons), ' SBR: ', num2str(SBR)]);
 
+        % resize albedo and intensity to appropriate size
+	    albedo = imresize(albedo_hr, [nr nc], 'bilinear');
+	    intensity = imresize(intensity_hr, [nr nc], 'bilinear');
+	    dist = imresize(dist_hr, [nr nc], 'bilinear');
+
         % Simulate the SPAD measuements at the correct resolution
-        [spad, detections, rates, range_bins, range_bins_hr] = SimulateSPADMeasurement(albedo_hr, intensity_hr, dist_hr, PSF_img, bin_size, num_bins, nr, nc, mean_signal_photons, mean_background_photons, dark_img, c);
-	    % normalize the rate function to 0 to 1
+        [spad, detections, rates, range_bins] = SimulateSPADMeasurement(albedo, intensity, dist, PSF_img, bin_size, num_bins, nr, nc, mean_signal_photons, mean_background_photons, dark_img, c);
+	    range_bins_hr = ToF2Bins(Dist2ToF(dist_hr, c), bin_size, num_bins, false);
+        % normalize the rate function to 0 to 1
 	    [norm_rates, rates_offset, rates_scaling] = NormalizePhotonRates(rates);
         rates_norm_params.rates_offset = rates_offset;
         rates_norm_params.rates_scaling = rates_scaling;
@@ -162,7 +160,7 @@ for ss = 1:length(scenes)
         end
 
         % save sparse spad detections to file
-        SaveSimulatedSPADImg(spad_out, spad, SBR, range_bins, range_bins_hr, est_range_bins, rates_norm_params, norm_rates, mean_signal_photons, mean_background_photons, bin_size);
+        SaveSimulatedSPADImg(spad_out, spad, SBR, range_bins, range_bins_hr, est_range_bins, rates_norm_params, norm_rates, intensity, intensity_hr, mean_signal_photons, mean_background_photons, bin_size);
 
         %         parsave(spad_out, spad, SBR, range_bins, range_bins_hr, mean_signal_photons, rates);
         
