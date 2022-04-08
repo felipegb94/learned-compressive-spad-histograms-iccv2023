@@ -4,18 +4,25 @@ from glob import glob
 import re
 import os.path
 import sys
+## For debugging
+from IPython.core import debugger
+breakpoint = debugger.set_trace
 
 # specify dataset folder here that contains the output of SimulateTrainMeasurements.m
-dataset_folder = os.path.abspath('./data_gener/TrainData/processed') + '/'
+dataset_folder = os.path.abspath('../../data_gener/TrainData/processed') + '/'
+intensity_dataset_folder = os.path.abspath('../../data_gener/TrainData/processed') + '/'
+
+# base_dataset_folder = '/home/felipe/repos/spatio-temporal-csph/data_gener/TrainData'
+# dataset_folder = os.path.join(base_dataset_folder, 'SimSPADDataset_nr-64_nc-64_nt-1024_tres-80ps_dark-1_psf-1') + '/'
+# intensity_dataset_folder = os.path.join(base_dataset_folder, 'processed') + '/'
 
 simulation_param_idx = 1    # 1 or 2 corresponding to that in SimulateTrainMeasurements.m
 
 def intersect_files(train_files):
     intensity_train_files = []
     for t in train_files:
-        intensity_train_files.append(glob(dataset_folder + t + 'intensity*.mat'))
+        intensity_train_files.append(glob(intensity_dataset_folder + t + 'intensity*.mat'))
     intensity_train_files = [file for sublist in intensity_train_files for file in sublist]
-
     spad_train_files = []
     if simulation_param_idx is not None:
         noise_param = [simulation_param_idx]
@@ -29,7 +36,6 @@ def intersect_files(train_files):
         spad_train_files[-1] = [file for sublist in spad_train_files[-1] for file in sublist]
         spad_train_files[-1] = [re.sub(r'(.*)/spad_(.*)_p.*.mat', r'\1/intensity_\2.mat',
                                  file) for file in spad_train_files[-1]]
-
     intensity_train_files = set(intensity_train_files) 
     for idx, p in enumerate(noise_param):
         spad_train_files[idx] = set(spad_train_files[idx])

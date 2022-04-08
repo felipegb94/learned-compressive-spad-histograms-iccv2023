@@ -13,7 +13,8 @@ from datetime import datetime
 import skimage.io
 import scipy.io as scio
 
-from util.SpadDataset import SpadDataset, RandomCrop, ToTensor
+# from util.SpadDataset import SpadDataset, RandomCrop, ToTensor
+from util.SpadDataset import SpadDataset
 from util.ParseArgs import parse_args
 from util.SaveChkp import save_checkpoint
 from pro.Train import train
