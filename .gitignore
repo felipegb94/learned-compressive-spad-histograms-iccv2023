@@ -1,5 +1,9 @@
 #### Custom gitignore
 
+datalists/train*
+datalists/val*
+datalists/test*
+
 data_gener/TrainData/raw
 data_gener/TrainData/raw_new_download
 data_gener/TrainData/raw_corrupted

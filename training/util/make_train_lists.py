@@ -12,9 +12,9 @@ breakpoint = debugger.set_trace
 dataset_folder = os.path.abspath('../../data_gener/TrainData/processed') + '/'
 intensity_dataset_folder = os.path.abspath('../../data_gener/TrainData/processed') + '/'
 
-# base_dataset_folder = '/home/felipe/repos/spatio-temporal-csph/data_gener/TrainData'
-# dataset_folder = os.path.join(base_dataset_folder, 'SimSPADDataset_nr-64_nc-64_nt-1024_tres-80ps_dark-1_psf-1') + '/'
-# intensity_dataset_folder = os.path.join(base_dataset_folder, 'processed') + '/'
+base_dataset_folder = '/home/felipe/repos/spatio-temporal-csph/data_gener/TrainData'
+dataset_folder = os.path.join(base_dataset_folder, 'SimSPADDataset_nr-64_nc-64_nt-1024_tres-80ps_dark-1_psf-1') + '/'
+intensity_dataset_folder = os.path.join(base_dataset_folder, 'processed') + '/'
 
 simulation_param_idx = 1    # 1 or 2 corresponding to that in SimulateTrainMeasurements.m
 
