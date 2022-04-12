@@ -25,6 +25,8 @@ def bin2depth(b):
 def test_sm(model, opt, outdir_m):
 
 	rmse_all = []
+	rmse_lmf = []
+	rmse_argmax = []
 	time_all = []
 
 	with torch.no_grad():
@@ -41,10 +43,10 @@ def test_sm(model, opt, outdir_m):
 			if("depth" in mat_data_file.keys()): 
 				dep = mat_data_file["depth"]
 			elif("bin" in mat_data_file.keys()):
-				bin = mat_data_file["bin"] / 1023
+				bin = mat_data_file["bin"] / 1023.
 				dep = bin2depth(bin)
 			elif("range_bins" in mat_data_file.keys()):
-				bin = mat_data_file["range_bins"] / 1023
+				bin = mat_data_file["range_bins"] / 1023.
 				dep = bin2depth(bin)
 			else:
 				breakpoint()
@@ -52,6 +54,7 @@ def test_sm(model, opt, outdir_m):
 
 			dep = np.asarray(dep).astype(np.float32)
 			(h, w) = dep.shape
+
 
 			# ## Old load from original PENonLocal
 			# M_mea = mat_data_file["spad"]
@@ -80,12 +83,20 @@ def test_sm(model, opt, outdir_m):
 			rmse = np.sqrt(np.mean((dist - dep)**2))
 			rmse_all.append(rmse)
 
+
+			if("est_range_bins" in mat_data_file.keys()):
+				bin_lmf = mat_data_file['est_range_bins']['est_range_bins_lmf'][0][0]/1023.
+				bin_argmax = mat_data_file['est_range_bins']['est_range_bins_argmax'][0][0]/1023.
+				rmse_lmf.append(np.sqrt(np.mean((bin2depth(bin_lmf) - dep)**2)))
+				rmse_argmax.append(np.sqrt(np.mean((bin2depth(bin_argmax) - dep)**2)))
+			elif("lm_filter_out" in mat_data_file.keys()):
+				bin_lmf = mat_data_file['lm_filter_out'] / 1023.
+				rmse_lmf.append(np.sqrt(np.mean((bin2depth(bin_lmf) - dep)**2)))
 			# scio.savemat(name_test_save, {"data":dist, "rmse":rmse})
 			# print("The RMSE: {}".format(rmse))
 
 			del M_mea_re
 			torch.cuda.empty_cache()
-
 
 			# plt.clf()
 			# plt.subplot(1,2,1)
@@ -97,6 +108,10 @@ def test_sm(model, opt, outdir_m):
 			# plt.title("Ground Truth Depth")
 			# plt.colorbar()
 			# plt.pause(0.1)
+	if(len(rmse_lmf) > 0):
+		print("LMF RMSE = {}".format(np.array(rmse_lmf).mean()))
+	if(len(rmse_argmax) > 0):
+		print("argmax RMSE = {}".format(np.array(rmse_argmax).mean()))
 
 	return np.mean(rmse_all), np.mean(time_all)
 

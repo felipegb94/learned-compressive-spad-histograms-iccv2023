@@ -1,7 +1,6 @@
 # The parse argments
 import os
 import sys
-import configparser
 from configparser import ConfigParser, ExtendedInterpolation
 from datetime import datetime
 
