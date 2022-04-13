@@ -97,7 +97,6 @@ class SpadDataset(torch.utils.data.Dataset):
         spad = spad[np.newaxis, :]
         spad = np.transpose(spad, (0, 3, 2, 1))
 
-
         # # ground truth depths in units of bins
         bins = np.asarray(spad_data['bin']).astype(np.float32)
         bins = bins[np.newaxis, :]
