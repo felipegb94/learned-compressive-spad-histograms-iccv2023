@@ -1,5 +1,7 @@
 #### Custom gitignore
 
+results
+
 datalists/train*
 datalists/val*
 datalists/test*

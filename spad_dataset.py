@@ -39,12 +39,13 @@ breakpoint = debugger.set_trace
 
 
 class SpadDataset(torch.utils.data.Dataset):
-    def __init__(self, datalist_fpath, noise_idx=None, output_size=32, disable_rand_crop=False):
+    def __init__(self, datalist_fpath, noise_idx=None, output_size=(32,32), disable_rand_crop=False):
         """__init__
         :param datapath: path to text file with list of spad data files (intensity files)
         :param noise_idx: the noise index list to include in the dataset (e.g., 1 or 2
         :param output_size: the output size after random crop
         """
+
         with open(datalist_fpath) as f: 
             self.spad_data_fpaths_all = f.read().split()
 
@@ -67,7 +68,9 @@ class SpadDataset(torch.utils.data.Dataset):
         # self.spad_data_fpaths.extend([intensity.replace('intensity', 'spad')
         #                             .replace('.mat', '_p{}.mat'.format(noise_idx))
         #                             for intensity in self.intensity_files])
-        self.output_size = output_size
+
+        if(isinstance(output_size, int)): self.output_size = (output_size, output_size)
+        else: self.output_size = output_size
         self.disable_rand_crop = disable_rand_crop
 
         print("SpadDataset with {} files".format(len(self.spad_data_fpaths)))
@@ -103,15 +106,20 @@ class SpadDataset(torch.utils.data.Dataset):
         bins = (bins - 1) / (n_bins - 1) # make range 0-n_bins-1 instead of 1-n_bins
 
         (h, w) = (nr, nc)
-        new_h = self.output_size
-        new_w = self.output_size
+        if(self.output_size is None):
+            new_h = h
+            new_w = w
+        else:
+            new_h = self.output_size[0]
+            new_w = self.output_size[1]
 
         if(self.disable_rand_crop):
             top = 0
             left = 0        
         else:
-            top = np.random.randint(0, h - new_h)
-            left = np.random.randint(0, w - new_w)
+            # add 1 because randint produces between low <= x < high 
+            top = np.random.randint(0, h - new_h + 1) 
+            left = np.random.randint(0, w - new_w + 1)
 
         rates = rates[..., top:top + new_h
                         , left:left + new_w]
@@ -144,7 +152,7 @@ if __name__=='__main__':
     ## Try test dataset
     datalist_fpath = './datalists/test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0.txt'
     noise_idx = None
-    spad_dataset = SpadDataset(datalist_fpath, noise_idx=noise_idx, output_size=60)
+    spad_dataset = SpadDataset(datalist_fpath, noise_idx=noise_idx, output_size=None)
 
     ## Load val dataset
     datalist_fpath = './datalists/val_nyuv2_SimSPADDataset_nr-64_nc-64_nt-1024_tres-80ps_dark-1_psf-1.txt'
@@ -181,8 +189,6 @@ if __name__=='__main__':
         plt.imshow(np.log(1+np.sum(spad, axis=0)))
         # plt.imshow(spad.cpu().detach().numpy().squeeze()[0,:].sum(axis=0))
         plt.pause(0.5)
-        breakpoint()
-
 
 
 
