@@ -91,14 +91,15 @@ class SpadDataset(torch.utils.data.Dataset):
         rates = rates / (np.sum(rates, axis=-3, keepdims=True) + 1e-8)
 
         # simulated spad measurements
+        # Here we need to swap the rows and cols because matlab saves dimensions in a different order.
         spad = np.asarray(scipy.sparse.csc_matrix.todense(spad_data['spad']))
-        spad = spad.reshape((nr, nc, n_bins))
+        spad = spad.reshape((nc, nr, n_bins))
         spad = spad[np.newaxis, :]
         spad = np.transpose(spad, (0, 3, 2, 1))
 
+
         # # ground truth depths in units of bins
         bins = np.asarray(spad_data['bin']).astype(np.float32)
-        bins = bins.reshape((nr, nc))
         bins = bins[np.newaxis, :]
         bins = (bins - 1) / (n_bins - 1) # make range 0-n_bins-1 instead of 1-n_bins
 
@@ -144,18 +145,18 @@ if __name__=='__main__':
     ## Try test dataset
     datalist_fpath = './datalists/test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0.txt'
     noise_idx = None
-    spad_dataset = SpadDataset(datalist_fpath, noise_idx=noise_idx)
+    spad_dataset = SpadDataset(datalist_fpath, noise_idx=noise_idx, output_size=60)
 
     ## Load val dataset
     datalist_fpath = './datalists/val_nyuv2_SimSPADDataset_nr-64_nc-64_nt-1024_tres-80ps_dark-1_psf-1.txt'
     noise_idx = [1]
-    spad_dataset = SpadDataset(datalist_fpath, noise_idx=noise_idx, output_size=50)
+    spad_dataset = SpadDataset(datalist_fpath, noise_idx=noise_idx, output_size=60)
 
     batch_size = 1
 
     loader = torch.utils.data.DataLoader(spad_dataset, batch_size=1, shuffle=True, num_workers=0)
     iter_loader = iter(loader)
-    for i in range(50):
+    for i in range(10):
         spad_sample = iter_loader.next()
         
         spad = spad_sample['spad']
@@ -167,7 +168,10 @@ if __name__=='__main__':
         spad = spad.cpu().detach().numpy()[0,:].squeeze()
         rates = rates.cpu().detach().numpy()[0,:].squeeze()
         bins = bins.cpu().detach().numpy()[0,:].squeeze()
-        # idx = idx.cpu().detach().numpy().squeeze()        
+        # idx = idx.cpu().detach().numpy().squeeze()
+        # 
+        print("     Rates: {}", rates.shape)        
+        print("     SPAD dims: {}", spad.shape)        
 
         plt.clf()
         plt.subplot(2,2,1)
@@ -178,7 +182,7 @@ if __name__=='__main__':
         plt.imshow(np.log(1+np.sum(spad, axis=0)))
         # plt.imshow(spad.cpu().detach().numpy().squeeze()[0,:].sum(axis=0))
         plt.pause(0.5)
-        # breakpoint()
+        breakpoint()
 
 
 
