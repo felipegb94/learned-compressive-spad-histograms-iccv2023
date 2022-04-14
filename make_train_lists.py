@@ -29,7 +29,6 @@ def write_fpaths(out_fpath, fpaths):
 
 @hydra.main(config_path="./conf", config_name="io_dirpaths")
 def make_train_lists(cfg):
-	print(OmegaConf.to_yaml(cfg))
 	## Load dir paths
 	datalists_dirpath = cfg.io_dirpaths.datalists
 	spad_dataset_dirpath = cfg.io_dirpaths.nyuv2_spad_dataset

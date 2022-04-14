@@ -1,17 +1,13 @@
 #### Standard Library Imports
-from asyncore import write
 import os
-from glob import glob
 
 #### Library imports
-import numpy as np
-
+import hydra
 from IPython.core import debugger
 breakpoint = debugger.set_trace
 
 #### Local imports
-from research_utils import io_ops
-from make_train_lists import *
+from make_train_lists import generate_spad_data_fpaths, write_fpaths
 
 
 @hydra.main(config_path="./conf", config_name="io_dirpaths")
