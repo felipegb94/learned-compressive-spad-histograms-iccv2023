@@ -9,7 +9,6 @@ import scipy
 import scipy.io
 import torch
 import torch.utils.data
-# import pytorch_lightning as pl
 
 from IPython.core import debugger
 breakpoint = debugger.set_trace
@@ -17,31 +16,10 @@ breakpoint = debugger.set_trace
 #### Local imports
 
 
-
-# class NYUv2SPADDataModule(pl.LightningDataModule):
-#     def __init__(self, datapath, dims=(64,64,1024), batch_size=2, noise_idx=1, output_size=32, disable_rand_crop=False):
-#         """__init__
-#         :param datapath: path to text file with list of
-#                         training files (intensity files)
-#         :param noise_idx: the noise index 1 or 2
-#         :param output_size: the output size after random crop
-#         """
-#         super().__init__()
-
-#         self.datapath = datapath
-#         self.batch_size = batch_size
-
-#         self.dims = (1,) + dims
-
-#         self.transforms = transforms.Compose([
-#                                 transforms.ToTensor()
-#         ])
-
-
 class SpadDataset(torch.utils.data.Dataset):
     def __init__(self, datalist_fpath, noise_idx=None, output_size=(32,32), disable_rand_crop=False):
         """__init__
-        :param datapath: path to text file with list of spad data files (intensity files)
+        :param datalist_fpath: path to text file with list of spad data files
         :param noise_idx: the noise index list to include in the dataset (e.g., 1 or 2
         :param output_size: the output size after random crop
         """
@@ -154,10 +132,10 @@ if __name__=='__main__':
     noise_idx = None
     spad_dataset = SpadDataset(datalist_fpath, noise_idx=noise_idx, output_size=None)
 
-    ## Load val dataset
-    datalist_fpath = './datalists/val_nyuv2_SimSPADDataset_nr-64_nc-64_nt-1024_tres-80ps_dark-1_psf-1.txt'
-    noise_idx = [1]
-    spad_dataset = SpadDataset(datalist_fpath, noise_idx=noise_idx, output_size=60)
+    # ## Load val dataset
+    # datalist_fpath = './datalists/val_nyuv2_SimSPADDataset_nr-64_nc-64_nt-1024_tres-80ps_dark-1_psf-1.txt'
+    # noise_idx = [1]
+    # spad_dataset = SpadDataset(datalist_fpath, noise_idx=noise_idx, output_size=60)
 
     batch_size = 1
 

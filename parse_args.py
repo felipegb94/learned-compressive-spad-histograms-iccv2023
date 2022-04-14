@@ -9,19 +9,30 @@ breakpoint = debugger.set_trace
 
 #### Local imports
 
-# def add_io_dirpaths_args(p):
-#     p.add_argument('--datalists_dir', type=str, help='Directory where datalists for train, val, and test datasets should be stored')
-#     p.add_argument('--results_dir', type=str, help='Directory where results should be stored')
-#     p.add_argument('--results_data_dir', type=str, help='Directory where results data should be stored')
-#     p.add_argument('--logdir_dir', type=str, help='Log directory')
-#     p.add_argument('--nyuv2_raw_dataset_dir', type=str, help='Dirpath to nyuv2 raw dataset')
-#     p.add_argument('--nyuv2_processed_dataset_dir', type=str, help='Dirpath to nyuv2 processed dataset')
-#     p.add_argument('--train_spad_dataset_dir', type=str, help='Dirpath to directory containing the train spad dataset')
-#     p.add_argument('--test_spad_dataset_dir', type=str, help='Dirpath to directory containing the test spad dataset')
+def add_train_args(p):
+    # General training options
+    p.add_argument('--batch_size', type=int, default=1)
+    p.add_argument('--gpu_num', type=int, default=1)
+    p.add_argument('--workers', type=int, default=4)
+    p.add_argument('--epoch', type=int, default=8)
+    p.add_argument('--save_every', type=int, default=100)
+    p.add_argument('--lri', type=float, default=1e-4)
+    p.add_argument('--p_tv', type=float, default=1e-5)
+    p.add_argument('--optimizer', type=str, default='Adam')
+    p.add_argument('--noise_idx', type=int, default=1)
 
-# def add_all_args(p):
-#     add_io_dirpaths_args(p)
-    
+    # p.add_argument('--model_name', type=str, default='DDFN_C64B10_NL') = DDFN_C64B10_NL
+    # p.add_argument('--log_dir', type=, default=) = ./output/logfile
+    # p.add_argument('--log_file', type=, default=) = ${log_dir}/${model_name}
+    # p.add_argument('--util_dir', type=, default=) = ./util
+    # p.add_argument('--train_file', type=, default=) = ${util_dir}/train_intensity.txt
+    # p.add_argument('--val_file', type=, default=) = ${util_dir}/val_intensity.txt
+    # p.add_argument('--resume', type=, default=) = False
+    # p.add_argument('--resume_fpt', type=, default=) = ${log_dir}/rsm
+    # p.add_argument('--resume_mod', type=, default=) = ${resume_fpt}/xxx.pth
+    # p.add_argument('--train_loss', type=, default=) = ${resume_fpt}/xxx.mat
+    # p.add_argument('--val_loss', type=, default=) = ${resume_fpt}/xxxx.mat
+
 
 if __name__=='__main__':
     p = configargparse.ArgumentParser()

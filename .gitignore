@@ -1,6 +1,7 @@
 #### Custom gitignore
 
 results
+outputs
 
 datalists/train*
 datalists/val*

@@ -7,6 +7,16 @@ Spatio Temporal Compressive Single-Photon Histograms
 
 Verify that the command `nvidia-smi` works on your computer. If it doesn't you may need to install the NVIDIA drivers. One way to do this in Ubuntu is to go to *Software and Updates*, then go to *additional drivers*, select the driver for your GPU, apply changes, and restart the machine. 
 
+### Setting up Environment for New Version
+
+1. Create env: `conda create -n csphenv38 python=3.8`
+2. Activate env: `conda activate csphenv38`
+3. Install pytorch with cuda support: `conda install pytorch torchvision torchaudio cudatoolkit=11.3 -c pytorch`
+   1. In my case pytorch 1.11 was installed
+4. Install Pytorch lightning: `conda install pytorch-lightning -c conda-forge`
+5. Install Additional packages: `conda install ipython matplotlib scipy scikit-image`
+6. Install Hydra for config files: `pip install hydra-core --upgrade`
+
 ### Setting up PENonLocal Environments
 
 **Option 1:** Using the `requirements.txt` provided in PENonLocal repository did not work for me. Most likely because of different GPUs + NVIDIA drivers + CUDA toolkit versions. The following steps worked for me instead in my `Ubuntu 20.04` using an `RTX 2070 Super` using `nvidia-driver-470`:
