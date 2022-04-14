@@ -1,3 +1,7 @@
+defaults:
+  - io_dirpaths
+  - _self_
+  
 params:
   gpu_num: 1
   batch_size: 4
@@ -8,7 +12,18 @@ params:
   lri: 1.0e-4
   p_tv: 1.0e-5
   noise_idx: 1
+  crop_patch_size: 32
 
-defaults:
-  - io_dirpaths
-  - _self_
+  model_name: DDFN_C64B10_NL
+  log_dirpath: ./log
+  log_file: ${.log_dirpath}/${.model_name}
+  util_dir: ./util
+  train_datalist_fpath: ${io_dirpaths.datalists_dirpath}/nyuv2_train_min_SimSPADDataset_nr-64_nc-64_nt-1024_tres-80ps_dark-1_psf-1.txt
+  val_datalist_fpath: ${io_dirpaths.datalists_dirpath}/nyuv2_val_min_SimSPADDataset_nr-64_nc-64_nt-1024_tres-80ps_dark-1_psf-1.txt
+  resume: False
+  resume_fpt: ${.log_dirpath}/rsm
+  resume_mod: ${.resume_fpt}/xxx.pth
+  train_loss: ${.resume_fpt}/xxx.mat
+  val_loss: ${.resume_fpt}/xxxx.mat
+
+

@@ -3,6 +3,7 @@
 results
 outputs
 
+datalists/*_SimSPADDataset_*
 datalists/train*
 datalists/val*
 datalists/test*

@@ -1,9 +1,10 @@
 io_dirpaths:
-  datalists: ${hydra:runtime.cwd}/./datalists
-  nyuv2_raw_dataset: ${hydra:runtime.cwd}/./data_gener/TrainData/raw
-  nyuv2_processed_dataset: ${hydra:runtime.cwd}/./data_gener/TrainData/processed
-  nyuv2_spad_dataset: ${hydra:runtime.cwd}/./data_gener/TrainData/SimSPADDataset_nr-64_nc-64_nt-1024_tres-80ps_dark-1_psf-1
-  middlebury_spad_dataset: ${hydra:runtime.cwd}/./data_gener/TestData/middlebury/processed/SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0
-  results_data: ${hydra:runtime.cwd}/./results/results_data
-  results_weekly: ${hydra:runtime.cwd}/./results/week_20220411
-  logdir: ./log
+  datalists_dirpath: ${hydra:runtime.cwd}/./datalists
+  nyuv2_train_list_fname: nyuv2_train_min.txt
+  nyuv2_val_list_fname: nyuv2_val_min.txt
+  nyuv2_raw_dataset_dirpath: ${hydra:runtime.cwd}/./data_gener/TrainData/raw
+  nyuv2_processed_dataset_dirpath: ${hydra:runtime.cwd}/./data_gener/TrainData/processed
+  nyuv2_spad_dataset_dirpath: ${hydra:runtime.cwd}/./data_gener/TrainData/SimSPADDataset_nr-64_nc-64_nt-1024_tres-80ps_dark-1_psf-1
+  middlebury_spad_dataset_dirpath: ${hydra:runtime.cwd}/./data_gener/TestData/middlebury/processed/SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0
+  results_data_dirpath: ${hydra:runtime.cwd}/./results/results_data
+  results_weekly_dirpath: ${hydra:runtime.cwd}/./results/week_20220411

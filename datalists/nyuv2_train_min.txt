@@ -1,0 +1,9 @@
+dining_room_0001a/
+dining_room_0002/
+dining_room_0004/
+home_office_0003/
+living_room_0001a/
+living_room_0003/
+office_0002a/
+study_0002/
+

@@ -13,8 +13,8 @@ from make_train_lists import generate_spad_data_fpaths, write_fpaths
 @hydra.main(config_path="./conf", config_name="io_dirpaths")
 def make_test_lists(cfg):
 	## Load dir paths
-	datalists_dirpath = cfg.io_dirpaths.datalists
-	spad_dataset_dirpath = cfg.io_dirpaths.middlebury_spad_dataset
+	datalists_dirpath = cfg.io_dirpaths.datalists_dirpath
+	spad_dataset_dirpath = cfg.io_dirpaths.middlebury_spad_dataset_dirpath
 	spad_dataset_dirpath = os.path.abspath(spad_dataset_dirpath)
 
 	## Set the dataset name
