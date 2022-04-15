@@ -65,7 +65,7 @@ class SpadDataset(torch.utils.data.Dataset):
         spad_data = scipy.io.loadmat(self.spad_data_fpaths[idx])
 
         # normalized pulse as GT histogram
-        rates = np.asarray(spad_data['rates'])
+        rates = np.asarray(spad_data['rates']).astype(np.float32)
         (nr, nc, n_bins) = rates.shape
         rates = rates[np.newaxis,: ]
         rates = np.transpose(rates, (0, 3, 1, 2))
@@ -73,7 +73,7 @@ class SpadDataset(torch.utils.data.Dataset):
 
         # simulated spad measurements
         # Here we need to swap the rows and cols because matlab saves dimensions in a different order.
-        spad = np.asarray(scipy.sparse.csc_matrix.todense(spad_data['spad']))
+        spad = np.asarray(scipy.sparse.csc_matrix.todense(spad_data['spad'])).astype(np.float32)
         spad = spad.reshape((nc, nr, n_bins))
         spad = spad[np.newaxis, :]
         spad = np.transpose(spad, (0, 3, 2, 1))

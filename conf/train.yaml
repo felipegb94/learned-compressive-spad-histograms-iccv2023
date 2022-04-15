@@ -4,9 +4,10 @@ defaults:
   
 params:
   gpu_num: 1
-  batch_size: 4
+  cuda: false
+  batch_size: 2
   workers: 4
-  epoch: 8
+  epoch: 2
   save_every: 420
   optimizer: Adam
   lri: 1.0e-4
