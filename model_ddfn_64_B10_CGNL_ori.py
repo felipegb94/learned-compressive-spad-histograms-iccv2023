@@ -311,19 +311,22 @@ class LITDeepBoosting(DeepBoosting):
 			and lightning will aggregate them correctly.  
 		'''
 		
+		# Stack some of the images from the outputs
 		dep = outputs[-1]['dep']
 		dep_re = outputs[-1]['dep_re']
-
-		# grid = torchvision.utils.make_grid([dep.squeeze(), dep_re.squeeze()])
-		# self.logger.experiment.add_image('depths and rec depths', grid, global_step=self.current_epoch)
+		n_samples = min(3, len(outputs))
+		dep_all = torch.zeros((n_samples, 1, dep.shape[-2], dep.shape[-1])).type(dep.dtype)
+		dep_re_all = torch.zeros((n_samples, 1, dep_re.shape[-2], dep_re.shape[-1])).type(dep_re.dtype)
+		for i in range(n_samples):
+			dep_all[i,:] = outputs[i]['dep'][0,:] # Grab first img in batch
+			dep_re_all[i,:] = outputs[i]['dep_re'][0,:]
 
 		# NOTE: By setting it to global step, we will log more images inside tensorboard, which may require more space
 		# If we set global_step to a constant, we will keep overwriting the images.
-		grid = torchvision.utils.make_grid(dep)
-		self.logger.experiment.add_image('depths', grid, global_step=self.global_step)
-		grid = torchvision.utils.make_grid(dep_re)
-		self.logger.experiment.add_image('rec depths', grid, global_step=self.global_step)
-		# self.training_step
+		grid = torchvision.utils.make_grid(dep_all, nrow=n_samples, value_range=(0,1))
+		self.logger.experiment.add_image('GT Depths', grid, global_step=self.global_step)
+		grid = torchvision.utils.make_grid(dep_re_all, nrow=n_samples, value_range=(0,1))
+		self.logger.experiment.add_image('Rec. Depths', grid, global_step=self.global_step)
 
 
 	def on_train_epoch_end(self) -> None:

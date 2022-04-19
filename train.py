@@ -70,11 +70,12 @@ def train(cfg):
 
 	# 
 	# trainer = pl.Trainer(fast_dev_run=True ) # Runs single batch
-	trainer = pl.Trainer(limit_train_batches=7, limit_val_batches=4, max_epochs=8, log_every_n_steps=1, logger=tb_logger, callbacks=callbacks) # Runs single batch
-	# if(cfg.params.cuda):
-	# 	trainer = pl.Trainer(accelerator="gpu", devices=1, max_epochs=cfg.params.epoch, logger=tb_logger, callbacks=callbacks) # 
-	# else:
-	# 	trainer = pl.Trainer(logger=tb_logger, callbacks=callbacks) # 
+	if(cfg.params.cuda):
+		# trainer = pl.Trainer(accelerator="gpu", devices=1, limit_train_batches=15, limit_val_batches=3, max_epochs=8, log_every_n_steps=1, logger=tb_logger, callbacks=callbacks) # Runs single batch
+		trainer = pl.Trainer(accelerator="gpu", devices=1, max_epochs=cfg.params.epoch, logger=tb_logger, callbacks=callbacks) # 
+	else:
+		# trainer = pl.Trainer(limit_train_batches=2, limit_val_batches=3, max_epochs=8, log_every_n_steps=1, logger=tb_logger, callbacks=callbacks) # Runs single batch
+		trainer = pl.Trainer(max_epochs=cfg.params.epoch, logger=tb_logger, callbacks=callbacks) # 
 
 	trainer.fit(lit_model, train_dataloaders=train_loader, val_dataloaders=val_loader)
 
