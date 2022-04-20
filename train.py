@@ -68,10 +68,15 @@ def train(cfg):
 		# , every_n_epochs=1 # How often to check the value we are monitoring
 		, mode='min'
 	) 
+	lr_monitor = pl.callbacks.LearningRateMonitor(logging_interval='step')
 	
-	callbacks = [ ckpt_callback ] 
+	callbacks = [ ckpt_callback, lr_monitor ] 
 
-	lit_model = LITDeepBoosting(cfg)
+	lit_model = LITDeepBoosting(
+					init_lr = cfg.params.lri,
+					lr_decay_gamma = cfg.params.lr_decay_gamma,
+					p_tv = cfg.params.p_tv
+					)
 
 	# 
 	# trainer = pl.Trainer(fast_dev_run=True ) # Runs single batch

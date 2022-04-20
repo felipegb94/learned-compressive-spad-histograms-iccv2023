@@ -237,12 +237,21 @@ class DeepBoosting(torch.nn.Module):
 
 
 class LITDeepBoosting(pl.LightningModule):
-	def __init__(self, cfg, in_channels=1):
+	def __init__(self, 
+		init_lr = 1e-4,
+		p_tv = 1e-5, 
+		lr_decay_gamma = 0.9,
+		in_channels=1):
+		
 		super().__init__()
-		self.batch_size = cfg.params.batch_size
-		self.cfg = cfg
+		
 		self.lsmx = torch.nn.LogSoftmax(dim=1)
 		self.save_hyperparameters()
+
+		# Train hyperparams		
+		self.init_lr = init_lr
+		self.lr_decay_gamma = lr_decay_gamma
+		self.p_tv = p_tv
 
 		self.deep_boosting_model = DeepBoosting(in_channels=in_channels)
 
@@ -254,8 +263,12 @@ class LITDeepBoosting(pl.LightningModule):
 		return out
 
 	def configure_optimizers(self):
-		optimizer = torch.optim.Adam(self.parameters(), self.cfg.params.lri)
-		return optimizer
+		optimizer = torch.optim.Adam(self.parameters(), self.init_lr)
+		lr_scheduler = {
+			'scheduler': torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=self.lr_decay_gamma, verbose=False)
+			, 'name': 'epoch/Adam-lr' # Name for logging in tensorboard (used by lr_monitor callback)
+		}
+		return [optimizer], [lr_scheduler]
 
 	def training_step(self, sample, batch_idx):
 		# load data and train the network
@@ -273,7 +286,7 @@ class LITDeepBoosting(pl.LightningModule):
 		loss_tv = criterion_TV(dep_re)
 		rmse = criterion_L2(dep_re, dep)
 
-		loss = loss_kl + self.cfg.params.p_tv*loss_tv
+		loss = loss_kl + self.p_tv*loss_tv
 
 		# Log to logger (i.e., tensorboard), if you want it to be displayed at progress bar, use prog_bar=True
 		self.log_dict(
@@ -299,7 +312,7 @@ class LITDeepBoosting(pl.LightningModule):
 		loss_tv = criterion_TV(dep_re)
 		val_rmse = criterion_L2(dep_re, dep)
 		
-		val_loss = loss_kl + self.cfg.params.p_tv*loss_tv
+		val_loss = loss_kl + self.p_tv*loss_tv
 
 		self.log("rmse/avg_val", val_rmse, prog_bar=True)
 		# Important NOTE: Newer version of lightning accumulate the val_loss for each batch and then take the mean at the end of the epoch
@@ -329,7 +342,7 @@ class LITDeepBoosting(pl.LightningModule):
 		loss_tv = criterion_TV(dep_re)
 		
 		test_rmse = criterion_L2(dep_re, dep)
-		test_loss = loss_kl + self.cfg.params.p_tv*loss_tv
+		test_loss = loss_kl + self.p_tv*loss_tv
 
 		# Compute depths and RMSE on depths
 		rec_depths = tof_utils.bin2depth(dep_re*nt, num_bins=nt, tau=tau)
