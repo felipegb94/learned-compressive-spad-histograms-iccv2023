@@ -17,7 +17,7 @@ breakpoint = debugger.set_trace
 
 
 class SpadDataset(torch.utils.data.Dataset):
-    def __init__(self, datalist_fpath, noise_idx=None, output_size=(32,32), disable_rand_crop=False):
+    def __init__(self, datalist_fpath, noise_idx=None, output_size=(32,32), disable_rand_crop=False, tres_ps=1000):
         """__init__
         :param datalist_fpath: path to text file with list of spad data files
         :param noise_idx: the noise index list to include in the dataset (e.g., 1 or 2
@@ -27,6 +27,7 @@ class SpadDataset(torch.utils.data.Dataset):
         with open(datalist_fpath) as f: 
             self.spad_data_fpaths_all = f.read().split()
 
+        self.tres_ps = tres_ps # time resolution in picosecs
         self.noise_idx = noise_idx
         self.spad_data_fpaths = []
         if(noise_idx is None):
@@ -99,18 +100,15 @@ class SpadDataset(torch.utils.data.Dataset):
             top = np.random.randint(0, h - new_h + 1) 
             left = np.random.randint(0, w - new_w + 1)
 
-        rates = rates[..., top:top + new_h
-                        , left:left + new_w]
-        spad = spad[..., top:top + new_h,
-                    left: left + new_w]
-        bins = bins[..., top: top + new_h,
-                    left: left + new_w]
+        rates = rates[..., top:top + new_h, left:left + new_w]
+        spad = spad[..., top:top + new_h, left: left + new_w]
+        bins = bins[..., top: top + new_h, left: left + new_w]
 
         rates = torch.from_numpy(rates)
         spad = torch.from_numpy(spad)
         bins = torch.from_numpy(bins)
 
-        sample = {'rates': rates, 'spad': spad, 'bins': bins, 'idx': idx}
+        sample = {'rates': rates, 'spad': spad, 'bins': bins, 'idx': idx, 'tres_ps': self.tres_ps}
 
         return sample
 

@@ -1,0 +1,11 @@
+
+
+tres: 80 # in picosencs
+nr: 64
+nc: 64
+nt: 1024
+dark_param_id: 1
+psf_param_id: 1
+
+train_datalist_fname: nyuv2_train_min_SimSPADDataset_nr-${nr}_nc-${nc}_nt-${nt}_tres-${tres}ps_dark-1_psf-1.txt
+val_datalist_fname: nyuv2_val_min_SimSPADDataset_nr-${nr}_nc-${nc}_nt-${nt}_tres-${tres}ps_dark-1_psf-1.txt

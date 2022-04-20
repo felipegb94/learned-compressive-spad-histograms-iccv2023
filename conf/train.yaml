@@ -6,7 +6,7 @@ hydra:
     dir: outputs/${params.model_name}/${experiment}/${now:%Y-%m-%d_%H%M%S}
 
 # Global configurations shared between different modules
-experiment: debug_baseline
+experiment: debug_nyuv2_min
 
 defaults:
   - io_dirpaths
@@ -17,7 +17,7 @@ params:
   cuda: false
   batch_size: 2
   workers: 4
-  epoch: 2
+  epoch: 4
   save_every: 420
   optimizer: Adam
   lri: 1.0e-4

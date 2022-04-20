@@ -13,14 +13,11 @@ breakpoint = debugger.set_trace
 
 #### Local imports
 from losses import criterion_L2, criterion_KL, criterion_TV
-
-
-
-dtype = torch.cuda.FloatTensor
+import tof_utils
 
 
 # feature extraction part
-class MsFeat(pl.LightningModule):
+class MsFeat(torch.nn.Module):
 	def __init__(self, in_channels):
 		outchannel_MS = 2
 		super(MsFeat, self).__init__()
@@ -45,7 +42,7 @@ class MsFeat(pl.LightningModule):
 		return torch.cat((conv1, conv2, conv3, conv4), 1)
 
 
-class NonLocal(pl.LightningModule):
+class NonLocal(torch.nn.Module):
 	def __init__(self, inplanes, use_scale=False, groups=None):
 		self.use_scale = use_scale
 		self.groups = groups
@@ -134,7 +131,7 @@ class NonLocal(pl.LightningModule):
 
 
 # feature integration
-class Block(pl.LightningModule):
+class Block(torch.nn.Module):
 	def __init__(self, in_channels):
 		outchannel_block = 16
 		super(Block, self).__init__()
@@ -167,7 +164,7 @@ class Block(pl.LightningModule):
 
 
 # build the model
-class DeepBoosting(pl.LightningModule):
+class DeepBoosting(torch.nn.Module):
 	def __init__(self, in_channels=1):
 		super(DeepBoosting, self).__init__()
 		self.msfeat = MsFeat(in_channels)
@@ -239,12 +236,22 @@ class DeepBoosting(pl.LightningModule):
 		return denoise_out, soft_argmax
 
 
-class LITDeepBoosting(DeepBoosting):
+class LITDeepBoosting(pl.LightningModule):
 	def __init__(self, cfg, in_channels=1):
-		super(LITDeepBoosting, self).__init__(in_channels)
+		super().__init__()
 		self.batch_size = cfg.params.batch_size
 		self.cfg = cfg
 		self.lsmx = torch.nn.LogSoftmax(dim=1)
+		self.save_hyperparameters()
+
+		self.deep_boosting_model = DeepBoosting(in_channels=in_channels)
+
+		self.example_input_array = torch.randn([1, 1, 1024, 32, 32])
+
+	def forward(self, x):
+		# use forward for inference/predictions
+		out = self.deep_boosting_model(x)
+		return out
 
 	def configure_optimizers(self):
 		optimizer = torch.optim.Adam(self.parameters(), self.cfg.params.lri)
@@ -271,11 +278,10 @@ class LITDeepBoosting(DeepBoosting):
 		# Log to logger (i.e., tensorboard), if you want it to be displayed at progress bar, use prog_bar=True
 		self.log_dict(
 			{
-				"train_loss": loss,
-				"train_rmse": rmse,
+				"loss/train": loss,
+				"rmse/train": rmse,
 			}
 			# , prog_bar=True
-			# , logger=True
 		)
 
 		return {'loss': loss}
@@ -298,10 +304,53 @@ class LITDeepBoosting(DeepBoosting):
 		# Important NOTE: Newer version of lightning accumulate the val_loss for each batch and then take the mean at the end of the epoch
 		self.log_dict(
 			{
-				"avg_val_loss": val_loss
-				, "avg_val_rmse": val_rmse
+				"loss/avg_val": val_loss
+				, "rmse/avg_val": val_rmse
+				# "avg_val_loss": val_loss
+				# , "avg_val_rmse": val_rmse
 			}
 			, prog_bar=True
+		)
+		return {'dep': dep, 'dep_re': dep_re}
+
+
+	def test_step(self, sample, batch_idx):
+		M_mea = sample["spad"]
+		M_gt = sample["rates"]
+		dep = sample["bins"]
+		# Get tof params to compute depths
+		tres = sample["tres_ps"][0]*1e-12 
+		nt = M_mea.shape[-3]
+		tau = nt*tres
+
+
+
+		M_mea_re, dep_re = self(M_mea)
+
+		M_mea_re_lsmx = self.lsmx(M_mea_re).unsqueeze(1)
+		loss_kl = criterion_KL(M_mea_re_lsmx, M_gt)
+		loss_tv = criterion_TV(dep_re)
+		
+		test_rmse = criterion_L2(dep_re, dep)
+		test_loss = loss_kl + self.cfg.params.p_tv*loss_tv
+
+		# Compute depths and RMSE on depths
+		rec_depths = tof_utils.bin2depth(dep_re*nt, num_bins=nt, tau=tau)
+		gt_depths = tof_utils.bin2depth(dep*nt, num_bins=nt, tau=tau)
+
+		# the following two lines give the same result
+		# depths_rmse = torch.sqrt(torch.mean((rec_depths - gt_depths)**2))
+		# depths_L2 = criterion_L2(rec_depths, gt_depths)
+		depths_rmse = criterion_L2(rec_depths, gt_depths)
+
+		# Important NOTE: Newer version of lightning accumulate the test_loss for each batch and then take the mean at the end of the epoch
+		self.log_dict(
+			{
+				"loss/avg_test": test_loss
+				, "rmse/avg_test": test_rmse
+				, "depths/test_rmse": depths_rmse
+			}
+			, on_step=True
 		)
 		return {'dep': dep, 'dep_re': dep_re}
 
@@ -337,4 +386,7 @@ class LITDeepBoosting(DeepBoosting):
 		print("")
 		return super().on_validation_epoch_end()
 	
-
+	def on_train_start(self):
+		# Proper logging of hyperparams and metrics in TB
+		# self.logger.log_hyperparams(self.hparams, {"loss/train": 0, "loss/avg_val": 0, "rmse/train": 0, "rmse/avg_val": 0})
+		self.logger.log_hyperparams(self.hparams)
