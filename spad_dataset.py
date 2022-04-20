@@ -51,7 +51,7 @@ class SpadDataset(torch.utils.data.Dataset):
         if(isinstance(output_size, int)): self.output_size = (output_size, output_size)
         else: self.output_size = output_size
         self.disable_rand_crop = disable_rand_crop
-
+        
         print("SpadDataset with {} files".format(len(self.spad_data_fpaths)))
 
     def __len__(self):

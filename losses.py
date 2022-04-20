@@ -1,12 +1,22 @@
-# This is the file for loss functions
+#### Standard Library Imports
+
+#### Library imports
 import torch
 import torch.nn as nn
+
+#### Local imports
 
 
 ###########################################
 # the set of loss functions
 criterion_GAN = nn.MSELoss()
-criterion_KL = nn.KLDivLoss()
+
+# We use mean reduction even if it is mathematically incorrect. This is what was used in Peng et al., 2020 and Lindell et al., 2018
+# One reason we may prefer mean of batchmean is that if the histogram image increases in dimension then we want the kldiv loss to stay
+# in the same order of magnitude
+# criterion_KL = nn.KLDivLoss()
+criterion_KL = nn.KLDivLoss(reduction='mean')
+# criterion_KL = nn.KLDivLoss(reduction='batchmean')
 
 # inpt, target: [batch_size, 1, h, w]
 criterion_L1 = nn.L1Loss()

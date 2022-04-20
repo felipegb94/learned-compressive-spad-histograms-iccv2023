@@ -55,7 +55,7 @@ def train(cfg):
 	# Let hydra manage directory outputs. We over-write the save_dir to . so that we use the ones that hydra configures
 	# tensorboard = pl.loggers.TensorBoardLogger(save_dir=".", name="", version="", log_graph=True, default_hp_metric=False)
 	tb_logger = pl.loggers.TensorBoardLogger(save_dir=".", name="", version="", log_graph=True, default_hp_metric=False)
-	
+
 	# NOTE: using rmse/avg_val instead of rmse_avg_val, allows to group things in tensorboard 
 	# To avoid creating new directories when using / in the monitor metric name, we need to set auto_insert_metric_name=False
 	# and set the filename we want to show
@@ -68,34 +68,34 @@ def train(cfg):
 		# , every_n_epochs=1 # How often to check the value we are monitoring
 		, mode='min'
 	) 
-	lr_monitor = pl.callbacks.LearningRateMonitor(logging_interval='step')
+
+	lr_monitor_callback = pl.callbacks.LearningRateMonitor(logging_interval='step')
 	
-	callbacks = [ ckpt_callback, lr_monitor ] 
+	callbacks = [ ckpt_callback, lr_monitor_callback ] 
 
 	lit_model = LITDeepBoosting(
 					init_lr = cfg.params.lri,
 					lr_decay_gamma = cfg.params.lr_decay_gamma,
 					p_tv = cfg.params.p_tv
 					)
-
 	# 
 	# trainer = pl.Trainer(fast_dev_run=True ) # Runs single batch
 	if(cfg.params.cuda):
-		trainer = pl.Trainer(accelerator="gpu", devices=1, 
-			limit_train_batches=80, limit_val_batches=10, max_epochs=5, 
-			logger=tb_logger, callbacks=callbacks,
-			log_every_n_steps=1, val_check_interval=0.25
-		 	) # Runs single batch
-		# trainer = pl.Trainer(accelerator="gpu", devices=1, max_epochs=cfg.params.epoch, 
-		# 	logger=tb_logger, callbacks=callbacks, 
-		# 	log_every_n_steps=10, val_check_interval=0.25) # 
+		# trainer = pl.Trainer(accelerator="gpu", devices=1, 
+		# 	limit_train_batches=80, limit_val_batches=10, max_epochs=5, 
+		# 	logger=tb_logger, callbacks=callbacks,
+		# 	log_every_n_steps=1, val_check_interval=0.25
+		#  	) # Runs single batch
+		trainer = pl.Trainer(accelerator="gpu", devices=1, max_epochs=cfg.params.epoch, 
+			logger=tb_logger, callbacks=callbacks, 
+			log_every_n_steps=10, val_check_interval=0.25) # 
 	else:
-		trainer = pl.Trainer(
-			limit_train_batches=2, limit_val_batches=3, max_epochs=8, log_every_n_steps=1, 
-			logger=tb_logger, callbacks=callbacks) # Runs single batch
-		# trainer = pl.Trainer(max_epochs=cfg.params.epoch, 
-		# 	logger=tb_logger, callbacks=callbacks, 
-		# 	log_every_n_steps=10, val_check_interval=0.25) # 
+		# trainer = pl.Trainer(
+		# 	limit_train_batches=2, limit_val_batches=3, max_epochs=8, log_every_n_steps=1, 
+		# 	logger=tb_logger, callbacks=callbacks) # Runs single batch
+		trainer = pl.Trainer(max_epochs=cfg.params.epoch, 
+			logger=tb_logger, callbacks=callbacks, 
+			log_every_n_steps=10, val_check_interval=0.25) # 
 
 	trainer.fit(lit_model, train_dataloaders=train_loader, val_dataloaders=val_loader)
 

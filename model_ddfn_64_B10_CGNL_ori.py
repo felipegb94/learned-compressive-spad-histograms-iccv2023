@@ -291,8 +291,10 @@ class LITDeepBoosting(pl.LightningModule):
 		# Log to logger (i.e., tensorboard), if you want it to be displayed at progress bar, use prog_bar=True
 		self.log_dict(
 			{
-				"loss/train": loss,
-				"rmse/train": rmse,
+				"loss/train": loss
+				, "rmse/train": rmse
+				, "train_losses/kldiv": loss_kl
+				, "train_losses/tv": self.p_tv*loss_tv				
 			}
 			# , prog_bar=True
 		)
