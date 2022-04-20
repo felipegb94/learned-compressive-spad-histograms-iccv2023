@@ -3,31 +3,31 @@ hydra:
     # Configure output dir of each experiment programmatically from the arguments
     # Example "outputs/mnist/classifier/baseline/2021-03-10-141516"
     # dir: outputs/${data.name}/${model.name}/${experiment}/${now:%Y-%m-%d_%H%M%S}
-    dir: outputs/${params.model_name}/${experiment}/${experiment_id}
-
-# Global configurations shared between different modules
-experiment: debug_nyuv2_min
-
-experiment_id: 2022-04-19_153129
+    # dir: outputs/${dataset.name}/${params.model_name}/${experiment}/${experiment_id}
+    dir: ${model_dirpath}
 
 defaults:
   - io_dirpaths
   - _self_
+  - dataset: middlebury
+  # enable color logging
+  - override hydra/hydra_logging: colorlog
+  - override hydra/job_logging: colorlog
 
+## Full trained model dirapth
+# model_dirpath: outputs/DDFN_C64B10_NL/debug_nyuv2/2022-04-19_205134/
+## slightly trained
+model_dirpath: outputs/nyuv2_min_64x64x1024_80ps/DDFN_C64B10_NL/debug/2022-04-20_100231
+
+# ckpt_id: epoch=04-step=400-avgvalrmse=0.0700
+ckpt_id: null
 
 params:
-  nr: 64
-  nc: 64
-  nt: 1024
-  tres_ps: 98
   gpu_num: 1
-  cuda: true
+  cuda: false
   batch_size: 1
-  lri: 1.0e-4
-  p_tv: 1.0e-5
   model_name: DDFN_C64B10_NL
   noise_idx: null
-  test_datalist_fpath: ${io_dirpaths.datalists_dirpath}/test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0.txt
-  # test_datalist_fpath: ${io_dirpaths.datalists_dirpath}/nyuv2_val_min_SimSPADDataset_nr-${params.nr}_nc-${params.nc}_nt-${params.nt}_tres-${params.tres_ps}ps_dark-1_psf-1.txt
+  test_datalist_fpath: ${io_dirpaths.datalists_dirpath}/${dataset.test_datalist_fname}
 
 

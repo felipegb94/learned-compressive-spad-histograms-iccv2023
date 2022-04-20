@@ -3,32 +3,45 @@ hydra:
     # Configure output dir of each experiment programmatically from the arguments
     # Example "outputs/mnist/classifier/baseline/2021-03-10-141516"
     # dir: outputs/${data.name}/${model.name}/${experiment}/${now:%Y-%m-%d_%H%M%S}
-    dir: outputs/${params.model_name}/${experiment}/${now:%Y-%m-%d_%H%M%S}
+    dir: outputs/${dataset.name}/${params.model_name}/${experiment}/${now:%Y-%m-%d_%H%M%S}
 
-# Global configurations shared between different modules
-experiment: debug_nyuv2_min
+#### Useful variables to have
+# path to original working directory
+# hydra hijacks working directory by changing it to the new log directory
+# https://hydra.cc/docs/next/tutorials/basic/running_your_app/working_directory
+original_work_dir: ${hydra:runtime.cwd}
 
 defaults:
-  - io_dirpaths
   - _self_
-  
+  - io_dirpaths
+  - dataset: nyuv2_min
+  # enable color logging
+  - override hydra/hydra_logging: colorlog
+  - override hydra/job_logging: colorlog
+
+# Global configurations shared between different modules
+experiment: debug
+
 params:
   gpu_num: 1
   cuda: false
-  batch_size: 2
+  batch_size: 1
   workers: 4
-  epoch: 4
-  save_every: 420
-  optimizer: Adam
+  epoch: 3
   lri: 1.0e-4
   p_tv: 1.0e-5
   noise_idx: 1
   crop_patch_size: 32
-
   model_name: DDFN_C64B10_NL
-  train_datalist_fpath: ${io_dirpaths.datalists_dirpath}/nyuv2_train_min_SimSPADDataset_nr-64_nc-64_nt-1024_tres-80ps_dark-1_psf-1.txt
-  val_datalist_fpath: ${io_dirpaths.datalists_dirpath}/nyuv2_val_min_SimSPADDataset_nr-64_nc-64_nt-1024_tres-80ps_dark-1_psf-1.txt
-  resume: False
+  train_datalist_fpath: ${io_dirpaths.datalists_dirpath}/${dataset.train_datalist_fname}
+  val_datalist_fpath: ${io_dirpaths.datalists_dirpath}/${dataset.val_datalist_fname}
+  # save_every: 420
+  # optimizer: Adam
+
+# resume_params:
+#   resume: False
+#   ckpt_rel_fpath: "2022-04-19_205134/checkpoints/epoch=05-step=20778-avgvalrmse=0.0291.ckpt"
+  # ckpt_fpath: "outputs/DDFN_C64B10_NL/debug_nyuv2/2022-04-19_205134/checkpoints/epoch=05-step=20778-avgvalrmse=0.0291.ckpt" 
   # util_dir: ./util
   # log_dirpath: ./log
   # log_file: ${.log_dirpath}/${.model_name}

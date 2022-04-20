@@ -301,15 +301,12 @@ class LITDeepBoosting(pl.LightningModule):
 		
 		val_loss = loss_kl + self.cfg.params.p_tv*loss_tv
 
+		self.log("rmse/avg_val", val_rmse, prog_bar=True)
 		# Important NOTE: Newer version of lightning accumulate the val_loss for each batch and then take the mean at the end of the epoch
 		self.log_dict(
 			{
 				"loss/avg_val": val_loss
-				, "rmse/avg_val": val_rmse
-				# "avg_val_loss": val_loss
-				# , "avg_val_rmse": val_rmse
 			}
-			, prog_bar=True
 		)
 		return {'dep': dep, 'dep_re': dep_re}
 

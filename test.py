@@ -24,11 +24,8 @@ def test(cfg):
 	if('middlebury' in cfg.params.test_datalist_fpath):
 		assert(cfg.params.batch_size==1), 'For middlebury batch size should be 1 since not all images are the same size so the cant be run as batch'
 
-	if('debug' in cfg.experiment):
-		pl.seed_everything(1234)
-		logger.info("Running debug experiment mode. Fixed Random Seed")
-	else:
-		logger.info("Running {} experiment mode".format(cfg.experiment))
+	pl.seed_everything(1234)
+
 	logger.info("\n" + OmegaConf.to_yaml(cfg))
 	logger.info("Number of assigned GPUs: {}".format(cfg.params.gpu_num))
 	logger.info("Number of available GPUs: {} {}".format(torch.cuda.device_count(), torch.cuda.get_device_name(torch.cuda.current_device())))
@@ -41,7 +38,7 @@ def test(cfg):
 	logger.info("Loading test data...")
 	logger.info("Test Datalist: {}".format(cfg.params.test_datalist_fpath))
 	test_data = SpadDataset(cfg.params.test_datalist_fpath, cfg.params.noise_idx, 
-		output_size=None, disable_rand_crop=True, tres_ps=cfg.params.tres_ps)
+		output_size=None, disable_rand_crop=True, tres_ps=cfg.dataset.tres_ps)
 	test_loader = DataLoader(test_data, batch_size=cfg.params.batch_size, 
 		shuffle=False, num_workers=0, pin_memory=cfg.params.cuda)
 	logger.info("Load test data complete - {} test samples!".format(len(test_data)))
@@ -52,7 +49,12 @@ def test(cfg):
 	tb_logger = pl.loggers.TensorBoardLogger(save_dir=".", name="", version="", log_graph=True, default_hp_metric=False)
 	
 	# uses in_dim=32, out_dim=10
-	model = LITDeepBoosting.load_from_checkpoint("checkpoints/epoch=03-step=976-avgvalrmse=0.0326.ckpt")
+	if(cfg.ckpt_id):
+		logger.info("Loading {} ckpt".format(cfg.ckpt_id))
+		model = LITDeepBoosting.load_from_checkpoint("checkpoints/"+cfg.ckpt_id)
+	else:
+		logger.info("Loading last.ckpt because no ckpt was given")
+		model = LITDeepBoosting.load_from_checkpoint("checkpoints/last.ckpt")
 
 	if(cfg.params.cuda):
 		trainer = pl.Trainer(accelerator="gpu", devices=1, logger=tb_logger) # 

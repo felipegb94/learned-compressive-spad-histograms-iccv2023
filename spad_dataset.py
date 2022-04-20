@@ -17,11 +17,11 @@ breakpoint = debugger.set_trace
 
 
 class SpadDataset(torch.utils.data.Dataset):
-    def __init__(self, datalist_fpath, noise_idx=None, output_size=(32,32), disable_rand_crop=False, tres_ps=1000):
+    def __init__(self, datalist_fpath, noise_idx=None, output_size=None, disable_rand_crop=False, tres_ps=1000):
         """__init__
         :param datalist_fpath: path to text file with list of spad data files
         :param noise_idx: the noise index list to include in the dataset (e.g., 1 or 2
-        :param output_size: the output size after random crop
+        :param output_size: the output size after random crop. If set to None it will output the full image
         """
 
         with open(datalist_fpath) as f: 
