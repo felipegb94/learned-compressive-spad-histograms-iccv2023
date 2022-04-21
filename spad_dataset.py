@@ -60,6 +60,12 @@ class SpadDataset(torch.utils.data.Dataset):
     def __len__(self):
         return len(self.spad_data_fpaths)
 
+    def get_spad_data_sample_id(self, idx):
+        # Create a unique identifier for this file so we can use it to save model outputs with a filename that contains this ID
+        spad_data_fname = self.spad_data_fpaths[idx]
+        spad_data_id = self.datalist_fname + '/' + os.path.splitext(os.path.basename(spad_data_fname))[0]
+        return spad_data_id
+
     def tryitem(self, idx):
         '''
             Try to load the spad data sample.
@@ -69,9 +75,6 @@ class SpadDataset(torch.utils.data.Dataset):
         spad_data_fname = self.spad_data_fpaths[idx]
         spad_data = scipy.io.loadmat(spad_data_fname)
         
-        # Create a unique identifier for this file so we can use it to save model outputs with a filename that contains this ID
-        spad_data_id = self.datalist_fname + '/' + os.path.splitext(os.path.basename(spad_data_fname))[0]
-
         # normalized pulse as GT histogram
         rates = np.asarray(spad_data['rates']).astype(np.float32)
         (nr, nc, n_bins) = rates.shape
@@ -115,7 +118,7 @@ class SpadDataset(torch.utils.data.Dataset):
         spad = torch.from_numpy(spad)
         bins = torch.from_numpy(bins)
 
-        sample = {'rates': rates, 'spad': spad, 'bins': bins, 'idx': idx, 'tres_ps': self.tres_ps, 'spad_data_id': spad_data_id}
+        sample = {'rates': rates, 'spad': spad, 'bins': bins, 'idx': idx}
 
         return sample
 

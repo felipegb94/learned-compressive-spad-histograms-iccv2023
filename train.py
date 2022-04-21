@@ -81,21 +81,21 @@ def train(cfg):
 	# 
 	# trainer = pl.Trainer(fast_dev_run=True ) # Runs single batch
 	if(cfg.params.cuda):
-		# trainer = pl.Trainer(accelerator="gpu", devices=1, 
-		# 	limit_train_batches=80, limit_val_batches=10, max_epochs=5, 
-		# 	logger=tb_logger, callbacks=callbacks,
-		# 	log_every_n_steps=1, val_check_interval=0.25
-		#  	) # Runs single batch
-		trainer = pl.Trainer(accelerator="gpu", devices=1, max_epochs=cfg.params.epoch, 
-			logger=tb_logger, callbacks=callbacks, 
-			log_every_n_steps=10, val_check_interval=0.25) # 
+		trainer = pl.Trainer(accelerator="gpu", devices=1, 
+			limit_train_batches=20, limit_val_batches=10, max_epochs=3, 
+			logger=tb_logger, callbacks=callbacks,
+			log_every_n_steps=1, val_check_interval=0.5
+		 	) # Runs single batch
+		# trainer = pl.Trainer(accelerator="gpu", devices=1, max_epochs=cfg.params.epoch, 
+		# 	logger=tb_logger, callbacks=callbacks, 
+		# 	log_every_n_steps=10, val_check_interval=0.25) # 
 	else:
-		# trainer = pl.Trainer(
-		# 	limit_train_batches=2, limit_val_batches=3, max_epochs=8, log_every_n_steps=1, 
-		# 	logger=tb_logger, callbacks=callbacks) # Runs single batch
-		trainer = pl.Trainer(max_epochs=cfg.params.epoch, 
-			logger=tb_logger, callbacks=callbacks, 
-			log_every_n_steps=10, val_check_interval=0.25) # 
+		trainer = pl.Trainer(
+			limit_train_batches=2, limit_val_batches=3, max_epochs=3, log_every_n_steps=1, 
+			logger=tb_logger, callbacks=callbacks) # Runs single batch
+		# trainer = pl.Trainer(max_epochs=cfg.params.epoch, 
+		# 	logger=tb_logger, callbacks=callbacks, 
+		# 	log_every_n_steps=10, val_check_interval=0.25) # 
 
 	trainer.fit(lit_model, train_dataloaders=train_loader, val_dataloaders=val_loader)
 

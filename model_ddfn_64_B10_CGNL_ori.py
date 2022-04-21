@@ -271,23 +271,34 @@ class LITDeepBoosting(pl.LightningModule):
 		}
 		return [optimizer], [lr_scheduler]
 
-	def training_step(self, sample, batch_idx):
-		# load data and train the network
-		# M_mea = sample["spad"].type(dtype)
-		# M_gt = sample["rates"].type(dtype)
-		# dep = sample["bins"].type(dtype)
-		M_mea = sample["spad"]
+	def forward_wrapper(self, input_data):
+		# Input the correct type of data to the model which should output the recovered histogram and depths
+		M_mea_re, dep_re = self(input_data)
+		return M_mea_re, dep_re
+
+	def compute_losses(self, sample, M_mea_re, dep_re):
+		# load data and compute losses
 		M_gt = sample["rates"]
 		dep = sample["bins"]
-
-		M_mea_re, dep_re = self(M_mea)
-
+		# Normalize
 		M_mea_re_lsmx = self.lsmx(M_mea_re).unsqueeze(1)
+		# Compute metrics
 		loss_kl = criterion_KL(M_mea_re_lsmx, M_gt)
 		loss_tv = criterion_TV(dep_re)
 		rmse = criterion_L2(dep_re, dep)
-
 		loss = loss_kl + self.p_tv*loss_tv
+
+		return loss, loss_kl, loss_tv, rmse
+
+
+
+	def training_step(self, sample, batch_idx):
+		# load the correct input to the network
+		M_mea = sample["spad"]
+		# Forward pass
+		M_mea_re, dep_re = self.forward_wrapper(input_data=M_mea)
+		# Compute Losses
+		(loss, loss_kl, loss_tv, rmse) = self.compute_losses(sample, M_mea_re, dep_re)
 
 		# Log to logger (i.e., tensorboard), if you want it to be displayed at progress bar, use prog_bar=True
 		self.log_dict(
@@ -299,24 +310,19 @@ class LITDeepBoosting(pl.LightningModule):
 			}
 			# , prog_bar=True
 		)
-
 		return {'loss': loss}
 
 
 	def validation_step(self, sample, batch_idx):
+		# load the correct input to the network
 		M_mea = sample["spad"]
-		M_gt = sample["rates"]
 		dep = sample["bins"]
-
-		M_mea_re, dep_re = self(M_mea)
-
-		M_mea_re_lsmx = self.lsmx(M_mea_re).unsqueeze(1)
-		loss_kl = criterion_KL(M_mea_re_lsmx, M_gt)
-		loss_tv = criterion_TV(dep_re)
-		val_rmse = criterion_L2(dep_re, dep)
+		# Forward pass
+		M_mea_re, dep_re = self.forward_wrapper(input_data=M_mea)
+		# Compute Losses
+		(val_loss, val_loss_kl, val_loss_tv, val_rmse) = self.compute_losses(sample, M_mea_re, dep_re)
 		
-		val_loss = loss_kl + self.p_tv*loss_tv
-
+		# Log the losses
 		self.log("rmse/avg_val", val_rmse, prog_bar=True)
 		# Important NOTE: Newer version of lightning accumulate the val_loss for each batch and then take the mean at the end of the epoch
 		self.log_dict(
@@ -328,31 +334,32 @@ class LITDeepBoosting(pl.LightningModule):
 
 
 	def test_step(self, sample, batch_idx):
+		# load the correct input to the network
 		M_mea = sample["spad"]
-		M_gt = sample["rates"]
 		dep = sample["bins"]
-		spad_data_id = sample["spad_data_id"]
+		# Forward pass
+		M_mea_re, dep_re = self.forward_wrapper(input_data=M_mea)
+		# Compute Losses
+		(test_loss, test_loss_kl, test_loss_tv, test_rmse) = self.compute_losses(sample, M_mea_re, dep_re)
+
+		## Save some model outputs
+		# Access dataloader to get some metadata for computation
+		dataloader_idx = 0 # If multiple dataloaders are available you need to change this using the input args to the test_step function
+		curr_dataloader = self.trainer.test_dataloaders[dataloader_idx]
 		# Get tof params to compute depths
-		tres = sample["tres_ps"][0]*1e-12 
+		tres = curr_dataloader.dataset.tres_ps*1e-12 
 		nt = M_mea.shape[-3]
 		tau = nt*tres
-
-		M_mea_re, dep_re = self(M_mea)
-
-		M_mea_re_lsmx = self.lsmx(M_mea_re).unsqueeze(1)
-		loss_kl = criterion_KL(M_mea_re_lsmx, M_gt)
-		loss_tv = criterion_TV(dep_re)
-		
-		test_rmse = criterion_L2(dep_re, dep)
-		test_loss = loss_kl + self.p_tv*loss_tv
-
 		### Save model outputs in a folder with the dataset name and with a filename equal to the train data filename
-		out_rel_dirpath = os.path.dirname(spad_data_id[0])
+		# First get dataloader to generate the data ids
+		spad_data_ids = []
+		for idx in sample['idx']:
+			spad_data_ids.append(curr_dataloader.dataset.get_spad_data_sample_id(idx))
+		out_rel_dirpath = os.path.dirname(spad_data_ids[0])
 		if(not os.path.exists(out_rel_dirpath)):
 			os.makedirs(out_rel_dirpath, exist_ok=True)
-		batch_size = dep_re.shape[0]
-		for i in range(batch_size):
-			out_data_fpath = spad_data_id[i]
+		for i in range(dep_re.shape[0]):
+			out_data_fpath = spad_data_ids[i]
 			np.savez(out_data_fpath, dep_re=dep_re[i,:].cpu().numpy())
 
 		# Compute depths and RMSE on depths
@@ -365,6 +372,7 @@ class LITDeepBoosting(pl.LightningModule):
 		depths_rmse = criterion_L2(rec_depths, gt_depths)
 
 		# Important NOTE: Newer version of lightning accumulate the test_loss for each batch and then take the mean at the end of the epoch
+		# Log results
 		self.log_dict(
 			{
 				"loss/avg_test": test_loss
