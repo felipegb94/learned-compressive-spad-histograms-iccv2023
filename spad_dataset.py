@@ -27,6 +27,9 @@ class SpadDataset(torch.utils.data.Dataset):
         with open(datalist_fpath) as f: 
             self.spad_data_fpaths_all = f.read().split()
 
+        self.datalist_fpath = datalist_fpath
+        self.datalist_fname = os.path.splitext(os.path.basename(datalist_fpath))[0]
+
         self.tres_ps = tres_ps # time resolution in picosecs
         self.noise_idx = noise_idx
         self.spad_data_fpaths = []
@@ -63,7 +66,11 @@ class SpadDataset(torch.utils.data.Dataset):
             * All normalization and data augmentation happens here.
         '''
         # load spad data
-        spad_data = scipy.io.loadmat(self.spad_data_fpaths[idx])
+        spad_data_fname = self.spad_data_fpaths[idx]
+        spad_data = scipy.io.loadmat(spad_data_fname)
+        
+        # Create a unique identifier for this file so we can use it to save model outputs with a filename that contains this ID
+        spad_data_id = self.datalist_fname + '/' + os.path.splitext(os.path.basename(spad_data_fname))[0]
 
         # normalized pulse as GT histogram
         rates = np.asarray(spad_data['rates']).astype(np.float32)
@@ -108,7 +115,7 @@ class SpadDataset(torch.utils.data.Dataset):
         spad = torch.from_numpy(spad)
         bins = torch.from_numpy(bins)
 
-        sample = {'rates': rates, 'spad': spad, 'bins': bins, 'idx': idx, 'tres_ps': self.tres_ps}
+        sample = {'rates': rates, 'spad': spad, 'bins': bins, 'idx': idx, 'tres_ps': self.tres_ps, 'spad_data_id': spad_data_id}
 
         return sample
 

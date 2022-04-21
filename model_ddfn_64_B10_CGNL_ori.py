@@ -1,7 +1,8 @@
 #### Standard Library Imports
-
+import os
 
 #### Library imports
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.init as init
@@ -330,12 +331,11 @@ class LITDeepBoosting(pl.LightningModule):
 		M_mea = sample["spad"]
 		M_gt = sample["rates"]
 		dep = sample["bins"]
+		spad_data_id = sample["spad_data_id"]
 		# Get tof params to compute depths
 		tres = sample["tres_ps"][0]*1e-12 
 		nt = M_mea.shape[-3]
 		tau = nt*tres
-
-
 
 		M_mea_re, dep_re = self(M_mea)
 
@@ -345,6 +345,15 @@ class LITDeepBoosting(pl.LightningModule):
 		
 		test_rmse = criterion_L2(dep_re, dep)
 		test_loss = loss_kl + self.p_tv*loss_tv
+
+		### Save model outputs in a folder with the dataset name and with a filename equal to the train data filename
+		out_rel_dirpath = os.path.dirname(spad_data_id[0])
+		if(not os.path.exists(out_rel_dirpath)):
+			os.makedirs(out_rel_dirpath, exist_ok=True)
+		batch_size = dep_re.shape[0]
+		for i in range(batch_size):
+			out_data_fpath = spad_data_id[i]
+			np.savez(out_data_fpath, dep_re=dep_re[i,:].cpu().numpy())
 
 		# Compute depths and RMSE on depths
 		rec_depths = tof_utils.bin2depth(dep_re*nt, num_bins=nt, tau=tau)
