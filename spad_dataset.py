@@ -17,7 +17,7 @@ breakpoint = debugger.set_trace
 
 
 class SpadDataset(torch.utils.data.Dataset):
-    def __init__(self, datalist_fpath, noise_idx=None, output_size=None, disable_rand_crop=False, tres_ps=1000):
+    def __init__(self, datalist_fpath, noise_idx=None, output_size=None, disable_rand_crop=False):
         """__init__
         :param datalist_fpath: path to text file with list of spad data files
         :param noise_idx: the noise index list to include in the dataset (e.g., 1 or 2
@@ -30,6 +30,7 @@ class SpadDataset(torch.utils.data.Dataset):
         self.datalist_fpath = datalist_fpath
         self.datalist_fname = os.path.splitext(os.path.basename(datalist_fpath))[0]
 
+        (_, _, _, tres_ps) = self.get_spad_data_sample_params(idx=0)
         self.tres_ps = tres_ps # time resolution in picosecs
         self.noise_idx = noise_idx
         self.spad_data_fpaths = []
@@ -65,6 +66,20 @@ class SpadDataset(torch.utils.data.Dataset):
         spad_data_fname = self.spad_data_fpaths[idx]
         spad_data_id = self.datalist_fname + '/' + os.path.splitext(os.path.basename(spad_data_fname))[0]
         return spad_data_id
+
+    def get_spad_data_sample_params(self, idx):
+        '''
+            Load the first sample and look at some of the parameters of the simulation
+        '''
+        # load spad data
+        spad_data_fname = self.spad_data_fpaths[0]
+        spad_data = scipy.io.loadmat(spad_data_fname)
+        # SBR = spad_data['SBR'].squeeze()
+        # mean_signal_photons = spad_data['mean_signal_photons'].squeeze()
+        # mean_background_photons = spad_data['mean_background_photons'].squeeze()
+        (nr, nc, nt) = spad_data['rates'].shape
+        tres_ps = spad_data['bin_size'].squeeze()*1e12
+        return (nr, nc, nt, tres_ps)
 
     def tryitem(self, idx):
         '''

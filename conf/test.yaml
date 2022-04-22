@@ -9,7 +9,7 @@ hydra:
 defaults:
   - io_dirpaths
   - _self_
-  - dataset: middlebury
+  - dataset: nyuv2_min
   # enable color logging
   - override hydra/hydra_logging: colorlog
   - override hydra/job_logging: colorlog

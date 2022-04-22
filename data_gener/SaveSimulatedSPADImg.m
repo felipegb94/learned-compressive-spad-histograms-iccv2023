@@ -25,6 +25,11 @@ bin_hr = range_bins_hr;
 photons = mean_signal_photons;
 % save(fname, 'spad', 'SBR', 'bin', 'range_bins', 'bin_hr', 'est_range_bins', 'rates_norm_params', 'rates', 'mean_signal_photons', 'mean_background_photons', 'bin_size', 'photons');
 
-save(fname, 'spad', 'SBR', 'bin', 'range_bins', 'bin_hr', 'est_range_bins', 'rates_norm_params', 'rates', 'intensity', 'intensity_hr', 'mean_signal_photons', 'mean_background_photons', 'bin_size', 'photons');
+% Save est_range_bins as separate files. Makes it simpler to read in scipy
+est_range_bins_argmax = est_range_bins.est_range_bins_argmax;
+est_range_bins_lmf = est_range_bins.est_range_bins_lmf;
+est_range_bins_zncc = est_range_bins.est_range_bins_zncc;
+
+save(fname, 'spad', 'SBR', 'bin', 'range_bins', 'bin_hr', 'est_range_bins_argmax', 'est_range_bins_lmf', 'est_range_bins_zncc', 'rates_norm_params', 'rates', 'intensity', 'intensity_hr', 'mean_signal_photons', 'mean_background_photons', 'bin_size', 'photons');
 
 end

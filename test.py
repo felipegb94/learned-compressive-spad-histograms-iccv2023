@@ -38,7 +38,7 @@ def test(cfg):
 	logger.info("Loading test data...")
 	logger.info("Test Datalist: {}".format(cfg.params.test_datalist_fpath))
 	test_data = SpadDataset(cfg.params.test_datalist_fpath, cfg.params.noise_idx, 
-		output_size=None, disable_rand_crop=True, tres_ps=cfg.dataset.tres_ps)
+		output_size=None, disable_rand_crop=True)
 	test_loader = DataLoader(test_data, batch_size=cfg.params.batch_size, 
 		shuffle=False, num_workers=0, pin_memory=cfg.params.cuda)
 	logger.info("Load test data complete - {} test samples!".format(len(test_data)))

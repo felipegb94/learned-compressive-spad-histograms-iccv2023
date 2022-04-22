@@ -155,6 +155,7 @@ class Block(torch.nn.Module):
 		init.kaiming_normal_(self.feat[0].weight, 0, 'fan_in', 'relu'); init.constant_(self.feat[0].bias, 0.0)
 	# note the channel for each layer
 	def forward(self, inputs):
+
 		conv1 = self.conv1(inputs)
 		feat1 = self.feat1(conv1)
 		feat15 = self.feat15(feat1)
@@ -170,17 +171,22 @@ class DeepBoosting(torch.nn.Module):
 		super(DeepBoosting, self).__init__()
 		self.msfeat = MsFeat(in_channels)
 		self.C1 = nn.Sequential(nn.Conv3d(8,2,kernel_size=1, stride=(1,1,1),bias=True),nn.ReLU(inplace=True))
-		init.kaiming_normal_(self.C1[0].weight, 0, 'fan_in', 'relu'); init.constant_(self.C1[0].bias, 0.0)
+		init.kaiming_normal_(self.C1[0].weight, 0, 'fan_in', 'relu'); 
+		init.constant_(self.C1[0].bias, 0.0)
 		self.nl = NonLocal(2, use_scale=False, groups=1)
 
 		self.ds1 = nn.Sequential(nn.Conv3d(2,4,kernel_size=3,stride=(2,1,1),padding=(1,1,1),bias=True),nn.ReLU(inplace=True))
-		init.kaiming_normal_(self.ds1[0].weight, 0, 'fan_in', 'relu'); init.constant_(self.ds1[0].bias, 0.0)
+		init.kaiming_normal_(self.ds1[0].weight, 0, 'fan_in', 'relu'); 
+		init.constant_(self.ds1[0].bias, 0.0)
 		self.ds2 = nn.Sequential(nn.Conv3d(4, 8, kernel_size=3, stride=(2, 1, 1), padding=(1, 1, 1), bias=True),nn.ReLU(inplace=True))
-		init.kaiming_normal_(self.ds2[0].weight, 0, 'fan_in', 'relu'); init.constant_(self.ds2[0].bias, 0.0)
+		init.kaiming_normal_(self.ds2[0].weight, 0, 'fan_in', 'relu'); 
+		init.constant_(self.ds2[0].bias, 0.0)
 		self.ds3 = nn.Sequential(nn.Conv3d(8,16,kernel_size=3,stride=(2,1,1),padding=(1,1,1),bias=True),nn.ReLU(inplace=True))
-		init.kaiming_normal_(self.ds3[0].weight, 0, 'fan_in', 'relu'); init.constant_(self.ds3[0].bias, 0.0)
+		init.kaiming_normal_(self.ds3[0].weight, 0, 'fan_in', 'relu'); 
+		init.constant_(self.ds3[0].bias, 0.0)
 		self.ds4 = nn.Sequential(nn.Conv3d(16, 32, kernel_size=3, stride=(2, 1, 1), padding=(1, 1, 1), bias=True),nn.ReLU(inplace=True))
-		init.kaiming_normal_(self.ds4[0].weight, 0, 'fan_in', 'relu'); init.constant_(self.ds4[0].bias, 0.0)
+		init.kaiming_normal_(self.ds4[0].weight, 0, 'fan_in', 'relu'); 
+		init.constant_(self.ds4[0].bias, 0.0)
 
 		self.dfus_block0 = Block(32)
 		self.dfus_block1 = Block(40)
@@ -207,7 +213,6 @@ class DeepBoosting(torch.nn.Module):
 		
 	def forward(self, inputs):
 		smax = torch.nn.Softmax2d()
-		
 		msfeat = self.msfeat(inputs) 
 		c1 = self.C1(msfeat)
 		nlout = self.nl(c1)
