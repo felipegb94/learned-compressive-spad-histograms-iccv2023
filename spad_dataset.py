@@ -30,8 +30,6 @@ class SpadDataset(torch.utils.data.Dataset):
         self.datalist_fpath = datalist_fpath
         self.datalist_fname = os.path.splitext(os.path.basename(datalist_fpath))[0]
 
-        (_, _, _, tres_ps) = self.get_spad_data_sample_params(idx=0)
-        self.tres_ps = tres_ps # time resolution in picosecs
         self.noise_idx = noise_idx
         self.spad_data_fpaths = []
         if(noise_idx is None):
@@ -47,7 +45,6 @@ class SpadDataset(torch.utils.data.Dataset):
                         self.spad_data_fpaths.append(fpath)
                         break
 
-        self.spad_data_fpaths =  self.spad_data_fpaths
         # self.spad_data_fpaths.extend([intensity.replace('intensity', 'spad')
         #                             .replace('.mat', '_p{}.mat'.format(noise_idx))
         #                             for intensity in self.intensity_files])
@@ -55,7 +52,10 @@ class SpadDataset(torch.utils.data.Dataset):
         if(isinstance(output_size, int)): self.output_size = (output_size, output_size)
         else: self.output_size = output_size
         self.disable_rand_crop = disable_rand_crop
-        
+
+        (_, _, _, tres_ps) = self.get_spad_data_sample_params(idx=0)
+        self.tres_ps = tres_ps # time resolution in picosecs
+
         print("SpadDataset with {} files".format(len(self.spad_data_fpaths)))
 
     def __len__(self):
