@@ -15,6 +15,20 @@ breakpoint = debugger.set_trace
 
 #### Local imports
 
+def normalize_matlab_depth_bins(range_bins, num_bins):
+    # make range 0-n_bins-1 instead of 1-n_bins
+    norm_range_bins = (range_bins - 1) / (num_bins - 1) 
+    return norm_range_bins
+
+def bins2hist(range_bins, num_bins):
+    range_bins = range_bins.squeeze()
+    (nt, nr, nc) = (num_bins,) + range_bins.shape
+    hist = np.zeros((nt,nr,nc))
+    for i in range(nr):
+        for j in range(nc):
+            bin_idx = range_bins[i,j]
+            hist[bin_idx, i,j] = 1.
+    return hist
 
 class SpadDataset(torch.utils.data.Dataset):
     def __init__(self, datalist_fpath, noise_idx=None, output_size=None, disable_rand_crop=False):
@@ -107,7 +121,14 @@ class SpadDataset(torch.utils.data.Dataset):
         # # ground truth depths in units of bins
         bins = np.asarray(spad_data['bin']).astype(np.float32)
         bins = bins[np.newaxis, :]
-        bins = (bins - 1) / (n_bins - 1) # make range 0-n_bins-1 instead of 1-n_bins
+        bins = normalize_matlab_depth_bins(bins, n_bins)
+
+        # # Estimated argmax depths from spad measurements
+        est_bins_argmax = np.asarray(spad_data['est_range_bins_argmax'])
+        est_bins_argmax = bins2hist(est_bins_argmax-1, num_bins=n_bins).astype(np.float32)
+        est_bins_argmax = est_bins_argmax[np.newaxis,:]
+        # est_bins_argmax = est_bins_argmax[np.newaxis, np.newaxis, :] - 1 # Subtract one to matlab indeces
+        # est_bins_argmax = normalize_matlab_depth_bins(est_bins_argmax, n_bins)
 
         (h, w) = (nr, nc)
         if(self.output_size is None):
@@ -128,12 +149,13 @@ class SpadDataset(torch.utils.data.Dataset):
         rates = rates[..., top:top + new_h, left:left + new_w]
         spad = spad[..., top:top + new_h, left: left + new_w]
         bins = bins[..., top: top + new_h, left: left + new_w]
-
+        est_bins_argmax = est_bins_argmax[..., top: top + new_h, left: left + new_w]
         rates = torch.from_numpy(rates)
         spad = torch.from_numpy(spad)
         bins = torch.from_numpy(bins)
+        est_bins_argmax = torch.from_numpy(est_bins_argmax)
 
-        sample = {'rates': rates, 'spad': spad, 'bins': bins, 'idx': idx}
+        sample = {'rates': rates, 'spad': spad, 'bins': bins, 'est_bins_argmax': est_bins_argmax, 'idx': idx}
 
         return sample
 

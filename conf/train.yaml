@@ -14,7 +14,7 @@ original_work_dir: ${hydra:runtime.cwd}
 defaults:
   - _self_
   - io_dirpaths
-  - dataset: nyuv2_min
+  - dataset: nyuv2
   # enable color logging
   - override hydra/hydra_logging: colorlog
   - override hydra/job_logging: colorlog
@@ -25,15 +25,16 @@ experiment: debug
 params:
   gpu_num: 1
   cuda: true
-  batch_size: 2
-  workers: 2
+  batch_size: 4
+  workers: 4
   epoch: 8
   lri: 1.0e-4
   lr_decay_gamma: 0.9
   p_tv: 1.0e-5
   noise_idx: 1
   crop_patch_size: 32
-  model_name: DDFN_C64B10_NL
+  # model_name: DDFN_C64B10_NL
+  model_name: Depth2Depth
   train_datalist_fpath: ${io_dirpaths.datalists_dirpath}/${dataset.train_datalist_fname}
   val_datalist_fpath: ${io_dirpaths.datalists_dirpath}/${dataset.val_datalist_fname}
   # save_every: 420

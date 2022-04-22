@@ -15,165 +15,56 @@ breakpoint = debugger.set_trace
 #### Local imports
 from losses import criterion_L2, criterion_KL, criterion_TV
 import tof_utils
+from model_ddfn_64_B10_CGNL_ori import Block, NonLocal, MsFeat
 
 
-# feature extraction part
-class MsFeat(torch.nn.Module):
-	def __init__(self, in_channels):
-		outchannel_MS = 2
-		super(MsFeat, self).__init__()
+# class Bins2Hist(torch.nn.Module):
+# 	def __init__(self, hist_len=1024):
+# 		super(Bins2Hist, self).__init__()
+# 		self.hist_len = hist_len
 
-		self.conv1 = nn.Sequential(nn.Conv3d(in_channels, outchannel_MS, 3, stride=(1,1,1), padding=1, dilation=1, bias=True), nn.ReLU(inplace=True))
-		init.kaiming_normal_(self.conv1[0].weight, 0, 'fan_in', 'relu'); init.constant_(self.conv1[0].bias, 0.0)
-
-		self.conv2 = nn.Sequential(nn.Conv3d(in_channels, outchannel_MS, 3, stride=(1,1,1), padding=2, dilation=2, bias=True), nn.ReLU(inplace=True))
-		init.kaiming_normal_(self.conv2[0].weight, 0, 'fan_in', 'relu'); init.constant_(self.conv2[0].bias, 0.0)
-
-		self.conv3 = nn.Sequential(nn.Conv3d(outchannel_MS, outchannel_MS, 3, padding=1, dilation=1, bias=True), nn.ReLU(inplace=True))
-		init.kaiming_normal_(self.conv3[0].weight, 0, 'fan_in', 'relu'); init.constant_(self.conv3[0].bias, 0.0)
-
-		self.conv4 = nn.Sequential(nn.Conv3d(outchannel_MS, outchannel_MS, 3, padding=2, dilation=2, bias=True), nn.ReLU(inplace=True))
-		init.kaiming_normal_(self.conv4[0].weight, 0, 'fan_in', 'relu'); init.constant_(self.conv4[0].bias, 0.0)
-
-	def forward(self, inputs):
-		conv1 = self.conv1(inputs)
-		conv2 = self.conv2(inputs)
-		conv3 = self.conv3(conv2)
-		conv4 = self.conv4(conv1)
-		return torch.cat((conv1, conv2, conv3, conv4), 1)
-
-
-class NonLocal(torch.nn.Module):
-	def __init__(self, inplanes, use_scale=False, groups=None):
-		self.use_scale = use_scale
-		self.groups = groups
-
-		super(NonLocal, self).__init__()
-		# conv theta
-		self.t = nn.Conv3d(inplanes, inplanes//1, kernel_size=1, stride=1, bias=False)
-		init.kaiming_normal_(self.t.weight, 0, 'fan_in', 'relu')
-		# conv phi
-		self.p = nn.Conv3d(inplanes, inplanes//1, kernel_size=1, stride=1, bias=False)
-		init.kaiming_normal_(self.p.weight, 0, 'fan_in', 'relu')
-		# conv g
-		self.g = nn.Conv3d(inplanes, inplanes//1, kernel_size=1, stride=1, bias=False)
-		init.kaiming_normal_(self.g.weight, 0, 'fan_in', 'relu')
-		# conv z
-		self.z = nn.Conv3d(inplanes//1, inplanes, kernel_size=1, stride=1,
-						   groups=self.groups, bias=False)
-		init.kaiming_normal_(self.z.weight, 0, 'fan_in', 'relu')
-		# concat groups
-		self.gn = nn.GroupNorm(num_groups=self.groups, num_channels=inplanes)
-		init.constant_(self.gn.weight, 0); nn.init.constant_(self.gn.bias, 0)
-
-		if self.use_scale:
-			print("=> WARN: Non-local block uses 'SCALE'")
-		if self.groups:
-			print("=> WARN: Non-local block uses '{}' groups".format(self.groups))
-
-	def kernel(self, t, p, g, b, c, d, h, w):
-		"""The linear kernel (dot production).
-
-		Args:
-			t: output of conv theata
-			p: output of conv phi
-			g: output of conv g
-			b: batch size
-			c: channels number
-			d: depth of featuremaps
-			h: height of featuremaps
-			w: width of featuremaps
-		"""
-		t = t.view(b, 1, c * d * h * w)
-		p = p.view(b, 1, c * d * h * w)
-		g = g.view(b, c * d * h * w, 1)
-
-		att = torch.bmm(p, g)
-
-		if self.use_scale:
-			att = att.div((c * d * h * w) ** 0.5)
-
-		x = torch.bmm(att, t)
-		x = x.view(b, c, d, h, w)
-
-		return x
-
-	def forward(self, x):
-		residual = x
-
-		t = self.t(x) #b,ch,d,h,w
-		p = self.p(x) #b,ch,d,h,w
-		g = self.g(x) #b,ch,d,h,w
-
-		b, c, d, h, w = t.size()
-
-		if self.groups and self.groups > 1:
-			_c = int(c / self.groups)
-
-			ts = torch.split(t, split_size_or_sections=_c, dim=1)
-			ps = torch.split(p, split_size_or_sections=_c, dim=1)
-			gs = torch.split(g, split_size_or_sections=_c, dim=1)
-
-			_t_sequences = []
-			for i in range(self.groups):
-				_x = self.kernel(ts[i], ps[i], gs[i],
-								 b, _c, d, h, w)
-				_t_sequences.append(_x)
-
-			x = torch.cat(_t_sequences, dim=1)
-		else:
-			x = self.kernel(t, p, g,
-							b, c, d, h, w)
-
-		x = self.z(x)
-		x = self.gn(x) + residual
-
-		return x
-
-
-# feature integration
-class Block(torch.nn.Module):
-	def __init__(self, in_channels):
-		outchannel_block = 16
-		super(Block, self).__init__()
-		self.conv1 = nn.Sequential(nn.Conv3d(in_channels, outchannel_block, 1, padding=0, dilation=1, bias=True), nn.ReLU(inplace=True))
-		init.kaiming_normal_(self.conv1[0].weight, 0, 'fan_in', 'relu'); init.constant_(self.conv1[0].bias, 0.0)
-
-		self.feat1 = nn.Sequential(nn.Conv3d(outchannel_block, 8, 3, padding=1, dilation=1, bias=True), nn.ReLU(inplace=True))
-		init.kaiming_normal_(self.feat1[0].weight, 0, 'fan_in', 'relu'); init.constant_(self.feat1[0].bias, 0.0)
-
-		self.feat15 = nn.Sequential(nn.Conv3d(8, 4, 3, padding=2, dilation=2, bias=True), nn.ReLU(inplace=True))
-		init.kaiming_normal_(self.feat15[0].weight, 0, 'fan_in', 'relu'); init.constant_(self.feat15[0].bias, 0.0)
-
-		self.feat2 = nn.Sequential(nn.Conv3d(outchannel_block, 8, 3, padding=2, dilation=2, bias=True), nn.ReLU(inplace=True))
-		init.kaiming_normal_(self.feat2[0].weight, 0, 'fan_in', 'relu'); init.constant_(self.feat2[0].bias, 0.0)
-
-		self.feat25 = nn.Sequential(nn.Conv3d(8, 4, 3, padding=1, dilation=1, bias=True), nn.ReLU(inplace=True))
-		init.kaiming_normal_(self.feat25[0].weight, 0, 'fan_in', 'relu'); init.constant_(self.feat25[0].bias, 0.0)
-
-		self.feat = nn.Sequential(nn.Conv3d(24, 8, 1, padding=0, dilation=1, bias=True), nn.ReLU(inplace=True))
-		init.kaiming_normal_(self.feat[0].weight, 0, 'fan_in', 'relu'); init.constant_(self.feat[0].bias, 0.0)
-	# note the channel for each layer
-	def forward(self, inputs):
-
-		conv1 = self.conv1(inputs)
-		feat1 = self.feat1(conv1)
-		feat15 = self.feat15(feat1)
-		feat2 = self.feat2(conv1)
-		feat25 = self.feat25(feat2)
-		feat = self.feat(torch.cat((feat1, feat15, feat2, feat25), 1))
-		return torch.cat((inputs, feat), 1)
+# 	def forward(self, inputs):
+# 		breakpoint()
+# 		dims = inputs.shape
+# 		# dims[-3] = 1024
+# 		hist = torch.zeros((1,1,1024,32,32)).to(inputs.device)
+# 		indeces = torch.index_select(hist, dim=-3, index=inputs)
+# 		hist[inputs] = 1.
+# 		return hist
 
 
 # build the model
-class DeepBoosting(torch.nn.Module):
+class DeepBoostingDepth2Depth(torch.nn.Module):
 	def __init__(self, in_channels=1):
-		super(DeepBoosting, self).__init__()
+		super(DeepBoostingDepth2Depth, self).__init__()
+		
+		# self.b2h = Bins2Hist() 
+
+		
 		self.msfeat = MsFeat(in_channels)
 		self.C1 = nn.Sequential(nn.Conv3d(8,2,kernel_size=1, stride=(1,1,1),bias=True),nn.ReLU(inplace=True))
 		init.kaiming_normal_(self.C1[0].weight, 0, 'fan_in', 'relu'); 
 		init.constant_(self.C1[0].bias, 0.0)
 		self.nl = NonLocal(2, use_scale=False, groups=1)
+
+		# self.deconvs1 = nn.Sequential(nn.ConvTranspose3d(2,4,kernel_size=(6,3,3), stride=(2,1,1), padding=(2, 1, 1), bias=True),nn.ReLU(inplace=True))
+		# init.kaiming_normal_(self.deconvs1[0].weight, 0, 'fan_in', 'relu'); 
+		# init.constant_(self.deconvs1[0].bias, 0.0)
+		# self.deconvs2 = nn.Sequential(nn.ConvTranspose3d(4,8,kernel_size=(6,3,3), stride=(2,1,1), padding=(2, 1, 1), bias=True),nn.ReLU(inplace=True))
+		# init.kaiming_normal_(self.deconvs2[0].weight, 0, 'fan_in', 'relu'); 
+		# init.constant_(self.deconvs2[0].bias, 0.0)
+		# self.deconvs3 = nn.Sequential(nn.ConvTranspose3d(8,16,kernel_size=(6,3,3), stride=(2,1,1), padding=(2, 1, 1), bias=True),nn.ReLU(inplace=True))
+		# init.kaiming_normal_(self.deconvs3[0].weight, 0, 'fan_in', 'relu'); 
+		# init.constant_(self.deconvs3[0].bias, 0.0)
+		# self.deconvs4 = nn.Sequential(nn.ConvTranspose3d(16,32,kernel_size=(6,3,3), stride=(2,1,1), padding=(2, 1, 1), bias=True),nn.ReLU(inplace=True))
+		# init.kaiming_normal_(self.deconvs4[0].weight, 0, 'fan_in', 'relu'); 
+		# init.constant_(self.deconvs4[0].bias, 0.0)
+		# self.deconvs5 = nn.Sequential(nn.ConvTranspose3d(32,32,kernel_size=(6,3,3), stride=(2,1,1), padding=(2, 1, 1), bias=True),nn.ReLU(inplace=True))
+		# init.kaiming_normal_(self.deconvs5[0].weight, 0, 'fan_in', 'relu'); 
+		# init.constant_(self.deconvs5[0].bias, 0.0)
+		# self.deconvs6 = nn.Sequential(nn.ConvTranspose3d(32,32,kernel_size=(6,3,3), stride=(2,1,1), padding=(2, 1, 1), bias=True),nn.ReLU(inplace=True))
+		# init.kaiming_normal_(self.deconvs6[0].weight, 0, 'fan_in', 'relu'); 
+		# init.constant_(self.deconvs6[0].bias, 0.0)
 
 		self.ds1 = nn.Sequential(nn.Conv3d(2,4,kernel_size=3,stride=(2,1,1),padding=(1,1,1),bias=True),nn.ReLU(inplace=True))
 		init.kaiming_normal_(self.ds1[0].weight, 0, 'fan_in', 'relu'); 
@@ -213,13 +104,25 @@ class DeepBoosting(torch.nn.Module):
 		
 	def forward(self, inputs):
 		smax = torch.nn.Softmax2d()
+		# hist_inputs = self.b2h(inputs)
+
 		msfeat = self.msfeat(inputs) 
 		c1 = self.C1(msfeat)
 		nlout = self.nl(c1)
+		
+		# dsfeat1 = self.deconvs1(nlout)
+		# dsfeat2 = self.deconvs2(dsfeat1) 
+		# dsfeat3 = self.deconvs3(dsfeat2) 
+		# dsfeat4 = self.deconvs4(dsfeat3) 
+		# dsfeat5 = self.deconvs5(dsfeat4) 
+		# dsfeat6 = self.deconvs6(dsfeat5) 
+		# b0 = self.dfus_block0(dsfeat6)
+		
 		dsfeat1 = self.ds1(nlout)
 		dsfeat2 = self.ds2(dsfeat1) 
 		dsfeat3 = self.ds3(dsfeat2) 
 		dsfeat4 = self.ds4(dsfeat3) 
+
 		b0 = self.dfus_block0(dsfeat4)
 		b1 = self.dfus_block1(b0)
 		b2 = self.dfus_block2(b1)
@@ -242,7 +145,7 @@ class DeepBoosting(torch.nn.Module):
 		return denoise_out, soft_argmax
 
 
-class LITDeepBoosting(pl.LightningModule):
+class LITDeepBoostingDepth2Depth(pl.LightningModule):
 	def __init__(self, 
 		init_lr = 1e-4,
 		p_tv = 1e-5, 
@@ -259,9 +162,10 @@ class LITDeepBoosting(pl.LightningModule):
 		self.lr_decay_gamma = lr_decay_gamma
 		self.p_tv = p_tv
 
-		self.deep_boosting_model = DeepBoosting(in_channels=in_channels)
+		self.deep_boosting_model = DeepBoostingDepth2Depth(in_channels=in_channels)
 
-		self.example_input_array = torch.randn([1, 1, 1024, 32, 32])
+		self.example_input_array = torch.randn(size=(1, 1, 1024, 32, 32))
+		# self.example_input_array = torch.randint(size=(1, 1, 1, 32, 32), low=0, high=1024)
 
 	def forward(self, x):
 		# use forward for inference/predictions
@@ -277,7 +181,7 @@ class LITDeepBoosting(pl.LightningModule):
 		return [optimizer], [lr_scheduler]
 
 	def get_input_data(self, sample):
-		return sample["spad"]
+		return sample["est_bins_argmax"]
 	
 	def forward_wrapper(self, sample):
 		# Input the correct type of data to the model which should output the recovered histogram and depths
@@ -399,9 +303,11 @@ class LITDeepBoosting(pl.LightningModule):
 		n_samples = min(3, len(outputs))
 		dep_all = torch.zeros((n_samples, 1, dep.shape[-2], dep.shape[-1])).type(dep.dtype)
 		dep_re_all = torch.zeros((n_samples, 1, dep_re.shape[-2], dep_re.shape[-1])).type(dep_re.dtype)
+		dep_errs_all = torch.zeros((n_samples, 1, dep_re.shape[-2], dep_re.shape[-1])).type(dep_re.dtype)
 		for i in range(n_samples):
 			dep_all[i,:] = outputs[i]['dep'][0,:] # Grab first img in batch
 			dep_re_all[i,:] = outputs[i]['dep_re'][0,:]
+		dep_errs_all = torch.abs(dep_re_all - dep_re)
 
 		# NOTE: By setting it to global step, we will log more images inside tensorboard, which may require more space
 		# If we set global_step to a constant, we will keep overwriting the images.
@@ -409,6 +315,8 @@ class LITDeepBoosting(pl.LightningModule):
 		self.logger.experiment.add_image('GT Depths', grid, global_step=self.global_step)
 		grid = torchvision.utils.make_grid(dep_re_all, nrow=n_samples, value_range=(0,1))
 		self.logger.experiment.add_image('Rec. Depths', grid, global_step=self.global_step)
+		grid = torchvision.utils.make_grid(dep_errs_all, nrow=n_samples, value_range=(0,1))
+		self.logger.experiment.add_image('Abs. Depth Errors', grid, global_step=self.global_step)
 
 
 	def on_train_epoch_end(self) -> None:
