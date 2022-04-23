@@ -14,6 +14,7 @@ data_gener/TrainData/raw_corrupted
 data_gener/TrainData/processed
 data_gener/TrainData/processed_test
 data_gener/TrainData/processed_min
+data_gener/TrainData/processed_zipped
 data_gener/TrainData/living_rooms*
 data_gener/TrainData/home_offices*
 data_gener/TrainData/r-1315*
