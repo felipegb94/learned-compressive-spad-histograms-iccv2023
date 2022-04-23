@@ -51,7 +51,10 @@ def test(cfg):
 	# uses in_dim=32, out_dim=10
 	if(cfg.ckpt_id):
 		logger.info("Loading {} ckpt".format(cfg.ckpt_id))
-		model = LITDeepBoosting.load_from_checkpoint("checkpoints/"+cfg.ckpt_id)
+		if('.ckpt' in cfg.ckpt_id):
+			model = LITDeepBoosting.load_from_checkpoint("checkpoints/"+cfg.ckpt_id)
+		else:
+			model = LITDeepBoosting.load_from_checkpoint("checkpoints/"+cfg.ckpt_id+'.ckpt')
 	else:
 		logger.info("Loading last.ckpt because no ckpt was given")
 		model = LITDeepBoosting.load_from_checkpoint("checkpoints/last.ckpt")

@@ -14,6 +14,7 @@ breakpoint = debugger.set_trace
 from spad_dataset import SpadDataset
 from model_ddfn_64_B10_CGNL_ori import LITDeepBoosting
 from model_depth2depth import LITDeepBoostingDepth2Depth
+from model_compressive_ddfn_64_B10_CGNL_ori import LITDeepBoostingCompressive, LITDeepBoostingCompressiveWithBias
 
 
 # A logger for this file (not for the pytorch logger)
@@ -86,6 +87,20 @@ def train(cfg):
 						init_lr = cfg.params.lri,
 						lr_decay_gamma = cfg.params.lr_decay_gamma,
 						p_tv = cfg.params.p_tv
+						)
+	elif(cfg.params.model_name == 'Compressive_DDFN_C64B10_NL'):
+		lit_model = LITDeepBoostingCompressive(
+						init_lr = cfg.params.lri,
+						lr_decay_gamma = cfg.params.lr_decay_gamma,
+						p_tv = cfg.params.p_tv,
+						k = 16
+						)
+	elif(cfg.params.model_name == 'CompressiveWithBias_DDFN_C64B10_NL'):
+		lit_model = LITDeepBoostingCompressiveWithBias(
+						init_lr = cfg.params.lri,
+						lr_decay_gamma = cfg.params.lr_decay_gamma,
+						p_tv = cfg.params.p_tv,
+						k = 16
 						)
 	else:
 		assert(False), "Incorrect model_name"
