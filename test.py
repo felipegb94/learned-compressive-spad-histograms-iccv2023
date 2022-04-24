@@ -13,6 +13,8 @@ breakpoint = debugger.set_trace
 #### Local imports
 from spad_dataset import SpadDataset
 from model_ddfn_64_B10_CGNL_ori import LITDeepBoosting
+from model_depth2depth import LITDeepBoostingDepth2Depth
+from model_compressive_ddfn_64_B10_CGNL_ori import LITDeepBoostingCompressive, LITDeepBoostingCompressiveWithBias
 
 
 # A logger for this file (not for the pytorch logger)
@@ -52,12 +54,24 @@ def test(cfg):
 	if(cfg.ckpt_id):
 		logger.info("Loading {} ckpt".format(cfg.ckpt_id))
 		if('.ckpt' in cfg.ckpt_id):
-			model = LITDeepBoosting.load_from_checkpoint("checkpoints/"+cfg.ckpt_id)
+			ckpt_id = cfg.ckpt_id
 		else:
-			model = LITDeepBoosting.load_from_checkpoint("checkpoints/"+cfg.ckpt_id+'.ckpt')
+			ckpt_id = cfg.ckpt_id + '.ckpt'
 	else:
 		logger.info("Loading last.ckpt because no ckpt was given")
-		model = LITDeepBoosting.load_from_checkpoint("checkpoints/last.ckpt")
+		ckpt_id = 'last.ckpt'
+
+	logger.info("Loading {} model".format(cfg.model_name))
+	if(cfg.model_name == 'Depth2Depth'):
+		model = LITDeepBoostingDepth2Depth.load_from_checkpoint("checkpoints/"+ckpt_id)
+	elif(cfg.model_name == 'Compressive_DDFN_C64B10_NL'):
+		model = LITDeepBoostingCompressive.load_from_checkpoint("checkpoints/"+ckpt_id)
+	elif(cfg.model_name == 'CompressiveWithBias_DDFN_C64B10_NL'):
+		model = LITDeepBoostingCompressiveWithBias.load_from_checkpoint("checkpoints/"+ckpt_id)
+	elif(cfg.model_name == 'DDFN_C64B10_NL'):
+		model = LITDeepBoosting.load_from_checkpoint("checkpoints/"+ckpt_id)
+	else:
+		assert(False), "Invalid model_name"
 
 	if(cfg.params.cuda):
 		trainer = pl.Trainer(accelerator="gpu", devices=1, logger=tb_logger) # 

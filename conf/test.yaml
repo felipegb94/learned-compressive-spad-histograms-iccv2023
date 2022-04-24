@@ -3,7 +3,7 @@ hydra:
     # Configure output dir of each experiment programmatically from the arguments
     # Example "outputs/mnist/classifier/baseline/2021-03-10-141516"
     # dir: outputs/${data.name}/${model.name}/${experiment}/${now:%Y-%m-%d_%H%M%S}
-    # dir: outputs/${dataset.name}/${params.model_name}/${experiment}/${experiment_id}
+    # dir: outputs/${dataset.name}/${.model_name}/${experiment}/${experiment_id}
     dir: ${model_dirpath}
 
 defaults:
@@ -15,23 +15,32 @@ defaults:
   - override hydra/job_logging: colorlog
 
 ## Peng et al., 2020 --> Full trained model NO gradient decay
-# model_dirpath: outputs/DDFN_C64B10_NL/debug_nyuv2/2022-04-19_205134
+# model_dirpath: outputs/${.model_name}/debug_nyuv2/2022-04-19_205134
+
 ## Peng et al., 2020 --> Full trained model with gradient decay
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/DDFN_C64B10_NL/debug/2022-04-20_185832
-## Depth2Depth Model --> Full trained model with gradient decay
-model_dirpath: outputs/nyuv2_64x64x1024_80ps/Depth2Depth/debug/2022-04-22_134732
-## slightly trained
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/DDFN_C64B10_NL/debug/2022-04-21_104630
+model_name: DDFN_C64B10_NL
+model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.model_name}/debug/2022-04-20_185832
+ckpt_id: epoch=05-step=19910-avgvalrmse=0.0281
+
+# ## Depth2Depth Model --> Full trained model with gradient decay
+# model_name: Depth2Depth
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.model_name}/debug/2022-04-22_134732
+# ckpt_id: epoch=05-step=19045-avgvalrmse=0.0363
+
+# ## Compressive --> Full trained model with gradient decay
+# model_name: Compressive_DDFN_C64B10_NL
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.model_name}/debug/2022-04-23_132059
+# ckpt_id: epoch=06-step=23373-avgvalrmse=0.0320
 
 # ckpt_id: epoch=04-step=400-avgvalrmse=0.0700
 # ckpt_id: null
-ckpt_id: epoch=05-step=19045-avgvalrmse=0.0363
+## Compressive
 
 params:
   gpu_num: 1
   cuda: true
   batch_size: 1
-  # model_name: Depth2Depth
+  # model_name: DDFN_C64B10_NL
   noise_idx: null
   test_datalist_fpath: ${io_dirpaths.datalists_dirpath}/${dataset.test_datalist_fname}
 
