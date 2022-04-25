@@ -24,7 +24,7 @@ experiment: debug
 
 params:
   gpu_num: 1
-  cuda: true
+  cuda: false
   batch_size: 4
   workers: 4
   epoch: 8
@@ -36,7 +36,8 @@ params:
   # model_name: DDFN_C64B10_NL
   # model_name: Depth2Depth
   # model_name: Compressive_DDFN_C64B10_NL
-  model_name: CompressiveWithBias_DDFN_C64B10_NL
+  # model_name: CompressiveWithBias_DDFN_C64B10_NL
+  model_name: CSPH1D_DDFN_C64B10_NL
   train_datalist_fpath: ${io_dirpaths.datalists_dirpath}/${dataset.train_datalist_fname}
   val_datalist_fpath: ${io_dirpaths.datalists_dirpath}/${dataset.val_datalist_fname}
   # save_every: 420

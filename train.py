@@ -15,6 +15,7 @@ from spad_dataset import SpadDataset
 from model_ddfn_64_B10_CGNL_ori import LITDeepBoosting
 from model_depth2depth import LITDeepBoostingDepth2Depth
 from model_compressive_ddfn_64_B10_CGNL_ori import LITDeepBoostingCompressive, LITDeepBoostingCompressiveWithBias
+from model_CSPH1D_ddfn_64_B10_CGNL_ori import LITDeepBoostingCSPH1D
 
 
 # A logger for this file (not for the pytorch logger)
@@ -102,6 +103,13 @@ def train(cfg):
 						p_tv = cfg.params.p_tv,
 						k = 16
 						)
+	elif(cfg.params.model_name == 'CSPH1D_DDFN_C64B10_NL'):
+		lit_model = LITDeepBoostingCSPH1D(
+						init_lr = cfg.params.lri,
+						lr_decay_gamma = cfg.params.lr_decay_gamma,
+						p_tv = cfg.params.p_tv,
+						k = 16, num_bins = 1024
+						)
 	else:
 		assert(False), "Incorrect model_name"
 	# 
@@ -117,7 +125,7 @@ def train(cfg):
 			log_every_n_steps=10, val_check_interval=0.25) # 
 	else:
 		trainer = pl.Trainer(
-			limit_train_batches=2, limit_val_batches=3, max_epochs=3, log_every_n_steps=1, 
+			limit_train_batches=15, limit_val_batches=3, max_epochs=3, log_every_n_steps=1, 
 			logger=tb_logger, callbacks=callbacks) # Runs single batch
 		# trainer = pl.Trainer(max_epochs=cfg.params.epoch, 
 		# 	logger=tb_logger, callbacks=callbacks, 
