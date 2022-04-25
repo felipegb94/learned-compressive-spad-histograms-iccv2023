@@ -3,6 +3,7 @@ import os
 
 #### Library imports
 import numpy as np
+import scipy.linalg
 import torch
 import torch.nn as nn
 import torch.nn.init as init
@@ -22,12 +23,19 @@ def zero_norm(v, dim=-1):
 	return zn_v
 
 class CSPH1DLayer(nn.Module):
-	def __init__(self, k=2, num_bins=1024):
+	def __init__(self, k=2, num_bins=1024, init='dft'):
 		# Init parent class
 		super(CSPH1DLayer, self).__init__()
-		
-		self.Cmat = torch.nn.Parameter(torch.randn(num_bins, k).type(torch.float32))
 
+		Cmat_init = np.zeros((num_bins, k))
+		if(init == 'dft'):
+			dft_mat = scipy.linalg.dft(n=num_bins)[1:,:] # Skip first harmonic
+			for i in range(k):
+				if(i % 2 == 0): Cmat_init[:,i] = dft_mat[i//2, :].real
+				else: Cmat_init[:,i] = dft_mat[i//2, :].imag
+		else:
+			Cmat_init = torch.randn(num_bins, k)
+		self.Cmat = torch.nn.Parameter(torch.tensor(Cmat_init).type(torch.float32))
 
 	def forward(self, inputs):
 		## Move time dim to last dimension

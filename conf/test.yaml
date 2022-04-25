@@ -17,10 +17,10 @@ defaults:
 ## Peng et al., 2020 --> Full trained model NO gradient decay
 # model_dirpath: outputs/${.model_name}/debug_nyuv2/2022-04-19_205134
 
-## Peng et al., 2020 --> Full trained model with gradient decay
-model_name: DDFN_C64B10_NL
-model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.model_name}/debug/2022-04-20_185832
-ckpt_id: epoch=05-step=19910-avgvalrmse=0.0281
+# ## Peng et al., 2020 --> Full trained model with gradient decay
+# model_name: DDFN_C64B10_NL
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.model_name}/debug/2022-04-20_185832
+# ckpt_id: epoch=05-step=19910-avgvalrmse=0.0281
 
 # ## Depth2Depth Model --> Full trained model with gradient decay
 # model_name: Depth2Depth
@@ -31,6 +31,12 @@ ckpt_id: epoch=05-step=19910-avgvalrmse=0.0281
 # model_name: Compressive_DDFN_C64B10_NL
 # model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.model_name}/debug/2022-04-23_132059
 # ckpt_id: epoch=06-step=23373-avgvalrmse=0.0320
+
+## CompressiveWithBias --> Full trained model with gradient decay
+model_name: CompressiveWithBias_DDFN_C64B10_NL
+model_dirpath: outputs/nyuv2_64x64x1024_80ps/CompressiveWithBias_DDFN_C64B10_NL/debug/2022-04-24_142932
+ckpt_id: epoch=05-step=18180-avgvalrmse=0.0323
+
 
 # ckpt_id: epoch=04-step=400-avgvalrmse=0.0700
 # ckpt_id: null

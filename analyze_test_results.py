@@ -2,6 +2,8 @@
 import os
 
 #### Library imports
+from hydra import compose, initialize
+from omegaconf import OmegaConf
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import io
@@ -10,9 +12,10 @@ breakpoint = debugger.set_trace
 
 #### Local imports
 from tof_utils import *
+from research_utils import plot_utils
 
 def denorm_bins(bins, num_bins):
-    return bins*(num_bins-1)
+    return bins*(num_bins)
 
 def compute_rmse(gt, est):
     rmse = np.sqrt(np.mean((gt - est)**2))
@@ -29,13 +32,17 @@ def compute_error_metrics(gt, est):
 
 if __name__=='__main__':
 
+    out_dirpath = './results/week_2022-04-18/test_results'
+
     ## Scene ID and Params
     scene_id = 'spad_Art'
-    sbr_params = '2_2'
+    sbr_params = '2_50'
     scene_fname = '{}_{}'.format(scene_id, sbr_params)
 
+
     ## Set dirpaths
-    compressive_model_result_dirpath = 'outputs/nyuv2_64x64x1024_80ps/Compressive_DDFN_C64B10_NL/debug/2022-04-23_132059/test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
+    # compressive_model_result_dirpath = 'outputs/nyuv2_64x64x1024_80ps/Compressive_DDFN_C64B10_NL/debug/2022-04-23_132059/test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
+    compressive_model_result_dirpath = 'outputs/nyuv2_64x64x1024_80ps/CompressiveWithBias_DDFN_C64B10_NL/debug/2022-04-24_142932/test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
     deepboosting_model_result_dirpath = 'outputs/nyuv2_64x64x1024_80ps/DDFN_C64B10_NL/debug/2022-04-20_185832/test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
     depth2depth_model_result_dirpath = 'outputs/nyuv2_64x64x1024_80ps/Depth2Depth/debug/2022-04-22_134732/test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
     gt_data_dirpath = 'data_gener/TestData/middlebury/processed/SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
@@ -88,7 +95,7 @@ if __name__=='__main__':
     max_depth = gt_depths.flatten().max()
 
     min_err = 0
-    max_err = 0.1
+    max_err = 0.08
 
     plt.clf()
     plt.suptitle("{} - SBR: {}, Signal: {} photons, Bkg: {} photons".format(scene_fname, SBR, mean_signal_photons, mean_background_photons), fontsize=20)
@@ -105,40 +112,45 @@ if __name__=='__main__':
     plt.title('argmax_depths \n rmse: {:.4f}'.format(argmax_rmse),fontsize=14)
     plt.colorbar()
     plt.subplot(2,3,4)
-    plt.imshow(compressive_model_depths, vmin=min_depth, vmax=max_depth); 
+    plt.imshow(deepboosting_model_depths, vmin=min_depth, vmax=max_depth); 
     plt.title('deepboosting_model_depths \n rmse: {:.4f}'.format(deepboosting_model_rmse),fontsize=14)
     plt.colorbar()
     plt.subplot(2,3,5)
-    plt.imshow(deepboosting_model_depths, vmin=min_depth, vmax=max_depth); 
+    plt.imshow(compressive_model_depths, vmin=min_depth, vmax=max_depth); 
     plt.title('compressive_model_depths \n rmse: {:.4f}'.format(compressive_model_rmse),fontsize=14)
     plt.colorbar()
     plt.subplot(2,3,6)
     plt.imshow(depth2depth_model_depths, vmin=min_depth, vmax=max_depth); 
     plt.title('depth2depth_model_depths \n rmse: {:.4f}'.format(depth2depth_model_rmse),fontsize=14)
     plt.colorbar()
+    out_fname = 'depths_' + scene_fname
+    plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname)
 
     # plt.clf()
+    # plt.suptitle("{} - SBR: {}, Signal: {} photons, Bkg: {} photons".format(scene_fname, SBR, mean_signal_photons, mean_background_photons), fontsize=20)
     # plt.subplot(2,3,1)
     # plt.imshow(gt_abs_errs, vmin=min_err, vmax=max_err); 
-    # plt.title('gt_abs_errs \n rmse: {:.4f}'.format(gt_rmse))
+    # plt.title('gt_abs_errs \n rmse: {:.4f}'.format(gt_rmse),fontsize=14)
     # plt.colorbar()
     # plt.subplot(2,3,2)
     # plt.imshow(lmf_abs_errs, vmin=min_err, vmax=max_err); 
-    # plt.title('lmf_abs_errs \n rmse: {:.4f}'.format(lmf_rmse))
+    # plt.title('lmf_abs_errs \n rmse: {:.4f}'.format(lmf_rmse),fontsize=14)
     # plt.colorbar()
     # plt.subplot(2,3,3)
     # plt.imshow(argmax_abs_errs, vmin=min_err, vmax=max_err); 
-    # plt.title('argmax_abs_errs \n rmse: {:.4f}'.format(argmax_rmse))
+    # plt.title('argmax_abs_errs \n rmse: {:.4f}'.format(argmax_rmse),fontsize=14)
     # plt.colorbar()
     # plt.subplot(2,3,4)
-    # plt.imshow(compressive_model_abs_errs, vmin=min_err, vmax=max_err); 
-    # plt.title('deepboosting_model_abs_errs \n rmse: {:.4f}'.format(deepboosting_model_rmse))
+    # plt.imshow(deepboosting_model_abs_errs, vmin=min_err, vmax=max_err); 
+    # plt.title('deepboosting_model_abs_errs \n rmse: {:.4f}'.format(deepboosting_model_rmse),fontsize=14)
     # plt.colorbar()
     # plt.subplot(2,3,5)
-    # plt.imshow(deepboosting_model_abs_errs, vmin=min_err, vmax=max_err); 
-    # plt.title('compressive_model_abs_errs \n rmse: {:.4f}'.format(compressive_model_rmse))
+    # plt.imshow(compressive_model_abs_errs, vmin=min_err, vmax=max_err); 
+    # plt.title('compressive_model_abs_errs \n rmse: {:.4f}'.format(compressive_model_rmse),fontsize=14)
     # plt.colorbar()
     # plt.subplot(2,3,6)
     # plt.imshow(depth2depth_model_abs_errs, vmin=min_err, vmax=max_err); 
-    # plt.title('depth2depth_model_abs_errs \n rmse: {:.4f}'.format(depth2depth_model_rmse))
+    # plt.title('depth2depth_model_abs_errs \n rmse: {:.4f}'.format(depth2depth_model_rmse),fontsize=14)
     # plt.colorbar()
+    # out_fname = 'errors_' + scene_fname
+    # plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname)
