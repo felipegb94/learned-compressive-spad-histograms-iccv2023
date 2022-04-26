@@ -10,8 +10,8 @@ breakpoint = debugger.set_trace
 
 #### Local imports
 from model_ddfn_64_B10_CGNL_ori import LITDeepBoosting, LITPlainDeepBoosting
-from model_compressive_ddfn_64_B10_CGNL_ori import LITDeepBoostingCompressive
-from model_depth2depth_ddfn_64_B10_CGNL_ori import LITDeepBoostingDepth2Depth
+from model_ddfn_64_B10_CGNL_ori_depth2depth import LITDeepBoostingDepth2Depth
+from model_ddfn_64_B10_CGNL_ori_compressive import LITDeepBoostingCompressive
 
 
 def init_model_from_id(cfg):
