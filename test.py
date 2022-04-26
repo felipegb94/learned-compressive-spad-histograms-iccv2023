@@ -13,7 +13,7 @@ breakpoint = debugger.set_trace
 #### Local imports
 from spad_dataset import SpadDataset
 from model_ddfn_64_B10_CGNL_ori import LITDeepBoosting
-from model_depth2depth import LITDeepBoostingDepth2Depth
+from model_depth2depth_ddfn_64_B10_CGNL_ori import LITDeepBoostingDepth2Depth
 from model_compressive_ddfn_64_B10_CGNL_ori import LITDeepBoostingCompressive, LITDeepBoostingCompressiveWithBias
 
 
@@ -62,7 +62,7 @@ def test(cfg):
 		ckpt_id = 'last.ckpt'
 
 	logger.info("Loading {} model".format(cfg.model_name))
-	if(cfg.model_name == 'Depth2Depth'):
+	if(cfg.model_name == 'Depth2Depth_DDFN_C64B10_NL'):
 		model = LITDeepBoostingDepth2Depth.load_from_checkpoint("checkpoints/"+ckpt_id)
 	elif(cfg.model_name == 'Compressive_DDFN_C64B10_NL'):
 		model = LITDeepBoostingCompressive.load_from_checkpoint("checkpoints/"+ckpt_id)

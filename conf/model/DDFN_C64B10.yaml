@@ -1,0 +1,8 @@
+# Plain Deep Boosting Model from Peng et al., 2020
+
+# Model ID is used to select the correct model objcet
+model_id: DDFN_C64B10
+model_params:
+  in_channels: 1
+# Model name is used for saving results
+model_name: ${.model_id}

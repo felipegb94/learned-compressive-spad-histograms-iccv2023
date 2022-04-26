@@ -18,15 +18,16 @@ class LITDeepBoostingCompressive(LITDeepBoosting):
 		lr_decay_gamma = 0.9,
 		in_channels=1,
 		k=16):
+		assert(k > 1), "k needs to be > 1"
 		# Init parent class
 		super(LITDeepBoostingCompressive, self).__init__(init_lr=init_lr,p_tv=p_tv,lr_decay_gamma=lr_decay_gamma,in_channels=in_channels)
-		
-		self.compressive_layer = Compressive3DLayer(k = 16)
+		self.k = k
+		self.compressive_layer = Compressive3DLayer(k = k)
 
 	def forward(self, x):
 		compressive_out = self.compressive_layer(x)
 		# use forward for inference/predictions
-		out = self.deep_boosting_model(compressive_out)
+		out = self.backbone_net(compressive_out)
 		return out
 
 class LITDeepBoostingCompressiveWithBias(LITDeepBoosting):
@@ -36,15 +37,16 @@ class LITDeepBoostingCompressiveWithBias(LITDeepBoosting):
 		lr_decay_gamma = 0.9,
 		in_channels=1,
 		k=16):
+		assert(k > 1), "k needs to be > 1"
 		# Init parent class
 		super(LITDeepBoostingCompressiveWithBias, self).__init__(init_lr=init_lr,p_tv=p_tv,lr_decay_gamma=lr_decay_gamma,in_channels=in_channels)
-		
-		self.compressive_layer = Compressive3DLayerWithBias(k = 16)
+		self.k = k
+		self.compressive_layer = Compressive3DLayerWithBias(k = k)
 
 	def forward(self, x):
 		compressive_out = self.compressive_layer(x)
 		# use forward for inference/predictions
-		out = self.deep_boosting_model(compressive_out)
+		out = self.backbone_net(compressive_out)
 		return out
 
 

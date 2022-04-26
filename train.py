@@ -12,10 +12,7 @@ breakpoint = debugger.set_trace
 
 #### Local imports
 from spad_dataset import SpadDataset
-from model_ddfn_64_B10_CGNL_ori import LITDeepBoosting
-from model_depth2depth import LITDeepBoostingDepth2Depth
-from model_compressive_ddfn_64_B10_CGNL_ori import LITDeepBoostingCompressive, LITDeepBoostingCompressiveWithBias
-from model_CSPH1D_ddfn_64_B10_CGNL_ori import LITDeepBoostingCSPH1D
+from model_utils import init_model_from_id
 
 
 # A logger for this file (not for the pytorch logger)
@@ -76,53 +73,20 @@ def train(cfg):
 	
 	callbacks = [ ckpt_callback, lr_monitor_callback ] 
 
-	logger.info("Initializing {} model".format(cfg.params.model_name))
-	if(cfg.params.model_name == 'Depth2Depth'):
-		lit_model = LITDeepBoostingDepth2Depth(
-						init_lr = cfg.params.lri,
-						lr_decay_gamma = cfg.params.lr_decay_gamma,
-						p_tv = cfg.params.p_tv
-						)
-	elif(cfg.params.model_name == 'DDFN_C64B10_NL'):
-		lit_model = LITDeepBoosting(
-						init_lr = cfg.params.lri,
-						lr_decay_gamma = cfg.params.lr_decay_gamma,
-						p_tv = cfg.params.p_tv
-						)
-	elif(cfg.params.model_name == 'Compressive_DDFN_C64B10_NL'):
-		lit_model = LITDeepBoostingCompressive(
-						init_lr = cfg.params.lri,
-						lr_decay_gamma = cfg.params.lr_decay_gamma,
-						p_tv = cfg.params.p_tv,
-						k = 16
-						)
-	elif(cfg.params.model_name == 'CompressiveWithBias_DDFN_C64B10_NL'):
-		lit_model = LITDeepBoostingCompressiveWithBias(
-						init_lr = cfg.params.lri,
-						lr_decay_gamma = cfg.params.lr_decay_gamma,
-						p_tv = cfg.params.p_tv,
-						k = 16
-						)
-	elif(cfg.params.model_name == 'CSPH1D_DDFN_C64B10_NL'):
-		lit_model = LITDeepBoostingCSPH1D(
-						init_lr = cfg.params.lri,
-						lr_decay_gamma = cfg.params.lr_decay_gamma,
-						p_tv = cfg.params.p_tv,
-						k = 16, num_bins = 1024
-						)
-	else:
-		assert(False), "Incorrect model_name"
+	logger.info("Initializing {} model".format(cfg.model.model_name))
+	lit_model = init_model_from_id(cfg)
+	
 	# 
 	# trainer = pl.Trainer(fast_dev_run=True ) # Runs single batch
 	if(cfg.params.cuda):
-		# trainer = pl.Trainer(accelerator="gpu", devices=1, 
-		# 	limit_train_batches=20, limit_val_batches=10, max_epochs=3, 
-		# 	logger=tb_logger, callbacks=callbacks,
-		# 	log_every_n_steps=1, val_check_interval=0.5
-		#  	) # Runs single batch
-		trainer = pl.Trainer(accelerator="gpu", devices=1, max_epochs=cfg.params.epoch, 
-			logger=tb_logger, callbacks=callbacks, 
-			log_every_n_steps=10, val_check_interval=0.25) # 
+		trainer = pl.Trainer(accelerator="gpu", devices=1, 
+			limit_train_batches=30, limit_val_batches=10, max_epochs=3, 
+			logger=tb_logger, callbacks=callbacks,
+			log_every_n_steps=1, val_check_interval=0.5
+		 	) # Runs single batch
+		# trainer = pl.Trainer(accelerator="gpu", devices=1, max_epochs=cfg.params.epoch, 
+		# 	logger=tb_logger, callbacks=callbacks, 
+		# 	log_every_n_steps=10, val_check_interval=0.25) # 
 	else:
 		trainer = pl.Trainer(
 			limit_train_batches=15, limit_val_batches=3, max_epochs=3, log_every_n_steps=1, 
