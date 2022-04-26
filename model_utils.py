@@ -14,6 +14,9 @@ from model_ddfn_64_B10_CGNL_ori_depth2depth import LITDeepBoostingDepth2Depth
 from model_ddfn_64_B10_CGNL_ori_compressive import LITDeepBoostingCompressive
 
 
+def count_parameters(model):
+	return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
 def init_model_from_id(cfg):
 	if(cfg.model.model_id == 'DDFN_C64B10_NL'):
 		lit_model = LITDeepBoosting(

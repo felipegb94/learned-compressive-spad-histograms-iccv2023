@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 @hydra.main(config_path="./conf", config_name="train")
 def train(cfg):
 	if('debug' in cfg.experiment):
-		pl.seed_everything(1234)
+		pl.seed_everything(cfg.random_seed)
 		logger.info("Running debug experiment mode. Fixed Random Seed")
 	else:
 		logger.info("Running {} experiment mode".format(cfg.experiment))
@@ -79,21 +79,21 @@ def train(cfg):
 	# 
 	# trainer = pl.Trainer(fast_dev_run=True ) # Runs single batch
 	if(cfg.params.cuda):
-		trainer = pl.Trainer(accelerator="gpu", devices=1, 
-			limit_train_batches=30, limit_val_batches=10, max_epochs=3, 
-			logger=tb_logger, callbacks=callbacks,
-			log_every_n_steps=1, val_check_interval=0.5
-		 	) # Runs single batch
-		# trainer = pl.Trainer(accelerator="gpu", devices=1, max_epochs=cfg.params.epoch, 
-		# 	logger=tb_logger, callbacks=callbacks, 
-		# 	log_every_n_steps=10, val_check_interval=0.25) # 
+		# trainer = pl.Trainer(accelerator="gpu", devices=1, 
+		# 	limit_train_batches=30, limit_val_batches=10, max_epochs=3, 
+		# 	logger=tb_logger, callbacks=callbacks,
+		# 	log_every_n_steps=1, val_check_interval=0.5
+		#  	) # Runs single batch
+		trainer = pl.Trainer(accelerator="gpu", devices=1, max_epochs=cfg.params.epoch, 
+			logger=tb_logger, callbacks=callbacks, 
+			log_every_n_steps=10, val_check_interval=0.25) # 
 	else:
-		trainer = pl.Trainer(
-			limit_train_batches=15, limit_val_batches=3, max_epochs=3, log_every_n_steps=1, 
-			logger=tb_logger, callbacks=callbacks) # Runs single batch
-		# trainer = pl.Trainer(max_epochs=cfg.params.epoch, 
-		# 	logger=tb_logger, callbacks=callbacks, 
-		# 	log_every_n_steps=10, val_check_interval=0.25) # 
+		# trainer = pl.Trainer(
+		# 	limit_train_batches=15, limit_val_batches=3, max_epochs=3, log_every_n_steps=1, 
+		# 	logger=tb_logger, callbacks=callbacks) # Runs single batch
+		trainer = pl.Trainer(max_epochs=cfg.params.epoch, 
+			logger=tb_logger, callbacks=callbacks, 
+			log_every_n_steps=10, val_check_interval=0.25) # 
 
 	trainer.fit(lit_model, train_dataloaders=train_loader, val_dataloaders=val_loader)
 

@@ -276,3 +276,27 @@ class LITPlainDeepBoosting(LITBaseSPADModel):
 		
 		# Overwrite example input array
 		self.example_input_array = torch.randn([1, 1, 1024, 32, 32])
+
+if __name__=='__main__':
+	import matplotlib.pyplot as plt
+	from model_utils import count_parameters
+	# Set random input
+	batch_size = 2
+	(nr, nc, nt) = (64, 64, 1024) 
+	inputs = torch.randn((batch_size, 1, nt, nr, nc))
+
+	# Set compression params
+
+	model = LITDeepBoosting()
+	print("{} Parameters: {}".format(model.__class__.__name__, count_parameters(model)))
+	outputs = model(inputs)
+	print("		inputs shape: {}".format(inputs.shape))
+	print("		outputs1 shape: {}".format(outputs[0].shape))
+	print("		outputs2 shape: {}".format(outputs[1].shape))
+
+	model = LITPlainDeepBoosting()
+	print("{} Parameters: {}".format(model.__class__.__name__, count_parameters(model)))
+	outputs = model(inputs)
+	print("		inputs shape: {}".format(inputs.shape))
+	print("		outputs1 shape: {}".format(outputs[0].shape))
+	print("		outputs2 shape: {}".format(outputs[1].shape))

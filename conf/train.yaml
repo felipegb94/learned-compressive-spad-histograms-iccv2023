@@ -14,17 +14,20 @@ original_work_dir: ${hydra:runtime.cwd}
 defaults:
   - _self_
   - io_dirpaths
-  - dataset: nyuv2_min
+  - dataset: nyuv2
   # - model: DDFN_C64B10_NL
   # - model: DDFN_C64B10_NL_Depth2Depth
-  - model: DDFN_C64B10_NL_Compressive
-  # - model: DDFN_C64B10
+  # - model: DDFN_C64B10_NL_Compressive
+  - model: DDFN_C64B10
   # enable color logging
   - override hydra/hydra_logging: colorlog
   - override hydra/job_logging: colorlog
 
 # Global configurations shared between different modules
 experiment: debug
+
+# Random seed to use
+random_seed: 1234
 
 params:
   gpu_num: 1
@@ -37,15 +40,11 @@ params:
   p_tv: 1.0e-5
   noise_idx: 1
   crop_patch_size: 32
-  # model_name: DDFN_C64B10_NL
-  # model_name: Depth2Depth_DDFN_C64B10_NL
-  # model_name: Compressive_DDFN_C64B10_NL
-  # model_name: CSPH1D_DDFN_C64B10_NL
   train_datalist_fpath: ${io_dirpaths.datalists_dirpath}/${dataset.train_datalist_fname}
   val_datalist_fpath: ${io_dirpaths.datalists_dirpath}/${dataset.val_datalist_fname}
-  # save_every: 420
-  # optimizer: Adam
 
+  # optimizer: Adam
+  # save_every: 420
 # resume_params:
 #   resume: False
 #   ckpt_rel_fpath: "2022-04-19_205134/checkpoints/epoch=05-step=20778-avgvalrmse=0.0291.ckpt"

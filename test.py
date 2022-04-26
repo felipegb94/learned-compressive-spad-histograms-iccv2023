@@ -12,10 +12,11 @@ breakpoint = debugger.set_trace
 
 #### Local imports
 from spad_dataset import SpadDataset
-from model_ddfn_64_B10_CGNL_ori import LITDeepBoosting
+from model_ddfn_64_B10_CGNL_ori import LITDeepBoosting, LITPlainDeepBoosting
+from model_ddfn_64_B10_CGNL_ori_old import LITDeepBoostingOriginal
 from model_ddfn_64_B10_CGNL_ori_depth2depth import LITDeepBoostingDepth2Depth
 from model_ddfn_64_B10_CGNL_ori_compressive import LITDeepBoostingCompressive, LITDeepBoostingCompressiveWithBias
-
+from model_utils import count_parameters
 
 # A logger for this file (not for the pytorch logger)
 logger = logging.getLogger(__name__)
@@ -50,6 +51,10 @@ def test(cfg):
 	# tensorboard = pl.loggers.TensorBoardLogger(save_dir=".", name="", version="", log_graph=True, default_hp_metric=False)
 	tb_logger = pl.loggers.TensorBoardLogger(save_dir=".", name="", version="", log_graph=True, default_hp_metric=False)
 	
+	## Callbacks
+	model_summary_callback = pl.callbacks.ModelSummary(max_depth=1)
+	callbacks = [ model_summary_callback ] 
+
 	# uses in_dim=32, out_dim=10
 	if(cfg.ckpt_id):
 		logger.info("Loading {} ckpt".format(cfg.ckpt_id))
@@ -62,23 +67,28 @@ def test(cfg):
 		ckpt_id = 'last.ckpt'
 
 	logger.info("Loading {} model".format(cfg.model_name))
-	if(cfg.model_name == 'Depth2Depth_DDFN_C64B10_NL'):
+	if(cfg.model_name == 'DDFN_C64B10_NL_Depth2Depth'):
 		model = LITDeepBoostingDepth2Depth.load_from_checkpoint("checkpoints/"+ckpt_id)
-	elif(cfg.model_name == 'Compressive_DDFN_C64B10_NL'):
+	elif(cfg.model_name == 'DDFN_C64B10_NL_Compressive'):
 		model = LITDeepBoostingCompressive.load_from_checkpoint("checkpoints/"+ckpt_id)
-	elif(cfg.model_name == 'CompressiveWithBias_DDFN_C64B10_NL'):
+	elif(cfg.model_name == 'DDFN_C64B10_NL_CompressiveWithBias'):
 		model = LITDeepBoostingCompressiveWithBias.load_from_checkpoint("checkpoints/"+ckpt_id)
-	elif(cfg.model_name == 'DDFN_C64B10_NL'):
-		model = LITDeepBoosting.load_from_checkpoint("checkpoints/"+ckpt_id)
+	elif(cfg.model_name == 'DDFN_C64B10_NL_original'):
+		model = LITDeepBoostingOriginal.load_from_checkpoint("checkpoints/"+ckpt_id)
+	elif(cfg.model_name == 'DDFN_C64B10'):
+		model = LITPlainDeepBoosting.load_from_checkpoint("checkpoints/"+ckpt_id)
 	else:
 		assert(False), "Invalid model_name"
 
 	if(cfg.params.cuda):
-		trainer = pl.Trainer(accelerator="gpu", devices=1, logger=tb_logger) # 
+		trainer = pl.Trainer(accelerator="gpu", devices=1, logger=tb_logger, callbacks=callbacks) # 
 	else:
-		trainer = pl.Trainer(logger=tb_logger) # 
+		trainer = pl.Trainer(logger=tb_logger, callbacks=callbacks) # 
+
+	logger.info("Number of Model Params: {}".format(count_parameters(model)))
 
 	trainer.test(model, dataloaders=test_loader)
+
 
 
 if __name__=='__main__':

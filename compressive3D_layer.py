@@ -15,8 +15,6 @@ breakpoint = debugger.set_trace
 
 #### Local imports
 
-
-	
 class Compressive3DLayer(nn.Module):
 	def __init__(self, k=2):
 		# Init parent class
