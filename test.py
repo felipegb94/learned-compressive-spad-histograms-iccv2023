@@ -52,8 +52,7 @@ def test(cfg):
 	tb_logger = pl.loggers.TensorBoardLogger(save_dir=".", name="", version="", log_graph=True, default_hp_metric=False)
 	
 	## Callbacks
-	model_summary_callback = pl.callbacks.ModelSummary(max_depth=1)
-	callbacks = [ model_summary_callback ] 
+	callbacks = [ ] 
 
 	# uses in_dim=32, out_dim=10
 	if(cfg.ckpt_id):

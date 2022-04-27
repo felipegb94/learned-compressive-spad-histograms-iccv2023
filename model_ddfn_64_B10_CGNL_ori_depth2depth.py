@@ -19,5 +19,5 @@ class LITDeepBoostingDepth2Depth(LITDeepBoosting):
 		super(LITDeepBoostingDepth2Depth, self).__init__(init_lr=init_lr,p_tv=p_tv,lr_decay_gamma=lr_decay_gamma,in_channels=in_channels)
 		
 	def get_input_data(self, sample):
-		return sample["est_bins_argmax"]
+		return sample["est_bins_argmax_hist"]
 	

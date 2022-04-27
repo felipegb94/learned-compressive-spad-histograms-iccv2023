@@ -1,7 +1,7 @@
 io_dirpaths:
   datalists_dirpath: ${hydra:runtime.cwd}/./datalists
-  nyuv2_train_list_fname: nyuv2_train_min.txt
-  nyuv2_val_list_fname: nyuv2_val_min.txt
+  nyuv2_train_list_fname: nyuv2_train.txt
+  nyuv2_val_list_fname: nyuv2_val.txt
   nyuv2_raw_dataset_dirpath: ${hydra:runtime.cwd}/./data_gener/TrainData/raw
   nyuv2_processed_dataset_dirpath: ${hydra:runtime.cwd}/./data_gener/TrainData/processed
   nyuv2_spad_dataset_dirpath: ${hydra:runtime.cwd}/./data_gener/TrainData/SimSPADDataset_nr-64_nc-64_nt-1024_tres-80ps_dark-1_psf-1

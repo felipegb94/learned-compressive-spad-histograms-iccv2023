@@ -125,11 +125,14 @@ class SpadDataset(torch.utils.data.Dataset):
 
         # # Estimated argmax depths from spad measurements
         est_bins_argmax = np.asarray(spad_data['est_range_bins_argmax'])
-        est_bins_argmax = bins2hist(est_bins_argmax-1, num_bins=n_bins).astype(np.float32)
-        est_bins_argmax = est_bins_argmax[np.newaxis,:]
-        # est_bins_argmax = est_bins_argmax[np.newaxis, np.newaxis, :] - 1 # Subtract one to matlab indeces
-        # est_bins_argmax = normalize_matlab_depth_bins(est_bins_argmax, n_bins)
+        # Generate hist from bin indeces
+        est_bins_argmax_hist = bins2hist(est_bins_argmax-1, num_bins=n_bins).astype(np.float32)
+        est_bins_argmax_hist = est_bins_argmax_hist[np.newaxis,:]
+        # Normalize the bin indeces
+        est_bins_argmax = est_bins_argmax[np.newaxis,:].astype(np.float32)
+        est_bins_argmax = normalize_matlab_depth_bins(est_bins_argmax, n_bins)
 
+        # Compute random crop if neeeded
         (h, w) = (nr, nc)
         if(self.output_size is None):
             new_h = h
@@ -150,12 +153,14 @@ class SpadDataset(torch.utils.data.Dataset):
         spad = spad[..., top:top + new_h, left: left + new_w]
         bins = bins[..., top: top + new_h, left: left + new_w]
         est_bins_argmax = est_bins_argmax[..., top: top + new_h, left: left + new_w]
+        est_bins_argmax_hist = est_bins_argmax_hist[..., top: top + new_h, left: left + new_w]
         rates = torch.from_numpy(rates)
         spad = torch.from_numpy(spad)
         bins = torch.from_numpy(bins)
         est_bins_argmax = torch.from_numpy(est_bins_argmax)
+        est_bins_argmax_hist = torch.from_numpy(est_bins_argmax_hist)
 
-        sample = {'rates': rates, 'spad': spad, 'bins': bins, 'est_bins_argmax': est_bins_argmax, 'idx': idx}
+        sample = {'rates': rates, 'spad': spad, 'bins': bins, 'est_bins_argmax': est_bins_argmax, 'est_bins_argmax_hist': est_bins_argmax_hist, 'idx': idx}
 
         return sample
 
@@ -192,12 +197,14 @@ if __name__=='__main__':
         spad = spad_sample['spad']
         rates = spad_sample['rates']
         bins = spad_sample['bins']
+        est_bins_argmax = spad_sample['est_bins_argmax']
         idx = spad_sample['idx']
         print(idx)
 
         spad = spad.cpu().detach().numpy()[0,:].squeeze()
         rates = rates.cpu().detach().numpy()[0,:].squeeze()
         bins = bins.cpu().detach().numpy()[0,:].squeeze()
+        est_bins_argmax = est_bins_argmax.cpu().detach().numpy()[0,:].squeeze()
         # idx = idx.cpu().detach().numpy().squeeze()
         # 
         print("     Rates: {}", rates.shape)        
@@ -210,7 +217,8 @@ if __name__=='__main__':
         plt.imshow(np.argmax(spad, axis=0) / spad.shape[0], vmin=bins.min(), vmax=bins.max())
         plt.subplot(2,2,3)
         plt.imshow(np.log(1+np.sum(spad, axis=0)))
-        # plt.imshow(spad.cpu().detach().numpy().squeeze()[0,:].sum(axis=0))
+        plt.subplot(2,2,4)
+        plt.imshow(est_bins_argmax, vmin=bins.min(), vmax=bins.max())
         plt.pause(0.5)
 
 

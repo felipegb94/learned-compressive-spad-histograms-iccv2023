@@ -14,9 +14,13 @@ from IPython.core import debugger
 breakpoint = debugger.set_trace
 
 #### Local imports
-from losses import criterion_L2, criterion_KL, criterion_TV
+from losses import criterion_L2, criterion_L1, criterion_KL, criterion_TV
 import tof_utils
 
+
+
+def make_zeromean_normalized_bins(bins):
+	return (2*bins) - 1
 
 class LITBaseSPADModel(pl.LightningModule):
 	def __init__(self, 
@@ -74,13 +78,17 @@ class LITBaseSPADModel(pl.LightningModule):
 		rmse = criterion_L2(dep_re, dep)
 		loss = loss_kl + self.p_tv*loss_tv
 
-		return loss, loss_kl, loss_tv, rmse
+		return {'loss': loss, 'loss_kl': loss_kl, 'loss_tv': loss_tv, 'rmse': rmse}
 
 	def training_step(self, sample, batch_idx):
 		# Forward pass
 		M_mea_re, dep_re = self.forward_wrapper(sample)
 		# Compute Losses
-		(loss, loss_kl, loss_tv, rmse) = self.compute_losses(sample, M_mea_re, dep_re)
+		losses = self.compute_losses(sample, M_mea_re, dep_re)
+		loss = losses['loss']
+		loss_kl = losses['loss_kl']
+		loss_tv = losses['loss_tv']
+		rmse = losses['rmse']
 
 		# Log to logger (i.e., tensorboard), if you want it to be displayed at progress bar, use prog_bar=True
 		self.log_dict(
@@ -99,8 +107,10 @@ class LITBaseSPADModel(pl.LightningModule):
 		# Forward pass
 		M_mea_re, dep_re = self.forward_wrapper(sample)
 		# Compute Losses
-		(val_loss, val_loss_kl, val_loss_tv, val_rmse) = self.compute_losses(sample, M_mea_re, dep_re)
-		
+		val_losses = self.compute_losses(sample, M_mea_re, dep_re)
+		val_loss = val_losses['loss']
+		val_rmse = val_losses['rmse']
+
 		# Log the losses
 		self.log("rmse/avg_val", val_rmse, prog_bar=True)
 		# Important NOTE: Newer version of lightning accumulate the val_loss for each batch and then take the mean at the end of the epoch
@@ -117,8 +127,11 @@ class LITBaseSPADModel(pl.LightningModule):
 	def test_step(self, sample, batch_idx):
 		# Forward pass
 		M_mea_re, dep_re = self.forward_wrapper(sample)
+
 		# Compute Losses
-		(test_loss, test_loss_kl, test_loss_tv, test_rmse) = self.compute_losses(sample, M_mea_re, dep_re)
+		test_losses = self.compute_losses(sample, M_mea_re, dep_re)
+		test_loss = test_losses['loss']
+		test_rmse = test_losses['rmse']
 
 		## Save some model outputs
 		# Access dataloader to get some metadata for computation
@@ -200,3 +213,61 @@ class LITBaseSPADModel(pl.LightningModule):
 		# Proper logging of hyperparams and metrics in TB
 		# self.logger.log_hyperparams(self.hparams, {"loss/train": 0, "loss/avg_val": 0, "rmse/train": 0, "rmse/avg_val": 0})
 		self.logger.log_hyperparams(self.hparams)
+
+
+class LITL1LossBaseSpadModel(LITBaseSPADModel):
+	'''
+		Same as BaseSpadModel, but we use L1 instead of KLDiv loss
+	'''
+	def __init__(self, 		
+		backbone_net,
+		init_lr = 1e-4,
+		p_tv = 1e-5, 
+		lr_decay_gamma = 0.9):
+
+		super(LITL1LossBaseSpadModel, self).__init__(
+			backbone_net=backbone_net,
+			init_lr = init_lr,
+			p_tv = p_tv, 
+			lr_decay_gamma = lr_decay_gamma )
+
+	def compute_losses(self, sample, M_mea_re, dep_re):
+		# load data and compute losses
+		M_gt = sample["rates"]
+		dep = sample["bins"]
+		# Normalize
+		M_mea_re_lsmx = self.lsmx(M_mea_re).unsqueeze(1)
+		# Compute metrics
+		loss_kl = criterion_KL(M_mea_re_lsmx, M_gt)
+		loss_tv = criterion_TV(dep_re)
+		loss_l1 = criterion_L1(dep_re, dep)
+		rmse = criterion_L2(dep_re, dep)
+		
+		## Use loss_l1 for training
+		loss = loss_l1 + self.p_tv*loss_tv
+
+		return {'loss': loss, 'loss_kl': loss_kl, 'loss_tv': loss_tv, 'loss_l1': loss_l1, 'rmse': rmse}
+
+	def training_step(self, sample, batch_idx):
+		# Forward pass
+		M_mea_re, dep_re = self.forward_wrapper(sample)
+		# Compute Losses
+		losses = self.compute_losses(sample, M_mea_re, dep_re)
+		loss = losses['loss']
+		loss_l1 = losses['loss_l1']
+		loss_kl = losses['loss_kl']
+		loss_tv = losses['loss_tv']
+		rmse = losses['rmse']
+
+		# Log to logger (i.e., tensorboard), if you want it to be displayed at progress bar, use prog_bar=True
+		self.log_dict(
+			{
+				"loss/train": loss
+				, "rmse/train": rmse
+				, "train_losses/kldiv": loss_kl
+				, "train_losses/l1": loss_l1
+				, "train_losses/tv": self.p_tv*loss_tv				
+			}
+			# , prog_bar=True
+		)
+		return {'loss': loss}
