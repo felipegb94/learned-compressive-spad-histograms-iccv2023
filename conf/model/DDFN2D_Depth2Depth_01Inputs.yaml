@@ -1,7 +1,7 @@
 # Plain Deep Boosting Model from Peng et al., 2020
 
 # Model ID is used to select the correct model objcet
-model_id: DDFN2D_Depth2Depth
+model_id: DDFN2D_Depth2Depth_01Inputs
 model_params:
   in_channels: 1
   outchannel_MS: 8

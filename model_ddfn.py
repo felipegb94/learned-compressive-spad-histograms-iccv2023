@@ -208,7 +208,7 @@ class Block2D(torch.nn.Module):
 		init.constant_(self.feat25[0].bias, 0.0)
 
 		self.feat = nn.Sequential(
-			nn.Conv2d(24, 8, 1, padding=0, dilation=1, bias=True), 
+			nn.Conv2d(24, 8, kernel_size=1, padding=0, dilation=1, bias=True), 
 			nn.ReLU(inplace=True))
 		init.kaiming_normal_(self.feat[0].weight, 0, 'fan_in', 'relu')
 		init.constant_(self.feat[0].bias, 0.0)

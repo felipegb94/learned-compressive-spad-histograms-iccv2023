@@ -35,12 +35,11 @@ class PlainDeepBoosting2DDepth2Depth(nn.Module):
 		self.C_rec = nn.Sequential(
 			nn.Conv2d(self.dfu_block_group.module_out_channels, 1, kernel_size=1, stride=1, bias=True),
 			# nn.ReLU(inplace=True)
-			nn.Sigmoid()
-			# nn.Tanh()
+			# nn.Sigmoid()
 		)
 		# init.kaiming_normal_(self.C_rec[0].weight, 0, 'fan_in', 'relu') 
-		# init.normal_(self.C_rec[0].weight, mean=0.0, std=1)
-		init.xavier_uniform_(self.C_rec[0].weight)
+		init.normal_(self.C_rec[0].weight, mean=0.0, std=0.001)
+		# init.xavier_uniform_(self.C_rec[0].weight)
 		init.constant_(self.C_rec[0].bias, 0.0)
 
 		self.gauss1D_layer = Gaussian1DLayer(gauss_len=num_bins, out_dim=-3)
@@ -94,6 +93,34 @@ class LITPlainDeepBoosting2DDepth2Depth(LITL1LossBaseSpadModel):
 	def get_input_data(self, sample):
 		return make_zeromean_normalized_bins(sample["est_bins_argmax"])
 		# return sample["est_bins_argmax"]
+
+class LITPlainDeepBoosting2DDepth2Depth01Inputs(LITL1LossBaseSpadModel):
+	def __init__(self, 
+		init_lr = 1e-4,
+		p_tv = 1e-5, 
+		lr_decay_gamma = 0.9,
+		in_channels=1,
+		outchannel_MS=4,
+		n_ddfn_blocks=12,
+		num_bins=1024
+		):
+		
+		deep_boosting_model = PlainDeepBoosting2DDepth2Depth(
+			in_channels=in_channels, 
+			outchannel_MS=outchannel_MS, 
+			n_ddfn_blocks=n_ddfn_blocks, 
+			num_bins=num_bins)
+
+		super(LITPlainDeepBoosting2DDepth2Depth01Inputs, self).__init__(backbone_net=deep_boosting_model,
+												init_lr = init_lr,
+												p_tv = p_tv, 
+												lr_decay_gamma = lr_decay_gamma)
+		
+		# Overwrite example input array
+		self.example_input_array = torch.randn([1, 1, 32, 32])
+	
+	def get_input_data(self, sample):
+		return sample["est_bins_argmax"]
 
 
 if __name__=='__main__':

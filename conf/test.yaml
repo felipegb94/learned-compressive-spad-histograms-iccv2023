@@ -24,10 +24,10 @@ train_dataset: nyuv2_64x64x1024_80ps
 # model_dirpath: outputs/${.train_dataset}/${.model_name}/debug/2022-04-20_185832
 # ckpt_id: epoch=05-step=19910-avgvalrmse=0.0281
 
-## Peng et al., 2020 (Plain Deep Boosting w/out NL) --> Full trained model with gradient decay
-model_name: DDFN_C64B10
-model_dirpath: outputs/nyuv2_64x64x1024_80ps/DDFN_C64B10/debug/2022-04-25_192521
-ckpt_id: epoch=05-step=19910-avgvalrmse=0.0287
+# ## Peng et al., 2020 (Plain Deep Boosting w/out NL) --> Full trained model with gradient decay
+# model_name: DDFN_C64B10
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/DDFN_C64B10/debug/2022-04-25_192521
+# ckpt_id: epoch=05-step=19910-avgvalrmse=0.0287
 
 # ## Depth2Depth Model --> Full trained model with gradient decay
 # model_name: DDFN_C64B10_NL_Depth2Depth
@@ -43,6 +43,12 @@ ckpt_id: epoch=05-step=19910-avgvalrmse=0.0287
 # model_name: DDFN_C64B10_NL_CompressiveWithBias
 # model_dirpath: outputs/${.train_dataset}/${.model_name}/debug/2022-04-24_142932
 # ckpt_id: epoch=05-step=18180-avgvalrmse=0.0323
+
+
+## Depth2Depth Model --> Full trained model with gradient decay
+model_name: DDFN2D_Depth2Depth/B-12_MS-4
+model_dirpath: outputs/${.train_dataset}/${.model_name}/debug/2022-04-26_224139
+ckpt_id: null # use last one
 
 
 # ckpt_id: epoch=04-step=400-avgvalrmse=0.0700

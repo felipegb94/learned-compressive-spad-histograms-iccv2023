@@ -15,11 +15,13 @@ defaults:
   - _self_
   - io_dirpaths
   - dataset: nyuv2
+  # - dataset: nyuv2_min_overfit
   # - model: DDFN_C64B10_NL
   # - model: DDFN_C64B10_NL_Depth2Depth
   # - model: DDFN_C64B10_NL_Compressive
   # - model: DDFN_C64B10
-  - model: DDFN2D_Depth2Depth
+  # - model: DDFN2D_Depth2Depth
+  - model: DDFN2D_Depth2Depth_01Inputs
   # enable color logging
   - override hydra/hydra_logging: colorlog
   - override hydra/job_logging: colorlog
@@ -35,8 +37,9 @@ params:
   cuda: true
   batch_size: 4
   workers: 4
-  epoch: 10
-  lri: 1.0e-4
+  epoch: 30
+  # lri: 1.0e-4
+  lri: 1.0e-3
   lr_decay_gamma: 0.9
   p_tv: 1.0e-5
   noise_idx: 1
