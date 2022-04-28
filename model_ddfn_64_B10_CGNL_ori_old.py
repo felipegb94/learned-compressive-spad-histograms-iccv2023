@@ -13,8 +13,9 @@ from IPython.core import debugger
 breakpoint = debugger.set_trace
 
 #### Local imports
-from losses import criterion_L2, criterion_KL, criterion_TV
+from losses import criterion_L2, criterion_KL, criterion_TV, criterion_L1
 import tof_utils
+from research_utils.np_utils import calc_mean_percentile_errors
 
 
 # feature extraction part
@@ -374,6 +375,10 @@ class LITDeepBoostingOriginal(pl.LightningModule):
 		# depths_rmse = torch.sqrt(torch.mean((rec_depths - gt_depths)**2))
 		# depths_L2 = criterion_L2(rec_depths, gt_depths)
 		depths_rmse = criterion_L2(rec_depths, gt_depths)
+		depths_mae = criterion_L1(rec_depths, gt_depths)
+
+		percentiles = [0.5, 0.75, 0.95, 0.99]
+		(mean_percentile_errs, _) = calc_mean_percentile_errors(np.abs(rec_depths.cpu().numpy()-gt_depths.cpu().numpy()), percentiles=percentiles)
 
 		# Important NOTE: Newer version of lightning accumulate the test_loss for each batch and then take the mean at the end of the epoch
 		# Log results
@@ -382,6 +387,11 @@ class LITDeepBoostingOriginal(pl.LightningModule):
 				"loss/avg_test": test_loss
 				, "rmse/avg_test": test_rmse
 				, "depths/test_rmse": depths_rmse
+				, "depths/test_mae": depths_mae
+				, "depths/test_mean_abs_perc{:.2f}".format(percentiles[0]): mean_percentile_errs[0]
+				, "depths/test_mean_abs_perc{:.2f}".format(percentiles[1]): mean_percentile_errs[1]
+				, "depths/test_mean_abs_perc{:.2f}".format(percentiles[2]): mean_percentile_errs[2]
+				, "depths/test_mean_abs_perc{:.2f}".format(percentiles[3]): mean_percentile_errs[3]
 			}
 			, on_step=True
 		)

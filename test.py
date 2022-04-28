@@ -16,7 +16,7 @@ from model_ddfn_64_B10_CGNL_ori import LITDeepBoosting, LITPlainDeepBoosting
 from model_ddfn_64_B10_CGNL_ori_old import LITDeepBoostingOriginal
 from model_ddfn_64_B10_CGNL_ori_depth2depth import LITDeepBoostingDepth2Depth
 from model_ddfn_64_B10_CGNL_ori_compressive import LITDeepBoostingCompressive, LITDeepBoostingCompressiveWithBias
-from model_ddfn2D_depth2depth import LITPlainDeepBoosting2DDepth2Depth
+from model_ddfn2D_depth2depth import LITPlainDeepBoosting2DDepth2Depth, LITPlainDeepBoosting2DDepth2Depth01Inputs
 from model_utils import count_parameters
 
 # A logger for this file (not for the pytorch logger)
@@ -77,8 +77,10 @@ def test(cfg):
 		model = LITDeepBoostingOriginal.load_from_checkpoint("checkpoints/"+ckpt_id)
 	elif(cfg.model_name == 'DDFN_C64B10'):
 		model = LITPlainDeepBoosting.load_from_checkpoint("checkpoints/"+ckpt_id)
-	elif(cfg.model_name == 'DDFN2D_Depth2Depth/B-12_MS-4'):
+	elif(cfg.model_name == 'DDFN2D_Depth2Depth/B-12_MS-8'):
 		model = LITPlainDeepBoosting2DDepth2Depth.load_from_checkpoint("checkpoints/"+ckpt_id)
+	elif(cfg.model_name == 'DDFN2D_Depth2Depth_01Inputs/B-12_MS-8'):
+		model = LITPlainDeepBoosting2DDepth2Depth01Inputs.load_from_checkpoint("checkpoints/"+ckpt_id)
 	else:
 		assert(False), "Invalid model_name"
 

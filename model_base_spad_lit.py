@@ -17,6 +17,7 @@ breakpoint = debugger.set_trace
 #### Local imports
 from losses import criterion_L2, criterion_L1, criterion_KL, criterion_TV
 import tof_utils
+from research_utils.np_utils import calc_mean_percentile_errors
 
 def make_zeromean_normalized_bins(bins):
 	return (2*bins) - 1
@@ -128,6 +129,7 @@ class LITBaseSPADModel(pl.LightningModule):
 
 
 	def test_step(self, sample, batch_idx):
+
 		# Forward pass
 		M_mea_re, dep_re = self.forward_wrapper(sample)
 
@@ -167,6 +169,10 @@ class LITBaseSPADModel(pl.LightningModule):
 		# depths_rmse = torch.sqrt(torch.mean((rec_depths - gt_depths)**2))
 		# depths_L2 = criterion_L2(rec_depths, gt_depths)
 		depths_rmse = criterion_L2(rec_depths, gt_depths)
+		depths_mae = criterion_L1(rec_depths, gt_depths)
+
+		percentiles = [0.5, 0.75, 0.95, 0.99]
+		(mean_percentile_errs, _) = calc_mean_percentile_errors(np.abs(rec_depths.cpu().numpy()-gt_depths.cpu().numpy()), percentiles=percentiles)
 
 		# Important NOTE: Newer version of lightning accumulate the test_loss for each batch and then take the mean at the end of the epoch
 		# Log results
@@ -175,6 +181,11 @@ class LITBaseSPADModel(pl.LightningModule):
 				"loss/avg_test": test_loss
 				, "rmse/avg_test": test_rmse
 				, "depths/test_rmse": depths_rmse
+				, "depths/test_mae": depths_mae
+				, "depths/test_mean_abs_perc{:.2f}".format(percentiles[0]): mean_percentile_errs[0]
+				, "depths/test_mean_abs_perc{:.2f}".format(percentiles[1]): mean_percentile_errs[1]
+				, "depths/test_mean_abs_perc{:.2f}".format(percentiles[2]): mean_percentile_errs[2]
+				, "depths/test_mean_abs_perc{:.2f}".format(percentiles[3]): mean_percentile_errs[3]
 			}
 			, on_step=True
 		)
