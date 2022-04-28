@@ -37,14 +37,20 @@ def train(cfg):
 	logger.info("Loading training data...")
 	logger.info("Train Datalist: {}".format(cfg.params.train_datalist_fpath))
 	# data preprocessing
-	train_data = SpadDataset(cfg.params.train_datalist_fpath, cfg.params.noise_idx, output_size=cfg.params.crop_patch_size)
+	train_data = SpadDataset(cfg.params.train_datalist_fpath, cfg.params.noise_idx 
+		, disable_rand_crop=cfg.params.disable_rand_crop
+		, output_size=cfg.params.crop_patch_size
+	)
 	train_loader = DataLoader(train_data, batch_size=cfg.params.batch_size, 
 							shuffle=True, num_workers=cfg.params.workers, 
 							pin_memory=cfg.params.cuda)
 	logger.info("Load training data complete - {} train samples!".format(len(train_data)))
 	logger.info("Loading validation data...")
 	logger.info("Val Datalist: {}".format(cfg.params.val_datalist_fpath))
-	val_data = SpadDataset(cfg.params.val_datalist_fpath, cfg.params.noise_idx, output_size=cfg.params.crop_patch_size)
+	val_data = SpadDataset(cfg.params.val_datalist_fpath, cfg.params.noise_idx
+		, disable_rand_crop=cfg.params.disable_rand_crop
+		, output_size=cfg.params.crop_patch_size
+	)
 	val_loader = DataLoader(val_data, batch_size=cfg.params.batch_size, 
 							shuffle=False, num_workers=cfg.params.workers, 
 							pin_memory=cfg.params.cuda)
@@ -92,9 +98,17 @@ def train(cfg):
 		# trainer = pl.Trainer(
 		# 	limit_train_batches=15, limit_val_batches=3, max_epochs=3, log_every_n_steps=1, 
 		# 	logger=tb_logger, callbacks=callbacks) # Runs single batch
-		trainer = pl.Trainer(max_epochs=cfg.params.epoch, 
-			logger=tb_logger, callbacks=callbacks, 
-			log_every_n_steps=10, val_check_interval=1.0) # 
+		# trainer = pl.Trainer(max_epochs=cfg.params.epoch, 
+		# 	logger=tb_logger, callbacks=callbacks, 
+		# 	log_every_n_steps=10, val_check_interval=1.0, track_grad_norm=2) # 
+		if(cfg.params.overfit_batches):
+			trainer = pl.Trainer(max_epochs=1000, 
+				logger=tb_logger, callbacks=callbacks, 
+				log_every_n_steps=5, val_check_interval=1.0, overfit_batches=0.02) # 
+		else:
+			trainer = pl.Trainer(max_epochs=cfg.params.epoch, 
+				logger=tb_logger, callbacks=callbacks, 
+				log_every_n_steps=5, val_check_interval=1.0) # 
 
 	trainer.fit(lit_model, train_dataloaders=train_loader, val_dataloaders=val_loader)
 

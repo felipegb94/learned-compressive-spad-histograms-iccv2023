@@ -13,6 +13,7 @@ from model_ddfn_64_B10_CGNL_ori import LITDeepBoosting, LITPlainDeepBoosting
 from model_ddfn_64_B10_CGNL_ori_depth2depth import LITDeepBoostingDepth2Depth
 from model_ddfn_64_B10_CGNL_ori_compressive import LITDeepBoostingCompressive
 from model_ddfn2D_depth2depth import LITPlainDeepBoosting2DDepth2Depth, LITPlainDeepBoosting2DDepth2Depth01Inputs
+from model_ddfn2D_depth2hist import LITPlainDeepBoosting2DDepth2Hist01Inputs
 
 
 def count_parameters(model):
@@ -60,6 +61,16 @@ def init_model_from_id(cfg):
 						)
 	elif(cfg.model.model_id == 'DDFN2D_Depth2Depth_01Inputs'):
 		lit_model = LITPlainDeepBoosting2DDepth2Depth01Inputs(
+						init_lr = cfg.params.lri
+						, lr_decay_gamma = cfg.params.lr_decay_gamma
+						, p_tv = cfg.params.p_tv
+						, in_channels = cfg.model.model_params.in_channels
+						, outchannel_MS = cfg.model.model_params.outchannel_MS
+						, n_ddfn_blocks = cfg.model.model_params.n_ddfn_blocks
+						, num_bins = cfg.dataset.nt
+						)
+	elif(cfg.model.model_id == 'DDFN2D_Depth2Hist_01Inputs'):
+		lit_model = LITPlainDeepBoosting2DDepth2Hist01Inputs(
 						init_lr = cfg.params.lri
 						, lr_decay_gamma = cfg.params.lr_decay_gamma
 						, p_tv = cfg.params.p_tv

@@ -3,7 +3,8 @@ hydra:
     # Configure output dir of each experiment programmatically from the arguments
     # Example "outputs/mnist/classifier/baseline/2021-03-10-141516"
     # dir: outputs/${data.name}/${model.name}/${experiment}/${now:%Y-%m-%d_%H%M%S}
-    dir: outputs/${dataset.name}/${model.model_name}/${experiment}/${now:%Y-%m-%d_%H%M%S}
+    # dir: outputs/${dataset.name}/${model.model_name}/${experiment}/${now:%Y-%m-%d_%H%M%S}
+    dir: outputs/${dataset.name}/${experiment}/${model.model_name}/${now:%Y-%m-%d_%H%M%S}
 
 #### Useful variables to have
 # path to original working directory
@@ -14,34 +15,38 @@ original_work_dir: ${hydra:runtime.cwd}
 defaults:
   - _self_
   - io_dirpaths
-  - dataset: nyuv2
-  # - dataset: nyuv2_min_overfit
+  # - dataset: nyuv2
+  - dataset: nyuv2_min_overfit
   # - model: DDFN_C64B10_NL
   # - model: DDFN_C64B10_NL_Depth2Depth
   # - model: DDFN_C64B10_NL_Compressive
   # - model: DDFN_C64B10
   # - model: DDFN2D_Depth2Depth
-  - model: DDFN2D_Depth2Depth_01Inputs
+  # - model: DDFN2D_Depth2Depth_01Inputs
+  - model: DDFN2D_Depth2Hist_01Inputs
   # enable color logging
   - override hydra/hydra_logging: colorlog
   - override hydra/job_logging: colorlog
 
 # Global configurations shared between different modules
-experiment: debug
+experiment: debug_overfit
 
 # Random seed to use
 random_seed: 1234
 
 params:
+  overfit_batches: true
+  disable_rand_crop: true
   gpu_num: 1
-  cuda: true
+  cuda: false
   batch_size: 4
-  workers: 4
+  workers: 0
   epoch: 30
-  # lri: 1.0e-4
-  lri: 1.0e-3
-  lr_decay_gamma: 0.9
-  p_tv: 1.0e-5
+  lri: 1.0e-4
+  # lri: 1.0e-3
+  lr_decay_gamma: 0.9999
+  # p_tv: 1.0e-5
+  p_tv: 0
   noise_idx: 1
   crop_patch_size: 32
   train_datalist_fpath: ${io_dirpaths.datalists_dirpath}/${dataset.train_datalist_fname}
