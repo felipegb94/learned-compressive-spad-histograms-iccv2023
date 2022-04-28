@@ -159,16 +159,16 @@ class SpadDataset(torch.utils.data.Dataset):
         bins = torch.from_numpy(bins)
         est_bins_argmax = torch.from_numpy(est_bins_argmax)
         est_bins_argmax_hist = torch.from_numpy(est_bins_argmax_hist)
-
+        
         sample = {
             'rates': rates 
             , 'spad': spad 
             , 'bins': bins 
             , 'est_bins_argmax': est_bins_argmax 
             , 'est_bins_argmax_hist': est_bins_argmax_hist 
-            , 'SBR': spad_data['SBR']
-            , 'mean_signal_photons': spad_data['mean_signal_photons']
-            , 'mean_background_photons': spad_data['mean_background_photons']
+            , 'SBR': spad_data['SBR'][0,0]
+            , 'mean_signal_photons': spad_data['mean_signal_photons'][0,0]
+            , 'mean_background_photons': spad_data['mean_background_photons'][0,0]
             , 'idx': idx
             }
 
