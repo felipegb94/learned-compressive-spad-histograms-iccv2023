@@ -1,0 +1,17 @@
+
+overfit_batches: true
+disable_rand_crop: true
+gpu_num: 1
+cuda: false
+batch_size: 4
+workers: 0
+epoch: 30
+lri: 1.0e-4
+# lri: 1.0e-3
+lr_decay_gamma: 0.9999
+# p_tv: 1.0e-5
+p_tv: 0
+noise_idx: 1
+crop_patch_size: 32
+train_datalist_fpath: ${io_dirpaths.datalists_dirpath}/${dataset.train_datalist_fname}
+val_datalist_fpath: ${io_dirpaths.datalists_dirpath}/${dataset.val_datalist_fname}

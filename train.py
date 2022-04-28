@@ -26,34 +26,34 @@ def train(cfg):
 	else:
 		logger.info("Running {} experiment mode".format(cfg.experiment))
 	logger.info("\n" + OmegaConf.to_yaml(cfg))
-	logger.info("Number of assigned GPUs: {}".format(cfg.params.gpu_num))
+	logger.info("Number of assigned GPUs: {}".format(cfg.train_params.gpu_num))
 	logger.info("Number of available GPUs: {} {}".format(torch.cuda.device_count(), torch.cuda.get_device_name(torch.cuda.current_device())))
 
-	if(torch.cuda.is_available() and cfg.params.cuda): device = torch.device("cuda:0")
+	if(torch.cuda.is_available() and cfg.train_params.cuda): device = torch.device("cuda:0")
 	else: 
 		device = torch.device("cpu")
-		cfg.params.cuda = False
+		cfg.train_params.cuda = False
 
 	logger.info("Loading training data...")
 	logger.info("Train Datalist: {}".format(cfg.params.train_datalist_fpath))
 	# data preprocessing
-	train_data = SpadDataset(cfg.params.train_datalist_fpath, cfg.params.noise_idx 
-		, disable_rand_crop=cfg.params.disable_rand_crop
-		, output_size=cfg.params.crop_patch_size
+	train_data = SpadDataset(cfg.params.train_datalist_fpath, cfg.train_params.noise_idx 
+		, disable_rand_crop=cfg.train_params.disable_rand_crop
+		, output_size=cfg.train_params.crop_patch_size
 	)
-	train_loader = DataLoader(train_data, batch_size=cfg.params.batch_size, 
-							shuffle=True, num_workers=cfg.params.workers, 
-							pin_memory=cfg.params.cuda)
+	train_loader = DataLoader(train_data, batch_size=cfg.train_params.batch_size, 
+							shuffle=True, num_workers=cfg.train_params.workers, 
+							pin_memory=cfg.train_params.cuda)
 	logger.info("Load training data complete - {} train samples!".format(len(train_data)))
 	logger.info("Loading validation data...")
 	logger.info("Val Datalist: {}".format(cfg.params.val_datalist_fpath))
-	val_data = SpadDataset(cfg.params.val_datalist_fpath, cfg.params.noise_idx
-		, disable_rand_crop=cfg.params.disable_rand_crop
-		, output_size=cfg.params.crop_patch_size
+	val_data = SpadDataset(cfg.params.val_datalist_fpath, cfg.train_params.noise_idx
+		, disable_rand_crop=cfg.train_params.disable_rand_crop
+		, output_size=cfg.train_params.crop_patch_size
 	)
-	val_loader = DataLoader(val_data, batch_size=cfg.params.batch_size, 
-							shuffle=False, num_workers=cfg.params.workers, 
-							pin_memory=cfg.params.cuda)
+	val_loader = DataLoader(val_data, batch_size=cfg.train_params.batch_size, 
+							shuffle=False, num_workers=cfg.train_params.workers, 
+							pin_memory=cfg.train_params.cuda)
 	logger.info("Load validation data complete - {} val samples!".format(len(val_data)))
 	logger.info("+++++++++++++++++++++++++++++++++++++++++++")
 
@@ -83,9 +83,9 @@ def train(cfg):
 	lit_model = init_model_from_id(cfg)
 	
 
-	if(cfg.params.overfit_batches):
+	if(cfg.train_params.overfit_batches):
 		# trainer = pl.Trainer(fast_dev_run=True, logger=tb_logger, callbacks=[lr_monitor_callback]) # 
-		if(cfg.params.cuda):
+		if(cfg.train_params.cuda):
 			trainer = pl.Trainer(accelerator="gpu", devices=1, max_epochs=200, 
 				logger=tb_logger, callbacks=[lr_monitor_callback], 
 				log_every_n_steps=2, val_check_interval=1.0, overfit_batches=0.03) # 
@@ -94,13 +94,13 @@ def train(cfg):
 				logger=tb_logger, callbacks=[lr_monitor_callback], 
 				log_every_n_steps=2, val_check_interval=1.0, overfit_batches=0.03) # 
 	else:
-		if(cfg.params.cuda):
+		if(cfg.train_params.cuda):
 			# trainer = pl.Trainer(accelerator="gpu", devices=1, 
 			# 	limit_train_batches=30, limit_val_batches=10, max_epochs=3, 
 			# 	logger=tb_logger, callbacks=callbacks,
 			# 	log_every_n_steps=1, val_check_interval=0.5
 			#  	) # Runs single batch
-			trainer = pl.Trainer(accelerator="gpu", devices=1, max_epochs=cfg.params.epoch, 
+			trainer = pl.Trainer(accelerator="gpu", devices=1, max_epochs=cfg.train_params.epoch, 
 				logger=tb_logger, callbacks=callbacks, 
 				log_every_n_steps=10, val_check_interval=0.25) # 
 				# log_every_n_steps=10, val_check_interval=1.0) # 
@@ -108,10 +108,10 @@ def train(cfg):
 			# trainer = pl.Trainer(
 			# 	limit_train_batches=15, limit_val_batches=3, max_epochs=3, log_every_n_steps=1, 
 			# 	logger=tb_logger, callbacks=callbacks) # Runs single batch
-			# trainer = pl.Trainer(max_epochs=cfg.params.epoch, 
+			# trainer = pl.Trainer(max_epochs=cfg.train_params.epoch, 
 			# 	logger=tb_logger, callbacks=callbacks, 
 			# 	log_every_n_steps=10, val_check_interval=1.0, track_grad_norm=2) # 
-			trainer = pl.Trainer(max_epochs=cfg.params.epoch, 
+			trainer = pl.Trainer(max_epochs=cfg.train_params.epoch, 
 				logger=tb_logger, callbacks=callbacks, 
 				log_every_n_steps=5, val_check_interval=1.0) # 
 

@@ -15,8 +15,9 @@ original_work_dir: ${hydra:runtime.cwd}
 defaults:
   - _self_
   - io_dirpaths
-  # - dataset: nyuv2
-  - dataset: nyuv2_min_overfit
+  - train_params: debug
+  - dataset: nyuv2
+  # - dataset: nyuv2_min_overfit
   # - model: DDFN_C64B10_NL
   # - model: DDFN_C64B10_NL_Depth2Depth
   # - model: DDFN_C64B10_NL_Compressive
@@ -29,41 +30,12 @@ defaults:
   - override hydra/job_logging: colorlog
 
 # Global configurations shared between different modules
-experiment: debug_overfit
+experiment: debug
 
 # Random seed to use
 random_seed: 1234
 
 params:
-  overfit_batches: true
-  disable_rand_crop: true
-  gpu_num: 1
-  cuda: false
-  batch_size: 4
-  workers: 0
-  epoch: 30
-  lri: 1.0e-4
-  # lri: 1.0e-3
-  lr_decay_gamma: 0.9999
-  # p_tv: 1.0e-5
-  p_tv: 0
-  noise_idx: 1
-  crop_patch_size: 32
   train_datalist_fpath: ${io_dirpaths.datalists_dirpath}/${dataset.train_datalist_fname}
   val_datalist_fpath: ${io_dirpaths.datalists_dirpath}/${dataset.val_datalist_fname}
-
-  # optimizer: Adam
-  # save_every: 420
-# resume_params:
-#   resume: False
-#   ckpt_rel_fpath: "2022-04-19_205134/checkpoints/epoch=05-step=20778-avgvalrmse=0.0291.ckpt"
-  # ckpt_fpath: "outputs/DDFN_C64B10_NL/debug_nyuv2/2022-04-19_205134/checkpoints/epoch=05-step=20778-avgvalrmse=0.0291.ckpt" 
-  # util_dir: ./util
-  # log_dirpath: ./log
-  # log_file: ${.log_dirpath}/${.model_name}
-  # resume_fpt: ${.log_dirpath}/rsm
-  # resume_mod: ${.resume_fpt}/xxx.pth
-  # train_loss: ${.resume_fpt}/xxx.mat
-  # val_loss: ${.resume_fpt}/xxxx.mat
-
 
