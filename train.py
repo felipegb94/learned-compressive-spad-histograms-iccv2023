@@ -82,8 +82,18 @@ def train(cfg):
 	logger.info("Initializing {} model".format(cfg.model.model_name))
 	lit_model = init_model_from_id(cfg)
 	
-	# 
-	# trainer = pl.Trainer(fast_dev_run=True ) # Runs single batch
+
+	if(cfg.params.overfits_batches):
+		# trainer = pl.Trainer(fast_dev_run=True, logger=tb_logger, callbacks=[lr_monitor_callback]) # 
+		if(cfg.params.cuda):
+			trainer = pl.Trainer(accelerator="gpu", devices=1, max_epochs=200, 
+				logger=tb_logger, callbacks=[lr_monitor_callback], 
+				log_every_n_steps=2, val_check_interval=1.0, overfit_batches=0.02) # 
+		else:
+			trainer = pl.Trainer(max_epochs=200, 
+				logger=tb_logger, callbacks=[lr_monitor_callback], 
+				log_every_n_steps=2, val_check_interval=1.0, overfit_batches=0.02) # 
+
 	if(cfg.params.cuda):
 		# trainer = pl.Trainer(accelerator="gpu", devices=1, 
 		# 	limit_train_batches=30, limit_val_batches=10, max_epochs=3, 
@@ -101,14 +111,9 @@ def train(cfg):
 		# trainer = pl.Trainer(max_epochs=cfg.params.epoch, 
 		# 	logger=tb_logger, callbacks=callbacks, 
 		# 	log_every_n_steps=10, val_check_interval=1.0, track_grad_norm=2) # 
-		if(cfg.params.overfit_batches):
-			trainer = pl.Trainer(max_epochs=1000, 
-				logger=tb_logger, callbacks=callbacks, 
-				log_every_n_steps=5, val_check_interval=1.0, overfit_batches=0.02) # 
-		else:
-			trainer = pl.Trainer(max_epochs=cfg.params.epoch, 
-				logger=tb_logger, callbacks=callbacks, 
-				log_every_n_steps=5, val_check_interval=1.0) # 
+		trainer = pl.Trainer(max_epochs=cfg.params.epoch, 
+			logger=tb_logger, callbacks=callbacks, 
+			log_every_n_steps=5, val_check_interval=1.0) # 
 
 	trainer.fit(lit_model, train_dataloaders=train_loader, val_dataloaders=val_loader)
 

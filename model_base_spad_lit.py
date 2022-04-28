@@ -7,6 +7,7 @@ import os
 
 #### Library imports
 import numpy as np
+import matplotlib.pyplot as plt
 import torch
 import pytorch_lightning as pl
 import torchvision
@@ -16,8 +17,6 @@ breakpoint = debugger.set_trace
 #### Local imports
 from losses import criterion_L2, criterion_L1, criterion_KL, criterion_TV
 import tof_utils
-
-
 
 def make_zeromean_normalized_bins(bins):
 	return (2*bins) - 1
@@ -100,8 +99,12 @@ class LITBaseSPADModel(pl.LightningModule):
 			}
 			# , prog_bar=True
 		)
-		return {'loss': loss}
 
+		## Log some images every 500 training steps
+		if((batch_idx % 500 == 0)):
+			self.log_depth_img(gt_dep=sample["bins"], rec_dep=dep_re, img_title_prefix='Train - ')
+		
+		return {'loss': loss}
 
 	def validation_step(self, sample, batch_idx):
 		# Forward pass
@@ -177,6 +180,19 @@ class LITBaseSPADModel(pl.LightningModule):
 		)
 		return {'dep': dep, 'dep_re': dep_re}
 
+	def log_depth_img(self, gt_dep, rec_dep, img_title_prefix):
+		n_img_per_row = gt_dep.shape[0]
+		# NOTE: By setting it to global step, we will log more images inside tensorboard, which may require more space
+		# If we set global_step to a constant, we will keep overwriting the images.
+		print(self.global_step)
+		grid1 = torchvision.utils.make_grid(gt_dep, nrow=n_img_per_row, value_range=(0,1))
+		self.logger.experiment.add_image(img_title_prefix + 'GT Depths', grid1, global_step=self.global_step)
+		grid2 = torchvision.utils.make_grid(rec_dep, nrow=n_img_per_row, value_range=(0,1))
+		self.logger.experiment.add_image(img_title_prefix + 'Rec. Depths', grid2, global_step=self.global_step)
+		## NOTE: The following pause statement helps avoid a random segfault that happens when logging the images inside 
+		# training step
+		plt.pause(0.1)
+
 	def validation_epoch_end(self, outputs):
 		'''
 			Important NOTE: In newer lightning versions, for single value metrix like val_loss, we can just add them to the log_dict at val_step
@@ -192,13 +208,13 @@ class LITBaseSPADModel(pl.LightningModule):
 		for i in range(n_samples):
 			dep_all[i,:] = outputs[i]['dep'][0,:] # Grab first img in batch
 			dep_re_all[i,:] = outputs[i]['dep_re'][0,:]
-
-		# NOTE: By setting it to global step, we will log more images inside tensorboard, which may require more space
-		# If we set global_step to a constant, we will keep overwriting the images.
-		grid = torchvision.utils.make_grid(dep_all, nrow=n_samples, value_range=(0,1))
-		self.logger.experiment.add_image('GT Depths', grid, global_step=self.global_step)
-		grid = torchvision.utils.make_grid(dep_re_all, nrow=n_samples, value_range=(0,1))
-		self.logger.experiment.add_image('Rec. Depths', grid, global_step=self.global_step)
+		self.log_depth_img(dep_all, dep_re_all, img_title_prefix='')
+		# # NOTE: By setting it to global step, we will log more images inside tensorboard, which may require more space
+		# # If we set global_step to a constant, we will keep overwriting the images.
+		# grid = torchvision.utils.make_grid(dep_all, nrow=n_samples, value_range=(0,1))
+		# self.logger.experiment.add_image('GT Depths', grid, global_step=self.global_step)
+		# grid = torchvision.utils.make_grid(dep_re_all, nrow=n_samples, value_range=(0,1))
+		# self.logger.experiment.add_image('Rec. Depths', grid, global_step=self.global_step)
 
 
 	def on_train_epoch_end(self) -> None:
@@ -270,4 +286,9 @@ class LITL1LossBaseSpadModel(LITBaseSPADModel):
 			}
 			# , prog_bar=True
 		)
+
+		## Log some images every 500 training steps
+		if((batch_idx % 500 == 0)):
+			self.log_depth_img(gt_dep=sample["bins"], rec_dep=dep_re, img_title_prefix='Train - ')
+
 		return {'loss': loss}
