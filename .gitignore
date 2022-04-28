@@ -3,6 +3,8 @@
 results
 outputs
 
+tmp.py
+
 datalists/*_SimSPADDataset_*
 datalists/train*
 datalists/val*

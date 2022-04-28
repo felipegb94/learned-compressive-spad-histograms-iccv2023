@@ -5,11 +5,12 @@ from IPython.core import debugger
 breakpoint = debugger.set_trace
 
 #### Local imports
-from model_ddfn_64_B10_CGNL_ori import LITDeepBoosting
+# from model_ddfn_64_B10_CGNL_ori import LITDeepBoosting
+from model_ddfn_64_B10_CGNL_ori_old import LITDeepBoostingOriginal
 
 
 
-class LITDeepBoostingDepth2Depth(LITDeepBoosting):
+class LITDeepBoostingDepth2Depth(LITDeepBoostingOriginal):
 	def __init__(self, 
 		init_lr = 1e-4,
 		p_tv = 1e-5, 

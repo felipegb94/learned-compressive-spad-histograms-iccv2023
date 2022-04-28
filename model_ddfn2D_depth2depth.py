@@ -33,9 +33,9 @@ class PlainDeepBoosting2DDepth2Depth(nn.Module):
 
 		# Reconstruction kernel
 		self.C_rec = nn.Sequential(
-			nn.Conv2d(self.dfu_block_group.module_out_channels, 1, kernel_size=1, stride=1, bias=True),
-			# nn.ReLU(inplace=True)
-			# nn.Sigmoid()
+			nn.Conv2d(self.dfu_block_group.module_out_channels, 1, kernel_size=1, stride=1, bias=True)
+			# , nn.ReLU(inplace=True)
+			# , nn.Sigmoid()
 		)
 		# init.kaiming_normal_(self.C_rec[0].weight, 0, 'fan_in', 'relu') 
 		init.normal_(self.C_rec[0].weight, mean=0.0, std=0.001)
@@ -63,7 +63,6 @@ class PlainDeepBoosting2DDepth2Depth(nn.Module):
 		denoise_out = self.gauss1D_layer(rec)
 
 		return denoise_out, rec
-
 
 class LITPlainDeepBoosting2DDepth2Depth(LITL1LossBaseSpadModel):
 	def __init__(self, 
@@ -122,7 +121,6 @@ class LITPlainDeepBoosting2DDepth2Depth01Inputs(LITL1LossBaseSpadModel):
 	def get_input_data(self, sample):
 		return sample["est_bins_argmax"]
 
-
 if __name__=='__main__':
 	import matplotlib.pyplot as plt
 	from model_utils import count_parameters
@@ -135,7 +133,7 @@ if __name__=='__main__':
 
 	# Set compression params
 	inputs = inputs2D
-	model = PlainDeepBoosting2DDepth2Depth()
+	model = PlainDeepBoosting2DDepth2Depth(num_bins=nt)
 	print("{} Parameters: {}".format(model.__class__.__name__, count_parameters(model)))
 	outputs = model(inputs)
 	print("		inputs shape: {}".format(inputs.shape))
@@ -150,3 +148,4 @@ if __name__=='__main__':
 	print("		inputs shape: {}".format(inputs.shape))
 	print("		outputs1 shape: {}".format(outputs[0].shape))
 	print("		outputs2 shape: {}".format(outputs[1].shape))
+
