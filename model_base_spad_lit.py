@@ -195,14 +195,13 @@ class LITBaseSPADModel(pl.LightningModule):
 		n_img_per_row = gt_dep.shape[0]
 		# NOTE: By setting it to global step, we will log more images inside tensorboard, which may require more space
 		# If we set global_step to a constant, we will keep overwriting the images.
-		print(self.global_step)
 		grid1 = torchvision.utils.make_grid(gt_dep, nrow=n_img_per_row, value_range=(0,1))
 		self.logger.experiment.add_image(img_title_prefix + 'GT Depths', grid1, global_step=self.global_step)
 		grid2 = torchvision.utils.make_grid(rec_dep, nrow=n_img_per_row, value_range=(0,1))
 		self.logger.experiment.add_image(img_title_prefix + 'Rec. Depths', grid2, global_step=self.global_step)
 		## NOTE: The following pause statement helps avoid a random segfault that happens when logging the images inside 
 		# training step
-		plt.pause(0.1)
+		plt.pause(0.2)
 
 	def validation_epoch_end(self, outputs):
 		'''

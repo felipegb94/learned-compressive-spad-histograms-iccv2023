@@ -34,12 +34,8 @@ class PlainDeepBoosting2DDepth2Depth(nn.Module):
 		# Reconstruction kernel
 		self.C_rec = nn.Sequential(
 			nn.Conv2d(self.dfu_block_group.module_out_channels, 1, kernel_size=1, stride=1, bias=True)
-			# , nn.ReLU(inplace=True)
-			# , nn.Sigmoid()
 		)
-		# init.kaiming_normal_(self.C_rec[0].weight, 0, 'fan_in', 'relu') 
 		init.normal_(self.C_rec[0].weight, mean=0.0, std=0.001)
-		# init.xavier_uniform_(self.C_rec[0].weight)
 		init.constant_(self.C_rec[0].bias, 0.0)
 
 		self.gauss1D_layer = Gaussian1DLayer(gauss_len=num_bins, out_dim=-3)
@@ -55,9 +51,6 @@ class PlainDeepBoosting2DDepth2Depth(nn.Module):
 
 		# depth reconstruction 
 		rec = self.C_rec(b_out)
-		# rec = (0.5*self.C_rec(b_out)) + 1 # If we use tanh make sure to make the rec between 0 and 1
-		# rec = self.C_rec(torch.cat((inputs, b_out), 1))
-		# breakpoint()
 
 		# hist reconstruction
 		denoise_out = self.gauss1D_layer(rec)
