@@ -2,6 +2,7 @@
 
 #### Standard Library Imports
 import os
+from glob import glob
 
 #### Library imports
 import numpy as np
@@ -59,9 +60,26 @@ class SpadDataset(torch.utils.data.Dataset):
                         self.spad_data_fpaths.append(fpath)
                         break
 
-        # self.spad_data_fpaths.extend([intensity.replace('intensity', 'spad')
-        #                             .replace('.mat', '_p{}.mat'.format(noise_idx))
-        #                             for intensity in self.intensity_files])
+        ## Get the base dirpath of the whole dataset. Sometimes the dataset will have multiple folder levels
+        dataset_base_dirpath = os.path.commonprefix(self.spad_data_fpaths)
+
+        ## Try to load PSF vector --> We may use it in some models
+        ## Find all files that start with PSF
+        pattern = os.path.join(dataset_base_dirpath, 'PSF_used_for_simulation*.mat')
+        psf_fpaths = glob(pattern)
+        if(len(psf_fpaths) >= 1):
+            # If file exists load it and use it
+            if(len(psf_fpaths) > 1):
+                print("Warning: More than one PSF/IRF avaiable. Choosing {}".format(psf_fpaths[0]))
+            psf_data = scipy.io.loadmat(psf_fpaths[0])
+            self.psf = psf_data['psf'].mean(axis=-1)
+        else:
+            # If file does not exist, just generate simple psf
+            print("No PSF/IRF available. Generating a simple narrow Gaussian")
+            from research_utils.signalproc_ops import gaussian_pulse
+            psf_len = 11
+            psf_mu = psf_len // 2
+            self.psf = gaussian_pulse(time_domain=np.arange(0,psf_len), mu=psf_mu, width=0.5)
 
         if(isinstance(output_size, int)): self.output_size = (output_size, output_size)
         else: self.output_size = output_size
@@ -192,16 +210,16 @@ if __name__=='__main__':
     noise_idx = None
     spad_dataset = SpadDataset(datalist_fpath, noise_idx=noise_idx, output_size=None)
 
-    # ## Load val dataset
-    # datalist_fpath = './datalists/val_nyuv2_SimSPADDataset_nr-64_nc-64_nt-1024_tres-80ps_dark-1_psf-1.txt'
-    # noise_idx = [1]
-    # spad_dataset = SpadDataset(datalist_fpath, noise_idx=noise_idx, output_size=60)
+    ## Load val dataset
+    datalist_fpath = './datalists/nyuv2_val_SimSPADDataset_nr-64_nc-64_nt-1024_tres-80ps_dark-1_psf-1.txt'
+    noise_idx = [1]
+    spad_dataset = SpadDataset(datalist_fpath, noise_idx=noise_idx, output_size=None)
 
     batch_size = 1
 
     loader = torch.utils.data.DataLoader(spad_dataset, batch_size=1, shuffle=True, num_workers=0)
     iter_loader = iter(loader)
-    for i in range(10):
+    for i in range(5):
         spad_sample = iter_loader.next()
         
         spad = spad_sample['spad']
@@ -229,8 +247,12 @@ if __name__=='__main__':
         plt.imshow(np.log(1+np.sum(spad, axis=0)))
         plt.subplot(2,2,4)
         plt.imshow(est_bins_argmax, vmin=bins.min(), vmax=bins.max())
-        plt.pause(0.5)
+        plt.pause(0.2)
 
 
 
+    plt.clf()
+    plt.plot(spad_dataset.psf)
+    plt.title("PSF used to simulate thiis dataset")
+    plt.pause(0.1)
 
