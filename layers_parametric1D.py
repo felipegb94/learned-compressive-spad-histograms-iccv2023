@@ -14,7 +14,6 @@ breakpoint = debugger.set_trace
 
 #### Local imports
 
-
 class Gaussian1DLayer(nn.Module):
 	'''
 		For each input mu (assume 0 < mu < 1) we generate a 1D gaussian signal with mean=mu and unit sigma
@@ -59,15 +58,19 @@ class IRF1DLayer(nn.Module):
 		assert(irf.ndim==1), "Input IRF should have only 1 dimension"
 
 		self.n = irf.size # Number of bins in irf
+		self.is_even = int((self.n % 2) == 0)
+		self.pad_l = self.n // 2
+		self.pad_r = self.n // 2 - self.is_even
+		breakpoint()
 		if(conv_dim == 0): 
 			self.kernel_dims = (self.n, 1, 1)
-			self.conv_padding = (0, 0) + (0, 0) + (self.n//2, self.n//2)
+			self.conv_padding = (0, 0) + (0, 0) + (self.pad_l, self.pad_r)
 		elif(conv_dim == 1): 
 			self.kernel_dims = (1, self.n, 1)
-			self.conv_padding = (0, 0) + (self.n//2, self.n//2) + (0, 0)
+			self.conv_padding = (0, 0) + (self.pad_l, self.pad_r) + (0, 0)
 		elif(conv_dim == 2): 
 			self.kernel_dims = (1, 1, self.n)
-			self.conv_padding = (self.n//2, self.n//2) + (0, 0) + (0, 0)
+			self.conv_padding = (self.pad_l, self.pad_r) + (0, 0) + (0, 0)
 		else: assert(False), "Invalid input conv_dim. conv_dim should be one of 0, 1, 2"
 
 		# Normalize
