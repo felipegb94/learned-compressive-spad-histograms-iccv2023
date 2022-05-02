@@ -61,7 +61,7 @@ class SpadDataset(torch.utils.data.Dataset):
                         break
 
         ## Get the base dirpath of the whole dataset. Sometimes the dataset will have multiple folder levels
-        dataset_base_dirpath = os.path.commonprefix(self.spad_data_fpaths)
+        dataset_base_dirpath = os.path.dirname(os.path.commonprefix(self.spad_data_fpaths))
 
         ## Try to load PSF vector --> We may use it in some models
         ## Find all files that start with PSF
