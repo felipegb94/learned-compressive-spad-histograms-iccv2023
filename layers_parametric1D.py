@@ -61,7 +61,6 @@ class IRF1DLayer(nn.Module):
 		self.is_even = int((self.n % 2) == 0)
 		self.pad_l = self.n // 2
 		self.pad_r = self.n // 2 - self.is_even
-		breakpoint()
 		if(conv_dim == 0): 
 			self.kernel_dims = (self.n, 1, 1)
 			self.conv_padding = (0, 0) + (0, 0) + (self.pad_l, self.pad_r)
@@ -75,6 +74,8 @@ class IRF1DLayer(nn.Module):
 
 		# Normalize
 		irf = irf / irf.sum()
+		# Flip irf vector
+		irf = np.flip(irf)
 		# Create a 3D convolutional filter that will effectively only operate on a single dimension
 		# The filter will have the in/out channel dimensions as 1
 		# The last 3 dimensions are the signal dimension
@@ -90,17 +91,17 @@ class IRF1DLayer(nn.Module):
 		# Apply convolution
 		# No need to pad here since we padded above to make sure that the out has the same dimension
 		out = F.conv3d(padded_input, self.irf_weights, stride=1, padding=0)
-		return out
+		return out.squeeze(1)
 
 
 if __name__=='__main__':
 	import matplotlib.pyplot as plt
 	from model_utils import count_parameters
-	from research_utils.signalproc_ops import gaussian_pulse
+	from research_utils.signalproc_ops import gaussian_pulse, expgaussian_pulse_conv
 
 	# Set random input
 	batch_size = 3
-	(nr, nc, nt) = (32, 32, 1024) 
+	(nr, nc, nt) = (32, 32, 256) 
 	inputs2D = torch.rand((batch_size, 1, nr, nc))
 
 	# Eval Network Components
@@ -112,20 +113,23 @@ if __name__=='__main__':
 	print("    output shape: {}".format(outputs.shape))
 
 	# Generate Gaussian Pulse
-	pulse_len = 25
-	pulse_domain = np.arange(0, pulse_len*5)
+	inputs = outputs
+	pulse_len = 3
+	pulse_domain = np.arange(0, 50)
 	pulse = gaussian_pulse(pulse_domain, mu=pulse_domain[-1]//2, width=pulse_len, circ_shifted=True)
+	pulse = expgaussian_pulse_conv(pulse_domain, mu=pulse_domain[-1]//2, sigma=pulse_len, exp_lambda=10/pulse_domain[-1], circ_shifted=True)
 	irf_layer = IRF1DLayer(irf=pulse, conv_dim=0)
-	outputs_irf_layer = irf_layer(outputs)
+	outputs_irf_layer = irf_layer(inputs)
 
-	outputs_np = outputs.cpu().numpy()
+	inputs_np = inputs.cpu().numpy()
 	outputs_irf_layer_np = outputs_irf_layer.cpu().numpy()
 	plt.clf()
 	(r,c) = (np.random.randint(0,nr), np.random.randint(0,nc))
-	plt.plot(outputs_np[0,0, :, r, c])
-	plt.plot(pulse)
-	plt.plot(outputs_irf_layer_np[0,0,:,r,c])
+	plt.plot(pulse, label="IRF")
+	plt.plot(inputs_np[0,0, :, r, c], label="Input to IRF Layer")
+	plt.plot(outputs_irf_layer_np[0,:,r,c], label="Output of IRF Layer")
 	plt.title("Row: {}, Col: {}".format(r,c))
+	plt.legend()
 
 
 
