@@ -31,7 +31,8 @@ class LITBaseSPADModel(pl.LightningModule):
 		
 		super(LITBaseSPADModel, self).__init__()
 		
-		self.lsmx = torch.nn.LogSoftmax(dim=1)
+		self.lsmx = torch.nn.LogSoftmax(dim=-3)
+		self.smx = torch.nn.Softmax(dim=-3)
 
 		# Train hyperparams		
 		self.init_lr = init_lr
@@ -74,6 +75,18 @@ class LITBaseSPADModel(pl.LightningModule):
 		M_mea_re_lsmx = self.lsmx(M_mea_re).unsqueeze(1)
 		# Compute metrics
 		loss_kl = criterion_KL(M_mea_re_lsmx, M_gt)
+
+		# M_gt_smx = self.smx(M_gt)
+		# loss_kl = criterion_KL(M_mea_re_lsmx, M_gt_smx)
+		# loss_kl = torch.nn.KLDivLoss(reduction='sum')(M_mea_re_lsmx, M_gt_smx)
+		# loss_kl = criterion_L2(M_mea_re.unsqueeze(1), M_gt)
+		# loss_kl1 = criterion_L2(torch.fft.rfft(M_gt, dim=-3).real, torch.fft.rfft(M_mea_re.unsqueeze(1), dim=-3).real)
+		# loss_kl2 = criterion_L2(torch.fft.rfft(M_gt, dim=-3).imag, torch.fft.rfft(M_mea_re.unsqueeze(1), dim=-3).imag)
+		# loss_kl = loss_kl1 + loss_kl2
+		# cumsum_M_gt = torch.cumsum(M_gt, dim=-3)
+		# cumsum_M_mea_re = torch.cumsum(M_mea_re.unsqueeze(1), dim=-3)
+		# loss_kl = criterion_L1(cumsum_M_gt, cumsum_M_mea_re) 
+
 		loss_tv = criterion_TV(dep_re)
 		rmse = criterion_L2(dep_re, dep)
 		loss = loss_kl + self.p_tv*loss_tv
@@ -102,8 +115,8 @@ class LITBaseSPADModel(pl.LightningModule):
 		)
 
 		## Log some images every 500 training steps
-		if((batch_idx % 500 == 0)):
-			self.log_depth_img(gt_dep=sample["bins"], rec_dep=dep_re, img_title_prefix='Train - ')
+		# if((batch_idx % 500 == 0)):
+		# 	self.log_depth_img(gt_dep=sample["bins"], rec_dep=dep_re, img_title_prefix='Train - ')
 		
 		return {'loss': loss}
 
@@ -201,7 +214,7 @@ class LITBaseSPADModel(pl.LightningModule):
 		self.logger.experiment.add_image(img_title_prefix + 'Rec. Depths', grid2, global_step=self.global_step)
 		## NOTE: The following pause statement helps avoid a random segfault that happens when logging the images inside 
 		# training step
-		plt.pause(0.2)
+		plt.pause(0.1)
 
 	def validation_epoch_end(self, outputs):
 		'''
@@ -298,7 +311,7 @@ class LITL1LossBaseSpadModel(LITBaseSPADModel):
 		)
 
 		## Log some images every 500 training steps
-		if((batch_idx % 500 == 0)):
-			self.log_depth_img(gt_dep=sample["bins"], rec_dep=dep_re, img_title_prefix='Train - ')
+		# if((batch_idx % 500 == 0)):
+		# 	self.log_depth_img(gt_dep=sample["bins"], rec_dep=dep_re, img_title_prefix='Train - ')
 
 		return {'loss': loss}

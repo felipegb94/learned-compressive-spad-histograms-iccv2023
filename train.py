@@ -78,9 +78,8 @@ def train(cfg):
 	lr_monitor_callback = pl.callbacks.LearningRateMonitor(logging_interval='step')
 	
 	callbacks = [ ckpt_callback, lr_monitor_callback ] 
-
 	logger.info("Initializing {} model".format(cfg.model.model_name))
-	lit_model = init_model_from_id(cfg)
+	lit_model = init_model_from_id(cfg, irf=train_data.psf)
 	
 
 	if(cfg.train_params.overfit_batches):

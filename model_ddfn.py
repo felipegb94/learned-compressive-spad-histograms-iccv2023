@@ -181,6 +181,8 @@ class Block2D(torch.nn.Module):
 
 		self.feat1 = nn.Sequential(
 			nn.Conv2d(outchannel_block, 8, kernel_size=3, padding=1, dilation=1, bias=True), 
+			# nn.Conv2d(outchannel_block, 16, kernel_size=3, padding=1, dilation=1, bias=True), 
+			# nn.Conv2d(outchannel_block, 32, kernel_size=3, padding=1, dilation=1, bias=True), 
 			nn.ReLU(inplace=True)
 		)
 		init.kaiming_normal_(self.feat1[0].weight, 0, 'fan_in', 'relu')
@@ -188,6 +190,8 @@ class Block2D(torch.nn.Module):
 
 		self.feat15 = nn.Sequential(
 			nn.Conv2d(8, 4, kernel_size=3, padding=2, dilation=2, bias=True), 
+			# nn.Conv2d(16, 8, kernel_size=3, padding=2, dilation=2, bias=True), 
+			# nn.Conv2d(32, 32, kernel_size=3, padding=2, dilation=2, bias=True), 
 			nn.ReLU(inplace=True)
 		)
 		init.kaiming_normal_(self.feat15[0].weight, 0, 'fan_in', 'relu')
@@ -195,6 +199,8 @@ class Block2D(torch.nn.Module):
 
 		self.feat2 = nn.Sequential(
 			nn.Conv2d(outchannel_block, 8, kernel_size=3, padding=2, dilation=2, bias=True), 
+			# nn.Conv2d(outchannel_block, 16, kernel_size=3, padding=2, dilation=2, bias=True), 
+			# nn.Conv2d(outchannel_block, 32, kernel_size=3, padding=2, dilation=2, bias=True), 
 			nn.ReLU(inplace=True)
 		)
 		init.kaiming_normal_(self.feat2[0].weight, 0, 'fan_in', 'relu')
@@ -202,6 +208,8 @@ class Block2D(torch.nn.Module):
 
 		self.feat25 = nn.Sequential(
 			nn.Conv2d(8, 4, kernel_size=3, padding=1, dilation=1, bias=True), 
+			# nn.Conv2d(16, 8, kernel_size=3, padding=1, dilation=1, bias=True), 
+			# nn.Conv2d(32, 32, kernel_size=3, padding=1, dilation=1, bias=True), 
 			nn.ReLU(inplace=True)
 		)
 		init.kaiming_normal_(self.feat25[0].weight, 0, 'fan_in', 'relu')
@@ -209,6 +217,8 @@ class Block2D(torch.nn.Module):
 
 		self.feat = nn.Sequential(
 			nn.Conv2d(24, 8, kernel_size=1, padding=0, dilation=1, bias=True), 
+			# nn.Conv2d(48, 16, kernel_size=1, padding=0, dilation=1, bias=True), 
+			# nn.Conv2d(128, 32, kernel_size=1, padding=0, dilation=1, bias=True), 
 			nn.ReLU(inplace=True))
 		init.kaiming_normal_(self.feat[0].weight, 0, 'fan_in', 'relu')
 		init.constant_(self.feat[0].bias, 0.0)
@@ -229,6 +239,7 @@ class Block2DGroup(torch.nn.Module):
 
 		# Compute how many channels will be output of this module
 		self.module_out_channels = in_channels + (8*n_ddfn_blocks)
+		# self.module_out_channels = in_channels + (32*n_ddfn_blocks)
 
 		self.n_ddfn_blocks = n_ddfn_blocks
 		curr_in_channels = in_channels
@@ -236,6 +247,7 @@ class Block2DGroup(torch.nn.Module):
 		for i in range(self.n_ddfn_blocks):
 			dfu2D_blocks_dict['dfu2D_block{}'.format(i)] = Block2D(in_channels=curr_in_channels) 
 			curr_in_channels += 8
+			# curr_in_channels += 32
 		self.dfu2D_blocks = nn.Sequential(dfu2D_blocks_dict)
 
 	def forward(self, inputs):

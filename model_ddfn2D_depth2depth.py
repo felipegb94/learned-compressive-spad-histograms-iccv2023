@@ -38,8 +38,9 @@ class PlainDeepBoosting2DDepth2Depth(nn.Module):
 		init.normal_(self.C_rec[0].weight, mean=0.0, std=0.001)
 		init.constant_(self.C_rec[0].bias, 0.0)
 
+		self.hist_rec_layer = Gaussian1DLayer(gauss_len=num_bins, out_dim=-3)
 		self.gauss1D_layer = Gaussian1DLayer(gauss_len=num_bins, out_dim=-3)
-
+	
 	def forward(self, inputs):
 
 		# Feature extraction

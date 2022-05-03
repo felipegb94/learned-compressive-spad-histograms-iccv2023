@@ -17,7 +17,6 @@ criterion_GAN = nn.MSELoss()
 # NOTE: The KLDiv loss expects input to be log-probabilities, but NOT the target
 # criterion_KL = nn.KLDivLoss()
 criterion_KL = nn.KLDivLoss(reduction='mean') 
-# criterion_KL = nn.KLDivLoss(reduction='batchmean')
 
 # inpt, target: [batch_size, 1, h, w]
 criterion_L1 = nn.L1Loss()

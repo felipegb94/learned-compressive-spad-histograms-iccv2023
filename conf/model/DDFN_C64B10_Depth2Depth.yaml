@@ -1,0 +1,9 @@
+## This model pre-computes depths and then generates a histogram from each depth whose only non-zero bin corresponds to the depth
+# Then we input that histogram into the DDFN_C64B10_NL model
+
+# Model ID is used to select the correct model objcet
+model_id: DDFN_C64B10_Depth2Depth
+model_params:
+  in_channels: 1
+# Model name is used for saving results
+model_name: ${.model_id}
