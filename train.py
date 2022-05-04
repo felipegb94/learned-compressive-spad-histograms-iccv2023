@@ -48,8 +48,7 @@ def train(cfg):
 	logger.info("Loading validation data...")
 	logger.info("Val Datalist: {}".format(cfg.params.val_datalist_fpath))
 	val_data = SpadDataset(cfg.params.val_datalist_fpath, cfg.train_params.noise_idx
-		, disable_rand_crop=cfg.train_params.disable_rand_crop
-		, output_size=cfg.train_params.crop_patch_size
+		, disable_rand_crop=True
 	)
 	val_loader = DataLoader(val_data, batch_size=cfg.train_params.batch_size, 
 							shuffle=False, num_workers=cfg.train_params.workers, 
