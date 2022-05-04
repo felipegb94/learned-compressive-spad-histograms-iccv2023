@@ -58,34 +58,6 @@ class PlainDeepBoosting2DDepth2Depth(nn.Module):
 
 		return denoise_out.squeeze(1), rec
 
-class LITPlainDeepBoosting2DDepth2Depth(LITL1LossBaseSpadModel):
-	def __init__(self, 
-		init_lr = 1e-4,
-		p_tv = 1e-5, 
-		lr_decay_gamma = 0.9,
-		in_channels=1,
-		outchannel_MS=4,
-		n_ddfn_blocks=12,
-		num_bins=1024
-		):
-		
-		deep_boosting_model = PlainDeepBoosting2DDepth2Depth(
-			in_channels=in_channels, 
-			outchannel_MS=outchannel_MS, 
-			n_ddfn_blocks=n_ddfn_blocks, 
-			num_bins=num_bins)
-
-		super(LITPlainDeepBoosting2DDepth2Depth, self).__init__(backbone_net=deep_boosting_model,
-												init_lr = init_lr,
-												p_tv = p_tv, 
-												lr_decay_gamma = lr_decay_gamma)
-		
-		# Overwrite example input array
-		self.example_input_array = torch.randn([1, 1, 32, 32])
-	
-	def get_input_data(self, sample):
-		return make_zeromean_normalized_bins(sample["est_bins_argmax"])
-		# return sample["est_bins_argmax"]
 
 class LITPlainDeepBoosting2DDepth2Depth01Inputs(LITL1LossBaseSpadModel):
 	def __init__(self, 
@@ -137,7 +109,7 @@ if __name__=='__main__':
 
 	# Set compression params
 	inputs = inputs2D
-	model = LITPlainDeepBoosting2DDepth2Depth(outchannel_MS=outchannel_MS, num_bins=nt)
+	model = LITPlainDeepBoosting2DDepth2Depth01Inputs(outchannel_MS=outchannel_MS, num_bins=nt)
 	print("{} Parameters: {}".format(model.__class__.__name__, count_parameters(model)))
 	outputs = model(inputs)
 	print("		inputs shape: {}".format(inputs.shape))
