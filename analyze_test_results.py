@@ -53,12 +53,14 @@ if __name__=='__main__':
     # scene_ids = ['spad_Art']
     # scene_ids = ['spad_Books']
     # sbr_params = ['2_2','2_10','2_50','5_2','5_10','5_50','10_2','10_10','10_50']
-    sbr_params = ['2_50']
+    sbr_params = ['5_50']
 
     ## Set dirpaths
     compressive_model_result_dirpath = 'outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_NL_Compressive/debug/2022-04-23_132059/test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
-    deepboosting_model_result_dirpath = 'outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_NL_original/debug/2022-04-20_185832/test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
-    depth2depth_model_result_dirpath = 'outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_NL_Depth2Depth/debug/2022-04-22_134732/test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
+    db3D_nl_result_dirpath = 'outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_NL_original/debug/2022-04-20_185832/test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
+    db3D_result_dirpath = 'outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10/debug/2022-04-25_192521/test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
+    db3D_nl_d2d_result_dirpath = 'outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_NL_Depth2Depth/debug/2022-04-22_134732/test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
+    db3D_d2d_result_dirpath = 'outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_Depth2Depth/2022-05-02_085659/test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
     db2D_d2d2hist01Inputs_B12_model_result_dirpath = 'outputs/nyuv2_64x64x1024_80ps/debug/DDFN2D_Depth2Depth2Hist_01Inputs/B-12_MS-8/2022-05-02_214727/test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
     db2D_d2d01Inputs_B12_model_result_dirpath = 'outputs/nyuv2_64x64x1024_80ps/debug/DDFN2D_Depth2Depth_01Inputs/B-12_MS-8/debug/2022-04-27_104532/test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
     db2D_d2d01Inputs_B16_model_result_dirpath = 'outputs/nyuv2_64x64x1024_80ps/debug/DDFN2D_Depth2Depth_01Inputs/B-16_MS-8/2022-05-01_172344/test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
@@ -69,8 +71,10 @@ if __name__=='__main__':
     lmf_rmse_all = []
     argmax_rmse_all = []
     compressive_model_rmse_all = []
-    deepboosting_model_rmse_all = []
-    depth2depth_model_rmse_all = []
+    db3D_nl_rmse_all = []
+    db3D_rmse_all = []
+    db3D_nl_d2d_rmse_all = []
+    db3D_d2d_rmse_all = []
     db2D_d2d2hist01Inputs_B12_model_rmse_all = []
     db2D_d2d01Inputs_B12_model_rmse_all = []
     db2D_d2d01Inputs_B16_model_rmse_all = []
@@ -106,8 +110,10 @@ if __name__=='__main__':
 
             ## Get depths for model outputs
             (compressive_model_depths) = get_model_depths(model_result_dirpath=compressive_model_result_dirpath, scene_id=curr_scene_id, sbr_params=curr_sbr_params, num_bins=num_bins, tau=tau)
-            (deepboosting_model_depths) = get_model_depths(model_result_dirpath=deepboosting_model_result_dirpath, scene_id=curr_scene_id, sbr_params=curr_sbr_params, num_bins=num_bins, tau=tau)
-            (depth2depth_model_depths) = get_model_depths(model_result_dirpath=depth2depth_model_result_dirpath, scene_id=curr_scene_id, sbr_params=curr_sbr_params, num_bins=num_bins, tau=tau)
+            (db3D_nl_depths) = get_model_depths(model_result_dirpath=db3D_nl_result_dirpath, scene_id=curr_scene_id, sbr_params=curr_sbr_params, num_bins=num_bins, tau=tau)
+            (db3D_depths) = get_model_depths(model_result_dirpath=db3D_result_dirpath, scene_id=curr_scene_id, sbr_params=curr_sbr_params, num_bins=num_bins, tau=tau)
+            (db3D_nl_d2d_depths) = get_model_depths(model_result_dirpath=db3D_nl_d2d_result_dirpath, scene_id=curr_scene_id, sbr_params=curr_sbr_params, num_bins=num_bins, tau=tau)
+            (db3D_d2d_depths) = get_model_depths(model_result_dirpath=db3D_d2d_result_dirpath, scene_id=curr_scene_id, sbr_params=curr_sbr_params, num_bins=num_bins, tau=tau)
             (db2D_d2d2hist01Inputs_B12_model_depths) = get_model_depths(model_result_dirpath=db2D_d2d2hist01Inputs_B12_model_result_dirpath, scene_id=curr_scene_id, sbr_params=curr_sbr_params, num_bins=num_bins, tau=tau)
             (db2D_d2d01Inputs_B12_model_depths) = get_model_depths(model_result_dirpath=db2D_d2d01Inputs_B12_model_result_dirpath, scene_id=curr_scene_id, sbr_params=curr_sbr_params, num_bins=num_bins, tau=tau)
             (db2D_d2d01Inputs_B16_model_depths) = get_model_depths(model_result_dirpath=db2D_d2d01Inputs_B16_model_result_dirpath, scene_id=curr_scene_id, sbr_params=curr_sbr_params, num_bins=num_bins, tau=tau)
@@ -118,8 +124,10 @@ if __name__=='__main__':
             (lmf_rmse, lmf_mae, lmf_abs_errs, lmf_perc_errs) = compute_error_metrics(gt_depths, lmf_depths)
             (argmax_rmse, argmax_mae, argmax_abs_errs, argmax_perc_errs) = compute_error_metrics(gt_depths, argmax_depths)
             (compressive_model_rmse, compressive_model_mae, compressive_model_abs_errs, compressive_model_perc_errs) = compute_error_metrics(gt_depths, compressive_model_depths)
-            (deepboosting_model_rmse, deepboosting_model_mae, deepboosting_model_abs_errs, deepboosting_model_perc_errs) = compute_error_metrics(gt_depths, deepboosting_model_depths)
-            (depth2depth_model_rmse, depth2depth_model_mae, depth2depth_model_abs_errs, depth2depth_model_perc_errs) = compute_error_metrics(gt_depths, depth2depth_model_depths)
+            (db3D_nl_rmse, db3D_nl_mae, db3D_nl_abs_errs, db3D_nl_perc_errs) = compute_error_metrics(gt_depths, db3D_nl_depths)
+            (db3D_rmse, db3D_mae, db3D_abs_errs, db3D_perc_errs) = compute_error_metrics(gt_depths, db3D_depths)
+            (db3D_nl_d2d_rmse, db3D_nl_d2d_mae, db3D_nl_d2d_abs_errs, db3D_nl_d2d_perc_errs) = compute_error_metrics(gt_depths, db3D_nl_d2d_depths)
+            (db3D_d2d_rmse, db3D_d2d_mae, db3D_d2d_abs_errs, db3D_d2d_perc_errs) = compute_error_metrics(gt_depths, db3D_d2d_depths)
             (db2D_d2d2hist01Inputs_B12_model_rmse, db2D_d2d2hist01Inputs_B12_model_mae, db2D_d2d2hist01Inputs_B12_model_abs_errs, db2D_d2d2hist01Inputs_B12_model_perc_errs) = compute_error_metrics(gt_depths, db2D_d2d2hist01Inputs_B12_model_depths)
             (db2D_d2d01Inputs_B12_model_rmse, db2D_d2d01Inputs_B12_model_mae, db2D_d2d01Inputs_B12_model_abs_errs, db2D_d2d01Inputs_B12_model_perc_errs) = compute_error_metrics(gt_depths, db2D_d2d01Inputs_B12_model_depths)
             (db2D_d2d01Inputs_B16_model_rmse, db2D_d2d01Inputs_B16_model_mae, db2D_d2d01Inputs_B16_model_abs_errs, db2D_d2d01Inputs_B16_model_perc_errs) = compute_error_metrics(gt_depths, db2D_d2d01Inputs_B16_model_depths)
@@ -130,8 +138,10 @@ if __name__=='__main__':
             lmf_rmse_all.append(lmf_rmse)
             argmax_rmse_all.append(argmax_rmse)
             compressive_model_rmse_all.append(compressive_model_rmse)
-            deepboosting_model_rmse_all.append(deepboosting_model_rmse)
-            depth2depth_model_rmse_all.append(depth2depth_model_rmse)
+            db3D_nl_rmse_all.append(db3D_nl_rmse)
+            db3D_rmse_all.append(db3D_rmse)
+            db3D_nl_d2d_rmse_all.append(db3D_nl_d2d_rmse)
+            db3D_d2d_rmse_all.append(db3D_d2d_rmse)
             db2D_d2d2hist01Inputs_B12_model_rmse_all.append(db2D_d2d2hist01Inputs_B12_model_rmse)
             db2D_d2d01Inputs_B12_model_rmse_all.append(db2D_d2d01Inputs_B12_model_rmse)
             db2D_d2d01Inputs_B16_model_rmse_all.append(db2D_d2d01Inputs_B16_model_rmse)
@@ -142,8 +152,10 @@ if __name__=='__main__':
             # print("    lmf: {}".format(lmf_perc_errs))
             # print("    argmax: {}".format(argmax_perc_errs))
             # print("    compressive_model: {}".format(compressive_model_perc_errs))
-            # print("    deepboosting_model: {}".format(deepboosting_model_perc_errs))
-            # print("    depth2depth_model: {}".format(depth2depth_model_perc_errs))
+            # print("    db3D_nl: {}".format(db3D_nl_perc_errs))
+            # print("    db3D: {}".format(db3D_perc_errs))
+            # print("    db3D_nl_d2d: {}".format(db3D_nl_d2d_perc_errs))
+            # print("    db3D_d2d: {}".format(db3D_d2d_perc_errs))
             # print("    db2D_d2d2hist01Inputs_B12_model: {}".format(db2D_d2d2hist01Inputs_B12_model_perc_errs))
             # print("    db2D_d2d01Inputs_B12_model: {}".format(db2D_d2d01Inputs_B12_model_perc_errs))
             # print("    db2D_d2d01Inputs_B16_model: {}".format(db2D_d2d01Inputs_B16_model_perc_errs))
@@ -160,8 +172,10 @@ if __name__=='__main__':
                 plt.clf()
                 plt.suptitle("{} - SBR: {}, Signal: {} photons, Bkg: {} photons".format(scene_fname, SBR, mean_signal_photons, mean_background_photons), fontsize=20)
                 plt.subplot(2,4,1)
-                plt.imshow(gt_depths, vmin=min_depth, vmax=max_depth); 
-                plt.title('gt_depths \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(gt_rmse, gt_mae*100, gt_perc_errs),fontsize=14)
+                # plt.imshow(gt_depths, vmin=min_depth, vmax=max_depth); 
+                # plt.title('gt_depths \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(gt_rmse, gt_mae*100, gt_perc_errs),fontsize=14)
+                plt.imshow(db3D_d2d_depths, vmin=min_depth, vmax=max_depth); 
+                plt.title('db3D_d2d_depths \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db3D_d2d_rmse, db3D_d2d_mae*100, db3D_d2d_perc_errs),fontsize=14)
                 plt.colorbar()
                 plt.subplot(2,4,2)
                 plt.imshow(lmf_depths, vmin=min_depth, vmax=max_depth); 
@@ -172,16 +186,16 @@ if __name__=='__main__':
                 plt.title('argmax_depths \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(argmax_rmse, argmax_mae*100, argmax_perc_errs),fontsize=14)
                 plt.colorbar()
                 plt.subplot(2,4,4)
-                plt.imshow(deepboosting_model_depths, vmin=min_depth, vmax=max_depth); 
-                plt.title('deepboosting_model_depths \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(deepboosting_model_rmse, deepboosting_model_mae*100, deepboosting_model_perc_errs),fontsize=14)
+                plt.imshow(db3D_nl_depths, vmin=min_depth, vmax=max_depth); 
+                plt.title('db3D_nl_depths \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db3D_nl_rmse, db3D_nl_mae*100, db3D_nl_perc_errs),fontsize=14)
                 plt.colorbar()
                 plt.subplot(2,4,5)
                 # plt.imshow(compressive_model_depths, vmin=min_depth, vmax=max_depth); 
                 # plt.title('compressive_model_depths \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(compressive_model_rmse, compressive_model_mae*100, compressive_model_perc_errs),fontsize=14)
-                # plt.imshow(depth2depth_model_depths, vmin=min_depth, vmax=max_depth); 
-                # plt.title('depth2depth_model_depths \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(depth2depth_model_rmse, depth2depth_model_mae*100, depth2depth_model_perc_errs),fontsize=14)
-                plt.imshow(db2D_d2d2hist01Inputs_B12_model_depths, vmin=min_depth, vmax=max_depth); 
-                plt.title('db2D_d2d2hist_B12_model_depths \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db2D_d2d2hist01Inputs_B12_model_rmse, db2D_d2d2hist01Inputs_B12_model_mae*100, db2D_d2d2hist01Inputs_B12_model_perc_errs),fontsize=14)
+                plt.imshow(db3D_nl_d2d_depths, vmin=min_depth, vmax=max_depth); 
+                plt.title('db3D_nl_d2d_depths \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db3D_nl_d2d_rmse, db3D_nl_d2d_mae*100, db3D_nl_d2d_perc_errs),fontsize=14)
+                # plt.imshow(db2D_d2d2hist01Inputs_B12_model_depths, vmin=min_depth, vmax=max_depth); 
+                # plt.title('db2D_d2d2hist_B12_model_depths \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db2D_d2d2hist01Inputs_B12_model_rmse, db2D_d2d2hist01Inputs_B12_model_mae*100, db2D_d2d2hist01Inputs_B12_model_perc_errs),fontsize=14)
                 plt.colorbar()
                 plt.subplot(2,4,6)
                 plt.imshow(db2D_d2d01Inputs_B12_model_depths, vmin=min_depth, vmax=max_depth); 
@@ -195,7 +209,7 @@ if __name__=='__main__':
                 plt.imshow(db2D_d2d01Inputs_B24_model_depths, vmin=min_depth, vmax=max_depth); 
                 plt.title('db2D_B24_model_depths \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db2D_d2d01Inputs_B24_model_rmse, db2D_d2d01Inputs_B24_model_mae*100, db2D_d2d01Inputs_B24_model_perc_errs),fontsize=14)
                 plt.colorbar()
-                out_fname = 'NEW2_depths_' + scene_fname
+                out_fname = 'd2d_comparisson_depths_' + scene_fname
                 plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname)
 
 
@@ -204,6 +218,8 @@ if __name__=='__main__':
                 # plt.subplot(2,4,1)
                 # plt.imshow(gt_depths, vmin=min_err, vmax=max_err); 
                 # plt.title('gt_abs_errs \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(gt_rmse, gt_mae*100, gt_perc_errs),fontsize=14)
+                # plt.imshow(db3D_d2d_abs_errs, vmin=min_err, vmax=max_err); 
+                # plt.title('db3D_d2d_abs_errs \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db3D_d2d_rmse, db3D_d2d_mae*100, db3D_d2d_perc_errs),fontsize=14)
                 # plt.colorbar()
                 # plt.subplot(2,4,2)
                 # plt.imshow(lmf_abs_errs, vmin=min_err, vmax=max_err); 
@@ -214,14 +230,14 @@ if __name__=='__main__':
                 # plt.title('argmax_abs_errs \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(argmax_rmse, argmax_mae*100, argmax_perc_errs),fontsize=14)
                 # plt.colorbar()
                 # plt.subplot(2,4,4)
-                # plt.imshow(deepboosting_model_abs_errs, vmin=min_err, vmax=max_err); 
-                # plt.title('deepboosting_model_abs_errs \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(deepboosting_model_rmse, deepboosting_model_mae*100, deepboosting_model_perc_errs),fontsize=14)
+                # plt.imshow(db3D_nl_abs_errs, vmin=min_err, vmax=max_err); 
+                # plt.title('db3D_nl_abs_errs \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db3D_nl_rmse, db3D_nl_mae*100, db3D_nl_perc_errs),fontsize=14)
                 # plt.colorbar()
                 # plt.subplot(2,4,5)
                 # # plt.imshow(compressive_model_abs_errs, vmin=min_err, vmax=max_err); 
                 # # plt.title('compressive_model_abs_errs \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(compressive_model_rmse, compressive_model_mae*100, compressive_model_perc_errs),fontsize=14)
-                # # plt.imshow(depth2depth_model_abs_errs, vmin=min_err, vmax=max_err); 
-                # # plt.title('depth2depth_model_abs_errs \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(depth2depth_model_rmse, depth2depth_model_mae*100, depth2depth_model_perc_errs),fontsize=14)
+                # # plt.imshow(db3D_nl_d2d_abs_errs, vmin=min_err, vmax=max_err); 
+                # # plt.title('db3D_nl_d2d_abs_errs \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db3D_nl_d2d_rmse, db3D_nl_d2d_mae*100, db3D_nl_d2d_perc_errs),fontsize=14)
                 # plt.imshow(db2D_d2d2hist01Inputs_B12_model_abs_errs, vmin=min_err, vmax=max_err); 
                 # plt.title('db2D_d2d2hist_B12_model_abs_errs \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db2D_d2d2hist01Inputs_B12_model_rmse, db2D_d2d2hist01Inputs_B12_model_mae*100, db2D_d2d2hist01Inputs_B12_model_perc_errs),fontsize=14)
                 # plt.colorbar()
@@ -237,7 +253,7 @@ if __name__=='__main__':
                 # plt.imshow(db2D_d2d01Inputs_B24_model_abs_errs, vmin=min_err, vmax=max_err); 
                 # plt.title('db2D_B24_model_abs_errs \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db2D_d2d01Inputs_B24_model_rmse, db2D_d2d01Inputs_B24_model_mae*100, db2D_d2d01Inputs_B24_model_perc_errs),fontsize=14)
                 # plt.colorbar()
-                # out_fname = 'NEW2_abs_errs_' + scene_fname
+                # out_fname = 'd2d_comparisson_abs_errs_' + scene_fname
                 # plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname)
 
     print("Test Set RMSE:")
@@ -245,8 +261,10 @@ if __name__=='__main__':
     print("    lmf: {}".format(np.mean(lmf_rmse_all)))
     print("    argmax: {}".format(np.mean(argmax_rmse_all)))
     print("    compressive_model: {}".format(np.mean(compressive_model_rmse_all)))
-    print("    deepboosting_model: {}".format(np.mean(deepboosting_model_rmse_all)))
-    print("    depth2depth_model: {}".format(np.mean(depth2depth_model_rmse_all)))
+    print("    db3D_nl: {}".format(np.mean(db3D_nl_rmse_all)))
+    print("    db3D: {}".format(np.mean(db3D_rmse_all)))
+    print("    db3D_nl_d2d: {}".format(np.mean(db3D_nl_d2d_rmse_all)))
+    print("    db3D_d2d: {}".format(np.mean(db3D_d2d_rmse_all)))
     print("    db2D_d2d2hist01Inputs_B12_model: {}".format(np.mean(db2D_d2d2hist01Inputs_B12_model_rmse_all)))
     print("    db2D_d2d01Inputs_B12_model: {}".format(np.mean(db2D_d2d01Inputs_B12_model_rmse_all)))
     print("    db2D_d2d01Inputs_B16_model: {}".format(np.mean(db2D_d2d01Inputs_B16_model_rmse_all)))
