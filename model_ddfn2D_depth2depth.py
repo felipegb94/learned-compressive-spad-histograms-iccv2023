@@ -56,7 +56,7 @@ class PlainDeepBoosting2DDepth2Depth(nn.Module):
 		# hist reconstruction
 		denoise_out = self.gauss1D_layer(rec)
 
-		return denoise_out, rec
+		return denoise_out.squeeze(1), rec
 
 class LITPlainDeepBoosting2DDepth2Depth(LITL1LossBaseSpadModel):
 	def __init__(self, 
@@ -107,7 +107,8 @@ class LITPlainDeepBoosting2DDepth2Depth01Inputs(LITL1LossBaseSpadModel):
 		super(LITPlainDeepBoosting2DDepth2Depth01Inputs, self).__init__(backbone_net=deep_boosting_model,
 												init_lr = init_lr,
 												p_tv = p_tv, 
-												lr_decay_gamma = lr_decay_gamma)
+												lr_decay_gamma = lr_decay_gamma
+												)
 		
 		# Overwrite example input array
 		self.example_input_array = torch.randn([1, 1, 32, 32])

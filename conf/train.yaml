@@ -4,7 +4,8 @@ hydra:
     # Example "outputs/mnist/classifier/baseline/2021-03-10-141516"
     # dir: outputs/${data.name}/${model.name}/${experiment}/${now:%Y-%m-%d_%H%M%S}
     # dir: outputs/${dataset.name}/${model.model_name}/${experiment}/${now:%Y-%m-%d_%H%M%S}
-    dir: outputs/${dataset.name}/${experiment}/${model.model_name}/${now:%Y-%m-%d_%H%M%S}
+    # dir: outputs/${dataset.name}/${experiment}/${model.model_name}/${now:%Y-%m-%d_%H%M%S}
+    dir: outputs/${dataset.name}/${experiment}/${model.model_name}/loss-${train_params.data_loss_id}_tv-${train_params.p_tv}/${now:%Y-%m-%d_%H%M%S}
 
 #### Useful variables to have
 # path to original working directory
@@ -21,10 +22,10 @@ defaults:
   # - model: DDFN_C64B10_NL_Depth2Depth
   # - model: DDFN_C64B10_NL_Compressive
   # - model: DDFN_C64B10
-  - model: DDFN_C64B10_Depth2Depth
+  # - model: DDFN_C64B10_Depth2Depth
   # - model: DDFN2D_Depth2Depth
-  # - model: DDFN2D_Depth2Depth_01Inputs
-  # - model: DDFN2D_Depth2Depth2Hist_01Inputs
+  - model: DDFN2D_Depth2Depth_01Inputs
+  # - model: DDFN2D_Depth2Depth
   # enable color logging
   - override hydra/hydra_logging: colorlog
   - override hydra/job_logging: colorlog

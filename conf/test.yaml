@@ -30,10 +30,15 @@ train_dataset: nyuv2_64x64x1024_80ps
 # model_dirpath: outputs/${.train_dataset}/DDFN_C64B10/debug/2022-04-25_192521
 # ckpt_id: epoch=05-step=19910-avgvalrmse=0.0287
 
-# ## Non-Local Depth2Depth Model --> Full trained model with gradient decay
+# ## 3D DB Non-Local Depth2Depth Model --> Full trained model with gradient decay
 # model_name: DDFN_C64B10_NL_Depth2Depth
 # model_dirpath: outputs/${.train_dataset}/debug/${.model_name}/debug/2022-04-22_134732
 # ckpt_id: epoch=05-step=19045-avgvalrmse=0.0363
+
+# ## 3D DB Plain Depth2Depth Model --> Full trained model with gradient decay
+# model_name: DDFN_C64B10_Depth2Depth
+# model_dirpath: outputs/${.train_dataset}/debug/${.model_name}/2022-05-02_085659
+# ckpt_id: epoch=05-step=19910-avgvalrmse=0.0357
 
 # ## Compressive --> Full trained model with gradient decay
 # model_name: DDFN_C64B10_NL_Compressive
@@ -51,11 +56,10 @@ train_dataset: nyuv2_64x64x1024_80ps
 # model_dirpath: outputs/${.train_dataset}/debug/${.model_name}/debug/2022-04-27_103314
 # ckpt_id: epoch=29-step=103022-avgvalrmse=0.0306 # use last one
 
-# ## Depth2Depth Model --> Full trained model with gradient decay
-# model_name: DDFN2D_Depth2Depth_01Inputs/B-12_MS-8
-# model_dirpath: outputs/${.train_dataset}/debug/${.model_name}/debug/2022-04-27_104532
-# ckpt_id: epoch=29-step=101292-avgvalrmse=0.0280 # use last one
-
+## Depth2Depth Model --> Full trained model with gradient decay
+model_name: DDFN2D_Depth2Depth_01Inputs/B-12_MS-8
+model_dirpath: outputs/${.train_dataset}/debug/${.model_name}/debug/2022-04-27_104532
+ckpt_id: epoch=29-step=101292-avgvalrmse=0.0280 # use last one
 
 # ## Depth2Depth Model --> Full trained model with gradient decay
 # model_name: DDFN2D_Depth2Depth_01Inputs/B-24_MS-8
@@ -71,14 +75,15 @@ train_dataset: nyuv2_64x64x1024_80ps
 # # ckpt_id: epoch=11-step=38958-avgvalrmse=0.0306
 # # ckpt_id: epoch=16-step=58003-avgvalrmse=0.0270
 
-## Depth2Depth2Hist Model --> Full trained model with gradient decay
-model_name: DDFN2D_Depth2Depth2Hist_01Inputs/B-12_MS-8
-model_dirpath: outputs/${.train_dataset}/debug/${.model_name}/2022-04-30_182741
-ckpt_id: epoch=42-step=148041-avgvalrmse=0.0278 # use last one
+# ## Depth2Depth2Hist Model --> Full trained model with gradient decay
+# model_name: DDFN2D_Depth2Depth2Hist_01Inputs/B-12_MS-8
+# model_dirpath: outputs/${.train_dataset}/debug/${.model_name}/2022-05-02_214727
+# ckpt_id: epoch=42-step=148041-avgvalrmse=0.0281
+
 
 params:
   gpu_num: 1
-  cuda: false
+  cuda: true
   batch_size: 1
   noise_idx: null
   test_datalist_fpath: ${io_dirpaths.datalists_dirpath}/${dataset.test_datalist_fname}

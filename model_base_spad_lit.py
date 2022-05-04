@@ -27,7 +27,9 @@ class LITBaseSPADModel(pl.LightningModule):
 		backbone_net,
 		init_lr = 1e-4,
 		p_tv = 1e-5, 
-		lr_decay_gamma = 0.9):
+		lr_decay_gamma = 0.9,
+		data_loss_id = 'kldiv',
+		):
 		
 		super(LITBaseSPADModel, self).__init__()
 		
@@ -38,6 +40,7 @@ class LITBaseSPADModel(pl.LightningModule):
 		self.init_lr = init_lr
 		self.lr_decay_gamma = lr_decay_gamma
 		self.p_tv = p_tv
+		self.data_loss_id = data_loss_id
 
 		self.backbone_net = backbone_net
 
@@ -75,23 +78,29 @@ class LITBaseSPADModel(pl.LightningModule):
 		M_mea_re_lsmx = self.lsmx(M_mea_re).unsqueeze(1)
 		# Compute metrics
 		loss_kl = criterion_KL(M_mea_re_lsmx, M_gt)
-
-		# M_gt_smx = self.smx(M_gt)
-		# loss_kl = criterion_KL(M_mea_re_lsmx, M_gt_smx)
-		# loss_kl = torch.nn.KLDivLoss(reduction='sum')(M_mea_re_lsmx, M_gt_smx)
-		# loss_kl = criterion_L2(M_mea_re.unsqueeze(1), M_gt)
-		# loss_kl1 = criterion_L2(torch.fft.rfft(M_gt, dim=-3).real, torch.fft.rfft(M_mea_re.unsqueeze(1), dim=-3).real)
-		# loss_kl2 = criterion_L2(torch.fft.rfft(M_gt, dim=-3).imag, torch.fft.rfft(M_mea_re.unsqueeze(1), dim=-3).imag)
-		# loss_kl = loss_kl1 + loss_kl2
-		# cumsum_M_gt = torch.cumsum(M_gt, dim=-3)
-		# cumsum_M_mea_re = torch.cumsum(M_mea_re.unsqueeze(1), dim=-3)
-		# loss_kl = criterion_L1(cumsum_M_gt, cumsum_M_mea_re) 
-
 		loss_tv = criterion_TV(dep_re)
-		rmse = criterion_L2(dep_re, dep)
-		loss = loss_kl + self.p_tv*loss_tv
+		loss_l1 = criterion_L1(dep_re, dep)
+		loss_emd = criterion_L1(torch.cumsum(M_gt, dim=-3), torch.cumsum(M_mea_re.unsqueeze(1), dim=-3))
+		loss_rmse = criterion_L2(dep_re, dep)
+		loss_tv = criterion_TV(dep_re)
 
-		return {'loss': loss, 'loss_kl': loss_kl, 'loss_tv': loss_tv, 'rmse': rmse}
+		if(self.data_loss_id == 'kldiv'):
+			loss = loss_kl + self.p_tv*loss_tv
+		elif(self.data_loss_id == 'L1'):
+			loss = loss_l1 + self.p_tv*loss_tv
+		elif(self.data_loss_id == 'L2'):
+			loss = loss_rmse + self.p_tv*loss_tv
+		elif(self.data_loss_id == 'EMD'):
+			loss = loss_emd + self.p_tv*loss_tv
+		else:
+			assert(False), "Invalid loss id"
+
+		return {'loss': loss, 
+				'loss_kl': loss_kl, 
+				'loss_l1': loss_l1, 
+				'loss_emd': loss_emd, 
+				'loss_tv': loss_tv, 
+				'rmse': loss_rmse}
 
 	def training_step(self, sample, batch_idx):
 		# Forward pass
@@ -99,6 +108,7 @@ class LITBaseSPADModel(pl.LightningModule):
 		# Compute Losses
 		losses = self.compute_losses(sample, M_mea_re, dep_re)
 		loss = losses['loss']
+		loss_l1 = losses['loss_l1']
 		loss_kl = losses['loss_kl']
 		loss_tv = losses['loss_tv']
 		rmse = losses['rmse']
@@ -109,6 +119,7 @@ class LITBaseSPADModel(pl.LightningModule):
 				"loss/train": loss
 				, "rmse/train": rmse
 				, "train_losses/kldiv": loss_kl
+				, "train_losses/l1": loss_l1
 				, "train_losses/tv": self.p_tv*loss_tv				
 			}
 			# , prog_bar=True
@@ -268,50 +279,6 @@ class LITL1LossBaseSpadModel(LITBaseSPADModel):
 			backbone_net=backbone_net,
 			init_lr = init_lr,
 			p_tv = p_tv, 
-			lr_decay_gamma = lr_decay_gamma )
-
-	def compute_losses(self, sample, M_mea_re, dep_re):
-		# load data and compute losses
-		M_gt = sample["rates"]
-		dep = sample["bins"]
-		# Normalize
-		M_mea_re_lsmx = self.lsmx(M_mea_re).unsqueeze(1)
-		# Compute metrics
-		loss_kl = criterion_KL(M_mea_re_lsmx, M_gt)
-		loss_tv = criterion_TV(dep_re)
-		loss_l1 = criterion_L1(dep_re, dep)
-		rmse = criterion_L2(dep_re, dep)
-		
-		## Use loss_l1 for training
-		loss = loss_l1 + self.p_tv*loss_tv
-
-		return {'loss': loss, 'loss_kl': loss_kl, 'loss_tv': loss_tv, 'loss_l1': loss_l1, 'rmse': rmse}
-
-	def training_step(self, sample, batch_idx):
-		# Forward pass
-		M_mea_re, dep_re = self.forward_wrapper(sample)
-		# Compute Losses
-		losses = self.compute_losses(sample, M_mea_re, dep_re)
-		loss = losses['loss']
-		loss_l1 = losses['loss_l1']
-		loss_kl = losses['loss_kl']
-		loss_tv = losses['loss_tv']
-		rmse = losses['rmse']
-
-		# Log to logger (i.e., tensorboard), if you want it to be displayed at progress bar, use prog_bar=True
-		self.log_dict(
-			{
-				"loss/train": loss
-				, "rmse/train": rmse
-				, "train_losses/kldiv": loss_kl
-				, "train_losses/l1": loss_l1
-				, "train_losses/tv": self.p_tv*loss_tv				
-			}
-			# , prog_bar=True
-		)
-
-		## Log some images every 500 training steps
-		# if((batch_idx % 500 == 0)):
-		# 	self.log_depth_img(gt_dep=sample["bins"], rec_dep=dep_re, img_title_prefix='Train - ')
-
-		return {'loss': loss}
+			lr_decay_gamma = lr_decay_gamma,
+			data_loss_id = 'L1'
+			)
