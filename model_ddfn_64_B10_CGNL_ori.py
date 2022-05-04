@@ -255,7 +255,9 @@ class LITDeepBoosting(LITBaseSPADModel):
 		super(LITDeepBoosting, self).__init__(backbone_net=deep_boosting_model,
 												init_lr = init_lr,
 												p_tv = p_tv, 
-												lr_decay_gamma = lr_decay_gamma)
+												lr_decay_gamma = lr_decay_gamma,
+												data_loss_id = 'kldiv' 
+												)
 		
 		# Overwrite example input array
 		self.example_input_array = torch.randn([1, 1, 1024, 32, 32])
@@ -272,7 +274,9 @@ class LITPlainDeepBoosting(LITBaseSPADModel):
 		super(LITPlainDeepBoosting, self).__init__(backbone_net=deep_boosting_model,
 												init_lr = init_lr,
 												p_tv = p_tv, 
-												lr_decay_gamma = lr_decay_gamma)
+												lr_decay_gamma = lr_decay_gamma,
+												data_loss_id = 'kldiv' 
+												)
 		
 		# Overwrite example input array
 		self.example_input_array = torch.randn([1, 1, 1024, 32, 32])

@@ -73,7 +73,9 @@ class LITPlainDeepBoosting2DDepth2Depth2Hist01Inputs(LITBaseSPADModel):
 		super(LITPlainDeepBoosting2DDepth2Depth2Hist01Inputs, self).__init__(backbone_net=deep_boosting_model,
 												init_lr = init_lr,
 												p_tv = p_tv, 
-												lr_decay_gamma = lr_decay_gamma)
+												lr_decay_gamma = lr_decay_gamma,
+												data_loss_id='EMD'
+												)
 		
 		# Overwrite example input array
 		self.example_input_array = torch.randn([1, 1, 32, 32])

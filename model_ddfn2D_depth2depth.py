@@ -9,7 +9,7 @@ from IPython.core import debugger
 breakpoint = debugger.set_trace
 
 #### Local imports
-from model_base_spad_lit import LITBaseSPADModel, LITL1LossBaseSpadModel, make_zeromean_normalized_bins
+from model_base_spad_lit import LITL1LossBaseSpadModel
 from model_ddfn import Block2DGroup, MsFeat2D
 from layers_parametric1D import Gaussian1DLayer
 
