@@ -14,7 +14,7 @@ breakpoint = debugger.set_trace
 from spad_dataset import SpadDataset
 from model_ddfn_64_B10_CGNL_ori import LITDeepBoosting, LITPlainDeepBoosting
 from model_ddfn_64_B10_CGNL_ori_old import LITDeepBoostingOriginal
-from model_ddfn_64_B10_CGNL_ori_depth2depth import LITDeepBoostingDepth2Depth
+from model_ddfn_64_B10_CGNL_ori_depth2depth import LITDeepBoostingDepth2Depth, LITPlainDeepBoostingDepth2Depth
 from model_ddfn_64_B10_CGNL_ori_compressive import LITDeepBoostingCompressive, LITDeepBoostingCompressiveWithBias
 from model_ddfn2D_depth2depth import LITPlainDeepBoosting2DDepth2Depth, LITPlainDeepBoosting2DDepth2Depth01Inputs
 from model_ddfn2D_depth2depth2hist import LITPlainDeepBoosting2DDepth2Depth2Hist01Inputs
@@ -70,6 +70,8 @@ def test(cfg):
 	logger.info("Loading {} model".format(cfg.model_name))
 	if(cfg.model_name == 'DDFN_C64B10_NL_Depth2Depth'):
 		model = LITDeepBoostingDepth2Depth.load_from_checkpoint("checkpoints/"+ckpt_id)
+	elif(cfg.model_name == 'DDFN_C64B10_Depth2Depth'):
+		model = LITPlainDeepBoostingDepth2Depth.load_from_checkpoint("checkpoints/"+ckpt_id)
 	elif(cfg.model_name == 'DDFN_C64B10_NL_Compressive'):
 		model = LITDeepBoostingCompressive.load_from_checkpoint("checkpoints/"+ckpt_id)
 	elif(cfg.model_name == 'DDFN_C64B10_NL_CompressiveWithBias'):
@@ -81,11 +83,11 @@ def test(cfg):
 	elif(cfg.model_name == 'DDFN2D_Depth2Depth/B-12_MS-8'):
 		model = LITPlainDeepBoosting2DDepth2Depth.load_from_checkpoint("checkpoints/"+ckpt_id)
 	elif(cfg.model_name == 'DDFN2D_Depth2Depth_01Inputs/B-12_MS-8'):
-		model = LITPlainDeepBoosting2DDepth2Depth01Inputs.load_from_checkpoint("checkpoints/"+ckpt_id)
+		model = LITPlainDeepBoosting2DDepth2Depth01Inputs.load_from_checkpoint("checkpoints/"+ckpt_id, strict=False)
 	elif(cfg.model_name == 'DDFN2D_Depth2Depth_01Inputs/B-16_MS-8'):
-		model = LITPlainDeepBoosting2DDepth2Depth01Inputs.load_from_checkpoint("checkpoints/"+ckpt_id)
+		model = LITPlainDeepBoosting2DDepth2Depth01Inputs.load_from_checkpoint("checkpoints/"+ckpt_id, strict=False)
 	elif(cfg.model_name == 'DDFN2D_Depth2Depth_01Inputs/B-24_MS-8'):
-		model = LITPlainDeepBoosting2DDepth2Depth01Inputs.load_from_checkpoint("checkpoints/"+ckpt_id)
+		model = LITPlainDeepBoosting2DDepth2Depth01Inputs.load_from_checkpoint("checkpoints/"+ckpt_id, strict=False)
 	elif(cfg.model_name == 'DDFN2D_Depth2Depth2Hist_01Inputs/B-12_MS-8'):
 		model = LITPlainDeepBoosting2DDepth2Depth2Hist01Inputs.load_from_checkpoint("checkpoints/"+ckpt_id, strict=False)
 	else:
