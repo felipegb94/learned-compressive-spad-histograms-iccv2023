@@ -82,7 +82,6 @@ class LITBaseSPADModel(pl.LightningModule):
 		loss_l1 = criterion_L1(dep_re, dep)
 		loss_emd = criterion_L1(torch.cumsum(M_gt, dim=-3), torch.cumsum(M_mea_re.unsqueeze(1), dim=-3))
 		loss_rmse = criterion_L2(dep_re, dep)
-		loss_tv = criterion_TV(dep_re)
 
 		if(self.data_loss_id == 'kldiv'):
 			loss = loss_kl + self.p_tv*loss_tv
