@@ -3,7 +3,7 @@
 results
 outputs
 
-tmp.py
+tmp.*
 
 datalists/*_SimSPADDataset_*
 datalists/train*
