@@ -80,11 +80,7 @@ def test(cfg):
 		model = LITDeepBoostingOriginal.load_from_checkpoint("checkpoints/"+ckpt_id)
 	elif(cfg.model_name == 'DDFN_C64B10'):
 		model = LITPlainDeepBoosting.load_from_checkpoint("checkpoints/"+ckpt_id)
-	elif(cfg.model_name == 'DDFN2D_Depth2Depth_01Inputs/B-12_MS-8'):
-		model = LITPlainDeepBoosting2DDepth2Depth01Inputs.load_from_checkpoint("checkpoints/"+ckpt_id, strict=False)
-	elif(cfg.model_name == 'DDFN2D_Depth2Depth_01Inputs/B-16_MS-8'):
-		model = LITPlainDeepBoosting2DDepth2Depth01Inputs.load_from_checkpoint("checkpoints/"+ckpt_id, strict=False)
-	elif(cfg.model_name == 'DDFN2D_Depth2Depth_01Inputs/B-24_MS-8'):
+	elif('DDFN2D_Depth2Depth_01Inputs' in cfg.model_name):
 		model = LITPlainDeepBoosting2DDepth2Depth01Inputs.load_from_checkpoint("checkpoints/"+ckpt_id, strict=False)
 	elif(cfg.model_name == 'DDFN2D_Depth2Depth2Hist_01Inputs/B-12_MS-8'):
 		model = LITPlainDeepBoosting2DDepth2Depth2Hist01Inputs.load_from_checkpoint("checkpoints/"+ckpt_id, strict=False)
