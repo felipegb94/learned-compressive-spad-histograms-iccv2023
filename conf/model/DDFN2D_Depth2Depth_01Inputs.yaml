@@ -9,3 +9,4 @@ model_params:
 
 # Model name is used for saving results
 model_name: ${.model_id}/B-${.model_params.n_ddfn_blocks}_MS-${.model_params.outchannel_MS}
+data_loss_id: L1

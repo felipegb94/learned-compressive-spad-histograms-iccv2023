@@ -5,7 +5,7 @@ hydra:
     # dir: outputs/${data.name}/${model.name}/${experiment}/${now:%Y-%m-%d_%H%M%S}
     # dir: outputs/${dataset.name}/${model.model_name}/${experiment}/${now:%Y-%m-%d_%H%M%S}
     # dir: outputs/${dataset.name}/${experiment}/${model.model_name}/${now:%Y-%m-%d_%H%M%S}
-    dir: outputs/${dataset.name}/${experiment}/${model.model_name}/loss-${train_params.data_loss_id}_tv-${train_params.p_tv}/${now:%Y-%m-%d_%H%M%S}
+    dir: outputs/${dataset.name}/${experiment}/${model.model_name}/loss-${model.data_loss_id}_tv-${train_params.p_tv}/${now:%Y-%m-%d_%H%M%S}
 
 #### Useful variables to have
 # path to original working directory

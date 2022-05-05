@@ -5,12 +5,16 @@ gpu_num: 1
 cuda: true
 batch_size: 4
 workers: 4
-epoch: 50
+epoch: 30
 # lri: 1.0e-4
 lri: 1.0e-3
 lr_decay_gamma: 0.9
+# p_tv: 1.0e-10
+# p_tv: 1.0e-6
 p_tv: 1.0e-5
-data_loss_id: kldiv
+# p_tv: 3.0e-5
+# p_tv: 1.0e-4
+# p_tv: 1.0e-3
 noise_idx: 1
 crop_patch_size: 32
 train_datalist_fpath: ${io_dirpaths.datalists_dirpath}/${dataset.train_datalist_fname}

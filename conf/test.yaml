@@ -56,17 +56,37 @@ train_dataset: nyuv2_64x64x1024_80ps
 # model_dirpath: outputs/${.train_dataset}/debug/${.model_name}/debug/2022-04-27_103314
 # ckpt_id: epoch=29-step=103022-avgvalrmse=0.0306 # use last one
 
-## Depth2Depth Model --> Full trained model with gradient decay
-model_name: DDFN2D_Depth2Depth_01Inputs/B-12_MS-8
-model_dirpath: outputs/${.train_dataset}/debug/${.model_name}/debug/2022-04-27_104532
-ckpt_id: epoch=29-step=101292-avgvalrmse=0.0280 # use last one
+# ## 01Inputs Depth2Depth Model --> Full trained model with gradient decay
+# model_name: DDFN2D_Depth2Depth_01Inputs/B-12_MS-8
+# model_dirpath: outputs/${.train_dataset}/debug/${.model_name}/debug/2022-04-27_104532
+# ckpt_id: epoch=29-step=101292-avgvalrmse=0.0280 # use last one
 
-# ## Depth2Depth Model --> Full trained model with gradient decay
+# ## 01Inputs Depth2Depth Model --> Full trained model with gradient decay
+# model_name: DDFN2D_Depth2Depth_01Inputs/B-12_MS-8/loss-L1_tv-0.001
+# model_dirpath: outputs/${.train_dataset}/debug/${.model_name}/2022-05-03_183044
+# ckpt_id: epoch=24-step=86572-avgvalrmse=0.0470 # use last one
+
+# ## 01Inputs Depth2Depth Model --> Full trained model with gradient decay
+# model_name: DDFN2D_Depth2Depth_01Inputs/B-12_MS-8/loss-L1_tv-0.0001
+# model_dirpath: outputs/${.train_dataset}/debug/${.model_name}/2022-05-03_183002
+# ckpt_id: epoch=24-step=86572-avgvalrmse=0.0286
+
+# ## 01Inputs Depth2Depth Model --> Full trained model with gradient decay
+# model_name: DDFN2D_Depth2Depth_01Inputs/B-12_MS-8/loss-L1_tv-3e-05
+# model_dirpath: outputs/${.train_dataset}/debug/${.model_name}/2022-05-03_185303
+# ckpt_id: epoch=25-step=90035-avgvalrmse=0.0285 # use last one
+
+# ## 01Inputs Depth2Depth Model --> Full trained model with gradient decay
+# model_name: DDFN2D_Depth2Depth_01Inputs/B-12_MS-8/loss-L1_tv-1e-10
+# model_dirpath: outputs/${.train_dataset}/debug/${.model_name}/2022-05-03_183128
+# ckpt_id: epoch=26-step=92633-avgvalrmse=0.0279 # use last one
+
+# ## 01Inputs Depth2Depth Model --> Full trained model with gradient decay
 # model_name: DDFN2D_Depth2Depth_01Inputs/B-24_MS-8
 # model_dirpath: outputs/${.train_dataset}/debug/${.model_name}/2022-04-28_163253
 # ckpt_id: epoch=26-step=91768-avgvalrmse=0.0267
 
-# ## Depth2Depth LARGE Model --> Full trained model with gradient decay
+# ## 01Inputs Depth2Depth LARGE Model --> Full trained model with gradient decay
 # model_name: DDFN2D_Depth2Depth_01Inputs/B-16_MS-8
 # model_dirpath: outputs/${.train_dataset}/debug/${.model_name}/2022-05-01_172344
 # ckpt_id: epoch=46-step=161893-avgvalrmse=0.0240

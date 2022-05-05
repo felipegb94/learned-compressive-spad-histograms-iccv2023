@@ -5,3 +5,4 @@ model_params:
   k: 16
 # Model name is used for saving results
 model_name: ${.model_id}/k${.model_params.k}
+data_loss_id: kldiv

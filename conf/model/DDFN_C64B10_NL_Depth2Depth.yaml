@@ -7,3 +7,4 @@ model_params:
   in_channels: 1
 # Model name is used for saving results
 model_name: ${.model_id}
+data_loss_id: kldiv
