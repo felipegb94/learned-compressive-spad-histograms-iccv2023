@@ -6,28 +6,30 @@ from IPython.core import debugger
 breakpoint = debugger.set_trace
 
 #### Local imports
-from model_ddfn_64_B10_CGNL_ori import LITDeepBoosting
+from model_ddfn_64_B10_CGNL_ori import LITPlainDeepBoosting
 from CSPH1D_layer import CSPH1DLayer
 
 
 
-class LITDeepBoostingCSPH1D(LITDeepBoosting):
-	def __init__(self, 
-		init_lr = 1e-4,
-		p_tv = 1e-5, 
-		lr_decay_gamma = 0.9,
-		in_channels=1,
-		k=16,
-		num_bins=1024):
+class LITPlainDeepBoostingCSPH1D(LITPlainDeepBoosting):
+	def __init__(self 
+		, init_lr = 1e-4
+		, p_tv = 1e-5 
+		, lr_decay_gamma = 0.9
+		, in_channels=1
+		, k=16
+		, num_bins=1024
+		, init = 'HybridGrayFourier'
+		, h_irf = None
+		):
 		# Init parent class
-		super(LITDeepBoostingCSPH1D, self).__init__(init_lr=init_lr,p_tv=p_tv,lr_decay_gamma=lr_decay_gamma,in_channels=in_channels)
-		
-		self.csph1D_layer = CSPH1DLayer(k = k, num_bins=num_bins)
+		super(LITPlainDeepBoostingCSPH1D, self).__init__(init_lr=init_lr,p_tv=p_tv,lr_decay_gamma=lr_decay_gamma,in_channels=in_channels)
+		self.csph1D_layer = CSPH1DLayer(k = k, num_bins = num_bins, init=init, h_irf=h_irf)
 
 	def forward(self, x):
 		(zncc_scores, B) = self.csph1D_layer(x)
 		# use forward for inference/predictions
-		out = self.deep_boosting_model(zncc_scores)
+		out = self.backbone_net(zncc_scores)
 		return out
 
 
@@ -41,8 +43,7 @@ if __name__=='__main__':
 
 	# Set compression params
 	k = 16
-
-	model = LITDeepBoostingCSPH1D(k=k, num_bins=nt)
+	model = LITPlainDeepBoostingCSPH1D(k=k, num_bins=nt)
 
 	outputs = model(inputs)
 

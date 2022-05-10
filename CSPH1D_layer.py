@@ -24,35 +24,54 @@ def zero_norm(v, dim=-1):
 	return zn_v
 
 class CSPH1DLayer(nn.Module):
-	def __init__(self, k=2, num_bins=1024, init='TruncFourier'):
+	def __init__(self, k=2, num_bins=1024, init='TruncFourier', h_irf=None):
 		# Init parent class
 		super(CSPH1DLayer, self).__init__()
 
-		Cmat_init = np.zeros((num_bins, k))
+		# Pad IRF with zeros if needed
+		self.h_irf = h_irf
+		if(not (h_irf is None)):
+			if(len(h_irf) < num_bins):
+				h_irf_new = np.zeros((num_bins,)).astype(h_irf.dtype)
+				h_irf_new[0:len(h_irf)] = h_irf
+				self.h_irf = h_irf_new
+			else:
+				self.h_irf = h_irf
+				assert(len(h_irf) == num_bins), "Length of input h_irf needs to be <= num_bins"
+			# Center irf if needed
+			self.h_irf = np.roll(self.h_irf, shift=-1*np.argmax(self.h_irf, axis=-1))
+
 		if(init == 'TruncFourier'):
-			coding_obj = TruncatedFourierCoding(num_bins, n_codes=k, include_zeroth_harmonic=False)
+			coding_obj = TruncatedFourierCoding(num_bins, n_codes=k, include_zeroth_harmonic=False, h_irf=self.h_irf, account_irf=True)
 			Cmat_init = coding_obj.C
+			decoding_Cmat_init = coding_obj.decoding_C
 		elif(init == 'HybridGrayFourier'):
-			coding_obj = HybridGrayBasedFourierCoding(num_bins, n_codes=k, include_zeroth_harmonic=False)
+			coding_obj = HybridGrayBasedFourierCoding(num_bins, n_codes=k, include_zeroth_harmonic=False, h_irf=self.h_irf, account_irf=True)
 			Cmat_init = coding_obj.C
+			decoding_Cmat_init = coding_obj.decoding_C
 		elif(init == 'HybridFourierGray'):
-			coding_obj = HybridFourierBasedGrayCoding(num_bins, n_codes=k)
+			coding_obj = HybridFourierBasedGrayCoding(num_bins, n_codes=k, h_irf=self.h_irf, account_irf=True)
 			Cmat_init = coding_obj.C
+			decoding_Cmat_init = coding_obj.decoding_C
 		elif(init == 'CoarseHist'):
-			coding_obj = GatedCoding(num_bins, n_gates=k)
+			coding_obj = GatedCoding(num_bins, n_gates=k, h_irf=self.h_irf, account_irf=True)
 			Cmat_init = coding_obj.C
+			decoding_Cmat_init = coding_obj.decoding_C
 		elif(init == 'RandBinary'):
 			Cmat_init = torch.randn(num_bins, k)
 			Cmat_init[Cmat_init >= 0] = 1
 			Cmat_init[Cmat_init < 0] = -1
+			decoding_Cmat_init = Cmat_init
 		elif(init == 'Rand'):
 			Cmat_init = torch.randn(num_bins, k)
 			Cmat_init[Cmat_init >= 1] = 1
 			Cmat_init[Cmat_init <= -1] = -1
+			decoding_Cmat_init = Cmat_init
 		else:
 			assert(False), "Invalid CSPH1D init ID"
 		
 		self.Cmat = torch.nn.Parameter(torch.tensor(Cmat_init).type(torch.float32), requires_grad=False)
+		self.decoding_Cmat = torch.nn.Parameter(torch.tensor(decoding_Cmat_init).type(torch.float32), requires_grad=False)
 		self.Cmat_t = self.Cmat.transpose(0,1)
 
 	def forward_matmul(self, inputs):
@@ -63,9 +82,10 @@ class CSPH1DLayer(nn.Module):
 		B = torch.matmul(inputs_reshaped, self.Cmat)
 
 		## Compute ZNCC Scores Table
-		zn_Cmat = zero_norm(self.Cmat, dim=-1)
+		# zn_Cmat = zero_norm(self.Cmat, dim=-1)
+		zn_decoding_Cmat = zero_norm(self.decoding_Cmat, dim=-1)
 		zn_B = zero_norm(B, dim=-1)
-		zncc = torch.matmul(zn_B, zn_Cmat.t())
+		zncc = torch.matmul(zn_B, zn_decoding_Cmat.t())
 		
 		## Transpose time dimension again
 		zncc = torch.transpose(zncc, -3, -1)
@@ -103,10 +123,10 @@ if __name__=='__main__':
 	inputs[inputs<2] = 0
 
 	simple_hist_input = torch.zeros((1, 1, nt, 1, 1))
-	simple_hist_input[0, 0, 100, 0, 0] = 10
+	simple_hist_input[0, 0, 100, 0, 0] = 1
 
 	## Init CSPH Layer Set compression params
-	k = 32
+	k = 16
 	init_id = 'TruncFourier'
 	# init_id = 'HybridGrayFourier'
 	# init_id = 'HybridFourierGray'
@@ -127,15 +147,15 @@ if __name__=='__main__':
 
 	## Test with random inputs
 	zncc, B = csph1D_layer(inputs)
-	zncc2, B2 = csph1D_layer.forward_conv(inputs)
+	# zncc2, B2 = csph1D_layer.forward_conv(inputs)
 	print("Input Shape: {}".format(inputs.shape))
 	print("ZNCC Out Shape: {}".format(zncc.shape))
 	print("B Out Shape: {}".format(B.shape))
 	
 	# Look at outputs
 	plt.subplot(2,1,2)
-	plt.plot(inputs[0,0,:,10,10], '--', label="Inputs 1")
-	plt.plot(zncc[0,0,:,10,10], label='ZNCC Outputs 1')
+	# plt.plot(inputs[0,0,:,10,10], '--', label="Inputs 1")
+	# plt.plot(zncc[0,0,:,10,10], label='ZNCC Outputs 1')
 
 	## Test with random inputs
 	zncc, B = csph1D_layer(simple_hist_input)
