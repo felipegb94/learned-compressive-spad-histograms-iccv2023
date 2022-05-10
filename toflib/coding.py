@@ -1446,7 +1446,7 @@ class HybridGrayBasedFourierCoding(FourierCoding):
 		If we reach the maximum frequency, then sample the remaining frequencies from lowest to highest, i.e.,
 		- 3, 5, 6, 7, 9, 10, 11, 12, ....
 	'''
-	def __init__(self, n_maxres, n_codes=1, include_zeroth_harmonic=False, filter_freqs=True, valid_freq_thresh=0.1, h_irf=None, account_irf=False):
+	def __init__(self, n_maxres, n_codes=1, include_zeroth_harmonic=False, filter_freqs=True, valid_freq_thresh=0.2, h_irf=None, account_irf=False):
 		n_freqs = (n_codes // 2) + 1
 		self.abs_max_freq_idx = n_maxres // 2
 		## If we know the IRF we can make sure to only include frequencies with sufficient magnitude
