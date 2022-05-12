@@ -9,6 +9,12 @@ Verify that the command `nvidia-smi` works on your computer. If it doesn't you m
 
 ### Setting up Environment for New Version
 
+The code has been tested in a machine with CUDA version `11.4` installed.
+
+You can create the conda environment from the `environment.yml` file.
+
+Alternatively, you can manuall create it as follows:
+
 1. Create env: `conda create -n csphenv38 python=3.8`
 2. Activate env: `conda activate csphenv38`
 3. Install pytorch with cuda support: `conda install pytorch torchvision torchaudio cudatoolkit=11.3 -c pytorch`
@@ -16,6 +22,8 @@ Verify that the command `nvidia-smi` works on your computer. If it doesn't you m
 4. Install Pytorch lightning: `conda install pytorch-lightning -c conda-forge`
 5. Install Additional packages: `conda install ipython matplotlib scipy scikit-image`
 6. Install Hydra for config files: `pip install hydra-core --upgrade`
+7. Install hydra plugins: `pip install hydra_colorlog --upgrade`
+8. Install `gdown` for downloading datasets: `pip install gdown`
 
 ### Setting up PENonLocal Environments
 

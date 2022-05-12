@@ -90,8 +90,12 @@ class LITPlainDeepBoosting2DDepth2Depth01Inputs(LITL1LossBaseSpadModel):
 class PlainDeepBoosting2DPhasor2Depth(nn.Module):
 	def __init__(self, outchannel_MS=2, n_ddfn_blocks=10, num_bins=1024):
 		super(PlainDeepBoosting2DPhasor2Depth, self).__init__()
+
+		self.num_bins = num_bins
+		self.nfreq = num_bins // 4
+
 		# feature extraction
-		self.msfeat = MsFeat2D(in_channels=14, outchannel_MS=outchannel_MS)
+		self.msfeat = MsFeat2D(in_channels=2*self.nfreq, outchannel_MS=outchannel_MS)
 		
 		# 1x1 convolution
 		self.C1 = nn.Sequential(
@@ -114,36 +118,23 @@ class PlainDeepBoosting2DPhasor2Depth(nn.Module):
 
 		self.hist_rec_layer = Gaussian1DLayer(gauss_len=num_bins, out_dim=-3)
 		self.gauss1D_layer = Gaussian1DLayer(gauss_len=num_bins, out_dim=-3)
+
 	
 	def forward(self, inputs):
 
 		# Convert depth inputs to phasor
 		# Assume inputs are between 0 and 1
 		phase = 2*math.pi*inputs
+
 		phasor_real1 = torch.cos(phase)
 		phasor_imag1 = torch.sin(phase)
-		phasor_real2 = torch.cos(2*phase)
-		phasor_imag2 = torch.sin(2*phase)
-		phasor_real4 = torch.cos(4*phase)
-		phasor_imag4 = torch.sin(4*phase)
-		phasor_real8 = torch.cos(8*phase)
-		phasor_imag8 = torch.sin(8*phase)
-		phasor_real16 = torch.cos(16*phase)
-		phasor_imag16 = torch.sin(16*phase)
-		phasor_real32 = torch.cos(32*phase)
-		phasor_imag32 = torch.sin(32*phase)
-		phasor_real64 = torch.cos(64*phase)
-		phasor_imag64 = torch.sin(64*phase)
+		phasor = torch.cat((phasor_real1, phasor_imag1), 1)
 
-		phasor = torch.cat((
-			phasor_real1, phasor_imag1
-			, phasor_real2, phasor_imag2
-			, phasor_real4, phasor_imag4
-			, phasor_real8, phasor_imag8
-			, phasor_real16, phasor_imag16
-			, phasor_real32, phasor_imag32
-			, phasor_real64, phasor_imag64
-			), 1)
+		for i in range(self.nfreq-1):
+			# Use i+2 freq because we want to skip 0th freq, and we added the first above
+			curr_phasor_real = torch.cos((i+2)*phase)
+			curr_phasor_imag = torch.sin((i+2)*phase)
+			phasor = torch.cat((phasor, curr_phasor_real, curr_phasor_imag), 1)
 
 		# Feature extraction
 		msfeat = self.msfeat(phasor) 
@@ -189,7 +180,7 @@ class LITPlainDeepBoosting2DPhasor2Depth(LITL1LossBaseSpadModel):
 
 if __name__=='__main__':
 	import matplotlib.pyplot as plt
-	from utils import count_parameters
+	from model_utils import count_parameters
 	# Set random input
 	batch_size = 2
 	(nr, nc, nt) = (64, 64, 512) 

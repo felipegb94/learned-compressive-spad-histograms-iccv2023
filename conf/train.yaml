@@ -23,16 +23,16 @@ defaults:
   # - model: DDFN_C64B10_NL_Compressive
   # - model: DDFN_C64B10
   # - model: DDFN_C64B10_Depth2Depth
-  - model: DDFN_C64B10_CSPH1D
+  # - model: DDFN_C64B10_CSPH1D
   # - model: DDFN2D_Depth2Depth
-  # - model: DDFN2D_Phasor2Depth
+  - model: DDFN2D_Phasor2Depth
   # - model: DDFN2D_Depth2Depth
   # enable color logging
   - override hydra/hydra_logging: colorlog
   - override hydra/job_logging: colorlog
 
 # Global configurations shared between different modules
-experiment: debug
+experiment: test
 
 # Random seed to use
 random_seed: 1234

@@ -7,4 +7,4 @@ io_dirpaths:
   nyuv2_spad_dataset_dirpath: ${hydra:runtime.cwd}/./data_gener/TrainData/SimSPADDataset_nr-64_nc-64_nt-1024_tres-80ps_dark-1_psf-1
   middlebury_spad_dataset_dirpath: ${hydra:runtime.cwd}/./data_gener/TestData/middlebury/processed/SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0
   results_data_dirpath: ${hydra:runtime.cwd}/./results/results_data
-  results_weekly_dirpath: ${hydra:runtime.cwd}/./results/week_20220502
+  results_weekly_dirpath: ${hydra:runtime.cwd}/./results/week_20220509
