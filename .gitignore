@@ -2,6 +2,7 @@
 
 results
 outputs
+outputs_old
 
 tmp.*
 
@@ -30,6 +31,12 @@ testing/preTrain
 testing/TestOut
 training/output
 training_debug/output
+
+old/testing/preTrain
+old/testing/TestOut
+old/training/output
+old/training_debug/output
+
 train_intensity.txt
 val_intensity.txt
 
