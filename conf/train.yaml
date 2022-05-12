@@ -23,8 +23,9 @@ defaults:
   # - model: DDFN_C64B10_NL_Compressive
   # - model: DDFN_C64B10
   # - model: DDFN_C64B10_Depth2Depth
+  - model: DDFN_C64B10_CSPH1D
   # - model: DDFN2D_Depth2Depth
-  - model: DDFN2D_Depth2Depth_01Inputs
+  # - model: DDFN2D_Phasor2Depth
   # - model: DDFN2D_Depth2Depth
   # enable color logging
   - override hydra/hydra_logging: colorlog
