@@ -20,12 +20,13 @@ criterion_KL = nn.KLDivLoss(reduction='mean')
 
 # inpt, target: [batch_size, 1, h, w]
 criterion_L1 = nn.L1Loss()
+criterion_L2 = nn.MSELoss()
 
 def criterion_TV(inpt):
     return torch.sum(torch.abs(inpt[:, :, :, :-1] - inpt[:, :, :, 1:])) + \
            torch.sum(torch.abs(inpt[:, :, :-1, :] - inpt[:, :, 1:, :]))
 
-def criterion_L2(est, gt):
+def criterion_RMSE(est, gt):
     criterion = nn.MSELoss()
     # est should have grad
     return torch.sqrt(criterion(est, gt))

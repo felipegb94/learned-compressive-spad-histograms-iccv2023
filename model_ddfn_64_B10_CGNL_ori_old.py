@@ -13,7 +13,7 @@ from IPython.core import debugger
 breakpoint = debugger.set_trace
 
 #### Local imports
-from losses import criterion_L2, criterion_KL, criterion_TV, criterion_L1
+from losses import criterion_RMSE, criterion_KL, criterion_TV, criterion_L1
 import tof_utils
 from research_utils.np_utils import calc_mean_percentile_errors
 
@@ -295,7 +295,7 @@ class LITDeepBoostingOriginal(pl.LightningModule):
 		# Compute metrics
 		loss_kl = criterion_KL(M_mea_re_lsmx, M_gt)
 		loss_tv = criterion_TV(dep_re)
-		rmse = criterion_L2(dep_re, dep)
+		rmse = criterion_RMSE(dep_re, dep)
 		loss = loss_kl + self.p_tv*loss_tv
 
 		return loss, loss_kl, loss_tv, rmse
@@ -373,8 +373,8 @@ class LITDeepBoostingOriginal(pl.LightningModule):
 
 		# the following two lines give the same result
 		# depths_rmse = torch.sqrt(torch.mean((rec_depths - gt_depths)**2))
-		# depths_L2 = criterion_L2(rec_depths, gt_depths)
-		depths_rmse = criterion_L2(rec_depths, gt_depths)
+		# depths_L2 = criterion_RMSE(rec_depths, gt_depths)
+		depths_rmse = criterion_RMSE(rec_depths, gt_depths)
 		depths_mae = criterion_L1(rec_depths, gt_depths)
 
 		percentiles = [0.5, 0.75, 0.95, 0.99]

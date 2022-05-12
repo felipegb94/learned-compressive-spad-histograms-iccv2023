@@ -3,6 +3,7 @@
 '''
 
 #### Standard Library Imports
+import os
 
 #### Library imports
 from IPython.core import debugger
@@ -10,9 +11,11 @@ breakpoint = debugger.set_trace
 
 #### Local imports
 from model_ddfn_64_B10_CGNL_ori import LITDeepBoosting, LITPlainDeepBoosting
+from model_ddfn_64_B10_CGNL_ori_old import LITDeepBoostingOriginal
 from model_ddfn_64_B10_CGNL_ori_depth2depth import LITDeepBoostingDepth2Depth, LITPlainDeepBoostingDepth2Depth
-from model_ddfn_64_B10_CGNL_ori_compressive import LITDeepBoostingCompressive
-from model_ddfn2D_depth2depth import LITPlainDeepBoosting2DDepth2Depth01Inputs
+from model_ddfn_64_B10_CGNL_ori_CSPH1D import LITPlainDeepBoostingCSPH1D
+from model_ddfn_64_B10_CGNL_ori_compressive import LITDeepBoostingCompressive, LITDeepBoostingCompressiveWithBias
+from model_ddfn2D_depth2depth import LITPlainDeepBoosting2DDepth2Depth01Inputs, LITPlainDeepBoosting2DPhasor2Depth
 from model_ddfn2D_depth2depth2hist import LITPlainDeepBoosting2DDepth2Depth2Hist01Inputs
 
 
@@ -48,6 +51,17 @@ def init_model_from_id(cfg, irf=None):
 						, p_tv = cfg.train_params.p_tv
 						, in_channels = cfg.model.model_params.in_channels
 						)
+	elif(cfg.model.model_id == 'DDFN_C64B10_CSPH1D'):
+		lit_model = LITPlainDeepBoostingCSPH1D(
+						init_lr = cfg.train_params.lri
+						, lr_decay_gamma = cfg.train_params.lr_decay_gamma
+						, p_tv = cfg.train_params.p_tv
+						, in_channels = cfg.model.model_params.in_channels
+						, init = cfg.model.model_params.init
+						, k = cfg.model.model_params.k
+						, num_bins = cfg.dataset.nt
+						, h_irf = irf
+						)
 	elif(cfg.model.model_id == 'DDFN_C64B10_NL_Compressive'):
 		lit_model = LITDeepBoostingCompressive(
 						init_lr = cfg.train_params.lri
@@ -62,6 +76,15 @@ def init_model_from_id(cfg, irf=None):
 						, lr_decay_gamma = cfg.train_params.lr_decay_gamma
 						, p_tv = cfg.train_params.p_tv
 						, in_channels = cfg.model.model_params.in_channels
+						, outchannel_MS = cfg.model.model_params.outchannel_MS
+						, n_ddfn_blocks = cfg.model.model_params.n_ddfn_blocks
+						, num_bins = cfg.dataset.nt
+						)
+	elif(cfg.model.model_id == 'DDFN2D_Phasor2Depth'):
+		lit_model = LITPlainDeepBoosting2DPhasor2Depth(
+						init_lr = cfg.train_params.lri
+						, lr_decay_gamma = cfg.train_params.lr_decay_gamma
+						, p_tv = cfg.train_params.p_tv
 						, outchannel_MS = cfg.model.model_params.outchannel_MS
 						, n_ddfn_blocks = cfg.model.model_params.n_ddfn_blocks
 						, num_bins = cfg.dataset.nt
@@ -81,3 +104,30 @@ def init_model_from_id(cfg, irf=None):
 		assert(False), "Incorrect model_id"
 
 	return lit_model
+
+def load_model_from_ckpt(model_name, ckpt_id, logger):
+	assert(os.path.exists(os.path.join('checkpoints/',ckpt_id))), "Input checkpoint does not exist ({})".format(ckpt_id)
+
+	logger.info("Loading {} model".format(model_name))
+	if(model_name == 'DDFN_C64B10_NL_Depth2Depth'):
+		model = LITDeepBoostingDepth2Depth.load_from_checkpoint("checkpoints/"+ckpt_id)
+	elif(model_name == 'DDFN_C64B10_Depth2Depth'):
+		model = LITPlainDeepBoostingDepth2Depth.load_from_checkpoint("checkpoints/"+ckpt_id)
+	elif(model_name == 'DDFN_C64B10_NL_Compressive'):
+		model = LITDeepBoostingCompressive.load_from_checkpoint("checkpoints/"+ckpt_id)
+	elif(model_name == 'DDFN_C64B10_NL_CompressiveWithBias'):
+		model = LITDeepBoostingCompressiveWithBias.load_from_checkpoint("checkpoints/"+ckpt_id)
+	elif(model_name == 'DDFN_C64B10_NL_original'):
+		model = LITDeepBoostingOriginal.load_from_checkpoint("checkpoints/"+ckpt_id)
+	elif(model_name == 'DDFN_C64B10'):
+		model = LITPlainDeepBoosting.load_from_checkpoint("checkpoints/"+ckpt_id)
+	elif('DDFN2D_Depth2Depth_01Inputs' in model_name):
+		model = LITPlainDeepBoosting2DDepth2Depth01Inputs.load_from_checkpoint("checkpoints/"+ckpt_id, strict=False)
+	elif('DDFN2D_Phasor2Depth' in model_name):
+		model = LITPlainDeepBoosting2DPhasor2Depth.load_from_checkpoint("checkpoints/"+ckpt_id, strict=False)
+	elif(model_name == 'DDFN2D_Depth2Depth2Hist_01Inputs/B-12_MS-8'):
+		model = LITPlainDeepBoosting2DDepth2Depth2Hist01Inputs.load_from_checkpoint("checkpoints/"+ckpt_id, strict=False)
+	else:
+		assert(False), "Invalid model_name: {}".format(model_name)
+	
+	return model

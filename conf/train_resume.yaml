@@ -1,0 +1,33 @@
+hydra: 
+  run:
+    dir: ${.model_dirpath}
+
+#### Useful variables to have
+# path to original working directory
+# hydra hijacks working directory by changing it to the new log directory
+# https://hydra.cc/docs/next/tutorials/basic/running_your_app/working_directory
+original_work_dir: ${hydra:runtime.cwd}
+
+## 01Inputs Depth2Depth LARGE Model --> Full trained model with gradient decay
+model_name: DDFN2D_Depth2Depth_01Inputs/B-16_MS-8/loss-L1_tv-3e-05
+model_dirpath: outputs/${.train_dataset}/debug/${.model_name}/2022-05-04_133635
+ckpt_id: null
+
+defaults:
+  - _self_
+  - io_dirpaths
+  - train_params: debug
+  - dataset: nyuv2
+  - override hydra/hydra_logging: colorlog
+  - override hydra/job_logging: colorlog
+
+# Global configurations shared between different modules
+experiment: test
+
+# Random seed to use
+random_seed: 1234
+
+params:
+  train_datalist_fpath: ${io_dirpaths.datalists_dirpath}/${dataset.train_datalist_fname}
+  val_datalist_fpath: ${io_dirpaths.datalists_dirpath}/${dataset.val_datalist_fname}
+

@@ -12,13 +12,8 @@ breakpoint = debugger.set_trace
 
 #### Local imports
 from spad_dataset import SpadDataset
-from model_ddfn_64_B10_CGNL_ori import LITDeepBoosting, LITPlainDeepBoosting
-from model_ddfn_64_B10_CGNL_ori_old import LITDeepBoostingOriginal
-from model_ddfn_64_B10_CGNL_ori_depth2depth import LITDeepBoostingDepth2Depth, LITPlainDeepBoostingDepth2Depth
-from model_ddfn_64_B10_CGNL_ori_compressive import LITDeepBoostingCompressive, LITDeepBoostingCompressiveWithBias
-from model_ddfn2D_depth2depth import LITPlainDeepBoosting2DDepth2Depth01Inputs
-from model_ddfn2D_depth2depth2hist import LITPlainDeepBoosting2DDepth2Depth2Hist01Inputs
-from model_utils import count_parameters
+from model_utils import count_parameters, load_model_from_ckpt
+from train import setup_tb_logger
 
 # A logger for this file (not for the pytorch logger)
 logger = logging.getLogger(__name__)
@@ -45,14 +40,12 @@ def test(cfg):
 	test_data = SpadDataset(cfg.params.test_datalist_fpath, cfg.params.noise_idx, 
 		output_size=None, disable_rand_crop=True)
 	test_loader = DataLoader(test_data, batch_size=cfg.params.batch_size, 
-		shuffle=False, num_workers=0, pin_memory=cfg.params.cuda)
+		shuffle=False, num_workers=cfg.params.num_workers, pin_memory=cfg.params.cuda)
 	logger.info("Load test data complete - {} test samples!".format(len(test_data)))
 	logger.info("+++++++++++++++++++++++++++++++++++++++++++")
 
-	# Let hydra manage directory outputs. We over-write the save_dir to . so that we use the ones that hydra configures
-	# tensorboard = pl.loggers.TensorBoardLogger(save_dir=".", name="", version="", log_graph=True, default_hp_metric=False)
-	tb_logger = pl.loggers.TensorBoardLogger(save_dir=".", name="", version="", log_graph=True, default_hp_metric=False)
-	
+	tb_logger = setup_tb_logger() 
+
 	## Callbacks
 	callbacks = [ ] 
 
@@ -67,25 +60,7 @@ def test(cfg):
 		logger.info("Loading last.ckpt because no ckpt was given")
 		ckpt_id = 'last.ckpt'
 
-	logger.info("Loading {} model".format(cfg.model_name))
-	if(cfg.model_name == 'DDFN_C64B10_NL_Depth2Depth'):
-		model = LITDeepBoostingDepth2Depth.load_from_checkpoint("checkpoints/"+ckpt_id)
-	elif(cfg.model_name == 'DDFN_C64B10_Depth2Depth'):
-		model = LITPlainDeepBoostingDepth2Depth.load_from_checkpoint("checkpoints/"+ckpt_id)
-	elif(cfg.model_name == 'DDFN_C64B10_NL_Compressive'):
-		model = LITDeepBoostingCompressive.load_from_checkpoint("checkpoints/"+ckpt_id)
-	elif(cfg.model_name == 'DDFN_C64B10_NL_CompressiveWithBias'):
-		model = LITDeepBoostingCompressiveWithBias.load_from_checkpoint("checkpoints/"+ckpt_id)
-	elif(cfg.model_name == 'DDFN_C64B10_NL_original'):
-		model = LITDeepBoostingOriginal.load_from_checkpoint("checkpoints/"+ckpt_id)
-	elif(cfg.model_name == 'DDFN_C64B10'):
-		model = LITPlainDeepBoosting.load_from_checkpoint("checkpoints/"+ckpt_id)
-	elif('DDFN2D_Depth2Depth_01Inputs' in cfg.model_name):
-		model = LITPlainDeepBoosting2DDepth2Depth01Inputs.load_from_checkpoint("checkpoints/"+ckpt_id, strict=False)
-	elif(cfg.model_name == 'DDFN2D_Depth2Depth2Hist_01Inputs/B-12_MS-8'):
-		model = LITPlainDeepBoosting2DDepth2Depth2Hist01Inputs.load_from_checkpoint("checkpoints/"+ckpt_id, strict=False)
-	else:
-		assert(False), "Invalid model_name"
+	model = load_model_from_ckpt(cfg.model_name, ckpt_id, logger)
 
 	if(cfg.params.cuda):
 		trainer = pl.Trainer(accelerator="gpu", devices=1, logger=tb_logger, callbacks=callbacks) # 
@@ -95,6 +70,9 @@ def test(cfg):
 	logger.info("Number of Model Params: {}".format(count_parameters(model)))
 
 	trainer.test(model, dataloaders=test_loader)
+
+	# # Testing validation loop
+	# trainer.validate(model, dataloaders=test_loader)
 
 
 

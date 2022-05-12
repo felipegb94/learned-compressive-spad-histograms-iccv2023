@@ -4,6 +4,7 @@
 
 #### Standard Library Imports
 import os
+import logging
 
 #### Library imports
 import numpy as np
@@ -15,7 +16,7 @@ from IPython.core import debugger
 breakpoint = debugger.set_trace
 
 #### Local imports
-from losses import criterion_L2, criterion_L1, criterion_KL, criterion_TV
+from losses import criterion_L2, criterion_L1, criterion_KL, criterion_RMSE, criterion_TV
 import tof_utils
 from research_utils.np_utils import calc_mean_percentile_errors
 
@@ -35,6 +36,8 @@ class LITBaseSPADModel(pl.LightningModule):
 		
 		self.lsmx = torch.nn.LogSoftmax(dim=-3)
 		self.smx = torch.nn.Softmax(dim=-3)
+		self.print_logger = logging.getLogger(__name__)
+
 
 		# Train hyperparams		
 		self.init_lr = init_lr
@@ -45,6 +48,8 @@ class LITBaseSPADModel(pl.LightningModule):
 		self.backbone_net = backbone_net
 
 		self.example_input_array = torch.randn([1, 1, 1024, 32, 32])
+
+		self.test_rmse_all = []
 
 		self.save_hyperparameters(ignore=['backbone_net'])
 
@@ -80,15 +85,16 @@ class LITBaseSPADModel(pl.LightningModule):
 		loss_kl = criterion_KL(M_mea_re_lsmx, M_gt)
 		loss_tv = criterion_TV(dep_re)
 		loss_l1 = criterion_L1(dep_re, dep)
+		loss_l2 = criterion_L2(dep_re, dep)
 		loss_emd = criterion_L1(torch.cumsum(M_gt, dim=-3), torch.cumsum(M_mea_re.unsqueeze(1), dim=-3))
-		loss_rmse = criterion_L2(dep_re, dep)
+		loss_rmse = criterion_RMSE(dep_re, dep)
 
 		if(self.data_loss_id == 'kldiv'):
 			loss = loss_kl + self.p_tv*loss_tv
 		elif(self.data_loss_id == 'L1'):
 			loss = loss_l1 + self.p_tv*loss_tv
 		elif(self.data_loss_id == 'L2'):
-			loss = loss_rmse + self.p_tv*loss_tv
+			loss = loss_l2 + self.p_tv*loss_tv
 		elif(self.data_loss_id == 'EMD'):
 			loss = loss_emd + self.p_tv*loss_tv
 		else:
@@ -97,6 +103,7 @@ class LITBaseSPADModel(pl.LightningModule):
 		return {'loss': loss, 
 				'loss_kl': loss_kl, 
 				'loss_l1': loss_l1, 
+				'loss_l2': loss_l2, 
 				'loss_emd': loss_emd, 
 				'loss_tv': loss_tv, 
 				'rmse': loss_rmse}
@@ -124,9 +131,14 @@ class LITBaseSPADModel(pl.LightningModule):
 			# , prog_bar=True
 		)
 
-		## Log some images every 500 training steps
+		# # Log some images every 500 training steps
 		# if((batch_idx % 500 == 0)):
 		# 	self.log_depth_img(gt_dep=sample["bins"], rec_dep=dep_re, img_title_prefix='Train - ')
+		
+		if((batch_idx % 250) == 0):
+			self.print_logger.info("Train - Epoch {} - Batch {} - Step {}".format(self.current_epoch, batch_idx, self.global_step))
+			self.print_logger.info("    RMSE: {}, L1: {}, KL: {}, TV: {}".format(rmse, loss_l1, loss_kl, self.p_tv*loss_tv))
+			
 		
 		return {'loss': loss}
 
@@ -137,6 +149,9 @@ class LITBaseSPADModel(pl.LightningModule):
 		val_losses = self.compute_losses(sample, M_mea_re, dep_re)
 		val_loss = val_losses['loss']
 		val_rmse = val_losses['rmse']
+		val_loss_l1 = val_losses['loss_l1']
+		val_loss_kl = val_losses['loss_kl']
+		val_loss_tv = val_losses['loss_tv']
 
 		# Log the losses
 		self.log("rmse/avg_val", val_rmse, prog_bar=True)
@@ -148,6 +163,12 @@ class LITBaseSPADModel(pl.LightningModule):
 		)
 		# Return depths
 		dep = sample["bins"]
+		
+		if((batch_idx % 300) == 0):
+			self.print_logger.info("Validation - Epoch {} - Batch {} - Step {}".format(self.current_epoch, batch_idx, self.global_step))
+			self.print_logger.info("    RMSE: {}, L1: {}, KL: {}, TV: {}".format(val_rmse, val_loss_l1, val_loss_kl, self.p_tv*val_loss_tv))
+
+		
 		return {'dep': dep, 'dep_re': dep_re}
 
 
@@ -191,7 +212,7 @@ class LITBaseSPADModel(pl.LightningModule):
 		# the following two lines give the same result
 		# depths_rmse = torch.sqrt(torch.mean((rec_depths - gt_depths)**2))
 		# depths_L2 = criterion_L2(rec_depths, gt_depths)
-		depths_rmse = criterion_L2(rec_depths, gt_depths)
+		depths_rmse = criterion_RMSE(rec_depths, gt_depths)
 		depths_mae = criterion_L1(rec_depths, gt_depths)
 
 		percentiles = [0.5, 0.75, 0.95, 0.99]
@@ -210,7 +231,6 @@ class LITBaseSPADModel(pl.LightningModule):
 				, "depths/test_mean_abs_perc{:.2f}".format(percentiles[2]): mean_percentile_errs[2]
 				, "depths/test_mean_abs_perc{:.2f}".format(percentiles[3]): mean_percentile_errs[3]
 			}
-			, on_step=True
 		)
 		return {'dep': dep, 'dep_re': dep_re}
 

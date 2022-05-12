@@ -13,6 +13,7 @@ breakpoint = debugger.set_trace
 #### Local imports
 from spad_dataset import SpadDataset
 from model_utils import init_model_from_id
+from train_test_utils import config_train_val_dataloaders, setup_tb_logger, setup_train_callbacks
 
 
 # A logger for this file (not for the pytorch logger)
@@ -20,11 +21,17 @@ logger = logging.getLogger(__name__)
 
 @hydra.main(config_path="./conf", config_name="train")
 def train(cfg):
-	if('debug' in cfg.experiment):
-		pl.seed_everything(cfg.random_seed)
-		logger.info("Running debug experiment mode. Fixed Random Seed")
-	else:
-		logger.info("Running {} experiment mode".format(cfg.experiment))
+	# if('debug' in cfg.experiment):
+	# 	pl.seed_everything(cfg.random_seed)
+	# 	logger.info("Running debug experiment mode. Fixed Random Seed")
+	# else:
+	# 	logger.info("Running {} experiment mode".format(cfg.experiment))
+
+	pl.seed_everything(cfg.random_seed)
+	logger.info("Running {} experiment mode".format(cfg.experiment))
+	logger.info("Fixed random seed {}".format(cfg.random_seed))
+
+
 	logger.info("\n" + OmegaConf.to_yaml(cfg))
 	logger.info("Number of assigned GPUs: {}".format(cfg.train_params.gpu_num))
 	logger.info("Number of available GPUs: {} {}".format(torch.cuda.device_count(), torch.cuda.get_device_name(torch.cuda.current_device())))
@@ -34,53 +41,16 @@ def train(cfg):
 		device = torch.device("cpu")
 		cfg.train_params.cuda = False
 
-	logger.info("Loading training data...")
-	logger.info("Train Datalist: {}".format(cfg.params.train_datalist_fpath))
-	# data preprocessing
-	train_data = SpadDataset(cfg.params.train_datalist_fpath, cfg.train_params.noise_idx 
-		, disable_rand_crop=cfg.train_params.disable_rand_crop
-		, output_size=cfg.train_params.crop_patch_size
-	)
-	train_loader = DataLoader(train_data, batch_size=cfg.train_params.batch_size, 
-							shuffle=True, num_workers=cfg.train_params.workers, 
-							pin_memory=cfg.train_params.cuda)
-	logger.info("Load training data complete - {} train samples!".format(len(train_data)))
-	logger.info("Loading validation data...")
-	logger.info("Val Datalist: {}".format(cfg.params.val_datalist_fpath))
-	val_data = SpadDataset(cfg.params.val_datalist_fpath, cfg.train_params.noise_idx
-		, disable_rand_crop=True
-	)
-	val_loader = DataLoader(val_data, batch_size=cfg.train_params.batch_size, 
-							shuffle=False, num_workers=cfg.train_params.workers, 
-							pin_memory=cfg.train_params.cuda)
-	logger.info("Load validation data complete - {} val samples!".format(len(val_data)))
-	logger.info("+++++++++++++++++++++++++++++++++++++++++++")
+	## Config dataloaders. Use a function that can be re-used in train_resume.py
+	(train_data, train_loader, val_data, val_loader) = config_train_val_dataloaders(cfg, logger)
 
+	tb_logger = setup_tb_logger()
 
-	# Let hydra manage directory outputs. We over-write the save_dir to . so that we use the ones that hydra configures
-	# tensorboard = pl.loggers.TensorBoardLogger(save_dir=".", name="", version="", log_graph=True, default_hp_metric=False)
-	tb_logger = pl.loggers.TensorBoardLogger(save_dir=".", name="", version="", log_graph=True, default_hp_metric=False)
+	(callbacks, lr_monitor_callback, ckpt_callback) = setup_train_callbacks()
 
-	# NOTE: using rmse/avg_val instead of rmse_avg_val, allows to group things in tensorboard 
-	# To avoid creating new directories when using / in the monitor metric name, we need to set auto_insert_metric_name=False
-	# and set the filename we want to show
-	ckpt_callback = pl.callbacks.ModelCheckpoint(
-		monitor='rmse/avg_val'	
-		, filename='epoch={epoch:02d}-step={step:02d}-avgvalrmse={rmse/avg_val:.4f}'
-		, auto_insert_metric_name=False
-		, save_last=True
-		, save_top_k=-1 # Of -1 it saves model at end of epoch
-		# , every_n_epochs=1 # How often to check the value we are monitoring
-		, mode='min'
-	) 
-
-	lr_monitor_callback = pl.callbacks.LearningRateMonitor(logging_interval='step')
-	
-	callbacks = [ ckpt_callback, lr_monitor_callback ] 
 	logger.info("Initializing {} model".format(cfg.model.model_name))
 	lit_model = init_model_from_id(cfg, irf=train_data.psf)
 	
-
 	if(cfg.train_params.overfit_batches):
 		# trainer = pl.Trainer(fast_dev_run=True, logger=tb_logger, callbacks=[lr_monitor_callback]) # 
 		if(cfg.train_params.cuda):
@@ -100,6 +70,7 @@ def train(cfg):
 			#  	) # Runs single batch
 			trainer = pl.Trainer(accelerator="gpu", devices=1, max_epochs=cfg.train_params.epoch, 
 				logger=tb_logger, callbacks=callbacks, 
+				# log_every_n_steps=10, val_check_interval=0.005) # 
 				log_every_n_steps=10, val_check_interval=0.25) # 
 				# log_every_n_steps=10, val_check_interval=1.0) # 
 		else:

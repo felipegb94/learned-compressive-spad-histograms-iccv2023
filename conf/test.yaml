@@ -11,6 +11,7 @@ defaults:
   - _self_
   - dataset: middlebury
   # - dataset: nyuv2_min
+  # - dataset: nyuv2
   # enable color logging
   - override hydra/hydra_logging: colorlog
   - override hydra/job_logging: colorlog
@@ -39,6 +40,12 @@ train_dataset: nyuv2_64x64x1024_80ps
 # model_name: DDFN_C64B10_Depth2Depth
 # model_dirpath: outputs/${.train_dataset}/debug/${.model_name}/2022-05-02_085659
 # ckpt_id: epoch=05-step=19910-avgvalrmse=0.0357
+
+## 3D DB Plain Depth2Depth Model (No TV) --> Full trained model with gradient decay
+model_name: DDFN_C64B10_Depth2Depth
+model_dirpath: outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_Depth2Depth/loss-kldiv_tv-0.0/2022-05-07_171658
+ckpt_id: epoch=08-step=28569-avgvalrmse=0.0263
+
 
 # ## Compressive --> Full trained model with gradient decay
 # model_name: DDFN_C64B10_NL_Compressive
@@ -89,11 +96,67 @@ train_dataset: nyuv2_64x64x1024_80ps
 # ## 01Inputs Depth2Depth LARGE Model --> Full trained model with gradient decay
 # model_name: DDFN2D_Depth2Depth_01Inputs/B-16_MS-8
 # model_dirpath: outputs/${.train_dataset}/debug/${.model_name}/2022-05-01_172344
-# ckpt_id: epoch=46-step=161893-avgvalrmse=0.0240
-# # ckpt_id: epoch=21-step=73588-avgvalrmse=0.0253 
-# # ckpt_id: epoch=18-step=64929-avgvalrmse=0.0290
-# # ckpt_id: epoch=11-step=38958-avgvalrmse=0.0306
-# # ckpt_id: epoch=16-step=58003-avgvalrmse=0.0270
+# ckpt_id: epoch=46-step=161893-avgvalrmse=0.0240 #0.075
+# # ckpt_id: epoch=11-step=39823-avgvalrmse=0.0279 # 0.097
+# # ckpt_id: epoch=12-step=45016-avgvalrmse=0.0279 # 0.1
+# # ckpt_id: epoch=13-step=47614-avgvalrmse=0.0294 # 0.14
+# # ckpt_id: epoch=15-step=52810-avgvalrmse=0.0291 # 0.045
+# # ckpt_id: epoch=15-step=53675-avgvalrmse=0.0280 # 0.086
+# # ckpt_id: epoch=16-step=57138-avgvalrmse=0.0279 # 0.099
+# # ckpt_id: epoch=18-step=65794-avgvalrmse=0.0263 # 0.10
+# # ckpt_id: epoch=20-step=72720-avgvalrmse=0.0273 #0.088
+# # ckpt_id: epoch=21-step=75318-avgvalrmse=0.0255 #0.1
+# # ckpt_id: epoch=23-step=82244-avgvalrmse=0.0260 #0.1
+# # ckpt_id: epoch=24-step=83977-avgvalrmse=0.0283 #0.23
+# # ckpt_id: epoch=25-step=89170-avgvalrmse=0.0255 #0.086
+# # ckpt_id: epoch=27-step=95231-avgvalrmse=0.0266 #0.1
+# # ckpt_id: epoch=29-step=103022-avgvalrmse=0.0258 #0.09
+# # ckpt_id: epoch=31-step=109083-avgvalrmse=0.0256 # 0.078
+# # ckpt_id: epoch=37-step=128996-avgvalrmse=0.0258 # 0.09
+# # ckpt_id: epoch=42-step=147176-avgvalrmse=0.0259 # 0.063
+
+# ## 01Inputs Depth2Depth LARGE Model --> Full trained model with gradient decay
+# model_name: DDFN2D_Depth2Depth_01Inputs/B-16_MS-8/loss-L1_tv-1e-05
+# model_dirpath: outputs/${.train_dataset}/debug/${.model_name}/2022-05-04_134615
+# ckpt_id: null
+
+# ## 01Inputs Depth2Depth LARGE Model --> Full trained model with gradient decay
+# model_name: DDFN2D_Depth2Depth_01Inputs/B-16_MS-8/loss-L1_tv-3e-05
+# model_dirpath: outputs/${.train_dataset}/debug/${.model_name}/2022-05-04_133635
+# ckpt_id: null
+
+# ## Phasor2Depth LARGE Model --> Full trained model with gradient decay
+# model_name: DDFN2D_Phasor2Depth/B-16_MS-8/loss-L1_tv-1e-05
+# # model_dirpath: outputs/${.train_dataset}/test/${.model_name}/2022-05-05_074039
+# # ckpt_id: epoch=21-step=38104-avgvalrmse=0.0405
+# model_dirpath: outputs/${.train_dataset}/test/${.model_name}/2022-05-05_122615
+# ckpt_id: epoch=30-step=53692-avgvalrmse=0.0279 # 0.069, 
+# # ckpt_id: epoch=05-step=9093-avgvalrmse=0.0493
+# # ckpt_id: epoch=06-step=12124-avgvalrmse=0.0345
+# # ckpt_id: epoch=07-step=12990-avgvalrmse=0.0328
+# # ckpt_id: epoch=07-step=13856-avgvalrmse=0.0380
+# # ckpt_id: epoch=08-step=14722-avgvalrmse=0.0317
+# # ckpt_id: epoch=09-step=16021-avgvalrmse=0.0314
+# # ckpt_id: epoch=09-step=16454-avgvalrmse=0.0331 # 0.09
+# # ckpt_id: epoch=13-step=23382-avgvalrmse=0.0311 #0.15
+# # ckpt_id: epoch=17-step=30743-avgvalrmse=0.0304 # 0.11
+# # ckpt_id: epoch=19-step=34207-avgvalrmse=0.0283 #
+# # ckpt_id: epoch=22-step=39403-avgvalrmse=0.0281 # 0.08
+# # ckpt_id: epoch=24-step=42434-avgvalrmse=0.0280 # 0.089
+# # ckpt_id: epoch=25-step=43733-avgvalrmse=0.0282 # 0.07
+# # ckpt_id: epoch=26-step=46331-avgvalrmse=0.0285 # 0.088
+# # ckpt_id: epoch=23-step=40269-avgvalrmse=0.0300 # 0.062, Val-set B8 RMSE: 0.0299/0.368, MAE: 0.137
+# # ckpt_id: epoch=23-step=40702-avgvalrmse=0.0288 # 0.059
+# # ckpt_id: epoch=23-step=41135-avgvalrmse=0.0284 # 0.073
+# # ckpt_id: epoch=23-step=41568-avgvalrmse=0.0312 #0.054
+# # ckpt_id: epoch=25-step=44599-avgvalrmse=0.0307 # 0.052, Val-set B8 RMSE: 0.03067/0.376, MAE: 0.14
+# # ckpt_id: epoch=22-step=38537-avgvalrmse=0.0303 # 0.086
+# # ## Val-set B8 RMSE: 0.02785/0.3422, MAE: 0.128, Val-set B5 RMSE: 0.026/0.331, MAE: 0.128  
+# # Val-loop val-set B8 RMSE: 0.02785
+# # ckpt_id: epoch=30-step=53692-avgvalrmse=0.0279 # 0.069, 
+# # ckpt_id: epoch=15-step=26846-avgvalrmse=0.0292 # 0.067
+# # ckpt_id: epoch=15-step=26413-avgvalrmse=0.0292 # 0.067
+# # ckpt_id: epoch=15-step=27712-avgvalrmse=0.0300 # 0.072
 
 # ## Depth2Depth2Hist Model --> Full trained model with gradient decay
 # model_name: DDFN2D_Depth2Depth2Hist_01Inputs/B-12_MS-8
@@ -103,8 +166,9 @@ train_dataset: nyuv2_64x64x1024_80ps
 
 params:
   gpu_num: 1
-  cuda: true
   batch_size: 1
+  num_workers: 8
+  cuda: true
   noise_idx: null
   test_datalist_fpath: ${io_dirpaths.datalists_dirpath}/${dataset.test_datalist_fname}
 
