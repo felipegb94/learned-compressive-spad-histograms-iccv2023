@@ -26,20 +26,21 @@ def train_resume(cfg):
 	logger.info("Fixed random seed {}".format(cfg.random_seed))
 
 	logger.info("\n" + OmegaConf.to_yaml(cfg))
-	logger.info("Number of assigned GPUs: {}".format(cfg.params.gpu_num))
+	logger.info("Number of assigned GPUs: {}".format(cfg.train_params.gpu_num))
 	logger.info("Number of available GPUs: {} {}".format(torch.cuda.device_count(), torch.cuda.get_device_name(torch.cuda.current_device())))
 
-	if(torch.cuda.is_available() and cfg.params.cuda): device = torch.device("cuda:0")
+
+	if(torch.cuda.is_available() and cfg.train_params.cuda): device = torch.device("cuda:0")
 	else: 
 		device = torch.device("cpu")
-		cfg.params.cuda = False
+		cfg.train_params.cuda = False
 
 	## Config dataloaders. Use a function that can be re-used in train_resume.py
 	(train_data, train_loader, val_data, val_loader) = config_train_val_dataloaders(cfg, logger)
 
 	tb_logger = setup_tb_logger()
 
-	(callbacks, lr_monitor_callback, ckpt_callback) = setup_train_callbacks()
+	(callbacks, lr_monitor_callback, ckpt_callback, resume_ckpt_callback) = setup_train_callbacks()
 
 	# uses in_dim=32, out_dim=10
 	if(cfg.ckpt_id):
@@ -52,12 +53,12 @@ def train_resume(cfg):
 		logger.info("Loading last.ckpt because no ckpt was given")
 		ckpt_id = 'last.ckpt'
 
-	lit_model = load_model_from_ckpt(cfg.model_name, ckpt_id, logger)
+	lit_model, ckpt_fpath = load_model_from_ckpt(cfg.model_name, ckpt_id, logger)
 
 	if(cfg.train_params.cuda):
 		trainer = pl.Trainer(accelerator="gpu", devices=1, max_epochs=cfg.train_params.epoch, 
 			logger=tb_logger, callbacks=callbacks, 
-			log_every_n_steps=10, val_check_interval=0.25) # 
+			log_every_n_steps=10, val_check_interval=0.5) # 
 	else:
 		trainer = pl.Trainer(max_epochs=cfg.train_params.epoch, 
 			logger=tb_logger, callbacks=callbacks, 
@@ -65,7 +66,7 @@ def train_resume(cfg):
 
 	logger.info("Number of Model Params: {}".format(count_parameters(lit_model)))
 
-	trainer.fit(lit_model, train_dataloaders=train_loader, val_dataloaders=val_loader)
+	trainer.fit(lit_model, train_dataloaders=train_loader, val_dataloaders=val_loader, ckpt_path=ckpt_fpath)
 
 
 

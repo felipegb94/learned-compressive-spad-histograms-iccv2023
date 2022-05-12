@@ -55,10 +55,20 @@ def setup_train_callbacks():
 		, save_top_k=-1 # Of -1 it saves model at end of epoch
 		# , every_n_epochs=1 # How often to check the value we are monitoring
 		, mode='min'
+		# , save_on_train_epoch_end=True
 	) 
+	
+	# This ckpt callback only saves the checkpoint at the end of each epoch and can be used to resume training
+	# NOTE: We need this because pytorch-lightning is a bit weird when loading checkpoints in the middle of an epoch
+	resume_ckpt_callback = pl.callbacks.ModelCheckpoint(
+		filename='epoch={epoch:02d}-step={step:02d}-end-of-epoch'
+		, auto_insert_metric_name=False
+		, save_last=False
+		, save_on_train_epoch_end=True
+	)
 
 	lr_monitor_callback = pl.callbacks.LearningRateMonitor(logging_interval='step')
 	
-	callbacks = [ ckpt_callback, lr_monitor_callback ] 
-	return (callbacks, lr_monitor_callback, ckpt_callback)
+	callbacks = [ ckpt_callback, lr_monitor_callback, resume_ckpt_callback ] 
+	return (callbacks, lr_monitor_callback, ckpt_callback, resume_ckpt_callback)
 

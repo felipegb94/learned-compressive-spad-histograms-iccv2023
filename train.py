@@ -46,7 +46,7 @@ def train(cfg):
 
 	tb_logger = setup_tb_logger()
 
-	(callbacks, lr_monitor_callback, ckpt_callback) = setup_train_callbacks()
+	(callbacks, lr_monitor_callback, ckpt_callback, resume_ckpt_callback) = setup_train_callbacks()
 
 	logger.info("Initializing {} model".format(cfg.model.model_name))
 	lit_model = init_model_from_id(cfg, irf=train_data.psf)
@@ -71,7 +71,7 @@ def train(cfg):
 			trainer = pl.Trainer(accelerator="gpu", devices=1, max_epochs=cfg.train_params.epoch, 
 				logger=tb_logger, callbacks=callbacks, 
 				# log_every_n_steps=10, val_check_interval=0.005) # 
-				log_every_n_steps=10, val_check_interval=0.25) # 
+				log_every_n_steps=10, val_check_interval=0.5) # 
 				# log_every_n_steps=10, val_check_interval=1.0) # 
 		else:
 			# trainer = pl.Trainer(

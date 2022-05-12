@@ -107,27 +107,27 @@ def init_model_from_id(cfg, irf=None):
 
 def load_model_from_ckpt(model_name, ckpt_id, logger):
 	assert(os.path.exists(os.path.join('checkpoints/',ckpt_id))), "Input checkpoint does not exist ({})".format(ckpt_id)
-
+	ckpt_fpath = os.path.join("checkpoints", ckpt_id)
 	logger.info("Loading {} model".format(model_name))
 	if(model_name == 'DDFN_C64B10_NL_Depth2Depth'):
-		model = LITDeepBoostingDepth2Depth.load_from_checkpoint("checkpoints/"+ckpt_id)
+		model = LITDeepBoostingDepth2Depth.load_from_checkpoint(ckpt_fpath)
 	elif(model_name == 'DDFN_C64B10_Depth2Depth'):
-		model = LITPlainDeepBoostingDepth2Depth.load_from_checkpoint("checkpoints/"+ckpt_id)
+		model = LITPlainDeepBoostingDepth2Depth.load_from_checkpoint(ckpt_fpath)
 	elif(model_name == 'DDFN_C64B10_NL_Compressive'):
-		model = LITDeepBoostingCompressive.load_from_checkpoint("checkpoints/"+ckpt_id)
+		model = LITDeepBoostingCompressive.load_from_checkpoint(ckpt_fpath)
 	elif(model_name == 'DDFN_C64B10_NL_CompressiveWithBias'):
-		model = LITDeepBoostingCompressiveWithBias.load_from_checkpoint("checkpoints/"+ckpt_id)
+		model = LITDeepBoostingCompressiveWithBias.load_from_checkpoint(ckpt_fpath)
 	elif(model_name == 'DDFN_C64B10_NL_original'):
-		model = LITDeepBoostingOriginal.load_from_checkpoint("checkpoints/"+ckpt_id)
+		model = LITDeepBoostingOriginal.load_from_checkpoint(ckpt_fpath)
 	elif(model_name == 'DDFN_C64B10'):
-		model = LITPlainDeepBoosting.load_from_checkpoint("checkpoints/"+ckpt_id)
+		model = LITPlainDeepBoosting.load_from_checkpoint(ckpt_fpath)
 	elif('DDFN2D_Depth2Depth_01Inputs' in model_name):
-		model = LITPlainDeepBoosting2DDepth2Depth01Inputs.load_from_checkpoint("checkpoints/"+ckpt_id, strict=False)
+		model = LITPlainDeepBoosting2DDepth2Depth01Inputs.load_from_checkpoint(ckpt_fpath, strict=False)
 	elif('DDFN2D_Phasor2Depth' in model_name):
-		model = LITPlainDeepBoosting2DPhasor2Depth.load_from_checkpoint("checkpoints/"+ckpt_id, strict=False)
+		model = LITPlainDeepBoosting2DPhasor2Depth.load_from_checkpoint(ckpt_fpath, strict=False)
 	elif(model_name == 'DDFN2D_Depth2Depth2Hist_01Inputs/B-12_MS-8'):
-		model = LITPlainDeepBoosting2DDepth2Depth2Hist01Inputs.load_from_checkpoint("checkpoints/"+ckpt_id, strict=False)
+		model = LITPlainDeepBoosting2DDepth2Depth2Hist01Inputs.load_from_checkpoint(ckpt_fpath, strict=False)
 	else:
 		assert(False), "Invalid model_name: {}".format(model_name)
 	
-	return model
+	return model, ckpt_fpath
