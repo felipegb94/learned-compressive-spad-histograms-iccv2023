@@ -137,7 +137,7 @@ class LITBaseSPADModel(pl.LightningModule):
 		
 		if((batch_idx % 250) == 0):
 			self.print_logger.info("Train - Epoch {} - Batch {} - Step {}".format(self.current_epoch, batch_idx, self.global_step))
-			self.print_logger.info("    RMSE: {}, L1: {}, KL: {}, TV: {}".format(rmse, loss_l1, loss_kl, self.p_tv*loss_tv))
+			self.print_logger.info("    RMSE: {:.4f}, L1: {:.4f}, KL: {:.4f}, TV: {:.4f}".format(rmse, loss_l1, loss_kl, self.p_tv*loss_tv))
 			
 		
 		return {'loss': loss}
@@ -166,7 +166,7 @@ class LITBaseSPADModel(pl.LightningModule):
 		
 		if((batch_idx % 300) == 0):
 			self.print_logger.info("Validation - Epoch {} - Batch {} - Step {}".format(self.current_epoch, batch_idx, self.global_step))
-			self.print_logger.info("    RMSE: {}, L1: {}, KL: {}, TV: {}".format(val_rmse, val_loss_l1, val_loss_kl, self.p_tv*val_loss_tv))
+			self.print_logger.info("    RMSE: {:.4f}, L1: {:.4f}, KL: {:.4f}, TV: {:.4f}".format(val_rmse, val_loss_l1, val_loss_kl, self.p_tv*val_loss_tv))
 
 		
 		return {'dep': dep, 'dep_re': dep_re}

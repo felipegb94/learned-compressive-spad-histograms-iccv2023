@@ -3,6 +3,7 @@
 results
 outputs
 outputs_old
+outputs_bkp
 
 tmp.*
 
