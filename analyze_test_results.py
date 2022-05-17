@@ -21,14 +21,18 @@ def compute_rmse(gt, est):
     rmse = np.sqrt(np.mean((gt - est)**2))
     return rmse
 
+def compute_mse(gt, est):
+    mse = np.mean((gt - est)**2)
+    return mse
+
 def compute_mae(gt, est):
-    mae = np.mean((gt - est)**2)
+    mae = np.mean(np.abs(gt - est))
     return mae
 
 def compute_error_metrics(gt, est):
     abs_errs = np.abs(gt-est)
     perc_errs = np_utils.calc_mean_percentile_errors(abs_errs)
-    return (compute_rmse(gt,est), compute_mae(gt,est), abs_errs, np.round(perc_errs[0], decimals=2))
+    return (compute_rmse(gt,est), compute_mse(gt,est), compute_mae(gt,est), abs_errs, np.round(perc_errs[0], decimals=2))
 
 def get_model_depths(model_result_dirpath, scene_id, sbr_params, num_bins, tau):
     scene_fname = '{}_{}'.format(scene_id, sbr_params)
@@ -38,6 +42,14 @@ def get_model_depths(model_result_dirpath, scene_id, sbr_params, num_bins, tau):
     model_depths = bin2depth(model_bins, num_bins=num_bins, tau=tau)
     return model_depths
 
+def calc_mean_rmse(metric_dict):
+    return np.mean(metric_dict['rmse'])
+
+def calc_mean_mse(metric_dict):
+    return np.mean(metric_dict['mse'])*100
+
+def calc_mean_mae(metric_dict):
+    return np.mean(metric_dict['mae'])*100
 
 if __name__=='__main__':
 
@@ -45,59 +57,69 @@ if __name__=='__main__':
     experiment_name = 'd2d2D_B12_tv_comparisson'
     experiment_name = 'phasor2depth_comparisson_v1'
     experiment_name = 'db3D_d2d_comparissons'
+    experiment_name = 'db3D_csph1D_comparissons'
 
-    out_dirpath = os.path.join('./results/week_2022-05-02/test_results', experiment_name)
+    out_dirpath = os.path.join('./results/week_2022-05-09/test_results', experiment_name)
     os.makedirs(out_dirpath, exist_ok=True)
 
-    plot_results = True
+    plot_results = False
 
     ## Scene ID and Params
     scene_ids = ['spad_Art', 'spad_Reindeer', 'spad_Books', 'spad_Moebius', 'spad_Bowling1', 'spad_Dolls', 'spad_Laundry', 'spad_Plastic']
-    # sbr_params = ['2_2','2_10','2_50','5_2','5_10','5_50','10_2','10_10','10_50']
+    sbr_params = ['2_2','2_10','2_50','5_2','5_10','5_50','10_2','10_10','10_50']
 
     # scene_ids = ['spad_Art']
     # # scene_ids = ['spad_Books']
     # # scene_ids = ['spad_Books']
-    scene_ids = ['spad_Reindeer']
-    # # sbr_params = ['2_2','2_10','2_50','5_2','5_10','5_50','10_2','10_10','10_50']
-    sbr_params = ['2_50']
+    # scene_ids = ['spad_Reindeer']
+    # sbr_params = ['2_2','2_10','2_50','5_2','5_10','5_50','10_2','10_10','10_50']
+    sbr_params = ['10_10']
+
+    test_set_id = 'test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
 
     ## Set dirpaths
-    compressive_model_result_dirpath = 'outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_NL_Compressive/debug/2022-04-23_132059/test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
-    db3D_nl_result_dirpath = 'outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_NL_original/debug/2022-04-20_185832/test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
-    db3D_result_dirpath = 'outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10/debug/2022-04-25_192521/test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
-    db3D_nl_d2d_result_dirpath = 'outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_NL_Depth2Depth/debug/2022-04-22_134732/test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
-    db3D_d2d_result_dirpath = 'outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_Depth2Depth/2022-05-02_085659/test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
-    db3D_d2d_tv0_result_dirpath = 'outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_Depth2Depth/loss-kldiv_tv-0.0/2022-05-07_171658/test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
-    db2D_d2d2hist01Inputs_B12_model_result_dirpath = 'outputs/nyuv2_64x64x1024_80ps/debug/DDFN2D_Depth2Depth2Hist_01Inputs/B-12_MS-8/2022-05-02_214727/test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
-    db2D_p2d_B12_tv1m5_model_result_dirpath = 'outputs/nyuv2_64x64x1024_80ps/test/DDFN2D_Phasor2Depth/B-16_MS-8/loss-L1_tv-1e-05/2022-05-05_122615/test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
-    db2D_d2d01Inputs_B12_tv1m3_model_result_dirpath = 'outputs/nyuv2_64x64x1024_80ps/debug/DDFN2D_Depth2Depth_01Inputs/B-12_MS-8/loss-L1_tv-0.001/2022-05-03_183044/test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
-    db2D_d2d01Inputs_B12_tv1m4_model_result_dirpath = 'outputs/nyuv2_64x64x1024_80ps/debug/DDFN2D_Depth2Depth_01Inputs/B-12_MS-8/loss-L1_tv-0.0001/2022-05-03_183002/test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
-    db2D_d2d01Inputs_B12_tv3m5_model_result_dirpath = 'outputs/nyuv2_64x64x1024_80ps/debug/DDFN2D_Depth2Depth_01Inputs/B-12_MS-8/loss-L1_tv-3e-05/2022-05-03_185303/test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
-    db2D_d2d01Inputs_B12_tv1m5_model_result_dirpath = 'outputs/nyuv2_64x64x1024_80ps/debug/DDFN2D_Depth2Depth_01Inputs/B-12_MS-8/debug/2022-04-27_104532/test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
-    db2D_d2d01Inputs_B12_tv1m10_model_result_dirpath = 'outputs/nyuv2_64x64x1024_80ps/debug/DDFN2D_Depth2Depth_01Inputs/B-12_MS-8/loss-L1_tv-1e-10/2022-05-03_183128/test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
-    db2D_d2d01Inputs_B16_model_result_dirpath = 'outputs/nyuv2_64x64x1024_80ps/debug/DDFN2D_Depth2Depth_01Inputs/B-16_MS-8/2022-05-01_172344/test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
-    db2D_d2d01Inputs_B24_model_result_dirpath = 'outputs/nyuv2_64x64x1024_80ps/debug/DDFN2D_Depth2Depth_01Inputs/B-24_MS-8/2022-04-28_163253/test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
+    compressive_result_dirpath = os.path.join('outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_NL_Compressive/debug/2022-04-23_132059/', test_set_id)
+    db3D_nl_result_dirpath = os.path.join('outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_NL_original/debug/2022-04-20_185832/', test_set_id)
+    db3D_result_dirpath = os.path.join('outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10/debug/2022-04-25_192521/', test_set_id)
+    db3D_nl_d2d_result_dirpath = os.path.join('outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_NL_Depth2Depth/debug/2022-04-22_134732/', test_set_id)
+    db3D_d2d_result_dirpath = os.path.join('outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_Depth2Depth/2022-05-02_085659/', test_set_id)
+    db3D_d2d_tv0_result_dirpath = os.path.join('outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_Depth2Depth/loss-kldiv_tv-0.0/2022-05-07_171658/', test_set_id)
+    db3D_csph1D_grayfour_tv0_result_dirpath = os.path.join('outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_CSPH1D/k16_HybridGrayFourier/loss-kldiv_tv-0.0/2022-05-11_070443/', test_set_id)
+    db3D_csph1D_truncfour_tv0_result_dirpath = os.path.join('outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_CSPH1D/k16_TruncFourier/loss-kldiv_tv-0.0/2022-05-14_175011/', test_set_id)
+    db3D_csph1D_coarsehist_tv0_result_dirpath = os.path.join('outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_CSPH1D/k16_CoarseHist/loss-kldiv_tv-0.0/2022-05-15_103103/', test_set_id)
+    db2D_d2d2hist01Inputs_B12_result_dirpath = os.path.join('outputs/nyuv2_64x64x1024_80ps/debug/DDFN2D_Depth2Depth2Hist_01Inputs/B-12_MS-8/2022-05-02_214727/', test_set_id)
+    db2D_p2d_B12_tv1m5_result_dirpath = os.path.join('outputs/nyuv2_64x64x1024_80ps/test/DDFN2D_Phasor2Depth/B-16_MS-8/loss-L1_tv-1e-05/2022-05-05_122615/', test_set_id)
+    db2D_d2d01Inputs_B12_tv1m3_result_dirpath = os.path.join('outputs/nyuv2_64x64x1024_80ps/debug/DDFN2D_Depth2Depth_01Inputs/B-12_MS-8/loss-L1_tv-0.001/2022-05-03_183044/', test_set_id)
+    db2D_d2d01Inputs_B12_tv1m4_result_dirpath = os.path.join('outputs/nyuv2_64x64x1024_80ps/debug/DDFN2D_Depth2Depth_01Inputs/B-12_MS-8/loss-L1_tv-0.0001/2022-05-03_183002/', test_set_id)
+    db2D_d2d01Inputs_B12_tv3m5_result_dirpath = os.path.join('outputs/nyuv2_64x64x1024_80ps/debug/DDFN2D_Depth2Depth_01Inputs/B-12_MS-8/loss-L1_tv-3e-05/2022-05-03_185303/', test_set_id)
+    db2D_d2d01Inputs_B12_tv1m5_result_dirpath = os.path.join('outputs/nyuv2_64x64x1024_80ps/debug/DDFN2D_Depth2Depth_01Inputs/B-12_MS-8/debug/2022-04-27_104532/', test_set_id)
+    db2D_d2d01Inputs_B12_tv1m10_result_dirpath = os.path.join('outputs/nyuv2_64x64x1024_80ps/debug/DDFN2D_Depth2Depth_01Inputs/B-12_MS-8/loss-L1_tv-1e-10/2022-05-03_183128/', test_set_id)
+    db2D_d2d01Inputs_B16_result_dirpath = os.path.join('outputs/nyuv2_64x64x1024_80ps/debug/DDFN2D_Depth2Depth_01Inputs/B-16_MS-8/2022-05-01_172344/', test_set_id)
+    db2D_d2d01Inputs_B24_result_dirpath = os.path.join('outputs/nyuv2_64x64x1024_80ps/debug/DDFN2D_Depth2Depth_01Inputs/B-24_MS-8/2022-04-28_163253/', test_set_id)
     gt_data_dirpath = 'data_gener/TestData/middlebury/processed/SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
 
-    gt_rmse_all = []
-    lmf_rmse_all = []
-    argmax_rmse_all = []
-    compressive_model_rmse_all = []
-    db3D_nl_rmse_all = []
-    db3D_rmse_all = []
-    db3D_nl_d2d_rmse_all = []
-    db3D_d2d_rmse_all = []
-    db3D_d2d_tv0_rmse_all = []
-    db2D_p2d_B12_tv1m5_model_rmse_all = []
-    db2D_d2d2hist01Inputs_B12_model_rmse_all = []
-    db2D_d2d01Inputs_B12_tv1m3_model_rmse_all = []
-    db2D_d2d01Inputs_B12_tv1m4_model_rmse_all = []
-    db2D_d2d01Inputs_B12_tv3m5_model_rmse_all = []
-    db2D_d2d01Inputs_B12_tv1m5_model_rmse_all = []
-    db2D_d2d01Inputs_B12_tv1m10_model_rmse_all = []
-    db2D_d2d01Inputs_B16_model_rmse_all = []
-    db2D_d2d01Inputs_B24_model_rmse_all = []
+    metrics_all = {}
+    metrics_all['gt'] = {};metrics_all['gt']['rmse'] = [];metrics_all['gt']['mae'] = [];metrics_all['gt']['mse'] = [];
+    metrics_all['lmf'] = {};metrics_all['lmf']['rmse'] = [];metrics_all['lmf']['mae'] = [];metrics_all['lmf']['mse'] = [];
+    metrics_all['argmax'] = {};metrics_all['argmax']['rmse'] = [];metrics_all['argmax']['mae'] = [];metrics_all['argmax']['mse'] = [];
+    metrics_all['compressive'] = {};metrics_all['compressive']['rmse'] = [];metrics_all['compressive']['mae'] = [];metrics_all['compressive']['mse'] = [];
+    metrics_all['db3D_nl'] = {};metrics_all['db3D_nl']['rmse'] = [];metrics_all['db3D_nl']['mae'] = [];metrics_all['db3D_nl']['mse'] = [];
+    metrics_all['db3D'] = {};metrics_all['db3D']['rmse'] = [];metrics_all['db3D']['mae'] = [];metrics_all['db3D']['mse'] = [];
+    metrics_all['db3D_nl_d2d'] = {};metrics_all['db3D_nl_d2d']['rmse'] = [];metrics_all['db3D_nl_d2d']['mae'] = [];metrics_all['db3D_nl_d2d']['mse'] = [];
+    metrics_all['db3D_d2d'] = {};metrics_all['db3D_d2d']['rmse'] = [];metrics_all['db3D_d2d']['mae'] = [];metrics_all['db3D_d2d']['mse'] = [];
+    metrics_all['db3D_d2d_tv0'] = {};metrics_all['db3D_d2d_tv0']['rmse'] = [];metrics_all['db3D_d2d_tv0']['mae'] = [];metrics_all['db3D_d2d_tv0']['mse'] = [];
+    metrics_all['db3D_csph1D_grayfour_tv0'] = {};metrics_all['db3D_csph1D_grayfour_tv0']['rmse'] = [];metrics_all['db3D_csph1D_grayfour_tv0']['mae'] = [];metrics_all['db3D_csph1D_grayfour_tv0']['mse'] = [];
+    metrics_all['db3D_csph1D_truncfour_tv0'] = {};metrics_all['db3D_csph1D_truncfour_tv0']['rmse'] = [];metrics_all['db3D_csph1D_truncfour_tv0']['mae'] = [];metrics_all['db3D_csph1D_truncfour_tv0']['mse'] = [];
+    metrics_all['db3D_csph1D_coarsehist_tv0'] = {};metrics_all['db3D_csph1D_coarsehist_tv0']['rmse'] = [];metrics_all['db3D_csph1D_coarsehist_tv0']['mae'] = [];metrics_all['db3D_csph1D_coarsehist_tv0']['mse'] = [];
+    metrics_all['db2D_p2d_B12_tv1m5'] = {};metrics_all['db2D_p2d_B12_tv1m5']['rmse'] = [];metrics_all['db2D_p2d_B12_tv1m5']['mae'] = [];metrics_all['db2D_p2d_B12_tv1m5']['mse'] = [];
+    metrics_all['db2D_d2d2hist01Inputs_B12'] = {};metrics_all['db2D_d2d2hist01Inputs_B12']['rmse'] = [];metrics_all['db2D_d2d2hist01Inputs_B12']['mae'] = [];metrics_all['db2D_d2d2hist01Inputs_B12']['mse'] = [];
+    metrics_all['db2D_d2d01Inputs_B12_tv1m3'] = {};metrics_all['db2D_d2d01Inputs_B12_tv1m3']['rmse'] = [];metrics_all['db2D_d2d01Inputs_B12_tv1m3']['mae'] = [];metrics_all['db2D_d2d01Inputs_B12_tv1m3']['mse'] = [];
+    metrics_all['db2D_d2d01Inputs_B12_tv1m4'] = {};metrics_all['db2D_d2d01Inputs_B12_tv1m4']['rmse'] = [];metrics_all['db2D_d2d01Inputs_B12_tv1m4']['mae'] = [];metrics_all['db2D_d2d01Inputs_B12_tv1m4']['mse'] = [];
+    metrics_all['db2D_d2d01Inputs_B12_tv3m5'] = {};metrics_all['db2D_d2d01Inputs_B12_tv3m5']['rmse'] = [];metrics_all['db2D_d2d01Inputs_B12_tv3m5']['mae'] = [];metrics_all['db2D_d2d01Inputs_B12_tv3m5']['mse'] = [];
+    metrics_all['db2D_d2d01Inputs_B12_tv1m5'] = {};metrics_all['db2D_d2d01Inputs_B12_tv1m5']['rmse'] = [];metrics_all['db2D_d2d01Inputs_B12_tv1m5']['mae'] = [];metrics_all['db2D_d2d01Inputs_B12_tv1m5']['mse'] = [];
+    metrics_all['db2D_d2d01Inputs_B12_tv1m10'] = {};metrics_all['db2D_d2d01Inputs_B12_tv1m10']['rmse'] = [];metrics_all['db2D_d2d01Inputs_B12_tv1m10']['mae'] = [];metrics_all['db2D_d2d01Inputs_B12_tv1m10']['mse'] = [];
+    metrics_all['db2D_d2d01Inputs_B16'] = {};metrics_all['db2D_d2d01Inputs_B16']['rmse'] = [];metrics_all['db2D_d2d01Inputs_B16']['mae'] = [];metrics_all['db2D_d2d01Inputs_B16']['mse'] = [];
+    metrics_all['db2D_d2d01Inputs_B24'] = {};metrics_all['db2D_d2d01Inputs_B24']['rmse'] = [];metrics_all['db2D_d2d01Inputs_B24']['mae'] = [];metrics_all['db2D_d2d01Inputs_B24']['mse'] = [];
 
     for i in range(len(scene_ids)):
         for j in range(len(sbr_params)):
@@ -128,75 +150,84 @@ if __name__=='__main__':
             argmax_depths = bin2depth(argmax_bins, num_bins=num_bins, tau=tau)
 
             ## Get depths for model outputs
-            (compressive_model_depths) = get_model_depths(model_result_dirpath=compressive_model_result_dirpath, scene_id=curr_scene_id, sbr_params=curr_sbr_params, num_bins=num_bins, tau=tau)
+            (compressive_depths) = get_model_depths(model_result_dirpath=compressive_result_dirpath, scene_id=curr_scene_id, sbr_params=curr_sbr_params, num_bins=num_bins, tau=tau)
             (db3D_nl_depths) = get_model_depths(model_result_dirpath=db3D_nl_result_dirpath, scene_id=curr_scene_id, sbr_params=curr_sbr_params, num_bins=num_bins, tau=tau)
             (db3D_depths) = get_model_depths(model_result_dirpath=db3D_result_dirpath, scene_id=curr_scene_id, sbr_params=curr_sbr_params, num_bins=num_bins, tau=tau)
             (db3D_nl_d2d_depths) = get_model_depths(model_result_dirpath=db3D_nl_d2d_result_dirpath, scene_id=curr_scene_id, sbr_params=curr_sbr_params, num_bins=num_bins, tau=tau)
             (db3D_d2d_depths) = get_model_depths(model_result_dirpath=db3D_d2d_result_dirpath, scene_id=curr_scene_id, sbr_params=curr_sbr_params, num_bins=num_bins, tau=tau)
             (db3D_d2d_tv0_depths) = get_model_depths(model_result_dirpath=db3D_d2d_tv0_result_dirpath, scene_id=curr_scene_id, sbr_params=curr_sbr_params, num_bins=num_bins, tau=tau)
-            (db2D_p2d_B12_tv1m5_model_depths) = get_model_depths(model_result_dirpath=db2D_p2d_B12_tv1m5_model_result_dirpath, scene_id=curr_scene_id, sbr_params=curr_sbr_params, num_bins=num_bins, tau=tau)
-            (db2D_d2d2hist01Inputs_B12_model_depths) = get_model_depths(model_result_dirpath=db2D_d2d2hist01Inputs_B12_model_result_dirpath, scene_id=curr_scene_id, sbr_params=curr_sbr_params, num_bins=num_bins, tau=tau)
-            (db2D_d2d01Inputs_B12_tv1m3_model_depths) = get_model_depths(model_result_dirpath=db2D_d2d01Inputs_B12_tv1m3_model_result_dirpath, scene_id=curr_scene_id, sbr_params=curr_sbr_params, num_bins=num_bins, tau=tau)
-            (db2D_d2d01Inputs_B12_tv1m4_model_depths) = get_model_depths(model_result_dirpath=db2D_d2d01Inputs_B12_tv1m4_model_result_dirpath, scene_id=curr_scene_id, sbr_params=curr_sbr_params, num_bins=num_bins, tau=tau)
-            (db2D_d2d01Inputs_B12_tv3m5_model_depths) = get_model_depths(model_result_dirpath=db2D_d2d01Inputs_B12_tv3m5_model_result_dirpath, scene_id=curr_scene_id, sbr_params=curr_sbr_params, num_bins=num_bins, tau=tau)
-            (db2D_d2d01Inputs_B12_tv1m5_model_depths) = get_model_depths(model_result_dirpath=db2D_d2d01Inputs_B12_tv1m5_model_result_dirpath, scene_id=curr_scene_id, sbr_params=curr_sbr_params, num_bins=num_bins, tau=tau)
-            (db2D_d2d01Inputs_B12_tv1m10_model_depths) = get_model_depths(model_result_dirpath=db2D_d2d01Inputs_B12_tv1m10_model_result_dirpath, scene_id=curr_scene_id, sbr_params=curr_sbr_params, num_bins=num_bins, tau=tau)
-            (db2D_d2d01Inputs_B16_model_depths) = get_model_depths(model_result_dirpath=db2D_d2d01Inputs_B16_model_result_dirpath, scene_id=curr_scene_id, sbr_params=curr_sbr_params, num_bins=num_bins, tau=tau)
-            (db2D_d2d01Inputs_B24_model_depths) = get_model_depths(model_result_dirpath=db2D_d2d01Inputs_B24_model_result_dirpath, scene_id=curr_scene_id, sbr_params=curr_sbr_params, num_bins=num_bins, tau=tau)
+            (db3D_csph1D_grayfour_tv0_depths) = get_model_depths(model_result_dirpath=db3D_csph1D_grayfour_tv0_result_dirpath, scene_id=curr_scene_id, sbr_params=curr_sbr_params, num_bins=num_bins, tau=tau)
+            (db3D_csph1D_truncfour_tv0_depths) = get_model_depths(model_result_dirpath=db3D_csph1D_truncfour_tv0_result_dirpath, scene_id=curr_scene_id, sbr_params=curr_sbr_params, num_bins=num_bins, tau=tau)
+            (db3D_csph1D_coarsehist_tv0_depths) = get_model_depths(model_result_dirpath=db3D_csph1D_coarsehist_tv0_result_dirpath, scene_id=curr_scene_id, sbr_params=curr_sbr_params, num_bins=num_bins, tau=tau)
+            (db2D_p2d_B12_tv1m5_depths) = get_model_depths(model_result_dirpath=db2D_p2d_B12_tv1m5_result_dirpath, scene_id=curr_scene_id, sbr_params=curr_sbr_params, num_bins=num_bins, tau=tau)
+            (db2D_d2d2hist01Inputs_B12_depths) = get_model_depths(model_result_dirpath=db2D_d2d2hist01Inputs_B12_result_dirpath, scene_id=curr_scene_id, sbr_params=curr_sbr_params, num_bins=num_bins, tau=tau)
+            (db2D_d2d01Inputs_B12_tv1m3_depths) = get_model_depths(model_result_dirpath=db2D_d2d01Inputs_B12_tv1m3_result_dirpath, scene_id=curr_scene_id, sbr_params=curr_sbr_params, num_bins=num_bins, tau=tau)
+            (db2D_d2d01Inputs_B12_tv1m4_depths) = get_model_depths(model_result_dirpath=db2D_d2d01Inputs_B12_tv1m4_result_dirpath, scene_id=curr_scene_id, sbr_params=curr_sbr_params, num_bins=num_bins, tau=tau)
+            (db2D_d2d01Inputs_B12_tv3m5_depths) = get_model_depths(model_result_dirpath=db2D_d2d01Inputs_B12_tv3m5_result_dirpath, scene_id=curr_scene_id, sbr_params=curr_sbr_params, num_bins=num_bins, tau=tau)
+            (db2D_d2d01Inputs_B12_tv1m5_depths) = get_model_depths(model_result_dirpath=db2D_d2d01Inputs_B12_tv1m5_result_dirpath, scene_id=curr_scene_id, sbr_params=curr_sbr_params, num_bins=num_bins, tau=tau)
+            (db2D_d2d01Inputs_B12_tv1m10_depths) = get_model_depths(model_result_dirpath=db2D_d2d01Inputs_B12_tv1m10_result_dirpath, scene_id=curr_scene_id, sbr_params=curr_sbr_params, num_bins=num_bins, tau=tau)
+            (db2D_d2d01Inputs_B16_depths) = get_model_depths(model_result_dirpath=db2D_d2d01Inputs_B16_result_dirpath, scene_id=curr_scene_id, sbr_params=curr_sbr_params, num_bins=num_bins, tau=tau)
+            (db2D_d2d01Inputs_B24_depths) = get_model_depths(model_result_dirpath=db2D_d2d01Inputs_B24_result_dirpath, scene_id=curr_scene_id, sbr_params=curr_sbr_params, num_bins=num_bins, tau=tau)
 
             ## Compute RMSE and MAE
-            (gt_rmse, gt_mae, gt_abs_errs, gt_perc_errs) = compute_error_metrics(gt_depths, gt_depths)
-            (lmf_rmse, lmf_mae, lmf_abs_errs, lmf_perc_errs) = compute_error_metrics(gt_depths, lmf_depths)
-            (argmax_rmse, argmax_mae, argmax_abs_errs, argmax_perc_errs) = compute_error_metrics(gt_depths, argmax_depths)
-            (compressive_model_rmse, compressive_model_mae, compressive_model_abs_errs, compressive_model_perc_errs) = compute_error_metrics(gt_depths, compressive_model_depths)
-            (db3D_nl_rmse, db3D_nl_mae, db3D_nl_abs_errs, db3D_nl_perc_errs) = compute_error_metrics(gt_depths, db3D_nl_depths)
-            (db3D_rmse, db3D_mae, db3D_abs_errs, db3D_perc_errs) = compute_error_metrics(gt_depths, db3D_depths)
-            (db3D_nl_d2d_rmse, db3D_nl_d2d_mae, db3D_nl_d2d_abs_errs, db3D_nl_d2d_perc_errs) = compute_error_metrics(gt_depths, db3D_nl_d2d_depths)
-            (db3D_d2d_rmse, db3D_d2d_mae, db3D_d2d_abs_errs, db3D_d2d_perc_errs) = compute_error_metrics(gt_depths, db3D_d2d_depths)
-            (db3D_d2d_tv0_rmse, db3D_d2d_tv0_mae, db3D_d2d_tv0_abs_errs, db3D_d2d_tv0_perc_errs) = compute_error_metrics(gt_depths, db3D_d2d_tv0_depths)
-            (db2D_p2d_B12_tv1m5_model_rmse, db2D_p2d_B12_tv1m5_model_mae, db2D_p2d_B12_tv1m5_model_abs_errs, db2D_p2d_B12_tv1m5_model_perc_errs) = compute_error_metrics(gt_depths, db2D_p2d_B12_tv1m5_model_depths)
-            (db2D_d2d2hist01Inputs_B12_model_rmse, db2D_d2d2hist01Inputs_B12_model_mae, db2D_d2d2hist01Inputs_B12_model_abs_errs, db2D_d2d2hist01Inputs_B12_model_perc_errs) = compute_error_metrics(gt_depths, db2D_d2d2hist01Inputs_B12_model_depths)
-            (db2D_d2d01Inputs_B12_tv1m3_model_rmse, db2D_d2d01Inputs_B12_tv1m3_model_mae, db2D_d2d01Inputs_B12_tv1m3_model_abs_errs, db2D_d2d01Inputs_B12_tv1m3_model_perc_errs) = compute_error_metrics(gt_depths, db2D_d2d01Inputs_B12_tv1m3_model_depths)
-            (db2D_d2d01Inputs_B12_tv1m4_model_rmse, db2D_d2d01Inputs_B12_tv1m4_model_mae, db2D_d2d01Inputs_B12_tv1m4_model_abs_errs, db2D_d2d01Inputs_B12_tv1m4_model_perc_errs) = compute_error_metrics(gt_depths, db2D_d2d01Inputs_B12_tv1m4_model_depths)
-            (db2D_d2d01Inputs_B12_tv3m5_model_rmse, db2D_d2d01Inputs_B12_tv3m5_model_mae, db2D_d2d01Inputs_B12_tv3m5_model_abs_errs, db2D_d2d01Inputs_B12_tv3m5_model_perc_errs) = compute_error_metrics(gt_depths, db2D_d2d01Inputs_B12_tv3m5_model_depths)
-            (db2D_d2d01Inputs_B12_tv1m5_model_rmse, db2D_d2d01Inputs_B12_tv1m5_model_mae, db2D_d2d01Inputs_B12_tv1m5_model_abs_errs, db2D_d2d01Inputs_B12_tv1m5_model_perc_errs) = compute_error_metrics(gt_depths, db2D_d2d01Inputs_B12_tv1m5_model_depths)
-            (db2D_d2d01Inputs_B12_tv1m10_model_rmse, db2D_d2d01Inputs_B12_tv1m10_model_mae, db2D_d2d01Inputs_B12_tv1m10_model_abs_errs, db2D_d2d01Inputs_B12_tv1m10_model_perc_errs) = compute_error_metrics(gt_depths, db2D_d2d01Inputs_B12_tv1m10_model_depths)
-            (db2D_d2d01Inputs_B16_model_rmse, db2D_d2d01Inputs_B16_model_mae, db2D_d2d01Inputs_B16_model_abs_errs, db2D_d2d01Inputs_B16_model_perc_errs) = compute_error_metrics(gt_depths, db2D_d2d01Inputs_B16_model_depths)
-            (db2D_d2d01Inputs_B24_model_rmse, db2D_d2d01Inputs_B24_model_mae, db2D_d2d01Inputs_B24_model_abs_errs, db2D_d2d01Inputs_B24_model_perc_errs) = compute_error_metrics(gt_depths, db2D_d2d01Inputs_B24_model_depths)
+            (gt_rmse, gt_mse, gt_mae, gt_abs_errs, gt_perc_errs) = compute_error_metrics(gt_depths, gt_depths)
+            (lmf_rmse, lmf_mse, lmf_mae, lmf_abs_errs, lmf_perc_errs) = compute_error_metrics(gt_depths, lmf_depths)
+            (argmax_rmse, argmax_mse, argmax_mae, argmax_abs_errs, argmax_perc_errs) = compute_error_metrics(gt_depths, argmax_depths)
+            (compressive_rmse, compressive_mse, compressive_mae, compressive_abs_errs, compressive_perc_errs) = compute_error_metrics(gt_depths, compressive_depths)
+            (db3D_nl_rmse, db3D_nl_mse, db3D_nl_mae, db3D_nl_abs_errs, db3D_nl_perc_errs) = compute_error_metrics(gt_depths, db3D_nl_depths)
+            (db3D_rmse, db3D_mse, db3D_mae, db3D_abs_errs, db3D_perc_errs) = compute_error_metrics(gt_depths, db3D_depths)
+            (db3D_nl_d2d_rmse, db3D_nl_d2d_mse, db3D_nl_d2d_mae, db3D_nl_d2d_abs_errs, db3D_nl_d2d_perc_errs) = compute_error_metrics(gt_depths, db3D_nl_d2d_depths)
+            (db3D_d2d_rmse, db3D_d2d_mse, db3D_d2d_mae, db3D_d2d_abs_errs, db3D_d2d_perc_errs) = compute_error_metrics(gt_depths, db3D_d2d_depths)
+            (db3D_d2d_tv0_rmse, db3D_d2d_tv0_mse, db3D_d2d_tv0_mae, db3D_d2d_tv0_abs_errs, db3D_d2d_tv0_perc_errs) = compute_error_metrics(gt_depths, db3D_d2d_tv0_depths)
+            (db3D_csph1D_grayfour_tv0_rmse, db3D_csph1D_grayfour_tv0_mse, db3D_csph1D_grayfour_tv0_mae, db3D_csph1D_grayfour_tv0_abs_errs, db3D_csph1D_grayfour_tv0_perc_errs) = compute_error_metrics(gt_depths, db3D_csph1D_grayfour_tv0_depths)
+            (db3D_csph1D_truncfour_tv0_rmse, db3D_csph1D_truncfour_tv0_mse, db3D_csph1D_truncfour_tv0_mae, db3D_csph1D_truncfour_tv0_abs_errs, db3D_csph1D_truncfour_tv0_perc_errs) = compute_error_metrics(gt_depths, db3D_csph1D_truncfour_tv0_depths)
+            (db3D_csph1D_coarsehist_tv0_rmse, db3D_csph1D_coarsehist_tv0_mse, db3D_csph1D_coarsehist_tv0_mae, db3D_csph1D_coarsehist_tv0_abs_errs, db3D_csph1D_coarsehist_tv0_perc_errs) = compute_error_metrics(gt_depths, db3D_csph1D_coarsehist_tv0_depths)
+            (db2D_p2d_B12_tv1m5_rmse, db2D_p2d_B12_tv1m5_mse, db2D_p2d_B12_tv1m5_mae, db2D_p2d_B12_tv1m5_abs_errs, db2D_p2d_B12_tv1m5_perc_errs) = compute_error_metrics(gt_depths, db2D_p2d_B12_tv1m5_depths)
+            (db2D_d2d2hist01Inputs_B12_rmse, db2D_d2d2hist01Inputs_B12_mse, db2D_d2d2hist01Inputs_B12_mae, db2D_d2d2hist01Inputs_B12_abs_errs, db2D_d2d2hist01Inputs_B12_perc_errs) = compute_error_metrics(gt_depths, db2D_d2d2hist01Inputs_B12_depths)
+            (db2D_d2d01Inputs_B12_tv1m3_rmse, db2D_d2d01Inputs_B12_tv1m3_mse, db2D_d2d01Inputs_B12_tv1m3_mae, db2D_d2d01Inputs_B12_tv1m3_abs_errs, db2D_d2d01Inputs_B12_tv1m3_perc_errs) = compute_error_metrics(gt_depths, db2D_d2d01Inputs_B12_tv1m3_depths)
+            (db2D_d2d01Inputs_B12_tv1m4_rmse, db2D_d2d01Inputs_B12_tv1m4_mse, db2D_d2d01Inputs_B12_tv1m4_mae, db2D_d2d01Inputs_B12_tv1m4_abs_errs, db2D_d2d01Inputs_B12_tv1m4_perc_errs) = compute_error_metrics(gt_depths, db2D_d2d01Inputs_B12_tv1m4_depths)
+            (db2D_d2d01Inputs_B12_tv3m5_rmse, db2D_d2d01Inputs_B12_tv3m5_mse, db2D_d2d01Inputs_B12_tv3m5_mae, db2D_d2d01Inputs_B12_tv3m5_abs_errs, db2D_d2d01Inputs_B12_tv3m5_perc_errs) = compute_error_metrics(gt_depths, db2D_d2d01Inputs_B12_tv3m5_depths)
+            (db2D_d2d01Inputs_B12_tv1m5_rmse, db2D_d2d01Inputs_B12_tv1m5_mse, db2D_d2d01Inputs_B12_tv1m5_mae, db2D_d2d01Inputs_B12_tv1m5_abs_errs, db2D_d2d01Inputs_B12_tv1m5_perc_errs) = compute_error_metrics(gt_depths, db2D_d2d01Inputs_B12_tv1m5_depths)
+            (db2D_d2d01Inputs_B12_tv1m10_rmse, db2D_d2d01Inputs_B12_tv1m10_mse, db2D_d2d01Inputs_B12_tv1m10_mae, db2D_d2d01Inputs_B12_tv1m10_abs_errs, db2D_d2d01Inputs_B12_tv1m10_perc_errs) = compute_error_metrics(gt_depths, db2D_d2d01Inputs_B12_tv1m10_depths)
+            (db2D_d2d01Inputs_B16_rmse, db2D_d2d01Inputs_B16_mse, db2D_d2d01Inputs_B16_mae, db2D_d2d01Inputs_B16_abs_errs, db2D_d2d01Inputs_B16_perc_errs) = compute_error_metrics(gt_depths, db2D_d2d01Inputs_B16_depths)
+            (db2D_d2d01Inputs_B24_rmse, db2D_d2d01Inputs_B24_mse, db2D_d2d01Inputs_B24_mae, db2D_d2d01Inputs_B24_abs_errs, db2D_d2d01Inputs_B24_perc_errs) = compute_error_metrics(gt_depths, db2D_d2d01Inputs_B24_depths)
 
 
-            gt_rmse_all.append(gt_rmse)
-            lmf_rmse_all.append(lmf_rmse)
-            argmax_rmse_all.append(argmax_rmse)
-            compressive_model_rmse_all.append(compressive_model_rmse)
-            db3D_nl_rmse_all.append(db3D_nl_rmse)
-            db3D_rmse_all.append(db3D_rmse)
-            db3D_nl_d2d_rmse_all.append(db3D_nl_d2d_rmse)
-            db3D_d2d_rmse_all.append(db3D_d2d_rmse)
-            db3D_d2d_tv0_rmse_all.append(db3D_d2d_tv0_rmse)
-            db2D_p2d_B12_tv1m5_model_rmse_all.append(db2D_p2d_B12_tv1m5_model_rmse)
-            db2D_d2d2hist01Inputs_B12_model_rmse_all.append(db2D_d2d2hist01Inputs_B12_model_rmse)
-            db2D_d2d01Inputs_B12_tv1m3_model_rmse_all.append(db2D_d2d01Inputs_B12_tv1m3_model_rmse)
-            db2D_d2d01Inputs_B12_tv1m4_model_rmse_all.append(db2D_d2d01Inputs_B12_tv1m4_model_rmse)
-            db2D_d2d01Inputs_B12_tv3m5_model_rmse_all.append(db2D_d2d01Inputs_B12_tv3m5_model_rmse)
-            db2D_d2d01Inputs_B12_tv1m5_model_rmse_all.append(db2D_d2d01Inputs_B12_tv1m5_model_rmse)
-            db2D_d2d01Inputs_B12_tv1m10_model_rmse_all.append(db2D_d2d01Inputs_B12_tv1m10_model_rmse)
-            db2D_d2d01Inputs_B16_model_rmse_all.append(db2D_d2d01Inputs_B16_model_rmse)
-            db2D_d2d01Inputs_B24_model_rmse_all.append(db2D_d2d01Inputs_B24_model_rmse)
+            metrics_all['gt']['rmse'].append(gt_rmse);metrics_all['gt']['mae'].append(gt_mae);metrics_all['gt']['mse'].append(gt_mse)
+            metrics_all['lmf']['rmse'].append(lmf_rmse);metrics_all['lmf']['mae'].append(lmf_mae);metrics_all['lmf']['mse'].append(lmf_mse)
+            metrics_all['argmax']['rmse'].append(argmax_rmse);metrics_all['argmax']['mae'].append(argmax_mae);metrics_all['argmax']['mse'].append(argmax_mse)
+            metrics_all['compressive']['rmse'].append(compressive_rmse);metrics_all['compressive']['mae'].append(compressive_mae);metrics_all['compressive']['mse'].append(compressive_mse)
+            metrics_all['db3D_nl']['rmse'].append(db3D_nl_rmse);metrics_all['db3D_nl']['mae'].append(db3D_nl_mae);metrics_all['db3D_nl']['mse'].append(db3D_nl_mse)
+            metrics_all['db3D']['rmse'].append(db3D_rmse);metrics_all['db3D']['mae'].append(db3D_mae);metrics_all['db3D']['mse'].append(db3D_mse)
+            metrics_all['db3D_nl_d2d']['rmse'].append(db3D_nl_d2d_rmse);metrics_all['db3D_nl_d2d']['mae'].append(db3D_nl_d2d_mae);metrics_all['db3D_nl_d2d']['mse'].append(db3D_nl_d2d_mse)
+            metrics_all['db3D_d2d']['rmse'].append(db3D_d2d_rmse);metrics_all['db3D_d2d']['mae'].append(db3D_d2d_mae);metrics_all['db3D_d2d']['mse'].append(db3D_d2d_mse)
+            metrics_all['db3D_d2d_tv0']['rmse'].append(db3D_d2d_tv0_rmse);metrics_all['db3D_d2d_tv0']['mae'].append(db3D_d2d_tv0_mae);metrics_all['db3D_d2d_tv0']['mse'].append(db3D_d2d_tv0_mse)
+            metrics_all['db3D_csph1D_grayfour_tv0']['rmse'].append(db3D_csph1D_grayfour_tv0_rmse);metrics_all['db3D_csph1D_grayfour_tv0']['mae'].append(db3D_csph1D_grayfour_tv0_mae);metrics_all['db3D_csph1D_grayfour_tv0']['mse'].append(db3D_csph1D_grayfour_tv0_mse)
+            metrics_all['db3D_csph1D_truncfour_tv0']['rmse'].append(db3D_csph1D_truncfour_tv0_rmse);metrics_all['db3D_csph1D_truncfour_tv0']['mae'].append(db3D_csph1D_truncfour_tv0_mae);metrics_all['db3D_csph1D_truncfour_tv0']['mse'].append(db3D_csph1D_truncfour_tv0_mse)
+            metrics_all['db3D_csph1D_coarsehist_tv0']['rmse'].append(db3D_csph1D_coarsehist_tv0_rmse);metrics_all['db3D_csph1D_coarsehist_tv0']['mae'].append(db3D_csph1D_coarsehist_tv0_mae);metrics_all['db3D_csph1D_coarsehist_tv0']['mse'].append(db3D_csph1D_coarsehist_tv0_mse)
+            metrics_all['db2D_p2d_B12_tv1m5']['rmse'].append(db2D_p2d_B12_tv1m5_rmse);metrics_all['db2D_p2d_B12_tv1m5']['mae'].append(db2D_p2d_B12_tv1m5_mae);metrics_all['db2D_p2d_B12_tv1m5']['mse'].append(db2D_p2d_B12_tv1m5_mse)
+            metrics_all['db2D_d2d2hist01Inputs_B12']['rmse'].append(db2D_d2d2hist01Inputs_B12_rmse);metrics_all['db2D_d2d2hist01Inputs_B12']['mae'].append(db2D_d2d2hist01Inputs_B12_mae);metrics_all['db2D_d2d2hist01Inputs_B12']['mse'].append(db2D_d2d2hist01Inputs_B12_mse)
+            metrics_all['db2D_d2d01Inputs_B12_tv1m3']['rmse'].append(db2D_d2d01Inputs_B12_tv1m3_rmse);metrics_all['db2D_d2d01Inputs_B12_tv1m3']['mae'].append(db2D_d2d01Inputs_B12_tv1m3_mae);metrics_all['db2D_d2d01Inputs_B12_tv1m3']['mse'].append(db2D_d2d01Inputs_B12_tv1m3_mse)
+            metrics_all['db2D_d2d01Inputs_B12_tv1m4']['rmse'].append(db2D_d2d01Inputs_B12_tv1m4_rmse);metrics_all['db2D_d2d01Inputs_B12_tv1m4']['mae'].append(db2D_d2d01Inputs_B12_tv1m4_mae);metrics_all['db2D_d2d01Inputs_B12_tv1m4']['mse'].append(db2D_d2d01Inputs_B12_tv1m4_mse)
+            metrics_all['db2D_d2d01Inputs_B12_tv3m5']['rmse'].append(db2D_d2d01Inputs_B12_tv3m5_rmse);metrics_all['db2D_d2d01Inputs_B12_tv3m5']['mae'].append(db2D_d2d01Inputs_B12_tv3m5_mae);metrics_all['db2D_d2d01Inputs_B12_tv3m5']['mse'].append(db2D_d2d01Inputs_B12_tv3m5_mse)
+            metrics_all['db2D_d2d01Inputs_B12_tv1m5']['rmse'].append(db2D_d2d01Inputs_B12_tv1m5_rmse);metrics_all['db2D_d2d01Inputs_B12_tv1m5']['mae'].append(db2D_d2d01Inputs_B12_tv1m5_mae);metrics_all['db2D_d2d01Inputs_B12_tv1m5']['mse'].append(db2D_d2d01Inputs_B12_tv1m5_mse)
+            metrics_all['db2D_d2d01Inputs_B12_tv1m10']['rmse'].append(db2D_d2d01Inputs_B12_tv1m10_rmse);metrics_all['db2D_d2d01Inputs_B12_tv1m10']['mae'].append(db2D_d2d01Inputs_B12_tv1m10_mae);metrics_all['db2D_d2d01Inputs_B12_tv1m10']['mse'].append(db2D_d2d01Inputs_B12_tv1m10_mse)
+            metrics_all['db2D_d2d01Inputs_B16']['rmse'].append(db2D_d2d01Inputs_B16_rmse);metrics_all['db2D_d2d01Inputs_B16']['mae'].append(db2D_d2d01Inputs_B16_mae);metrics_all['db2D_d2d01Inputs_B16']['mse'].append(db2D_d2d01Inputs_B16_mse)
+            metrics_all['db2D_d2d01Inputs_B24']['rmse'].append(db2D_d2d01Inputs_B24_rmse);metrics_all['db2D_d2d01Inputs_B24']['mae'].append(db2D_d2d01Inputs_B24_mae);metrics_all['db2D_d2d01Inputs_B24']['mse'].append(db2D_d2d01Inputs_B24_mse)
 
             # print("Percentile Errors - {}:".format(scene_fname))
             # print("    gt: {}".format(gt_perc_errs))
             # print("    lmf: {}".format(lmf_perc_errs))
             # print("    argmax: {}".format(argmax_perc_errs))
-            # print("    compressive_model: {}".format(compressive_model_perc_errs))
+            # print("    compressive: {}".format(compressive_perc_errs))
             # print("    db3D_nl: {}".format(db3D_nl_perc_errs))
             # print("    db3D: {}".format(db3D_perc_errs))
             # print("    db3D_nl_d2d: {}".format(db3D_nl_d2d_perc_errs))
             # print("    db3D_d2d: {}".format(db3D_d2d_perc_errs))
-            # print("    db2D_d2d2hist01Inputs_B12_model: {}".format(db2D_d2d2hist01Inputs_B12_model_perc_errs))
-            # print("    db2D_d2d01Inputs_B12_tv1m5_model: {}".format(db2D_d2d01Inputs_B12_tv1m5_model_perc_errs))
-            # print("    db2D_d2d01Inputs_B16_model: {}".format(db2D_d2d01Inputs_B16_model_perc_errs))
-            # print("    db2D_d2d01Inputs_B24_model: {}".format(db2D_d2d01Inputs_B24_model_perc_errs))
+            # print("    db2D_d2d2hist01Inputs_B12_model: {}".format(db2D_d2d2hist01Inputs_B12_perc_errs))
+            # print("    db2D_d2d01Inputs_B12_tv1m5_model: {}".format(db2D_d2d01Inputs_B12_tv1m5_perc_errs))
+            # print("    db2D_d2d01Inputs_B16_model: {}".format(db2D_d2d01Inputs_B16_perc_errs))
+            # print("    db2D_d2d01Inputs_B24_model: {}".format(db2D_d2d01Inputs_B24_perc_errs))
             # print("    db2D_d2d_model: {}".format(db2D_d2d_model_perc_errs)) 
             
             min_depth = gt_depths.flatten().min()
@@ -205,8 +236,6 @@ if __name__=='__main__':
             max_err = 0.15
 
             if(plot_results):
-
-
                 plt.clf()
                 plt.suptitle("{} - SBR: {}, Signal: {} photons, Bkg: {} photons".format(scene_fname, SBR, mean_signal_photons, mean_background_photons), fontsize=20)
                 plt.subplot(2,3,1)
@@ -258,32 +287,32 @@ if __name__=='__main__':
                 # plt.title('db3D_nl_depths \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db3D_nl_rmse, db3D_nl_mae*100, db3D_nl_perc_errs),fontsize=14)
                 # plt.colorbar()
                 # plt.subplot(2,4,5)
-                # # plt.imshow(compressive_model_depths, vmin=min_depth, vmax=max_depth); 
-                # # plt.title('compressive_model_depths \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(compressive_model_rmse, compressive_model_mae*100, compressive_model_perc_errs),fontsize=14)
+                # # plt.imshow(compressive_depths, vmin=min_depth, vmax=max_depth); 
+                # # plt.title('compressive_depths \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(compressive_rmse, compressive_mae*100, compressive_perc_errs),fontsize=14)
                 # plt.imshow(db3D_nl_d2d_depths, vmin=min_depth, vmax=max_depth); 
                 # plt.title('db3D_nl_d2d_depths \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db3D_nl_d2d_rmse, db3D_nl_d2d_mae*100, db3D_nl_d2d_perc_errs),fontsize=14)
-                # # plt.imshow(db2D_d2d2hist01Inputs_B12_model_depths, vmin=min_depth, vmax=max_depth); 
-                # # plt.title('db2D_d2d2hist_B12_model_depths \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db2D_d2d2hist01Inputs_B12_model_rmse, db2D_d2d2hist01Inputs_B12_model_mae*100, db2D_d2d2hist01Inputs_B12_model_perc_errs),fontsize=14)
-                # plt.imshow(db2D_d2d01Inputs_B12_tv1m3_model_depths, vmin=min_depth, vmax=max_depth); 
-                # plt.title('db2D_B12_tv1m3_model_depths \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db2D_d2d01Inputs_B12_tv1m3_model_rmse, db2D_d2d01Inputs_B12_tv1m3_model_mae*100, db2D_d2d01Inputs_B12_tv1m3_model_perc_errs),fontsize=14)
+                # # plt.imshow(db2D_d2d2hist01Inputs_B12_depths, vmin=min_depth, vmax=max_depth); 
+                # # plt.title('db2D_d2d2hist_B12_model_depths \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db2D_d2d2hist01Inputs_B12_rmse, db2D_d2d2hist01Inputs_B12_mae*100, db2D_d2d2hist01Inputs_B12_perc_errs),fontsize=14)
+                # plt.imshow(db2D_d2d01Inputs_B12_tv1m3_depths, vmin=min_depth, vmax=max_depth); 
+                # plt.title('db2D_B12_tv1m3_model_depths \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db2D_d2d01Inputs_B12_tv1m3_rmse, db2D_d2d01Inputs_B12_tv1m3_mae*100, db2D_d2d01Inputs_B12_tv1m3_perc_errs),fontsize=14)
                 # plt.colorbar()
                 # plt.subplot(2,4,6)
-                # plt.imshow(db2D_d2d01Inputs_B12_tv3m5_model_depths, vmin=min_depth, vmax=max_depth); 
-                # plt.title('db2D_B12_tv3m5_model_depths \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db2D_d2d01Inputs_B12_tv3m5_model_rmse, db2D_d2d01Inputs_B12_tv3m5_model_mae*100, db2D_d2d01Inputs_B12_tv3m5_model_perc_errs),fontsize=14)
-                # # plt.imshow(db2D_d2d01Inputs_B12_tv1m4_model_depths, vmin=min_depth, vmax=max_depth); 
-                # # plt.title('db2D_B12_tv1m4_model_depths \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db2D_d2d01Inputs_B12_tv1m4_model_rmse, db2D_d2d01Inputs_B12_tv1m4_model_mae*100, db2D_d2d01Inputs_B12_tv1m4_model_perc_errs),fontsize=14)
+                # plt.imshow(db2D_d2d01Inputs_B12_tv3m5_depths, vmin=min_depth, vmax=max_depth); 
+                # plt.title('db2D_B12_tv3m5_model_depths \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db2D_d2d01Inputs_B12_tv3m5_rmse, db2D_d2d01Inputs_B12_tv3m5_mae*100, db2D_d2d01Inputs_B12_tv3m5_perc_errs),fontsize=14)
+                # # plt.imshow(db2D_d2d01Inputs_B12_tv1m4_depths, vmin=min_depth, vmax=max_depth); 
+                # # plt.title('db2D_B12_tv1m4_model_depths \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db2D_d2d01Inputs_B12_tv1m4_rmse, db2D_d2d01Inputs_B12_tv1m4_mae*100, db2D_d2d01Inputs_B12_tv1m4_perc_errs),fontsize=14)
                 # plt.colorbar()
                 # plt.subplot(2,4,7)
-                # plt.imshow(db2D_d2d01Inputs_B12_tv1m5_model_depths, vmin=min_depth, vmax=max_depth); 
-                # plt.title('db2D_B12_tv1m5_model_depths \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db2D_d2d01Inputs_B12_tv1m5_model_rmse, db2D_d2d01Inputs_B12_tv1m5_model_mae*100, db2D_d2d01Inputs_B12_tv1m5_model_perc_errs),fontsize=14)
-                # # plt.imshow(db2D_d2d01Inputs_B16_model_depths, vmin=min_depth, vmax=max_depth); 
-                # # plt.title('db2D_B16_model_depths \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db2D_d2d01Inputs_B16_model_rmse, db2D_d2d01Inputs_B16_model_mae*100, db2D_d2d01Inputs_B16_model_perc_errs),fontsize=14)
+                # plt.imshow(db2D_d2d01Inputs_B12_tv1m5_depths, vmin=min_depth, vmax=max_depth); 
+                # plt.title('db2D_B12_tv1m5_model_depths \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db2D_d2d01Inputs_B12_tv1m5_rmse, db2D_d2d01Inputs_B12_tv1m5_mae*100, db2D_d2d01Inputs_B12_tv1m5_perc_errs),fontsize=14)
+                # # plt.imshow(db2D_d2d01Inputs_B16_depths, vmin=min_depth, vmax=max_depth); 
+                # # plt.title('db2D_B16_model_depths \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db2D_d2d01Inputs_B16_rmse, db2D_d2d01Inputs_B16_mae*100, db2D_d2d01Inputs_B16_perc_errs),fontsize=14)
                 # plt.colorbar()
                 # plt.subplot(2,4,8)
-                # plt.imshow(db2D_d2d01Inputs_B12_tv1m10_model_depths, vmin=min_depth, vmax=max_depth); 
-                # plt.title('db2D_B12_tv1m10_model_depths \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db2D_d2d01Inputs_B12_tv1m10_model_rmse, db2D_d2d01Inputs_B12_tv1m10_model_mae*100, db2D_d2d01Inputs_B12_tv1m10_model_perc_errs),fontsize=14)
-                # # plt.imshow(db2D_d2d01Inputs_B24_model_depths, vmin=min_depth, vmax=max_depth); 
-                # # plt.title('db2D_B24_model_depths \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db2D_d2d01Inputs_B24_model_rmse, db2D_d2d01Inputs_B24_model_mae*100, db2D_d2d01Inputs_B24_model_perc_errs),fontsize=14)
+                # plt.imshow(db2D_d2d01Inputs_B12_tv1m10_depths, vmin=min_depth, vmax=max_depth); 
+                # plt.title('db2D_B12_tv1m10_model_depths \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db2D_d2d01Inputs_B12_tv1m10_rmse, db2D_d2d01Inputs_B12_tv1m10_mae*100, db2D_d2d01Inputs_B12_tv1m10_perc_errs),fontsize=14)
+                # # plt.imshow(db2D_d2d01Inputs_B24_depths, vmin=min_depth, vmax=max_depth); 
+                # # plt.title('db2D_B24_model_depths \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db2D_d2d01Inputs_B24_rmse, db2D_d2d01Inputs_B24_mae*100, db2D_d2d01Inputs_B24_perc_errs),fontsize=14)
                 # plt.colorbar()
                 # out_fname = 'depths_' + scene_fname
                 # plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname)
@@ -310,44 +339,46 @@ if __name__=='__main__':
                 # plt.title('db3D_nl_abs_errs \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db3D_nl_rmse, db3D_nl_mae*100, db3D_nl_perc_errs),fontsize=14)
                 # plt.colorbar()
                 # plt.subplot(2,4,5)
-                # # plt.imshow(compressive_model_abs_errs, vmin=min_err, vmax=max_err); 
-                # # plt.title('compressive_model_abs_errs \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(compressive_model_rmse, compressive_model_mae*100, compressive_model_perc_errs),fontsize=14)
+                # # plt.imshow(compressive_abs_errs, vmin=min_err, vmax=max_err); 
+                # # plt.title('compressive_abs_errs \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(compressive_rmse, compressive_mae*100, compressive_perc_errs),fontsize=14)
                 # # plt.imshow(db3D_nl_d2d_abs_errs, vmin=min_err, vmax=max_err); 
                 # # plt.title('db3D_nl_d2d_abs_errs \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db3D_nl_d2d_rmse, db3D_nl_d2d_mae*100, db3D_nl_d2d_perc_errs),fontsize=14)
-                # plt.imshow(db2D_d2d2hist01Inputs_B12_model_abs_errs, vmin=min_err, vmax=max_err); 
-                # plt.title('db2D_d2d2hist_B12_model_abs_errs \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db2D_d2d2hist01Inputs_B12_model_rmse, db2D_d2d2hist01Inputs_B12_model_mae*100, db2D_d2d2hist01Inputs_B12_model_perc_errs),fontsize=14)
+                # plt.imshow(db2D_d2d2hist01Inputs_B12_abs_errs, vmin=min_err, vmax=max_err); 
+                # plt.title('db2D_d2d2hist_B12_model_abs_errs \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db2D_d2d2hist01Inputs_B12_rmse, db2D_d2d2hist01Inputs_B12_mae*100, db2D_d2d2hist01Inputs_B12_perc_errs),fontsize=14)
                 # plt.colorbar()
                 # plt.subplot(2,4,6)
-                # plt.imshow(db2D_d2d01Inputs_B12_tv1m5_model_abs_errs, vmin=min_err, vmax=max_err); 
-                # plt.title('db2D_B12_model_abs_errs \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db2D_d2d01Inputs_B12_tv1m5_model_rmse, db2D_d2d01Inputs_B12_tv1m5_model_mae*100, db2D_d2d01Inputs_B12_tv1m5_model_perc_errs),fontsize=14)
+                # plt.imshow(db2D_d2d01Inputs_B12_tv1m5_abs_errs, vmin=min_err, vmax=max_err); 
+                # plt.title('db2D_B12_model_abs_errs \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db2D_d2d01Inputs_B12_tv1m5_rmse, db2D_d2d01Inputs_B12_tv1m5_mae*100, db2D_d2d01Inputs_B12_tv1m5_perc_errs),fontsize=14)
                 # plt.colorbar()
                 # plt.subplot(2,4,7)
-                # plt.imshow(db2D_d2d01Inputs_B16_model_abs_errs, vmin=min_err, vmax=max_err); 
-                # plt.title('db2D_B16_model_abs_errs \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db2D_d2d01Inputs_B16_model_rmse, db2D_d2d01Inputs_B16_model_mae*100, db2D_d2d01Inputs_B16_model_perc_errs),fontsize=14)
+                # plt.imshow(db2D_d2d01Inputs_B16_abs_errs, vmin=min_err, vmax=max_err); 
+                # plt.title('db2D_B16_model_abs_errs \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db2D_d2d01Inputs_B16_rmse, db2D_d2d01Inputs_B16_mae*100, db2D_d2d01Inputs_B16_perc_errs),fontsize=14)
                 # plt.colorbar()
                 # plt.subplot(2,4,8)
-                # plt.imshow(db2D_d2d01Inputs_B24_model_abs_errs, vmin=min_err, vmax=max_err); 
-                # plt.title('db2D_B24_model_abs_errs \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db2D_d2d01Inputs_B24_model_rmse, db2D_d2d01Inputs_B24_model_mae*100, db2D_d2d01Inputs_B24_model_perc_errs),fontsize=14)
+                # plt.imshow(db2D_d2d01Inputs_B24_abs_errs, vmin=min_err, vmax=max_err); 
+                # plt.title('db2D_B24_model_abs_errs \n rmse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db2D_d2d01Inputs_B24_rmse, db2D_d2d01Inputs_B24_mae*100, db2D_d2d01Inputs_B24_perc_errs),fontsize=14)
                 # plt.colorbar()
                 # out_fname = 'abs_errs_' + scene_fname
                 # plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname)
 
-    print("Test Set RMSE:")
-    print("    gt: {}".format(np.mean(gt_rmse_all)))
-    print("    lmf: {}".format(np.mean(np.array(lmf_rmse_all).flatten())))
-    print("    argmax: {}".format(np.mean(argmax_rmse_all)))
-    print("    compressive_model: {}".format(np.mean(compressive_model_rmse_all)))
-    print("    db3D_nl: {}".format(np.mean(db3D_nl_rmse_all)))
-    print("    db3D: {}".format(np.mean(db3D_rmse_all)))
-    print("    db3D_nl_d2d: {}".format(np.mean(db3D_nl_d2d_rmse_all)))
-    print("    db3D_d2d: {}".format(np.mean(db3D_d2d_rmse_all)))
-    print("    db3D_d2d_tv0: {}".format(np.mean(db3D_d2d_tv0_rmse_all)))
-    print("    db2D_p2d_B12_tv1m5_model: {}".format(np.mean(db2D_p2d_B12_tv1m5_model_rmse_all)))
-    print("    db2D_d2d2hist01Inputs_B12_model: {}".format(np.mean(db2D_d2d2hist01Inputs_B12_model_rmse_all)))
-    print("    db2D_d2d01Inputs_B12_tv1m3_model: {}".format(np.mean(db2D_d2d01Inputs_B12_tv1m3_model_rmse_all)))
-    print("    db2D_d2d01Inputs_B12_tv1m4_model: {}".format(np.mean(db2D_d2d01Inputs_B12_tv1m4_model_rmse_all)))
-    print("    db2D_d2d01Inputs_B12_tv3m5_model: {}".format(np.mean(db2D_d2d01Inputs_B12_tv3m5_model_rmse_all)))
-    print("    db2D_d2d01Inputs_B12_tv1m5_model: {}".format(np.mean(db2D_d2d01Inputs_B12_tv1m5_model_rmse_all)))
-    print("    db2D_d2d01Inputs_B12_tv1m10_model: {}".format(np.mean(db2D_d2d01Inputs_B12_tv1m10_model_rmse_all)))
-    print("    db2D_d2d01Inputs_B16_model: {}".format(np.mean(db2D_d2d01Inputs_B16_model_rmse_all)))
-    print("    db2D_d2d01Inputs_B24_model: {}".format(np.mean(db2D_d2d01Inputs_B24_model_rmse_all)))
+    print("Test Set RMSE | MAE (cm) | MSE (cm):")
+    print("    gt: {:.3f} | {:.2f}cm | {:.2f} ".format(calc_mean_rmse(metrics_all['gt']),calc_mean_mae(metrics_all['gt']),calc_mean_mse(metrics_all['gt'])))
+    print("    lmf: {:.3f} | {:.2f}cm | {:.2f} ".format(calc_mean_rmse(metrics_all['lmf']),calc_mean_mae(metrics_all['lmf']),calc_mean_mse(metrics_all['lmf'])))
+    print("    argmax: {:.3f} | {:.2f}cm | {:.2f} ".format(calc_mean_rmse(metrics_all['argmax']),calc_mean_mae(metrics_all['argmax']),calc_mean_mse(metrics_all['argmax'])))
+    print("    compressive: {:.3f} | {:.2f}cm | {:.2f} ".format(calc_mean_rmse(metrics_all['compressive']),calc_mean_mae(metrics_all['compressive']),calc_mean_mse(metrics_all['compressive'])))
+    print("    db3D: {:.3f} | {:.2f}cm | {:.2f} ".format(calc_mean_rmse(metrics_all['db3D']),calc_mean_mae(metrics_all['db3D']),calc_mean_mse(metrics_all['db3D'])))
+    print("    db3D_d2d: {:.3f} | {:.2f}cm | {:.2f} ".format(calc_mean_rmse(metrics_all['db3D_d2d']),calc_mean_mae(metrics_all['db3D_d2d']),calc_mean_mse(metrics_all['db3D_d2d'])))
+    print("    db3D_d2d_tv0: {:.3f} | {:.2f}cm | {:.2f} ".format(calc_mean_rmse(metrics_all['db3D_d2d_tv0']),calc_mean_mae(metrics_all['db3D_d2d_tv0']),calc_mean_mse(metrics_all['db3D_d2d_tv0'])))
+    print("    db3D_csph1D_grayfour_tv0: {:.3f} | {:.2f}cm | {:.2f} ".format(calc_mean_rmse(metrics_all['db3D_csph1D_grayfour_tv0']),calc_mean_mae(metrics_all['db3D_csph1D_grayfour_tv0']),calc_mean_mse(metrics_all['db3D_csph1D_grayfour_tv0'])))
+    print("    db3D_csph1D_truncfour_tv0: {:.3f} | {:.2f}cm | {:.2f} ".format(calc_mean_rmse(metrics_all['db3D_csph1D_truncfour_tv0']),calc_mean_mae(metrics_all['db3D_csph1D_truncfour_tv0']),calc_mean_mse(metrics_all['db3D_csph1D_truncfour_tv0'])))
+    print("    db3D_csph1D_coarsehist_tv0: {:.3f} | {:.2f}cm | {:.2f} ".format(calc_mean_rmse(metrics_all['db3D_csph1D_coarsehist_tv0']),calc_mean_mae(metrics_all['db3D_csph1D_coarsehist_tv0']),calc_mean_mse(metrics_all['db3D_csph1D_coarsehist_tv0'])))
+    print("    db2D_p2d_B12_tv1m5: {:.3f} | {:.2f}cm | {:.2f} ".format(calc_mean_rmse(metrics_all['db2D_p2d_B12_tv1m5']),calc_mean_mae(metrics_all['db2D_p2d_B12_tv1m5']),calc_mean_mse(metrics_all['db2D_p2d_B12_tv1m5'])))
+    print("    db2D_d2d2hist01Inputs_B12: {:.3f} | {:.2f}cm | {:.2f} ".format(calc_mean_rmse(metrics_all['db2D_d2d2hist01Inputs_B12']),calc_mean_mae(metrics_all['db2D_d2d2hist01Inputs_B12']),calc_mean_mse(metrics_all['db2D_d2d2hist01Inputs_B12'])))
+    print("    db2D_d2d01Inputs_B12_tv1m3: {:.3f} | {:.2f}cm | {:.2f} ".format(calc_mean_rmse(metrics_all['db2D_d2d01Inputs_B12_tv1m3']),calc_mean_mae(metrics_all['db2D_d2d01Inputs_B12_tv1m3']),calc_mean_mse(metrics_all['db2D_d2d01Inputs_B12_tv1m3'])))
+    print("    db2D_d2d01Inputs_B12_tv1m4: {:.3f} | {:.2f}cm | {:.2f} ".format(calc_mean_rmse(metrics_all['db2D_d2d01Inputs_B12_tv1m4']),calc_mean_mae(metrics_all['db2D_d2d01Inputs_B12_tv1m4']),calc_mean_mse(metrics_all['db2D_d2d01Inputs_B12_tv1m4'])))
+    print("    db2D_d2d01Inputs_B12_tv3m5: {:.3f} | {:.2f}cm | {:.2f} ".format(calc_mean_rmse(metrics_all['db2D_d2d01Inputs_B12_tv3m5']),calc_mean_mae(metrics_all['db2D_d2d01Inputs_B12_tv3m5']),calc_mean_mse(metrics_all['db2D_d2d01Inputs_B12_tv3m5'])))
+    print("    db2D_d2d01Inputs_B12_tv1m5: {:.3f} | {:.2f}cm | {:.2f} ".format(calc_mean_rmse(metrics_all['db2D_d2d01Inputs_B12_tv1m5']),calc_mean_mae(metrics_all['db2D_d2d01Inputs_B12_tv1m5']),calc_mean_mse(metrics_all['db2D_d2d01Inputs_B12_tv1m5'])))
+    print("    db2D_d2d01Inputs_B12_tv1m10: {:.3f} | {:.2f}cm | {:.2f} ".format(calc_mean_rmse(metrics_all['db2D_d2d01Inputs_B12_tv1m10']),calc_mean_mae(metrics_all['db2D_d2d01Inputs_B12_tv1m10']),calc_mean_mse(metrics_all['db2D_d2d01Inputs_B12_tv1m10'])))
+    print("    db2D_d2d01Inputs_B16: {:.3f} | {:.2f}cm | {:.2f} ".format(calc_mean_rmse(metrics_all['db2D_d2d01Inputs_B16']),calc_mean_mae(metrics_all['db2D_d2d01Inputs_B16']),calc_mean_mse(metrics_all['db2D_d2d01Inputs_B16'])))
+    print("    db2D_d2d01Inputs_B24: {:.3f} | {:.2f}cm | {:.2f} ".format(calc_mean_rmse(metrics_all['db2D_d2d01Inputs_B24']),calc_mean_mae(metrics_all['db2D_d2d01Inputs_B24']),calc_mean_mse(metrics_all['db2D_d2d01Inputs_B24'])))
+
