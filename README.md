@@ -1,6 +1,8 @@
 # spatio-temporal-csph
 Spatio Temporal Compressive Single-Photon Histograms
 
+To clone: `git clone --recurse-submodules git@github.com:felipegb94/spatio-temporal-csph.git`
+
 ## Setup
 
 ### Step 1: Make sure CUDA drivers work
