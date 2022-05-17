@@ -5,6 +5,8 @@ model_id: DDFN_C64B10_CSPH1D
 model_params:
   in_channels: 1
   init: HybridGrayFourier
+  # init: TruncFourier
+  # init: CoarseHist
   k: 16
 
 # Model name is used for saving results

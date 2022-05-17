@@ -218,7 +218,7 @@ class PlainDeepBoosting(torch.nn.Module):
 
 		self.C2 = nn.Sequential(nn.Conv3d(7,1,kernel_size=1, stride=(1,1,1),bias=True),nn.ReLU(inplace=True))
 		init.kaiming_normal_(self.C2[0].weight, 0, 'fan_in', 'relu'); init.constant_(self.C2[0].bias, 0.0)
-		
+
 	def forward(self, inputs):
 		smax = torch.nn.Softmax2d()
 		msfeat = self.msfeat(inputs) 

@@ -113,6 +113,8 @@ def load_model_from_ckpt(model_name, ckpt_id, logger):
 		model = LITDeepBoostingDepth2Depth.load_from_checkpoint(ckpt_fpath)
 	elif(model_name == 'DDFN_C64B10_Depth2Depth'):
 		model = LITPlainDeepBoostingDepth2Depth.load_from_checkpoint(ckpt_fpath)
+	elif('DDFN_C64B10_CSPH1D' in model_name):
+		model = LITPlainDeepBoostingCSPH1D.load_from_checkpoint(ckpt_fpath)
 	elif(model_name == 'DDFN_C64B10_NL_Compressive'):
 		model = LITDeepBoostingCompressive.load_from_checkpoint(ckpt_fpath)
 	elif(model_name == 'DDFN_C64B10_NL_CompressiveWithBias'):

@@ -23,19 +23,19 @@ defaults:
   # - model: DDFN_C64B10_NL_Compressive
   # - model: DDFN_C64B10
   # - model: DDFN_C64B10_Depth2Depth
-  # - model: DDFN_C64B10_CSPH1D
-  # - model: DDFN2D_Depth2Depth
-  - model: DDFN2D_Phasor2Depth
-  # - model: DDFN2D_Depth2Depth
+  - model: DDFN_C64B10_CSPH1D
+  # - model: DDFN2D_Phasor2Depth
+  # - model: DDFN2D_Depth2Depth_01Inputs
   # enable color logging
   - override hydra/hydra_logging: colorlog
   - override hydra/job_logging: colorlog
 
 # Global configurations shared between different modules
-experiment: test
+experiment: debug
 
 # Random seed to use
-random_seed: 1234
+# random_seed: 1234
+random_seed: 1235
 
 params:
   train_datalist_fpath: ${io_dirpaths.datalists_dirpath}/${dataset.train_datalist_fname}

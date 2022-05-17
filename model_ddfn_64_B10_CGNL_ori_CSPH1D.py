@@ -32,6 +32,12 @@ class LITPlainDeepBoostingCSPH1D(LITPlainDeepBoosting):
 		out = self.backbone_net(zncc_scores)
 		return out
 
+	def forward_test(self, x):
+		(zncc_scores, B) = self.csph1D_layer(x)
+		# use forward for inference/predictions
+		out = self.backbone_net(zncc_scores)
+		return out, zncc_scores, B
+
 
 if __name__=='__main__':
 	import matplotlib.pyplot as plt
@@ -41,6 +47,17 @@ if __name__=='__main__':
 	(nr, nc, nt) = (64, 64, 1024) 
 	inputs = torch.randn((batch_size, 1, nt, nr, nc))
 
+	simple_hist_input = torch.zeros((2, 1, nt, 32, 32))
+	simple_hist_input[0, 0, 100, 0, 0] = 3
+	simple_hist_input[0, 0, 200, 0, 0] = 1
+	simple_hist_input[0, 0, 50, 0, 0] = 1
+	simple_hist_input[0, 0, 540, 0, 0] = 1
+
+	simple_hist_input[1, 0, 300, 0, 0] = 2
+	simple_hist_input[1, 0, 800, 0, 0] = 1
+	simple_hist_input[1, 0, 34, 0, 0] = 1
+	simple_hist_input[1, 0, 900, 0, 0] = 1
+
 	# Set compression params
 	k = 16
 	model = LITPlainDeepBoostingCSPH1D(k=k, num_bins=nt)
@@ -49,6 +66,20 @@ if __name__=='__main__':
 
 	print("outputs1 shape: {}".format(outputs[0].shape))
 	print("outputs2 shape: {}".format(outputs[1].shape))
+
+	## Test with simple inputs
+	out, zncc, B = model.forward_test(simple_hist_input)
+	print("Input Shape: {}".format(simple_hist_input.shape))
+	print("ZNCC Out Shape: {}".format(zncc.shape))
+	print("B Out Shape: {}".format(B.shape))
+	
+	# Look at outputs
+	plt.clf()
+	plt.plot(simple_hist_input[0,0,:,0,0], '--', label="Inputs 2")
+	plt.plot(zncc[0,0,:,0,0], label='ZNCC Outputs 2')
+	plt.plot(simple_hist_input[1,0,:,0,0], '--', label="Inputs 3")
+	plt.plot(zncc[1,0,:,0,0], label='ZNCC Outputs 3')
+	plt.legend()
 
 
 

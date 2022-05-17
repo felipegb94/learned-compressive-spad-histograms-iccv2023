@@ -18,11 +18,14 @@ breakpoint = debugger.set_trace
 from toflib.coding import TruncatedFourierCoding, HybridGrayBasedFourierCoding, GatedCoding, HybridFourierBasedGrayCoding
 
 
-def zero_norm(v, dim=-1):
+def zero_norm_vec(v, dim=-1):
 	zero_mean_v = (v - torch.mean(v, dim=dim, keepdim=True)) 
 	zn_v = zero_mean_v / (torch.linalg.norm(zero_mean_v, ord=2, dim=dim, keepdim=True) + 1e-6)
 	return zn_v
 
+def norm_vec(v, dim=-1):
+	n_v = v / (torch.linalg.norm(v, ord=2, dim=dim, keepdim=True) + 1e-6)
+	return n_v
 class CSPH1DLayer(nn.Module):
 	def __init__(self, k=2, num_bins=1024, init='TruncFourier', h_irf=None):
 		# Init parent class
@@ -41,32 +44,36 @@ class CSPH1DLayer(nn.Module):
 			# Center irf if needed
 			self.h_irf = np.roll(self.h_irf, shift=-1*np.argmax(self.h_irf, axis=-1))
 
+		# Use zero_norm_vec for all codes with non-zero mean, and norm_vec for all codes with zeromean
+		self.norm_op = zero_norm_vec
+
 		if(init == 'TruncFourier'):
 			coding_obj = TruncatedFourierCoding(num_bins, n_codes=k, include_zeroth_harmonic=False, h_irf=self.h_irf, account_irf=True)
 			Cmat_init = coding_obj.C
 			decoding_Cmat_init = coding_obj.decoding_C
+			# self.norm_op = norm_vec
 		elif(init == 'HybridGrayFourier'):
 			coding_obj = HybridGrayBasedFourierCoding(num_bins, n_codes=k, include_zeroth_harmonic=False, h_irf=self.h_irf, account_irf=True)
 			Cmat_init = coding_obj.C
 			decoding_Cmat_init = coding_obj.decoding_C
-		elif(init == 'HybridFourierGray'):
-			coding_obj = HybridFourierBasedGrayCoding(num_bins, n_codes=k, h_irf=self.h_irf, account_irf=True)
-			Cmat_init = coding_obj.C
-			decoding_Cmat_init = coding_obj.decoding_C
+			# self.norm_op = norm_vec
 		elif(init == 'CoarseHist'):
 			coding_obj = GatedCoding(num_bins, n_gates=k, h_irf=self.h_irf, account_irf=True)
 			Cmat_init = coding_obj.C
 			decoding_Cmat_init = coding_obj.decoding_C
+			# self.norm_op = zero_norm_vec
 		elif(init == 'RandBinary'):
 			Cmat_init = torch.randn(num_bins, k)
 			Cmat_init[Cmat_init >= 0] = 1
 			Cmat_init[Cmat_init < 0] = -1
 			decoding_Cmat_init = Cmat_init
+			# self.norm_op = norm_vec
 		elif(init == 'Rand'):
 			Cmat_init = torch.randn(num_bins, k)
 			Cmat_init[Cmat_init >= 1] = 1
 			Cmat_init[Cmat_init <= -1] = -1
 			decoding_Cmat_init = Cmat_init
+			# self.norm_op = norm_vec
 		else:
 			assert(False), "Invalid CSPH1D init ID"
 		
@@ -82,9 +89,9 @@ class CSPH1DLayer(nn.Module):
 		B = torch.matmul(inputs_reshaped, self.Cmat)
 
 		## Compute ZNCC Scores Table
-		# zn_Cmat = zero_norm(self.Cmat, dim=-1)
-		zn_decoding_Cmat = zero_norm(self.decoding_Cmat, dim=-1)
-		zn_B = zero_norm(B, dim=-1)
+		# zn_Cmat = self.norm_op(self.Cmat, dim=-1)
+		zn_decoding_Cmat = self.norm_op(self.decoding_Cmat, dim=-1)
+		zn_B = self.norm_op(B, dim=-1)
 		zncc = torch.matmul(zn_B, zn_decoding_Cmat.t())
 		
 		## Transpose time dimension again
@@ -122,13 +129,21 @@ if __name__=='__main__':
 	inputs = torch.randn((batch_size, 1, nt, nr, nc))
 	inputs[inputs<2] = 0
 
-	simple_hist_input = torch.zeros((1, 1, nt, 1, 1))
-	simple_hist_input[0, 0, 100, 0, 0] = 1
+	simple_hist_input = torch.zeros((2, 1, nt, 32, 32))
+	simple_hist_input[0, 0, 100, 0, 0] = 3
+	simple_hist_input[0, 0, 200, 0, 0] = 1
+	simple_hist_input[0, 0, 50, 0, 0] = 1
+	simple_hist_input[0, 0, 540, 0, 0] = 1
+
+	simple_hist_input[1, 0, 300, 0, 0] = 2
+	simple_hist_input[1, 0, 800, 0, 0] = 1
+	simple_hist_input[1, 0, 34, 0, 0] = 1
+	simple_hist_input[1, 0, 900, 0, 0] = 1
 
 	## Init CSPH Layer Set compression params
 	k = 16
-	init_id = 'TruncFourier'
-	# init_id = 'HybridGrayFourier'
+	# init_id = 'TruncFourier'
+	init_id = 'HybridGrayFourier'
 	# init_id = 'HybridFourierGray'
 	# init_id = 'CoarseHist'
 	# init_id = 'Rand'
@@ -166,8 +181,7 @@ if __name__=='__main__':
 	# Look at outputs
 	plt.plot(simple_hist_input[0,0,:,0,0], '--', label="Inputs 2")
 	plt.plot(zncc[0,0,:,0,0], label='ZNCC Outputs 2')
-
-
-
-
+	plt.plot(simple_hist_input[1,0,:,0,0], '--', label="Inputs 3")
+	plt.plot(zncc[1,0,:,0,0], label='ZNCC Outputs 3')
+	plt.legend()
 

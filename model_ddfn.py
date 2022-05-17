@@ -39,6 +39,8 @@ class MsFeat3D(torch.nn.Module):
 
 		self.conv4 = nn.Sequential(nn.Conv3d(outchannel_MS, outchannel_MS, kernel_size=3, padding=2, dilation=2, bias=True), nn.ReLU(inplace=True))
 		init.kaiming_normal_(self.conv4[0].weight, 0, 'fan_in', 'relu'); init.constant_(self.conv4[0].bias, 0.0)
+		
+		# self.bnorm = nn.BatchNorm3d(4*outchannel_MS)
 
 	def forward(self, inputs):
 		conv1 = self.conv1(inputs)
@@ -46,6 +48,7 @@ class MsFeat3D(torch.nn.Module):
 		conv3 = self.conv3(conv2)
 		conv4 = self.conv4(conv1)
 		return torch.cat((conv1, conv2, conv3, conv4), 1)
+		# return self.bnorm(torch.cat((conv1, conv2, conv3, conv4), 1))
 
 # feature integration
 class Block3D(torch.nn.Module):
@@ -78,6 +81,8 @@ class Block3D(torch.nn.Module):
 		self.feat = nn.Sequential(nn.Conv3d(24, 8, 1, padding=0, dilation=1, bias=True), nn.ReLU(inplace=True))
 		init.kaiming_normal_(self.feat[0].weight, 0, 'fan_in', 'relu'); init.constant_(self.feat[0].bias, 0.0)
 
+		# self.bnorm = nn.BatchNorm3d(8+in_channels)
+
 	# note the channel for each layer
 	def forward(self, inputs):
 		conv1 = self.conv1(inputs)
@@ -87,6 +92,7 @@ class Block3D(torch.nn.Module):
 		feat25 = self.feat25(feat2)
 		feat = self.feat(torch.cat((feat1, feat15, feat2, feat25), 1))
 		return torch.cat((inputs, feat), 1)
+		# return self.bnorm(torch.cat((inputs, feat), 1))
 
 
 class Block3DGroup(torch.nn.Module):

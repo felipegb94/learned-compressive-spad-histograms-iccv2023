@@ -90,7 +90,10 @@ class LITBaseSPADModel(pl.LightningModule):
 		loss_rmse = criterion_RMSE(dep_re, dep)
 
 		if(self.data_loss_id == 'kldiv'):
-			loss = loss_kl + self.p_tv*loss_tv
+			# For the first 100 steps only consider the data loss term
+			if(self.global_step < 500): loss = loss_kl
+			else: loss = loss_kl + self.p_tv*loss_tv
+			# loss = loss_kl + self.p_tv*loss_tv
 		elif(self.data_loss_id == 'L1'):
 			loss = loss_l1 + self.p_tv*loss_tv
 		elif(self.data_loss_id == 'L2'):
@@ -132,7 +135,7 @@ class LITBaseSPADModel(pl.LightningModule):
 		)
 
 		# # Log some images every 500 training steps
-		# if((batch_idx % 500 == 0)):
+		# if((batch_idx % 20 == 0)):
 		# 	self.log_depth_img(gt_dep=sample["bins"], rec_dep=dep_re, img_title_prefix='Train - ')
 		
 		if((batch_idx % 250) == 0):

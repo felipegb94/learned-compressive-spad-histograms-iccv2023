@@ -9,7 +9,7 @@ import torch.nn as nn
 
 ###########################################
 # the set of loss functions
-criterion_GAN = nn.MSELoss()
+# criterion_GAN = nn.MSELoss()
 
 # We use mean reduction even if it is mathematically incorrect. This is what was used in Peng et al., 2020 and Lindell et al., 2018
 # One reason we may prefer mean of batchmean is that if the histogram image increases in dimension then we want the kldiv loss to stay
