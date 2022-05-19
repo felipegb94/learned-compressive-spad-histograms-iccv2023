@@ -214,7 +214,7 @@ class LITBaseSPADModel(pl.LightningModule):
 
 		# the following two lines give the same result
 		# depths_rmse = torch.sqrt(torch.mean((rec_depths - gt_depths)**2))
-		# depths_L2 = criterion_L2(rec_depths, gt_depths)
+		depths_mse = criterion_L2(rec_depths, gt_depths)
 		depths_rmse = criterion_RMSE(rec_depths, gt_depths)
 		depths_mae = criterion_L1(rec_depths, gt_depths)
 
@@ -229,6 +229,7 @@ class LITBaseSPADModel(pl.LightningModule):
 				, "rmse/avg_test": test_rmse
 				, "depths/test_rmse": depths_rmse
 				, "depths/test_mae": depths_mae
+				, "depths/test_mse": depths_mse
 				, "depths/test_mean_abs_perc{:.2f}".format(percentiles[0]): mean_percentile_errs[0]
 				, "depths/test_mean_abs_perc{:.2f}".format(percentiles[1]): mean_percentile_errs[1]
 				, "depths/test_mean_abs_perc{:.2f}".format(percentiles[2]): mean_percentile_errs[2]
