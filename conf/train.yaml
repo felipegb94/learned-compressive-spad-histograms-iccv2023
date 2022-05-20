@@ -34,8 +34,8 @@ defaults:
 experiment: debug
 
 # Random seed to use
-# random_seed: 1234
-random_seed: 1235
+random_seed: 1234
+# random_seed: 1235
 
 params:
   train_datalist_fpath: ${io_dirpaths.datalists_dirpath}/${dataset.train_datalist_fname}

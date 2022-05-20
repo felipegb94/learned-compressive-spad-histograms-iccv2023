@@ -8,10 +8,16 @@ hydra:
 # https://hydra.cc/docs/next/tutorials/basic/running_your_app/working_directory
 original_work_dir: ${hydra:runtime.cwd}
 
-# ## 01Inputs Depth2Depth LARGE Model --> Full trained model with gradient decay
-model_name: DDFN2D_Phasor2Depth/B-16_MS-8/loss-L1_tv-0.0
-model_dirpath: outputs/${dataset.name}/${experiment}/${model_name}/2022-05-12_141759
-ckpt_id: epoch=00-step=3463-end-of-epoch
+# # ## 01Inputs Depth2Depth LARGE Model --> Full trained model with gradient decay
+# model_name: DDFN2D_Phasor2Depth/B-16_MS-8/loss-L1_tv-0.0
+# model_dirpath: outputs/${dataset.name}/${experiment}/${model_name}/2022-05-12_141759
+# ckpt_id: epoch=00-step=3463-end-of-epoch
+
+# ## 01Inputs Phasor2Depth LARGE Model --> Full trained model with gradient decay
+model_name: DDFN2D_Phasor2Depth/B-16_MS-8/loss-L1_tv-1e-05
+model_dirpath: outputs/${dataset.name}/${experiment}/${model_name}/2022-05-18_042156
+ckpt_id: epoch=09-step=20782-end-of-epoch
+
 
 defaults:
   - _self_
