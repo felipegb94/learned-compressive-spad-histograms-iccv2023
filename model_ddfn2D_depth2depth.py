@@ -177,6 +177,191 @@ class LITPlainDeepBoosting2DPhasor2Depth(LITL1LossBaseSpadModel):
 	
 	def get_input_data(self, sample):
 		return sample["est_bins_argmax"]
+class PlainDeepBoosting2DPhasor2Depth7Freqs(nn.Module):
+	def __init__(self, outchannel_MS=2, n_ddfn_blocks=10, num_bins=1024):
+		super(PlainDeepBoosting2DPhasor2Depth7Freqs, self).__init__()
+		# feature extraction
+		self.msfeat = MsFeat2D(in_channels=14, outchannel_MS=outchannel_MS)
+		
+		# 1x1 convolution
+		self.C1 = nn.Sequential(
+			nn.Conv2d(self.msfeat.module_out_channels, self.msfeat.module_out_channels, kernel_size=1, stride=1, bias=True),
+			nn.ReLU(inplace=True)
+			)
+		init.kaiming_normal_(self.C1[0].weight, 0, 'fan_in', 'relu') 
+		init.constant_(self.C1[0].bias, 0.0)
+
+		## ddfn blocks
+		self.n_ddfn_blocks = n_ddfn_blocks
+		self.dfu_block_group = Block2DGroup(in_channels=self.msfeat.module_out_channels, n_ddfn_blocks=self.n_ddfn_blocks)
+
+		# Reconstruction kernel
+		self.C_rec = nn.Sequential(
+			nn.Conv2d(self.dfu_block_group.module_out_channels, 1, kernel_size=1, stride=1, bias=True)
+		)
+		init.normal_(self.C_rec[0].weight, mean=0.0, std=0.001)
+		init.constant_(self.C_rec[0].bias, 0.0)
+
+		self.hist_rec_layer = Gaussian1DLayer(gauss_len=num_bins, out_dim=-3)
+		self.gauss1D_layer = Gaussian1DLayer(gauss_len=num_bins, out_dim=-3)
+	
+	def forward(self, inputs):
+
+		# Convert depth inputs to phasor
+		# Assume inputs are between 0 and 1
+		phase = 2*math.pi*inputs
+		phasor_real1 = torch.cos(phase)
+		phasor_imag1 = torch.sin(phase)
+		phasor_real2 = torch.cos(2*phase)
+		phasor_imag2 = torch.sin(2*phase)
+		phasor_real4 = torch.cos(4*phase)
+		phasor_imag4 = torch.sin(4*phase)
+		phasor_real8 = torch.cos(8*phase)
+		phasor_imag8 = torch.sin(8*phase)
+		phasor_real16 = torch.cos(16*phase)
+		phasor_imag16 = torch.sin(16*phase)
+		phasor_real32 = torch.cos(32*phase)
+		phasor_imag32 = torch.sin(32*phase)
+		phasor_real64 = torch.cos(64*phase)
+		phasor_imag64 = torch.sin(64*phase)
+
+		phasor = torch.cat((
+			phasor_real1, phasor_imag1
+			, phasor_real2, phasor_imag2
+			, phasor_real4, phasor_imag4
+			, phasor_real8, phasor_imag8
+			, phasor_real16, phasor_imag16
+			, phasor_real32, phasor_imag32
+			, phasor_real64, phasor_imag64
+			), 1)
+
+		# Feature extraction
+		msfeat = self.msfeat(phasor) 
+		c1 = self.C1(msfeat)
+
+		# Feature integration 
+		b_out = self.dfu_block_group(c1)
+
+		# depth reconstruction 
+		rec = self.C_rec(b_out)
+
+		# hist reconstruction
+		denoise_out = self.gauss1D_layer(rec)
+
+		return denoise_out.squeeze(1), rec
+
+
+
+class LITPlainDeepBoosting2DPhasor2Depth7Freqs(LITL1LossBaseSpadModel):
+	def __init__(self, 
+		init_lr = 1e-4,
+		p_tv = 1e-5, 
+		lr_decay_gamma = 0.9,
+		outchannel_MS=4,
+		n_ddfn_blocks=12,
+		num_bins=1024
+		):
+		
+		deep_boosting_model = PlainDeepBoosting2DPhasor2Depth7Freqs(
+			outchannel_MS=outchannel_MS, 
+			n_ddfn_blocks=n_ddfn_blocks, 
+			num_bins=num_bins)
+
+		super(LITPlainDeepBoosting2DPhasor2Depth7Freqs, self).__init__(backbone_net=deep_boosting_model,
+												init_lr = init_lr,
+												p_tv = p_tv, 
+												lr_decay_gamma = lr_decay_gamma
+												)
+		
+		# Overwrite example input array
+		self.example_input_array = torch.randn([1, 1, 32, 32])
+	
+	def get_input_data(self, sample):
+		return sample["est_bins_argmax"]
+
+class PlainDeepBoosting2DPhasor2Depth1Freq(nn.Module):
+	def __init__(self, outchannel_MS=2, n_ddfn_blocks=10, num_bins=1024):
+		super(PlainDeepBoosting2DPhasor2Depth1Freq, self).__init__()
+		# feature extraction
+		self.msfeat = MsFeat2D(in_channels=14, outchannel_MS=outchannel_MS)
+		
+		# 1x1 convolution
+		self.C1 = nn.Sequential(
+			nn.Conv2d(self.msfeat.module_out_channels, self.msfeat.module_out_channels, kernel_size=1, stride=1, bias=True),
+			nn.ReLU(inplace=True)
+			)
+		init.kaiming_normal_(self.C1[0].weight, 0, 'fan_in', 'relu') 
+		init.constant_(self.C1[0].bias, 0.0)
+
+		## ddfn blocks
+		self.n_ddfn_blocks = n_ddfn_blocks
+		self.dfu_block_group = Block2DGroup(in_channels=self.msfeat.module_out_channels, n_ddfn_blocks=self.n_ddfn_blocks)
+
+		# Reconstruction kernel
+		self.C_rec = nn.Sequential(
+			nn.Conv2d(self.dfu_block_group.module_out_channels, 1, kernel_size=1, stride=1, bias=True)
+		)
+		init.normal_(self.C_rec[0].weight, mean=0.0, std=0.001)
+		init.constant_(self.C_rec[0].bias, 0.0)
+
+		self.hist_rec_layer = Gaussian1DLayer(gauss_len=num_bins, out_dim=-3)
+		self.gauss1D_layer = Gaussian1DLayer(gauss_len=num_bins, out_dim=-3)
+	
+	def forward(self, inputs):
+
+		# Convert depth inputs to phasor
+		# Assume inputs are between 0 and 1
+		phase = 2*math.pi*inputs
+		phasor_real1 = torch.cos(phase)
+		phasor_imag1 = torch.sin(phase)
+
+		phasor = torch.cat((
+			phasor_real1, phasor_imag1
+			), 1)
+
+		# Feature extraction
+		msfeat = self.msfeat(phasor) 
+		c1 = self.C1(msfeat)
+
+		# Feature integration 
+		b_out = self.dfu_block_group(c1)
+
+		# depth reconstruction 
+		rec = self.C_rec(b_out)
+
+		# hist reconstruction
+		denoise_out = self.gauss1D_layer(rec)
+
+		return denoise_out.squeeze(1), rec
+
+
+
+class LITPlainDeepBoosting2DPhasor2Depth1Freq(LITL1LossBaseSpadModel):
+	def __init__(self, 
+		init_lr = 1e-4,
+		p_tv = 1e-5, 
+		lr_decay_gamma = 0.9,
+		outchannel_MS=4,
+		n_ddfn_blocks=12,
+		num_bins=1024
+		):
+		
+		deep_boosting_model = PlainDeepBoosting2DPhasor2Depth1Freq(
+			outchannel_MS=outchannel_MS, 
+			n_ddfn_blocks=n_ddfn_blocks, 
+			num_bins=num_bins)
+
+		super(LITPlainDeepBoosting2DPhasor2Depth1Freq, self).__init__(backbone_net=deep_boosting_model,
+												init_lr = init_lr,
+												p_tv = p_tv, 
+												lr_decay_gamma = lr_decay_gamma
+												)
+		
+		# Overwrite example input array
+		self.example_input_array = torch.randn([1, 1, 32, 32])
+	
+	def get_input_data(self, sample):
+		return sample["est_bins_argmax"]
 
 if __name__=='__main__':
 	import matplotlib.pyplot as plt

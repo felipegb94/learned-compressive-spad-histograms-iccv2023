@@ -4,6 +4,7 @@ results
 outputs
 outputs_old
 outputs_bkp
+outputs_fmu
 
 tmp.*
 

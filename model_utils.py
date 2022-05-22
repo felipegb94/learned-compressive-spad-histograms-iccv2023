@@ -15,7 +15,7 @@ from model_ddfn_64_B10_CGNL_ori_old import LITDeepBoostingOriginal
 from model_ddfn_64_B10_CGNL_ori_depth2depth import LITDeepBoostingDepth2Depth, LITPlainDeepBoostingDepth2Depth
 from model_ddfn_64_B10_CGNL_ori_CSPH1D import LITPlainDeepBoostingCSPH1D
 from model_ddfn_64_B10_CGNL_ori_compressive import LITDeepBoostingCompressive, LITDeepBoostingCompressiveWithBias
-from model_ddfn2D_depth2depth import LITPlainDeepBoosting2DDepth2Depth01Inputs, LITPlainDeepBoosting2DPhasor2Depth
+from model_ddfn2D_depth2depth import LITPlainDeepBoosting2DDepth2Depth01Inputs, LITPlainDeepBoosting2DPhasor2Depth, LITPlainDeepBoosting2DPhasor2Depth,LITPlainDeepBoosting2DPhasor2Depth7Freqs,LITPlainDeepBoosting2DPhasor2Depth1Freq
 from model_ddfn2D_depth2depth2hist import LITPlainDeepBoosting2DDepth2Depth2Hist01Inputs
 
 
@@ -89,6 +89,24 @@ def init_model_from_id(cfg, irf=None):
 						, n_ddfn_blocks = cfg.model.model_params.n_ddfn_blocks
 						, num_bins = cfg.dataset.nt
 						)
+	elif(cfg.model.model_id == 'DDFN2D_Phasor2Depth7Freqs'):
+		lit_model = LITPlainDeepBoosting2DPhasor2Depth7Freqs(
+						init_lr = cfg.train_params.lri
+						, lr_decay_gamma = cfg.train_params.lr_decay_gamma
+						, p_tv = cfg.train_params.p_tv
+						, outchannel_MS = cfg.model.model_params.outchannel_MS
+						, n_ddfn_blocks = cfg.model.model_params.n_ddfn_blocks
+						, num_bins = cfg.dataset.nt
+						)
+	elif(cfg.model.model_id == 'DDFN2D_Phasor2Depth1Freq'):
+		lit_model = LITPlainDeepBoosting2DPhasor2Depth1Freq(
+						init_lr = cfg.train_params.lri
+						, lr_decay_gamma = cfg.train_params.lr_decay_gamma
+						, p_tv = cfg.train_params.p_tv
+						, outchannel_MS = cfg.model.model_params.outchannel_MS
+						, n_ddfn_blocks = cfg.model.model_params.n_ddfn_blocks
+						, num_bins = cfg.dataset.nt
+						)
 	elif(cfg.model.model_id == 'DDFN2D_Depth2Depth2Hist_01Inputs'):
 		lit_model = LITPlainDeepBoosting2DDepth2Depth2Hist01Inputs(
 						irf = irf
@@ -126,7 +144,12 @@ def load_model_from_ckpt(model_name, ckpt_id, logger):
 	elif('DDFN2D_Depth2Depth_01Inputs' in model_name):
 		model = LITPlainDeepBoosting2DDepth2Depth01Inputs.load_from_checkpoint(ckpt_fpath, strict=False)
 	elif('DDFN2D_Phasor2Depth' in model_name):
-		model = LITPlainDeepBoosting2DPhasor2Depth.load_from_checkpoint(ckpt_fpath, strict=False)
+		if('7Freqs' in model_name):
+			model = LITPlainDeepBoosting2DPhasor2Depth7Freqs.load_from_checkpoint(ckpt_fpath, strict=False)
+		if('1Freq' in model_name):
+			model = LITPlainDeepBoosting2DPhasor2Depth1Freq.load_from_checkpoint(ckpt_fpath, strict=False)
+		else:
+			model = LITPlainDeepBoosting2DPhasor2Depth.load_from_checkpoint(ckpt_fpath, strict=False)
 	elif(model_name == 'DDFN2D_Depth2Depth2Hist_01Inputs/B-12_MS-8'):
 		model = LITPlainDeepBoosting2DDepth2Depth2Hist01Inputs.load_from_checkpoint(ckpt_fpath, strict=False)
 	else:
