@@ -17,6 +17,7 @@ from model_ddfn_64_B10_CGNL_ori_CSPH1D import LITPlainDeepBoostingCSPH1D
 from model_ddfn_64_B10_CGNL_ori_compressive import LITDeepBoostingCompressive, LITDeepBoostingCompressiveWithBias
 from model_ddfn2D_depth2depth import LITPlainDeepBoosting2DDepth2Depth01Inputs, LITPlainDeepBoosting2DPhasor2Depth, LITPlainDeepBoosting2DPhasor2Depth,LITPlainDeepBoosting2DPhasor2Depth7Freqs,LITPlainDeepBoosting2DPhasor2Depth1Freq
 from model_ddfn2D_depth2depth2hist import LITPlainDeepBoosting2DDepth2Depth2Hist01Inputs
+from model_unet2D_csph import LITUnet2DCSPH1D
 
 
 def count_parameters(model):
@@ -117,6 +118,17 @@ def init_model_from_id(cfg, irf=None):
 						, outchannel_MS = cfg.model.model_params.outchannel_MS
 						, n_ddfn_blocks = cfg.model.model_params.n_ddfn_blocks
 						, num_bins = cfg.dataset.nt
+						)
+	elif(cfg.model.model_id == 'Unet2D_CSPH1D'):
+		lit_model = LITUnet2DCSPH1D(
+						init_lr = cfg.train_params.lri
+						, lr_decay_gamma = cfg.train_params.lr_decay_gamma
+						, p_tv = cfg.train_params.p_tv
+						, init = cfg.model.model_params.init
+						, optimize_csph = cfg.model.model_params.optimize_csph
+						, k = cfg.model.model_params.k
+						, num_bins = cfg.dataset.nt
+						, h_irf = irf
 						)
 	else:
 		assert(False), "Incorrect model_id"

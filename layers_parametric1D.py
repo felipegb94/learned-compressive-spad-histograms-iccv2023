@@ -31,6 +31,12 @@ class Gaussian1DLayer(nn.Module):
 		self.out_dim = out_dim
 
 	def forward(self, mu):
+		'''
+		Expected input dims: (Batch, n_ch, nr, nc)
+		Output dimensions for out_dim=-1: (Batch, n_ch, nr, nc, gauss_len)
+		Output dimensions for out_dim=-3: (Batch, n_ch, gauss_len,  nr, nc)
+		This function will basically add one dimension
+		'''
 		loc = mu.unsqueeze(-1) - self.domain
 		if(self.out_dim != -1):
 			loc_reshaped = torch.moveaxis(loc, source=-1, destination=self.out_dim)

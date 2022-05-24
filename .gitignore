@@ -5,6 +5,7 @@ outputs
 outputs_old
 outputs_bkp
 outputs_fmu
+pytorch_prototyping
 
 tmp.*
 

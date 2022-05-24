@@ -46,3 +46,13 @@
 # python train.py ++experiment=debug model=DDFN_C64B10_CSPH1D ++model.model_params.init=CoarseHist ++model.model_params.k=64 ++train_params.p_tv=0.0 ++train_params.epoch=10 ++train_params.lri=1e-4 ++random_seed=1234
 
 
+
+## Run Unet2D CSPH1D HybridGrayFourier (K=16 experiment) 
+python train.py ++experiment=test model=Unet2D_CSPH1D ++model.model_params.init=HybridGrayFourier ++model.model_params.k=16 ++train_params.p_tv=0.0 ++train_params.epoch=50 ++train_params.lri=1e-3 ++random_seed=1234 ++train_params.batch_size=16
+
+## Run Unet2D CSPH1D HybridGrayFourier (K=32 experiment) 
+python train.py ++experiment=test model=Unet2D_CSPH1D ++model.model_params.init=HybridGrayFourier ++model.model_params.k=32 ++train_params.p_tv=0.0 ++train_params.epoch=50 ++train_params.lri=1e-3 ++random_seed=1234 ++train_params.batch_size=16
+
+## Run Unet2D CSPH1D HybridGrayFourier (K=64 experiment) 
+python train.py ++experiment=test model=Unet2D_CSPH1D ++model.model_params.init=HybridGrayFourier ++model.model_params.k=64 ++train_params.p_tv=0.0 ++train_params.epoch=50 ++train_params.lri=1e-3 ++random_seed=1234 ++train_params.batch_size=16
+
