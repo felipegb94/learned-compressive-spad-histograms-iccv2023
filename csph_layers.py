@@ -150,8 +150,15 @@ class CSPH1D2DLayer(nn.Module):
 		self.csph1D_encoding = CSPH1DGlobalEncodingLayer(k=k, num_bins=num_bins, init=init, h_irf=h_irf, optimize_weights=optimize_weights)
 		self.csph2D_encoding = CSPH2DLocalEncodingLayer(k=k, down_factor=down_factor)
 
-		self.csph1D_decoding = CSPH1DGlobalDecodingZNCC(self.csph1D_encoding)
+		# self.csph1D_decoding = CSPH1DGlobalDecodingZNCC(self.csph1D_encoding)
 		self.csph2D_decoding = CSPH2DLocalDecodingLayer(factor=down_factor)
+
+		self.csph1D_decoding = nn.Sequential(
+			nn.Conv2d(k, num_bins, kernel_size=1, stride=1, bias=True),
+			nn.ReLU(inplace=True))
+		nn.init.kaiming_normal_(self.csph1D_decoding[0].weight, 0, 'fan_in', 'relu'); 
+		nn.init.constant_(self.csph1D_decoding[0].bias, 0.0)
+
 
 	def forward(self, inputs):
 		'''
