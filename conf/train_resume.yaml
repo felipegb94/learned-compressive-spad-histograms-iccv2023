@@ -13,10 +13,16 @@ original_work_dir: ${hydra:runtime.cwd}
 # model_dirpath: outputs/${dataset.name}/${experiment}/${model_name}/2022-05-12_141759
 # ckpt_id: epoch=00-step=3463-end-of-epoch
 
-# ## 01Inputs Phasor2Depth LARGE Model --> Full trained model with gradient decay
-model_name: DDFN2D_Phasor2Depth/B-16_MS-8/loss-L1_tv-1e-05
-model_dirpath: outputs/${dataset.name}/${experiment}/${model_name}/2022-05-18_042156
-ckpt_id: epoch=09-step=20782-end-of-epoch
+# # ## 01Inputs Phasor2Depth LARGE Model --> Full trained model with gradient decay
+# model_name: DDFN2D_Phasor2Depth/B-16_MS-8/loss-L1_tv-1e-05
+# model_dirpath: outputs/${dataset.name}/${experiment}/${model_name}/2022-05-18_042156
+# ckpt_id: epoch=09-step=20782-end-of-epoch
+
+
+## K=16 TruncFourier 3D DB Plain CSPH1D Model (No TV | LR=1e-3) --> Full trained model with gradient decay
+model_name: DDFN_C64B10_CSPH1D/k16_TruncFourier/loss-kldiv_tv-0.0
+model_dirpath: outputs/nyuv2_64x64x1024_80ps/test_csph/${.model_name}/2022-05-19_142207
+ckpt_id: epoch=09-step=34630-end-of-epoch
 
 
 defaults:

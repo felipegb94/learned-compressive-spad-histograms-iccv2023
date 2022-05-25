@@ -186,8 +186,10 @@ def init_model_from_id(cfg, irf=None):
 	return lit_model
 
 def load_model_from_ckpt(model_name, ckpt_id, logger):
-	assert(os.path.exists(os.path.join('checkpoints/',ckpt_id))), "Input checkpoint does not exist ({})".format(ckpt_id)
 	ckpt_fpath = os.path.join("checkpoints", ckpt_id)
+	print(os.listdir("checkpoints/"))
+	print(os.getcwd())
+	assert(os.path.exists(os.path.join('checkpoints/',ckpt_id))), "Input checkpoint does not exist ({})".format(ckpt_id)
 	logger.info("Loading {} model".format(model_name))
 	if(model_name == 'DDFN_C64B10_NL_Depth2Depth'):
 		model = LITDeepBoostingDepth2Depth.load_from_checkpoint(ckpt_fpath)
