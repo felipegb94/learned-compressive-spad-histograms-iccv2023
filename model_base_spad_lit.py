@@ -17,11 +17,18 @@ breakpoint = debugger.set_trace
 
 #### Local imports
 from losses import criterion_L2, criterion_L1, criterion_KL, criterion_RMSE, criterion_TV
-import tof_utils
+from research_utils.shared_constants import TWOPI, EPSILON
 from research_utils.np_utils import calc_mean_percentile_errors
+import tof_utils
 
 def make_zeromean_normalized_bins(bins):
 	return (2*bins) - 1
+
+def normdepth2phasor(d):
+	phase = TWOPI*d
+	cos = torch.cos(phase)
+	sin = torch.sin(phase)
+	return torch.cat((cos, sin), dim=1)
 
 class LITBaseSPADModel(pl.LightningModule):
 	def __init__(self, 
@@ -72,13 +79,21 @@ class LITBaseSPADModel(pl.LightningModule):
 	def forward_wrapper(self, sample):
 		# Input the correct type of data to the model which should output the recovered histogram and depths
 		input_data = self.get_input_data(sample)
-		M_mea_re, dep_re = self(input_data)
-		return M_mea_re, dep_re
+		M_mea_re, rec = self(input_data)
+		return M_mea_re, rec
 
-	def compute_losses(self, sample, M_mea_re, dep_re):
+	def rec2depth(self, rec):
+		'''
+			For some models the reconstructed signal are not depths 
+		'''
+		return rec
+
+	def compute_losses(self, sample, M_mea_re, rec):
 		# load data and compute losses
 		M_gt = sample["rates"]
 		dep = sample["bins"]
+		# Get recovered depths normalized between 0,1
+		dep_re = self.rec2depth(rec)
 		# Normalize
 		M_mea_re_lsmx = self.lsmx(M_mea_re).unsqueeze(1)
 		# Compute metrics
@@ -86,6 +101,7 @@ class LITBaseSPADModel(pl.LightningModule):
 		loss_tv = criterion_TV(dep_re)
 		loss_l1 = criterion_L1(dep_re, dep)
 		loss_l2 = criterion_L2(dep_re, dep)
+		loss_phasorl1 = criterion_L1(normdepth2phasor(dep_re), normdepth2phasor(dep))
 		loss_emd = criterion_L1(torch.cumsum(M_gt, dim=-3), torch.cumsum(M_mea_re.unsqueeze(1), dim=-3))
 		loss_rmse = criterion_RMSE(dep_re, dep)
 
@@ -100,6 +116,19 @@ class LITBaseSPADModel(pl.LightningModule):
 			loss = loss_l2 + self.p_tv*loss_tv
 		elif(self.data_loss_id == 'EMD'):
 			loss = loss_emd + self.p_tv*loss_tv
+		elif(self.data_loss_id == 'PhasorL1'):
+			loss = loss_phasorl1 + self.p_tv*loss_tv
+		elif(self.data_loss_id == 'DirectPhasorL1'):
+			loss_directphasorl1 = criterion_L1(rec, normdepth2phasor(dep))
+			loss = loss_directphasorl1 + self.p_tv*loss_tv
+		elif(self.data_loss_id == 'FFTHistL1'):
+			fft_gt_hist = torch.fft.rfft(M_gt.squeeze(1), dim=-3)
+			loss_real_l1 = criterion_L1(fft_gt_hist.real, rec[:, 0::2, :])
+			loss_imag_l1 = criterion_L1(fft_gt_hist.imag, rec[:, 1::2, :])
+			loss = loss_real_l1 + loss_imag_l1 + self.p_tv*loss_tv 
+		elif(self.data_loss_id == 'DispL1'):
+			loss_displ1 = criterion_L1(rec, 1 / (dep + EPSILON))
+			loss = loss_displ1 + self.p_tv*loss_tv
 		else:
 			assert(False), "Invalid loss id"
 
@@ -113,11 +142,12 @@ class LITBaseSPADModel(pl.LightningModule):
 
 	def training_step(self, sample, batch_idx):
 		# Forward pass
-		M_mea_re, dep_re = self.forward_wrapper(sample)
+		M_mea_re, rec = self.forward_wrapper(sample)
 		# Compute Losses
-		losses = self.compute_losses(sample, M_mea_re, dep_re)
+		losses = self.compute_losses(sample, M_mea_re, rec)
 		loss = losses['loss']
 		loss_l1 = losses['loss_l1']
+		loss_l2 = losses['loss_l2']
 		loss_kl = losses['loss_kl']
 		loss_tv = losses['loss_tv']
 		rmse = losses['rmse']
@@ -129,6 +159,7 @@ class LITBaseSPADModel(pl.LightningModule):
 				, "rmse/train": rmse
 				, "train_losses/kldiv": loss_kl
 				, "train_losses/l1": loss_l1
+				, "train_losses/l2": loss_l2
 				, "train_losses/tv": self.p_tv*loss_tv				
 			}
 			# , prog_bar=True
@@ -147,9 +178,10 @@ class LITBaseSPADModel(pl.LightningModule):
 
 	def validation_step(self, sample, batch_idx):
 		# Forward pass
-		M_mea_re, dep_re = self.forward_wrapper(sample)
+		M_mea_re, rec = self.forward_wrapper(sample)
+		dep_re = self.rec2depth(rec)
 		# Compute Losses
-		val_losses = self.compute_losses(sample, M_mea_re, dep_re)
+		val_losses = self.compute_losses(sample, M_mea_re, rec)
 		val_loss = val_losses['loss']
 		val_rmse = val_losses['rmse']
 		val_loss_l1 = val_losses['loss_l1']
@@ -178,10 +210,11 @@ class LITBaseSPADModel(pl.LightningModule):
 	def test_step(self, sample, batch_idx):
 
 		# Forward pass
-		M_mea_re, dep_re = self.forward_wrapper(sample)
+		M_mea_re, rec = self.forward_wrapper(sample)
+		dep_re = self.rec2depth(rec)
 
 		# Compute Losses
-		test_losses = self.compute_losses(sample, M_mea_re, dep_re)
+		test_losses = self.compute_losses(sample, M_mea_re, rec)
 		test_loss = test_losses['loss']
 		test_rmse = test_losses['rmse']
 

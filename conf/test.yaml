@@ -54,7 +54,7 @@ train_dataset: nyuv2_64x64x1024_80ps
 # ## K=16 HybridGrayFourier 3D DB Plain CSPH1D Model (No TV, Higher LR) --> Full trained model with gradient decay
 # model_name: DDFN_C64B10_CSPH1D/k16_HybridGrayFourier/loss-kldiv_tv-0.0
 # model_dirpath: outputs_fmu/outputs/nyuv2_64x64x1024_80ps/debug/${.model_name}/2022-05-20_194518
-# ckpt_id: epoch=12-step=45018-avgvalrmse=0.0189 # 0.029 (not converged?)
+# ckpt_id: epoch=19-step=69259-avgvalrmse=0.0184 # 0.029 (not converged?)
 
 # ## K=16 TruncFourier 3D DB Plain CSPH1D Model (No TV) --> Full trained model with gradient decay
 # model_name: DDFN_C64B10_CSPH1D/k16_TruncFourier/loss-kldiv_tv-0.0
@@ -71,10 +71,10 @@ train_dataset: nyuv2_64x64x1024_80ps
 # model_dirpath: outputs/nyuv2_64x64x1024_80ps/debug/${.model_name}/2022-05-15_103103
 # ckpt_id: epoch=09-step=34629-avgvalrmse=0.0257 #
 
-# ## K=32 HybridGrayFourier 3D DB Plain CSPH1D Model (No TV | LR=1e-3) --> Full trained model with gradient decay
-# model_name: DDFN_C64B10_CSPH1D/k32_HybridGrayFourier/loss-kldiv_tv-0.0
-# model_dirpath: outputs_fmu/outputs/nyuv2_64x64x1024_80ps/debug/${.model_name}/2022-05-20_194601
-# ckpt_id: epoch=11-step=39824-avgvalrmse=0.0158 # 0.0195
+## K=32 HybridGrayFourier 3D DB Plain CSPH1D Model (No TV | LR=1e-3) --> Full trained model with gradient decay
+model_name: DDFN_C64B10_CSPH1D/k32_HybridGrayFourier/loss-kldiv_tv-0.0
+model_dirpath: outputs_fmu/outputs/nyuv2_64x64x1024_80ps/debug/${.model_name}/2022-05-20_194601
+ckpt_id: epoch=19-step=69259-avgvalrmse=0.0152 # 0.0195
 
 # ## K=64 HybridGrayFourier 3D DB Plain CSPH1D Model (No TV) --> Full trained model with gradient decay
 # model_name: DDFN_C64B10_CSPH1D/k64_HybridGrayFourier/loss-kldiv_tv-0.0
