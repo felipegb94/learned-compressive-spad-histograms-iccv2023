@@ -62,10 +62,10 @@ train_dataset: nyuv2_64x64x1024_80ps
 # model_dirpath: outputs/nyuv2_64x64x1024_80ps/debug/${.model_name}/2022-05-14_175011
 # ckpt_id: epoch=09-step=34629-avgvalrmse=0.0213 # 0.040
 
-# ## K=16 TruncFourier 3D DB Plain CSPH1D Model (No TV | LR=1e-3) --> Full trained model with gradient decay
-# model_name: DDFN_C64B10_CSPH1D/k16_TruncFourier/loss-kldiv_tv-0.0
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/debug/${.model_name}/2022-05-19_142207
-# ckpt_id: epoch=08-step=31166-avgvalrmse=0.0180 # 0.0346
+## K=16 TruncFourier 3D DB Plain CSPH1D Model (No TV | LR=1e-3) --> Full trained model with gradient decay
+model_name: DDFN_C64B10_CSPH1D/k16_TruncFourier/loss-kldiv_tv-0.0
+model_dirpath: outputs/nyuv2_64x64x1024_80ps/test_csph/${.model_name}/2022-05-19_142207
+ckpt_id: epoch=19-step=69259-avgvalrmse=0.0170 # 0.0346
 
 # ## K=16 CoarseHist 3D DB Plain CSPH1D Model (No TV) --> Full trained model with gradient decay
 # model_name: DDFN_C64B10_CSPH1D/k16_CoarseHist/loss-kldiv_tv-0.0
@@ -95,8 +95,8 @@ train_dataset: nyuv2_64x64x1024_80ps
 # ## CSPH1D2D (learned) K=64 HybridGrayFourier (No TV) 
 # model_name: DDFN_C64B10_CSPH1D2D/k64_down2_HybridGrayFourier/loss-kldiv_tv-0.0
 # model_dirpath: outputs/nyuv2_64x64x1024_80ps/test_csph/${.model_name}/2022-05-24_220441
-# ckpt_id: epoch=06-step=24240-avgvalrmse=0.0188 # 
-
+# # ckpt_id: epoch=06-step=24240-avgvalrmse=0.0188 # 
+# ckpt_id: epoch=19-step=67528-avgvalrmse=0.0168
 
 
 # ## 3D DB Plain CSPH1D Model (1e-5 TV) -- With seed 1234 and 0th harmonic

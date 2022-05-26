@@ -57,6 +57,11 @@ class CSPH1DLayer(nn.Module):
 			Cmat_init = coding_obj.C
 			decoding_Cmat_init = coding_obj.decoding_C
 			# self.norm_op = norm_vec
+		elif(init == 'HybridFourierGray'):
+			coding_obj = HybridFourierBasedGrayCoding(num_bins, n_codes=k, h_irf=self.h_irf, account_irf=True)
+			Cmat_init = coding_obj.C
+			decoding_Cmat_init = coding_obj.decoding_C
+			# self.norm_op = norm_vec
 		elif(init == 'CoarseHist'):
 			coding_obj = GatedCoding(num_bins, n_gates=k, h_irf=self.h_irf, account_irf=True)
 			Cmat_init = coding_obj.C

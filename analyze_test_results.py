@@ -72,7 +72,7 @@ if __name__=='__main__':
     # # scene_ids = ['spad_Books']
     # # scene_ids = ['spad_Books']
     # scene_ids = ['spad_Reindeer']
-    # sbr_params = ['10_10']
+    sbr_params = ['2_50']
 
     test_set_id = 'test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
 
@@ -86,7 +86,8 @@ if __name__=='__main__':
     db3D_csph1D2Dk64down2_grayfour_tv0_result_dirpath = os.path.join('outputs/nyuv2_64x64x1024_80ps/test_csph/DDFN_C64B10_CSPH1D2D/k64_down2_HybridGrayFourier/loss-kldiv_tv-0.0/2022-05-24_220441/', test_set_id)
     db3D_csph1Dk16_grayfour_tv0_result_dirpath = os.path.join('outputs/nyuv2_64x64x1024_80ps/test_csph/DDFN_C64B10_CSPH1D/k16_HybridGrayFourier/loss-kldiv_tv-0.0/2022-05-20_194518/', test_set_id)
     # db3D_csph1Dk16_grayfour_tv0_result_dirpath = os.path.join('outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_CSPH1D/k16_HybridGrayFourier/loss-kldiv_tv-0.0/2022-05-11_070443/', test_set_id)
-    db3D_csph1Dk16_truncfour_tv0_result_dirpath = os.path.join('outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_CSPH1D/k16_TruncFourier/loss-kldiv_tv-0.0/2022-05-14_175011/', test_set_id)
+    db3D_csph1Dk16_truncfour_tv0_result_dirpath = os.path.join('outputs/nyuv2_64x64x1024_80ps/test_csph/DDFN_C64B10_CSPH1D/k16_TruncFourier/loss-kldiv_tv-0.0/2022-05-19_142207', test_set_id)
+    # db3D_csph1Dk16_truncfour_tv0_result_dirpath = os.path.join('outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_CSPH1D/k16_TruncFourier/loss-kldiv_tv-0.0/2022-05-14_175011/', test_set_id)
     db3D_csph1Dk16_coarsehist_tv0_result_dirpath = os.path.join('outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_CSPH1D/k16_CoarseHist/loss-kldiv_tv-0.0/2022-05-15_103103/', test_set_id)
     db3D_csph1Dk32_grayfour_tv0_result_dirpath = os.path.join('outputs/nyuv2_64x64x1024_80ps/test_csph/DDFN_C64B10_CSPH1D/k32_HybridGrayFourier/loss-kldiv_tv-0.0/2022-05-20_194601/', test_set_id)
     db3D_csph1Dk64_grayfour_tv0_result_dirpath = os.path.join('outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_CSPH1D/k64_HybridGrayFourier/loss-kldiv_tv-0.0/2022-05-18_050753/', test_set_id)
