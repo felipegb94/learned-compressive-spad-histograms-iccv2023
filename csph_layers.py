@@ -3,6 +3,7 @@ import os
 
 #### Library imports
 import numpy as np
+from requests import post
 import scipy.linalg
 import torch
 import torch.nn as nn
@@ -16,6 +17,8 @@ breakpoint = debugger.set_trace
 
 #### Local imports
 from toflib.coding import TruncatedFourierCoding, HybridGrayBasedFourierCoding, GatedCoding, HybridFourierBasedGrayCoding
+from model_unet import UpBlock
+
 
 def pad_h_irf(h_irf, num_bins):
 	if(not (h_irf is None)):
@@ -150,9 +153,12 @@ class CSPH1D2DLayer(nn.Module):
 		self.csph1D_encoding = CSPH1DGlobalEncodingLayer(k=k, num_bins=num_bins, init=init, h_irf=h_irf, optimize_weights=optimize_weights)
 		self.csph2D_encoding = CSPH2DLocalEncodingLayer(k=k, down_factor=down_factor)
 
-		# self.csph1D_decoding = CSPH1DGlobalDecodingZNCC(self.csph1D_encoding)
 		self.csph2D_decoding = CSPH2DLocalDecodingLayer(factor=down_factor)
 
+		# # 1D ZNCC decoding
+		# self.csph1D_decoding = CSPH1DGlobalDecodingZNCC(self.csph1D_encoding)
+
+		## 1D Learned decoding
 		self.csph1D_decoding = nn.Sequential(
 			nn.Conv2d(k, num_bins, kernel_size=1, stride=1, bias=True),
 			nn.ReLU(inplace=True))
@@ -169,6 +175,44 @@ class CSPH1D2DLayer(nn.Module):
 		B2 = self.csph2D_encoding(B1)
 		B3 = self.csph2D_decoding(B2)
 		B4 = self.csph1D_decoding(B3)
+		return B4, B2
+
+class CSPH1DGlobal2DLocalLayer4xDown(nn.Module):
+	def __init__(self, k=2, num_bins=1024, init='TruncFourier', h_irf=None, optimize_weights=False):
+		# Init parent class
+		super(CSPH1DGlobal2DLocalLayer4xDown, self).__init__()
+		self.down_factor = 4
+
+		self.csph1D_encoding = CSPH1DGlobalEncodingLayer(k=k, num_bins=num_bins, init=init, h_irf=h_irf, optimize_weights=optimize_weights)
+		self.csph2D_encoding = CSPH2DLocalEncodingLayer(k=k, down_factor=self.down_factor)
+
+		# self.csph2D_decoding = CSPH2DLocalDecodingLayer(factor=self.down_factor)
+		self.csph2D_decoding1 = UpBlock(in_channels = k, out_channels=k, post_conv=False,
+							use_dropout=False, norm=None, upsampling_mode='bilinear')
+		self.csph2D_decoding2 = UpBlock(in_channels = k, out_channels=k, post_conv=False,
+							use_dropout=False, norm=None, upsampling_mode='bilinear')
+
+		# # 1D ZNCC decoding
+		# self.csph1D_decoding = CSPH1DGlobalDecodingZNCC(self.csph1D_encoding)
+
+		## 1D Learned decoding
+		self.csph1D_decoding = nn.Sequential(
+			nn.Conv2d(k, num_bins, kernel_size=1, stride=1, bias=True),
+			nn.ReLU(inplace=True))
+		nn.init.kaiming_normal_(self.csph1D_decoding[0].weight, 0, 'fan_in', 'relu'); 
+		nn.init.constant_(self.csph1D_decoding[0].bias, 0.0)
+
+
+	def forward(self, inputs):
+		'''
+			Expected input dims == (Batch, Nt, Nr, Nc)
+		'''
+		## Compute compressive histogram
+		B1 = self.csph1D_encoding(inputs)
+		B2 = self.csph2D_encoding(B1)
+		B3_1 = self.csph2D_decoding1(B2)
+		B3_2 = self.csph2D_decoding2(B3_1)
+		B4 = self.csph1D_decoding(B3_2)
 		return B4, B2
 
 if __name__=='__main__':
@@ -224,6 +268,7 @@ if __name__=='__main__':
 	print("    inputs2: {}".format(simple_hist_input.shape))
 	print("    outputs2: {}".format(simple_hist_output.shape))
 
+
 	plt.clf()
 	plt.subplot(2,1,1)
 	plt.plot(simple_hist_input[0,:,0,0])
@@ -235,4 +280,14 @@ if __name__=='__main__':
 	plt.plot(simple_hist_output[1,:,0,0].detach().cpu().numpy())
 	plt.plot(simple_hist_output[1,:,1,1].detach().cpu().numpy())
 
+
+	## CSPH1DGlobal2DLocalLayer4xDown CSPH Coding Object
+	csph1DGlobal2DLocal4xDown_obj = CSPH1DGlobal2DLocalLayer4xDown(k=k, num_bins=nt, init='TruncFourier', optimize_weights=False)
+	(outputs, csph_out) = csph1DGlobal2DLocal4xDown_obj(inputs)
+	(simple_hist_output, simple_hist_csph) = csph1DGlobal2DLocal4xDown_obj(simple_hist_input)
+	print("CSPH1DGlobal2DLocalLayer4xDown Layer:")
+	print("    inputs1: {}".format(inputs.shape))
+	print("    outputs1: {}".format(outputs.shape))
+	print("    inputs2: {}".format(simple_hist_input.shape))
+	print("    outputs2: {}".format(simple_hist_output.shape))
 

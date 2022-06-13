@@ -14,7 +14,7 @@ from model_ddfn_64_B10_CGNL_ori import LITDeepBoosting, LITPlainDeepBoosting
 from model_ddfn_64_B10_CGNL_ori_old import LITDeepBoostingOriginal
 from model_ddfn_64_B10_CGNL_ori_depth2depth import LITDeepBoostingDepth2Depth, LITPlainDeepBoostingDepth2Depth
 from model_ddfn_64_B10_CGNL_ori_CSPH1D import LITPlainDeepBoostingCSPH1D
-from model_ddfn_64_B10_CGNL_ori_CSPH1D2D import LITPlainDeepBoostingCSPH1D2D
+from model_ddfn_64_B10_CGNL_ori_CSPH1D2D import LITPlainDeepBoostingCSPH1D2D, LITPlainDeepBoostingCSPH1DGlobal2DLocal4xDown
 from model_ddfn_64_B10_CGNL_ori_compressive import LITDeepBoostingCompressive, LITDeepBoostingCompressiveWithBias
 from model_ddfn2D_depth2depth import LITPlainDeepBoosting2DDepth2Depth01Inputs, LITPlainDeepBoosting2DPhasor2Depth, LITPlainDeepBoosting2DPhasor2Depth,LITPlainDeepBoosting2DPhasor2Depth7Freqs,LITPlainDeepBoosting2DPhasor2Depth1Freq
 from model_ddfn2D_depth2depth2hist import LITPlainDeepBoosting2DDepth2Depth2Hist01Inputs
@@ -73,6 +73,17 @@ def init_model_from_id(cfg, irf=None):
 						, init = cfg.model.model_params.init
 						, k = cfg.model.model_params.k
 						, down_factor = cfg.model.model_params.down_factor
+						, num_bins = cfg.dataset.nt
+						, h_irf = irf
+						)
+	elif(cfg.model.model_id == 'DDFN_C64B10_CSPH1DGlobal2DLocal4xDown'):
+		lit_model = LITPlainDeepBoostingCSPH1DGlobal2DLocal4xDown(
+						init_lr = cfg.train_params.lri
+						, lr_decay_gamma = cfg.train_params.lr_decay_gamma
+						, p_tv = cfg.train_params.p_tv
+						, in_channels = cfg.model.model_params.in_channels
+						, init = cfg.model.model_params.init
+						, k = cfg.model.model_params.k
 						, num_bins = cfg.dataset.nt
 						, h_irf = irf
 						)
@@ -199,6 +210,8 @@ def load_model_from_ckpt(model_name, ckpt_id, logger):
 		model = LITPlainDeepBoostingCSPH1D.load_from_checkpoint(ckpt_fpath)
 	elif('DDFN_C64B10_CSPH1D2D/' in model_name):
 		model = LITPlainDeepBoostingCSPH1D2D.load_from_checkpoint(ckpt_fpath)
+	elif('DDFN_C64B10_CSPH1DGlobal2DLocal4xDown/' in model_name):
+		model = LITPlainDeepBoostingCSPH1DGlobal2DLocal4xDown.load_from_checkpoint(ckpt_fpath)
 	elif(model_name == 'DDFN_C64B10_NL_Compressive'):
 		model = LITDeepBoostingCompressive.load_from_checkpoint(ckpt_fpath)
 	elif(model_name == 'DDFN_C64B10_NL_CompressiveWithBias'):

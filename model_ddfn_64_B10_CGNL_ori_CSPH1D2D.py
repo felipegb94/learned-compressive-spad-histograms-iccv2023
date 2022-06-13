@@ -7,7 +7,7 @@ breakpoint = debugger.set_trace
 
 #### Local imports
 from model_ddfn_64_B10_CGNL_ori import LITPlainDeepBoosting
-from csph_layers import CSPH1D2DLayer
+from csph_layers import CSPH1D2DLayer, CSPH1DGlobal2DLocalLayer4xDown
 
 
 
@@ -26,6 +26,27 @@ class LITPlainDeepBoostingCSPH1D2D(LITPlainDeepBoosting):
 		# Init parent class
 		super(LITPlainDeepBoostingCSPH1D2D, self).__init__(init_lr=init_lr,p_tv=p_tv,lr_decay_gamma=lr_decay_gamma,in_channels=in_channels)
 		self.csph1D2D_layer = CSPH1D2DLayer(k = k, down_factor=down_factor, num_bins = num_bins, init=init, h_irf=h_irf)
+
+	def forward(self, x):
+		(zncc_scores, B) = self.csph1D2D_layer(x.squeeze(1))
+		# use forward for inference/predictions
+		out = self.backbone_net(zncc_scores.unsqueeze(1))
+		return out
+
+class LITPlainDeepBoostingCSPH1DGlobal2DLocal4xDown(LITPlainDeepBoosting):
+	def __init__(self 
+		, init_lr = 1e-4
+		, p_tv = 1e-5 
+		, lr_decay_gamma = 0.9
+		, in_channels=1
+		, k=16
+		, num_bins=1024
+		, init = 'HybridGrayFourier'
+		, h_irf = None
+		):
+		# Init parent class
+		super(LITPlainDeepBoostingCSPH1DGlobal2DLocal4xDown, self).__init__(init_lr=init_lr,p_tv=p_tv,lr_decay_gamma=lr_decay_gamma,in_channels=in_channels)
+		self.csph1D2D_layer = CSPH1DGlobal2DLocalLayer4xDown(k = k, num_bins = num_bins, init=init, h_irf=h_irf)
 
 	def forward(self, x):
 		(zncc_scores, B) = self.csph1D2D_layer(x.squeeze(1))

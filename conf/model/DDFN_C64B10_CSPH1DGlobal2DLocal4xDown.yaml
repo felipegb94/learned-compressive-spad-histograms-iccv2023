@@ -1,0 +1,14 @@
+# Plain Deep Boosting Model from Peng et al., 2020
+
+# Model ID is used to select the correct model objcet
+model_id: DDFN_C64B10_CSPH1DGlobal2DLocal4xDown
+model_params:
+  in_channels: 1
+  # init: HybridGrayFourier
+  init: TruncFourier
+  # init: CoarseHist
+  k: 128
+
+# Model name is used for saving results
+model_name: ${.model_id}/k${.model_params.k}_down4_${.model_params.init}
+data_loss_id: kldiv
