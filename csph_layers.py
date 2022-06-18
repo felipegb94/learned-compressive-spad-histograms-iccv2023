@@ -1,5 +1,7 @@
 #### Standard Library Imports
 import os
+from pickletools import optimize
+from typing import OrderedDict
 
 #### Library imports
 import numpy as np
@@ -41,6 +43,27 @@ def norm_vec(v, dim=-1):
 	n_v = v / (torch.linalg.norm(v, ord=2, dim=dim, keepdim=True) + 1e-6)
 	return n_v
 
+def get_temporal_cmat_init(k, num_bins, init_id, h_irf=None):
+	if(init_id == 'TruncFourier'):
+		coding_obj = TruncatedFourierCoding(num_bins, n_codes=k, include_zeroth_harmonic=False, h_irf=h_irf, account_irf=True)
+		Cmat_init = coding_obj.C
+	elif(init_id == 'HybridGrayFourier'):
+		coding_obj = HybridGrayBasedFourierCoding(num_bins, n_codes=k, include_zeroth_harmonic=False, h_irf=h_irf, account_irf=True)
+		Cmat_init = coding_obj.C
+	elif(init_id == 'HybridFourierGray'):
+		coding_obj = HybridFourierBasedGrayCoding(num_bins, n_codes=k, h_irf=h_irf, account_irf=True)
+		Cmat_init = coding_obj.C
+	elif(init_id == 'CoarseHist'):
+		coding_obj = GatedCoding(num_bins, n_gates=k, h_irf=h_irf, account_irf=True)
+		Cmat_init = coding_obj.C
+	elif(init_id == 'Rand'):
+		Cmat_init = np.random.randn(num_bins, k)*0.01
+		Cmat_init[Cmat_init >= 1] = 1
+		Cmat_init[Cmat_init <= -1] = -1
+	else:
+		assert(False), "Invalid CSPH1D init ID"
+	return Cmat_init
+
 class CSPH1DGlobalEncodingLayer(nn.Module):
 	def __init__(self, k=2, num_bins=1024, init='TruncFourier', h_irf=None, optimize_weights=False):
 		# Init parent class
@@ -51,21 +74,7 @@ class CSPH1DGlobalEncodingLayer(nn.Module):
 		# Pad IRF with zeros if needed
 		self.h_irf = pad_h_irf(h_irf, num_bins=num_bins) # This is used to select the frequencies that will be used in HybridGrayFourier
 
-		if(init == 'TruncFourier'):
-			coding_obj = TruncatedFourierCoding(num_bins, n_codes=k, include_zeroth_harmonic=False, h_irf=self.h_irf, account_irf=True)
-			Cmat_init = coding_obj.C
-		elif(init == 'HybridGrayFourier'):
-			coding_obj = HybridGrayBasedFourierCoding(num_bins, n_codes=k, include_zeroth_harmonic=False, h_irf=self.h_irf, account_irf=True)
-			Cmat_init = coding_obj.C
-		elif(init == 'CoarseHist'):
-			coding_obj = GatedCoding(num_bins, n_gates=k, h_irf=self.h_irf, account_irf=True)
-			Cmat_init = coding_obj.C
-		elif(init == 'Rand'):
-			Cmat_init = np.random.randn(num_bins, k)*0.01
-			Cmat_init[Cmat_init >= 1] = 1
-			Cmat_init[Cmat_init <= -1] = -1
-		else:
-			assert(False), "Invalid CSPH1D init ID"
+		Cmat_init = get_temporal_cmat_init(k=k, num_bins=num_bins, init_id=init, h_irf=self.h_irf)
 		
 		# Define a 1x1 convolution that does a dot product on the time axis (i.e., dim=-3)
 		self.Cmat1D = torch.nn.Conv2d( in_channels=self.num_bins 
@@ -215,6 +224,90 @@ class CSPH1DGlobal2DLocalLayer4xDown(nn.Module):
 		B4 = self.csph1D_decoding(B3_2)
 		return B4, B2
 
+class CSPHEncodingLayer(nn.Module):
+	def __init__(self, k=2, num_bins=1024, 
+					tblock_init='TruncFourier', h_irf=None, optimize_tdim_codes=False,
+					nt_blocks=1, spatial_block_dims=(1, 1), 
+					encoding_type='separable'
+				):
+		# Init parent class
+		super(CSPHEncodingLayer, self).__init__()
+		# Validate some input params
+		assert((num_bins % nt_blocks) == 0), "Number of bins should be divisible by number of time blocks"
+		assert(len(spatial_block_dims) == 2), "Spatial dims should be a tuple of size 2"
+
+		self.num_bins = num_bins
+		self.k = k
+		self.tblock_init=tblock_init
+		self.optimize_tdim_codes=optimize_tdim_codes
+		self.nt_blocks=nt_blocks
+		self.tblock_len = int(self.num_bins / nt_blocks) 
+		self.spatial_block_dims=spatial_block_dims
+		# Pad IRF with zeros if needed
+		self.h_irf = pad_h_irf(h_irf, num_bins=num_bins) # This is used to select the frequencies that will be used in HybridGrayFourier
+		# Get initialization matrix for the temporal dimension block
+		self.Cmat_tdim_init = get_temporal_cmat_init(k=k, num_bins=self.tblock_len, init_id=tblock_init, h_irf=self.h_irf)
+		
+		# Initialize the encoding layer
+		self.encoding_type = encoding_type
+		self.encoding_kernel_dims = (self.tblock_len,) +  self.spatial_block_dims
+		self.encoding_kernel_stride = self.encoding_kernel_dims
+		if(self.encoding_type == 'separable'):
+			# Separable convolution encoding
+			# First, define a tblock_lenx1x1 convolution kernel
+			self.Cmat_tdim = torch.nn.Conv3d( in_channels=1
+										, out_channels=self.k 
+										, kernel_size=(self.tblock_len, 1, 1) 
+										, stride=(self.tblock_len, 1, 1)
+										, padding=0, dilation = 1, bias=False 
+			)
+			# init weights for tdim layer
+			self.Cmat_tdim.weight.data = torch.from_numpy(self.Cmat_tdim_init.transpose()[:,np.newaxis,:,np.newaxis,np.newaxis]).type(self.Cmat_tdim.weight.data.dtype)
+
+			self.Cmat_xydim = torch.nn.Conv3d( in_channels=self.k
+										, out_channels=self.k 
+										, kernel_size=(1,) + self.spatial_block_dims
+										, stride=(1,) + self.spatial_block_dims
+										, padding=0, dilation=1, bias=False 
+										, groups=self.k
+			)
+
+			self.csph_coding_layer = nn.Sequential( OrderedDict([
+														('Cmat_tdim', self.Cmat_tdim)
+														, ('Cmat_xydim', self.Cmat_xydim)
+			]))
+			expected_num_params = (self.k*self.tblock_len) + (self.k*self.spatial_block_dims[0]*self.spatial_block_dims[1])
+		elif(self.encoding_type == 'full'):
+			self.Cmat_txydim = torch.nn.Conv3d( in_channels=1
+										, out_channels=self.k 
+										, kernel_size=self.encoding_kernel_dims
+										, stride=self.encoding_kernel_stride
+										, padding=0, dilation = 1, bias=False 
+			)
+			self.csph_coding_layer = nn.Sequential( OrderedDict([
+														('Cmat_txydim', self.Cmat_txydim)
+			]))
+			expected_num_params = self.k*self.encoding_kernel_dims[0]*self.encoding_kernel_dims[1]*self.encoding_kernel_dims[2]
+		else:
+			raise ValueError('Invalid encoding_type ({}) given as input.'.format(self.encoding_type))
+
+		print("Initialization a CSPH Encoding Layer:")
+		print("    - Encoding Type: {}".format(self.encoding_type))
+		print("    - Encoding Kernel Dims: {}".format(self.encoding_kernel_dims))
+		num_params = sum(p.numel() for p in self.csph_coding_layer.parameters())
+		print("    - Num CSPH Params: {}".format(num_params))
+		assert(expected_num_params == num_params), "Expected number of params does not match the coding layer params"
+		self.Cmat_size = num_params
+
+
+	def forward(self, inputs):
+		'''
+			Expected input dims == (Batch, Nt, Nr, Nc)
+		'''
+		## Compute compressive histogram
+		B = self.csph_coding_layer(inputs)
+		return B
+
 if __name__=='__main__':
 	import matplotlib.pyplot as plt
 
@@ -290,4 +383,28 @@ if __name__=='__main__':
 	print("    outputs1: {}".format(outputs.shape))
 	print("    inputs2: {}".format(simple_hist_input.shape))
 	print("    outputs2: {}".format(simple_hist_output.shape))
+
+	## CSPHEncodingLayer Coding Object
+	init_params = ['HybridGrayFourier','CoarseHist','TruncFourier']
+	k = 32
+	optimize_tdim_codes = True
+	nt_blocks = 4
+	spatial_block_dims = [(1,1), (2,2), (4,4)]				
+	encoding_types=[ 'full', 'separable']
+	for init_param in init_params:
+		for spatial_block_dim in spatial_block_dims:
+			for encoding_type in encoding_types:
+				csph_layer_obj = CSPHEncodingLayer(k=k, num_bins=nt 
+												, tblock_init=init_param, optimize_tdim_codes=optimize_tdim_codes
+												, spatial_block_dims=spatial_block_dim, encoding_type=encoding_type
+												, nt_blocks=nt_blocks)
+				csph_out = csph_layer_obj(inputs.unsqueeze(1))
+
+	csph_layer_weights = csph_layer_obj.csph_coding_layer[0].weight.data.cpu().numpy()
+	# (simple_hist_output, simple_hist_csph) = csph1DGlobal2DLocal4xDown_obj(simple_hist_input)
+	print("CSPHEncodingLayer Layer:")
+	print("    inputs1: {}".format(inputs.unsqueeze(1).shape))
+	print("    outputs1: {}".format(csph_out.shape))
+	# print("    inputs2: {}".format(simple_hist_input.shape))
+	# print("    outputs2: {}".format(simple_hist_output.shape))
 
