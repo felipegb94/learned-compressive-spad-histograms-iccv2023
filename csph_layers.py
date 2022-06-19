@@ -227,14 +227,13 @@ class CSPH1DGlobal2DLocalLayer4xDown(nn.Module):
 class CSPHEncodingLayer(nn.Module):
 	def __init__(self, k=2, num_bins=1024, 
 					tblock_init='TruncFourier', h_irf=None, optimize_tdim_codes=False,
-					nt_blocks=1, spatial_block_dims=(1, 1), 
+					nt_blocks=1, spatial_down_factor=1, 
 					encoding_type='separable'
 				):
 		# Init parent class
 		super(CSPHEncodingLayer, self).__init__()
 		# Validate some input params
 		assert((num_bins % nt_blocks) == 0), "Number of bins should be divisible by number of time blocks"
-		assert(len(spatial_block_dims) == 2), "Spatial dims should be a tuple of size 2"
 
 		self.num_bins = num_bins
 		self.k = k
@@ -242,7 +241,7 @@ class CSPHEncodingLayer(nn.Module):
 		self.optimize_tdim_codes=optimize_tdim_codes
 		self.nt_blocks=nt_blocks
 		self.tblock_len = int(self.num_bins / nt_blocks) 
-		self.spatial_block_dims=spatial_block_dims
+		self.spatial_down_factor=spatial_down_factor
 		# Pad IRF with zeros if needed
 		self.h_irf = pad_h_irf(h_irf, num_bins=num_bins) # This is used to select the frequencies that will be used in HybridGrayFourier
 		# Get initialization matrix for the temporal dimension block
@@ -250,7 +249,7 @@ class CSPHEncodingLayer(nn.Module):
 		
 		# Initialize the encoding layer
 		self.encoding_type = encoding_type
-		self.encoding_kernel_dims = (self.tblock_len,) +  self.spatial_block_dims
+		self.encoding_kernel_dims = (self.tblock_len, self.spatial_down_factor, self.spatial_down_factor)
 		self.encoding_kernel_stride = self.encoding_kernel_dims
 		if(self.encoding_type == 'separable'):
 			# Separable convolution encoding
@@ -266,8 +265,8 @@ class CSPHEncodingLayer(nn.Module):
 
 			self.Cmat_xydim = torch.nn.Conv3d( in_channels=self.k
 										, out_channels=self.k 
-										, kernel_size=(1,) + self.spatial_block_dims
-										, stride=(1,) + self.spatial_block_dims
+										, kernel_size=(1, self.spatial_down_factor, self.spatial_down_factor)
+										, stride=(1, self.spatial_down_factor, self.spatial_down_factor)
 										, padding=0, dilation=1, bias=False 
 										, groups=self.k
 			)
@@ -276,7 +275,7 @@ class CSPHEncodingLayer(nn.Module):
 														('Cmat_tdim', self.Cmat_tdim)
 														, ('Cmat_xydim', self.Cmat_xydim)
 			]))
-			expected_num_params = (self.k*self.tblock_len) + (self.k*self.spatial_block_dims[0]*self.spatial_block_dims[1])
+			expected_num_params = (self.k*self.tblock_len) + (self.k*self.spatial_down_factor*self.spatial_down_factor)
 		elif(self.encoding_type == 'full'):
 			self.Cmat_txydim = torch.nn.Conv3d( in_channels=1
 										, out_channels=self.k 
@@ -307,6 +306,50 @@ class CSPHEncodingLayer(nn.Module):
 		## Compute compressive histogram
 		B = self.csph_coding_layer(inputs)
 		return B
+
+class CSPHDecodingLayer(nn.Module):
+	def __init__(self, k, num_bins, nt_blocks, up_factor_xydim):
+		super(CSPHDecodingLayer, self).__init__()
+
+		self.num_bins = num_bins
+		self.k = k
+		self.nt_blocks=nt_blocks
+		self.tblock_len = int(self.num_bins / nt_blocks) 
+		self.up_factor_xydim = up_factor_xydim
+		self.Nt = self.num_bins
+
+		## Create temporal decoding block
+		self.temporal_decoding_block = nn.Sequential(
+											nn.Conv3d(in_channels=self.k, out_channels=self.tblock_len, kernel_size=1, bias=True),
+											nn.ReLU(inplace=True)
+											)
+		 
+
+		## Apply a 1x1x1 conv block for each
+		decoding_block_1x1 = nn.Conv2d(in_channels=self.Nt, out_channels=self.Nt*self.up_factor_xydim*self.up_factor_xydim, kernel_size=1, bias=True)
+		self.spatial_decoding_block = nn.Sequential(decoding_block_1x1, 
+													nn.ReLU(inplace=True),
+													nn.PixelShuffle(self.up_factor_xydim))
+
+
+	def forward(self, inputs):
+		'''
+			Expected input dims == (Batch, k, Mt, Mr, Mc)
+		'''
+		## Spatial upsampled output
+		(batch, k_codes, Mt, Mr, Mc) = inputs.shape
+		(Nr, Nc) = (self.up_factor_xydim*Mr, self.up_factor_xydim*Mc)
+		## Dims: Batch, Nt/Mt, Mt, Mr, Mc
+		temporally_decoded_out = self.temporal_decoding_block(inputs)
+
+		## Reshape appropriately so that we stack the channel dimensions (a copy needs to be made due to the reshape that is needed)
+		# See test in the main function that shows why we want this type of reshape
+		temporally_decoded_out_reshaped = torch.permute(temporally_decoded_out, dims=(0, 2, 1, 3, 4)).reshape((batch, self.Nt, Mr, Mc))
+
+		## Reshape to merge the time and channel dimension
+		decoded_out = self.spatial_decoding_block(temporally_decoded_out_reshaped) 
+
+		return decoded_out.unsqueeze(1)
 
 if __name__=='__main__':
 	import matplotlib.pyplot as plt
@@ -389,14 +432,14 @@ if __name__=='__main__':
 	k = 32
 	optimize_tdim_codes = True
 	nt_blocks = 4
-	spatial_block_dims = [(1,1), (2,2), (4,4)]				
+	spatial_down_factor = [1, 2, 4]				
 	encoding_types=[ 'full', 'separable']
 	for init_param in init_params:
-		for spatial_block_dim in spatial_block_dims:
+		for spatial_block_dim in spatial_down_factor:
 			for encoding_type in encoding_types:
 				csph_layer_obj = CSPHEncodingLayer(k=k, num_bins=nt 
 												, tblock_init=init_param, optimize_tdim_codes=optimize_tdim_codes
-												, spatial_block_dims=spatial_block_dim, encoding_type=encoding_type
+												, spatial_down_factor=spatial_block_dim, encoding_type=encoding_type
 												, nt_blocks=nt_blocks)
 				csph_out = csph_layer_obj(inputs.unsqueeze(1))
 
@@ -407,4 +450,32 @@ if __name__=='__main__':
 	print("    outputs1: {}".format(csph_out.shape))
 	# print("    inputs2: {}".format(simple_hist_input.shape))
 	# print("    outputs2: {}".format(simple_hist_output.shape))
+
+	csph_decoding_obj = CSPHDecodingLayer(k=k, num_bins=nt, nt_blocks=csph_layer_obj.nt_blocks, up_factor_xydim=csph_layer_obj.spatial_down_factor)
+	csph_decoded_out = csph_decoding_obj(csph_out)
+	print("CSPHDecodingLayer Layer:")
+	print("    inputs1: {}".format(csph_out.shape))
+	print("    outputs1: {}".format(csph_decoded_out.shape))
+
+	## Test output of csph 
+	temporally_decoded_csph = csph_decoding_obj.temporal_decoding_block(csph_out)
+	(batch, tblock_len, Mt, Mr, Mc) = temporally_decoded_csph.shape
+	# temporally_decoded_csph_reshaped = temporally_decoded_csph.view((batch, tblock_len*Mt, Mr, Mc))
+	# temporally_decoded_csph_reshaped = torch.reshape(temporally_decoded_csph, (batch, tblock_len*Mt, Mr, Mc))
+	# temporally_decoded_csph_reshaped = torch.reshape(temporally_decoded_csph, (batch, Mt, tblock_len, Mr, Mc)).reshape()
+	temporally_decoded_csph_reshaped = torch.permute(temporally_decoded_csph, dims=(0, 2, 1, 3, 4)).reshape((batch, tblock_len*Mt, Mr, Mc))
+
+	for i in range(Mt):
+		start_idx = i*tblock_len
+		end_idx = start_idx + tblock_len
+		
+		block1 = temporally_decoded_csph[:, :, i, :, :]
+		block2 = temporally_decoded_csph_reshaped[:, start_idx:end_idx, :, :]
+		abs_diff = torch.abs(block1-block2)
+		print("Diff Stats:")
+		print("    Max = {}".format(abs_diff.flatten().max()))
+		print("    Min = {}".format(abs_diff.flatten().min()))
+		print("    Mean = {}".format(abs_diff.flatten().mean()))
+		
+		
 

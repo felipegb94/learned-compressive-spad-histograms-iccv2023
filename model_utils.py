@@ -13,6 +13,7 @@ breakpoint = debugger.set_trace
 from model_ddfn_64_B10_CGNL_ori import LITDeepBoosting, LITPlainDeepBoosting
 from model_ddfn_64_B10_CGNL_ori_old import LITDeepBoostingOriginal
 from model_ddfn_64_B10_CGNL_ori_depth2depth import LITDeepBoostingDepth2Depth, LITPlainDeepBoostingDepth2Depth
+from model_ddfn_64_B10_CGNL_ori_CSPH import LITPlainDeepBoostingCSPH
 from model_ddfn_64_B10_CGNL_ori_CSPH1D import LITPlainDeepBoostingCSPH1D
 from model_ddfn_64_B10_CGNL_ori_CSPH1D2D import LITPlainDeepBoostingCSPH1D2D, LITPlainDeepBoostingCSPH1DGlobal2DLocal4xDown
 from model_ddfn_64_B10_CGNL_ori_compressive import LITDeepBoostingCompressive, LITDeepBoostingCompressiveWithBias
@@ -52,6 +53,21 @@ def init_model_from_id(cfg, irf=None):
 						, lr_decay_gamma = cfg.train_params.lr_decay_gamma
 						, p_tv = cfg.train_params.p_tv
 						, in_channels = cfg.model.model_params.in_channels
+						)
+	elif(cfg.model.model_id == 'DDFN_C64B10_CSPH'):
+		lit_model = LITPlainDeepBoostingCSPH(
+						init_lr = cfg.train_params.lri
+						, lr_decay_gamma = cfg.train_params.lr_decay_gamma
+						, p_tv = cfg.train_params.p_tv
+						, in_channels = cfg.model.model_params.in_channels
+						, k = cfg.model.model_params.k
+						, spatial_down_factor = cfg.model.model_params.spatial_down_factor
+						, nt_blocks = cfg.model.model_params.nt_blocks
+						, tblock_init = cfg.model.model_params.tblock_init
+						, optimize_tdim_codes = cfg.model.model_params.optimize_tdim_codes
+						, encoding_type = cfg.model.model_params.encoding_type
+						, num_bins = cfg.dataset.nt
+						, h_irf = irf
 						)
 	elif(cfg.model.model_id == 'DDFN_C64B10_CSPH1D'):
 		lit_model = LITPlainDeepBoostingCSPH1D(
