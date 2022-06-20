@@ -116,8 +116,7 @@ train_dataset: nyuv2_64x64x1024_80ps
 # ## CSPH1D2D (learned) K=64 HybridGrayFourier (No TV) 
 # model_name: DDFN_C64B10_CSPH1D2D/k64_down2_HybridGrayFourier/loss-kldiv_tv-0.0
 # model_dirpath: outputs/nyuv2_64x64x1024_80ps/test_csph/${.model_name}/2022-05-24_220441
-# # ckpt_id: epoch=06-step=24240-avgvalrmse=0.0188 # 
-# ckpt_id: epoch=19-step=67528-avgvalrmse=0.0168
+# ckpt_id: epoch=19-step=67528-avgvalrmse=0.0168 # 0.02109
 
 # ## CSPH1D2D (Learned Down, ZNCC Up) K=128 HybridGrayFourier (No TV) 
 # model_name: DDFN_C64B10_CSPH1D2D/k128_down2_HybridGrayFourier/loss-kldiv_tv-0.0
@@ -130,11 +129,21 @@ train_dataset: nyuv2_64x64x1024_80ps
 # model_dirpath: outputs/nyuv2_64x64x1024_80ps/test_csph/${.model_name}/2022-06-05_181812
 # ckpt_id: epoch=19-step=67528-avgvalrmse=0.0163 # 0.0169 
 
-## CSPH1DGlobal2DLocal4xDown (learned) K=128 TruncFourir (No TV) 
-model_name: DDFN_C64B10_CSPH1DGlobal2DLocal4xDown/k128_down4_TruncFourier/loss-kldiv_tv-0.0
-model_dirpath: outputs/nyuv2_64x64x1024_80ps/test_csph/${.model_name}/2022-06-06_131240
-ckpt_id: epoch=16-step=58870-avgvalrmse=0.0262 # 0.0398
+# ## CSPH1DGlobal2DLocal4xDown (learned) K=128 TruncFourir (No TV) 
+# model_name: DDFN_C64B10_CSPH1DGlobal2DLocal4xDown/k128_down4_TruncFourier/loss-kldiv_tv-0.0
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/test_csph/${.model_name}/2022-06-06_131240
+# ckpt_id: epoch=16-step=58870-avgvalrmse=0.0262 # 0.0398
 
+
+# ## K=64 CSPH Separable 2x2x1024 (learned spatial, learned up) HybridGrayFourier (No TV) 
+# model_name: DDFN_C64B10_CSPH/k64_down2_Mt1_HybridGrayFourier-opt-False/loss-kldiv_tv-0.0
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/test_csph/${.model_name}/2022-06-18_183013
+# ckpt_id: epoch=18-step=64065-avgvalrmse=0.0161 # 0.01964203268289566
+
+## K=128 CSPH Separable 4x4x1024 (learned spatial, learned up) TruncFourier (No TV) 
+model_name: DDFN_C64B10_CSPH/k128_down4_Mt1_TruncFourier-opt-False/loss-kldiv_tv-0.0
+model_dirpath: outputs/nyuv2_64x64x1024_80ps/test_csph/${.model_name}/2022-06-18_203447
+ckpt_id: epoch=12-step=45018-avgvalrmse=0.0203 #
 
 # ## 3D DB Plain CSPH1D Model (1e-5 TV) -- With seed 1234 and 0th harmonic
 # model_name: DDFN_C64B10_CSPH1D/k16_HybridGrayFourier/loss-kldiv_tv-1e-05
