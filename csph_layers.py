@@ -243,7 +243,7 @@ class CSPHEncodingLayer(nn.Module):
 		self.tblock_len = int(self.num_bins / nt_blocks) 
 		self.spatial_down_factor=spatial_down_factor
 		# Pad IRF with zeros if needed
-		self.h_irf = pad_h_irf(h_irf, num_bins=num_bins) # This is used to select the frequencies that will be used in HybridGrayFourier
+		self.h_irf = pad_h_irf(h_irf, num_bins=self.tblock_len) # This is used to select the frequencies that will be used in HybridGrayFourier
 		# Get initialization matrix for the temporal dimension block
 		self.Cmat_tdim_init = get_temporal_cmat_init(k=k, num_bins=self.tblock_len, init_id=tblock_init, h_irf=self.h_irf)
 		
