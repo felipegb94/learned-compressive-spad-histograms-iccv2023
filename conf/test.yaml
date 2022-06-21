@@ -140,16 +140,21 @@ train_dataset: nyuv2_64x64x1024_80ps
 # model_dirpath: outputs/nyuv2_64x64x1024_80ps/test_csph/${.model_name}/2022-06-18_183013
 # ckpt_id: epoch=18-step=64065-avgvalrmse=0.0161 # 0.01964203268289566
 
-## K=128 CSPH Separable 4x4x1024 (learned spatial, learned up) TruncFourier (No TV) 
-model_name: DDFN_C64B10_CSPH/k128_down4_Mt1_TruncFourier-opt-False/loss-kldiv_tv-0.0
-model_dirpath: outputs/nyuv2_64x64x1024_80ps/test_csph/${.model_name}/2022-06-18_203447
-ckpt_id: epoch=12-step=45018-avgvalrmse=0.0203 #
+# ## 128x compression K=128 CSPH Separable 4x4x1024 (learned spatial, learned up) TruncFourier (No TV) 
+# model_name: DDFN_C64B10_CSPH/k128_down4_Mt1_TruncFourier-opt-False/loss-kldiv_tv-0.0
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/test_csph/${.model_name}/2022-06-18_203447
+# ckpt_id: epoch=17-step=62333-avgvalrmse=0.0197 # 0.0247
+
+
+# ## 128x compression K=64 CSPH Separable 4x4x512 (learned spatial, learned up) TruncFourier (No TV) 
+model_name: DDFN_C64B10_CSPH/k64_down4_Mt2_TruncFourier-opt-False/loss-kldiv_tv-0.0
+model_dirpath: outputs/nyuv2_64x64x1024_80ps/test_csph/${.model_name}/2022-06-20_111348
+ckpt_id: epoch=13-step=46750-avgvalrmse=0.0209 # 0.0254
 
 # ## 3D DB Plain CSPH1D Model (1e-5 TV) -- With seed 1234 and 0th harmonic
 # model_name: DDFN_C64B10_CSPH1D/k16_HybridGrayFourier/loss-kldiv_tv-1e-05
 # model_dirpath: outputs/nyuv2_64x64x1024_80ps/debug/${.model_name}/2022-05-13_203112
 # ckpt_id: epoch=06-step=22509-avgvalrmse=0.0308
-
 
 # ## Compressive --> Full trained model with gradient decay
 # model_name: DDFN_C64B10_NL_Compressive
@@ -247,8 +252,8 @@ ckpt_id: epoch=12-step=45018-avgvalrmse=0.0203 #
 params:
   gpu_num: 1
   batch_size: 1
-  num_workers: 8
-  cuda: true
+  num_workers: 4
+  cuda: false
   noise_idx: null
   test_datalist_fpath: ${io_dirpaths.datalists_dirpath}/${dataset.test_datalist_fname}
 
