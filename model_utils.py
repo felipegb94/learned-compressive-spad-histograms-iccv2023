@@ -212,12 +212,17 @@ def init_model_from_id(cfg, irf=None):
 
 	return lit_model
 
-def load_model_from_ckpt(model_name, ckpt_id, logger):
-	ckpt_fpath = os.path.join("checkpoints", ckpt_id)
-	print(os.listdir("checkpoints/"))
+def load_model_from_ckpt(model_name, ckpt_id, logger=None, model_dirpath=None):
+	if(model_dirpath is None):
+		model_dirpath = './'
+	ckpt_fpath = os.path.join(model_dirpath, 'checkpoints/', ckpt_id)
+	print(os.listdir(os.path.join(model_dirpath, "checkpoints/")))
 	print(os.getcwd())
-	assert(os.path.exists(os.path.join('checkpoints/',ckpt_id))), "Input checkpoint does not exist ({})".format(ckpt_id)
-	logger.info("Loading {} model".format(model_name))
+	assert(os.path.exists(ckpt_fpath)), "Input checkpoint does not exist ({})".format(ckpt_id)
+	if(logger is None):
+		print("Loading {} model".format(model_name))
+	else:
+		logger.info("Loading {} model".format(model_name))
 	if(model_name == 'DDFN_C64B10_NL_Depth2Depth'):
 		model = LITDeepBoostingDepth2Depth.load_from_checkpoint(ckpt_fpath)
 	elif(model_name == 'DDFN_C64B10_Depth2Depth'):

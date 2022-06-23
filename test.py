@@ -60,7 +60,7 @@ def test(cfg):
 		logger.info("Loading last.ckpt because no ckpt was given")
 		ckpt_id = 'last.ckpt'
 
-	model, ckpt_fpath = load_model_from_ckpt(cfg.model_name, ckpt_id, logger)
+	model, ckpt_fpath = load_model_from_ckpt(cfg.model_name, ckpt_id, logger=logger)
 
 	if(cfg.params.cuda):
 		trainer = pl.Trainer(accelerator="gpu", devices=1, logger=tb_logger, callbacks=callbacks) # 

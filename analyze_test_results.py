@@ -60,6 +60,7 @@ if __name__=='__main__':
     experiment_name = 'db3D_csph1Dk16_comparissons'
     experiment_name = 'csphseparable_vs_csph1D2D_comparissons'
     experiment_name = '64xcompression_csphseparable_vs_csph1D2D_comparissons'
+    experiment_name = '128xcompression_csphseparable_comparissons'
 
     out_dirpath = os.path.join('./results/week_2022-06-20/test_results', experiment_name)
     os.makedirs(out_dirpath, exist_ok=True)
@@ -71,9 +72,10 @@ if __name__=='__main__':
     sbr_params = ['2_2','2_10','2_50','5_2','5_10','5_50','10_2','10_10','10_50']
 
     scene_ids = ['spad_Art']
+    # # # scene_ids = ['spad_Books']
     # # scene_ids = ['spad_Books']
-    # scene_ids = ['spad_Books']
     # scene_ids = ['spad_Reindeer']
+    # scene_ids = ['spad_Plastic']
     sbr_params = ['10_10']
 
     test_set_id = 'test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
@@ -86,8 +88,10 @@ if __name__=='__main__':
     db3D_d2d_result_dirpath = os.path.join('outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_Depth2Depth/2022-05-02_085659/', test_set_id)
     db3D_d2d_tv0_result_dirpath = os.path.join('outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_Depth2Depth/loss-kldiv_tv-0.0/2022-05-07_171658/', test_set_id)
     db3D_csphk64_separable2x2x1024_grayfour_tv0_result_dirpath = os.path.join('outputs/nyuv2_64x64x1024_80ps/test_csph/DDFN_C64B10_CSPH/k64_down2_Mt1_HybridGrayFourier-opt-False/loss-kldiv_tv-0.0/2022-06-18_183013/', test_set_id)
+    db3D_csphk256_separable4x4x1024_truncfour_tv0_result_dirpath = os.path.join('outputs/nyuv2_64x64x1024_80ps/test_csph/DDFN_C64B10_CSPH/k256_down4_Mt1_TruncFourier-opt-False/loss-kldiv_tv-0.0/2022-06-22_130057/', test_set_id)
     db3D_csphk128_separable4x4x1024_truncfour_tv0_result_dirpath = os.path.join('outputs/nyuv2_64x64x1024_80ps/test_csph/DDFN_C64B10_CSPH/k128_down4_Mt1_TruncFourier-opt-False/loss-kldiv_tv-0.0/2022-06-18_203447/', test_set_id)
     db3D_csphk64_separable4x4x512_truncfour_tv0_result_dirpath = os.path.join('outputs/nyuv2_64x64x1024_80ps/test_csph/DDFN_C64B10_CSPH/k64_down4_Mt2_TruncFourier-opt-False/loss-kldiv_tv-0.0/2022-06-20_111348/', test_set_id)
+    db3D_csphk32_separable2x2x1024_grayfour_tv0_result_dirpath = os.path.join('outputs/nyuv2_64x64x1024_80ps/test_csph/DDFN_C64B10_CSPH/k32_down2_Mt1_HybridGrayFourier-opt-False/loss-kldiv_tv-0.0/2022-06-21_230853/', test_set_id)
     db3D_csph1DGlobal2DLocal4xDown_k128_truncfour_tv0_result_dirpath = os.path.join('outputs/nyuv2_64x64x1024_80ps/test_csph/DDFN_C64B10_CSPH1DGlobal2DLocal4xDown/k128_down4_TruncFourier/loss-kldiv_tv-0.0/2022-06-06_131240/', test_set_id)
     db3D_csph1D2Dk128down2upzncc_grayfour_tv0_result_dirpath = os.path.join('outputs/nyuv2_64x64x1024_80ps/test_csph/DDFN_C64B10_CSPH1D2D/k128_down2_HybridGrayFourier/loss-kldiv_tv-0.0/2022-05-25_182959_zncc/', test_set_id)
     db3D_csph1D2Dk128down2_grayfour_tv0_result_dirpath = os.path.join('outputs/nyuv2_64x64x1024_80ps/test_csph/DDFN_C64B10_CSPH1D2D/k128_down2_HybridGrayFourier/loss-kldiv_tv-0.0/2022-06-05_181812/', test_set_id)
@@ -129,6 +133,8 @@ if __name__=='__main__':
     metrics_all['db3D_d2d'] = {};metrics_all['db3D_d2d']['rmse'] = [];metrics_all['db3D_d2d']['mae'] = [];metrics_all['db3D_d2d']['mse'] = [];
     metrics_all['db3D_d2d_tv0'] = {};metrics_all['db3D_d2d_tv0']['rmse'] = [];metrics_all['db3D_d2d_tv0']['mae'] = [];metrics_all['db3D_d2d_tv0']['mse'] = [];
     metrics_all['db3D_csphk64_separable2x2x1024_grayfour_tv0'] = {};metrics_all['db3D_csphk64_separable2x2x1024_grayfour_tv0']['rmse'] = [];metrics_all['db3D_csphk64_separable2x2x1024_grayfour_tv0']['mae'] = [];metrics_all['db3D_csphk64_separable2x2x1024_grayfour_tv0']['mse'] = [];
+    metrics_all['db3D_csphk256_separable4x4x1024_truncfour_tv0'] = {};metrics_all['db3D_csphk256_separable4x4x1024_truncfour_tv0']['rmse'] = [];metrics_all['db3D_csphk256_separable4x4x1024_truncfour_tv0']['mae'] = [];metrics_all['db3D_csphk256_separable4x4x1024_truncfour_tv0']['mse'] = [];
+    metrics_all['db3D_csphk32_separable2x2x1024_grayfour_tv0'] = {};metrics_all['db3D_csphk32_separable2x2x1024_grayfour_tv0']['rmse'] = [];metrics_all['db3D_csphk32_separable2x2x1024_grayfour_tv0']['mae'] = [];metrics_all['db3D_csphk32_separable2x2x1024_grayfour_tv0']['mse'] = [];
     metrics_all['db3D_csphk128_separable4x4x1024_truncfour_tv0'] = {};metrics_all['db3D_csphk128_separable4x4x1024_truncfour_tv0']['rmse'] = [];metrics_all['db3D_csphk128_separable4x4x1024_truncfour_tv0']['mae'] = [];metrics_all['db3D_csphk128_separable4x4x1024_truncfour_tv0']['mse'] = [];
     metrics_all['db3D_csphk64_separable4x4x512_truncfour_tv0'] = {};metrics_all['db3D_csphk64_separable4x4x512_truncfour_tv0']['rmse'] = [];metrics_all['db3D_csphk64_separable4x4x512_truncfour_tv0']['mae'] = [];metrics_all['db3D_csphk64_separable4x4x512_truncfour_tv0']['mse'] = [];
     metrics_all['db3D_csph1DGlobal2DLocal4xDown_k128_truncfour_tv0'] = {};metrics_all['db3D_csph1DGlobal2DLocal4xDown_k128_truncfour_tv0']['rmse'] = [];metrics_all['db3D_csph1DGlobal2DLocal4xDown_k128_truncfour_tv0']['mae'] = [];metrics_all['db3D_csph1DGlobal2DLocal4xDown_k128_truncfour_tv0']['mse'] = [];
@@ -194,6 +200,8 @@ if __name__=='__main__':
             (db3D_d2d_depths) = get_model_depths(model_result_dirpath=db3D_d2d_result_dirpath, scene_id=curr_scene_id, sbr_params=curr_sbr_params, num_bins=num_bins, tau=tau)
             (db3D_d2d_tv0_depths) = get_model_depths(model_result_dirpath=db3D_d2d_tv0_result_dirpath, scene_id=curr_scene_id, sbr_params=curr_sbr_params, num_bins=num_bins, tau=tau)
             (db3D_csphk64_separable2x2x1024_grayfour_tv0_depths) = get_model_depths(model_result_dirpath=db3D_csphk64_separable2x2x1024_grayfour_tv0_result_dirpath, scene_id=curr_scene_id, sbr_params=curr_sbr_params, num_bins=num_bins, tau=tau)
+            (db3D_csphk256_separable4x4x1024_truncfour_tv0_depths) = get_model_depths(model_result_dirpath=db3D_csphk256_separable4x4x1024_truncfour_tv0_result_dirpath, scene_id=curr_scene_id, sbr_params=curr_sbr_params, num_bins=num_bins, tau=tau)
+            (db3D_csphk32_separable2x2x1024_grayfour_tv0_depths) = get_model_depths(model_result_dirpath=db3D_csphk32_separable2x2x1024_grayfour_tv0_result_dirpath, scene_id=curr_scene_id, sbr_params=curr_sbr_params, num_bins=num_bins, tau=tau)
             (db3D_csphk128_separable4x4x1024_truncfour_tv0_depths) = get_model_depths(model_result_dirpath=db3D_csphk128_separable4x4x1024_truncfour_tv0_result_dirpath, scene_id=curr_scene_id, sbr_params=curr_sbr_params, num_bins=num_bins, tau=tau)
             (db3D_csphk64_separable4x4x512_truncfour_tv0_depths) = get_model_depths(model_result_dirpath=db3D_csphk64_separable4x4x512_truncfour_tv0_result_dirpath, scene_id=curr_scene_id, sbr_params=curr_sbr_params, num_bins=num_bins, tau=tau)
             (db3D_csph1DGlobal2DLocal4xDown_k128_truncfour_tv0_depths) = get_model_depths(model_result_dirpath=db3D_csph1DGlobal2DLocal4xDown_k128_truncfour_tv0_result_dirpath, scene_id=curr_scene_id, sbr_params=curr_sbr_params, num_bins=num_bins, tau=tau)
@@ -234,6 +242,8 @@ if __name__=='__main__':
             (db3D_d2d_rmse, db3D_d2d_mse, db3D_d2d_mae, db3D_d2d_abs_errs, db3D_d2d_perc_errs) = compute_error_metrics(gt_depths, db3D_d2d_depths)
             (db3D_d2d_tv0_rmse, db3D_d2d_tv0_mse, db3D_d2d_tv0_mae, db3D_d2d_tv0_abs_errs, db3D_d2d_tv0_perc_errs) = compute_error_metrics(gt_depths, db3D_d2d_tv0_depths)
             (db3D_csphk64_separable2x2x1024_grayfour_tv0_rmse, db3D_csphk64_separable2x2x1024_grayfour_tv0_mse, db3D_csphk64_separable2x2x1024_grayfour_tv0_mae, db3D_csphk64_separable2x2x1024_grayfour_tv0_abs_errs, db3D_csphk64_separable2x2x1024_grayfour_tv0_perc_errs) = compute_error_metrics(gt_depths, db3D_csphk64_separable2x2x1024_grayfour_tv0_depths)
+            (db3D_csphk256_separable4x4x1024_truncfour_tv0_rmse, db3D_csphk256_separable4x4x1024_truncfour_tv0_mse, db3D_csphk256_separable4x4x1024_truncfour_tv0_mae, db3D_csphk256_separable4x4x1024_truncfour_tv0_abs_errs, db3D_csphk256_separable4x4x1024_truncfour_tv0_perc_errs) = compute_error_metrics(gt_depths, db3D_csphk256_separable4x4x1024_truncfour_tv0_depths)
+            (db3D_csphk32_separable2x2x1024_grayfour_tv0_rmse, db3D_csphk32_separable2x2x1024_grayfour_tv0_mse, db3D_csphk32_separable2x2x1024_grayfour_tv0_mae, db3D_csphk32_separable2x2x1024_grayfour_tv0_abs_errs, db3D_csphk32_separable2x2x1024_grayfour_tv0_perc_errs) = compute_error_metrics(gt_depths, db3D_csphk32_separable2x2x1024_grayfour_tv0_depths)
             (db3D_csphk128_separable4x4x1024_truncfour_tv0_rmse, db3D_csphk128_separable4x4x1024_truncfour_tv0_mse, db3D_csphk128_separable4x4x1024_truncfour_tv0_mae, db3D_csphk128_separable4x4x1024_truncfour_tv0_abs_errs, db3D_csphk128_separable4x4x1024_truncfour_tv0_perc_errs) = compute_error_metrics(gt_depths, db3D_csphk128_separable4x4x1024_truncfour_tv0_depths)
             (db3D_csphk64_separable4x4x512_truncfour_tv0_rmse, db3D_csphk64_separable4x4x512_truncfour_tv0_mse, db3D_csphk64_separable4x4x512_truncfour_tv0_mae, db3D_csphk64_separable4x4x512_truncfour_tv0_abs_errs, db3D_csphk64_separable4x4x512_truncfour_tv0_perc_errs) = compute_error_metrics(gt_depths, db3D_csphk64_separable4x4x512_truncfour_tv0_depths)
             (db3D_csph1DGlobal2DLocal4xDown_k128_truncfour_tv0_rmse, db3D_csph1DGlobal2DLocal4xDown_k128_truncfour_tv0_mse, db3D_csph1DGlobal2DLocal4xDown_k128_truncfour_tv0_mae, db3D_csph1DGlobal2DLocal4xDown_k128_truncfour_tv0_abs_errs, db3D_csph1DGlobal2DLocal4xDown_k128_truncfour_tv0_perc_errs) = compute_error_metrics(gt_depths, db3D_csph1DGlobal2DLocal4xDown_k128_truncfour_tv0_depths)
@@ -274,6 +284,8 @@ if __name__=='__main__':
             metrics_all['db3D_d2d']['rmse'].append(db3D_d2d_rmse);metrics_all['db3D_d2d']['mae'].append(db3D_d2d_mae);metrics_all['db3D_d2d']['mse'].append(db3D_d2d_mse)
             metrics_all['db3D_d2d_tv0']['rmse'].append(db3D_d2d_tv0_rmse);metrics_all['db3D_d2d_tv0']['mae'].append(db3D_d2d_tv0_mae);metrics_all['db3D_d2d_tv0']['mse'].append(db3D_d2d_tv0_mse)
             metrics_all['db3D_csphk64_separable2x2x1024_grayfour_tv0']['rmse'].append(db3D_csphk64_separable2x2x1024_grayfour_tv0_rmse);metrics_all['db3D_csphk64_separable2x2x1024_grayfour_tv0']['mae'].append(db3D_csphk64_separable2x2x1024_grayfour_tv0_mae);metrics_all['db3D_csphk64_separable2x2x1024_grayfour_tv0']['mse'].append(db3D_csphk64_separable2x2x1024_grayfour_tv0_mse)
+            metrics_all['db3D_csphk256_separable4x4x1024_truncfour_tv0']['rmse'].append(db3D_csphk256_separable4x4x1024_truncfour_tv0_rmse);metrics_all['db3D_csphk256_separable4x4x1024_truncfour_tv0']['mae'].append(db3D_csphk256_separable4x4x1024_truncfour_tv0_mae);metrics_all['db3D_csphk256_separable4x4x1024_truncfour_tv0']['mse'].append(db3D_csphk256_separable4x4x1024_truncfour_tv0_mse)
+            metrics_all['db3D_csphk32_separable2x2x1024_grayfour_tv0']['rmse'].append(db3D_csphk32_separable2x2x1024_grayfour_tv0_rmse);metrics_all['db3D_csphk32_separable2x2x1024_grayfour_tv0']['mae'].append(db3D_csphk32_separable2x2x1024_grayfour_tv0_mae);metrics_all['db3D_csphk32_separable2x2x1024_grayfour_tv0']['mse'].append(db3D_csphk32_separable2x2x1024_grayfour_tv0_mse)
             metrics_all['db3D_csphk128_separable4x4x1024_truncfour_tv0']['rmse'].append(db3D_csphk128_separable4x4x1024_truncfour_tv0_rmse);metrics_all['db3D_csphk128_separable4x4x1024_truncfour_tv0']['mae'].append(db3D_csphk128_separable4x4x1024_truncfour_tv0_mae);metrics_all['db3D_csphk128_separable4x4x1024_truncfour_tv0']['mse'].append(db3D_csphk128_separable4x4x1024_truncfour_tv0_mse)
             metrics_all['db3D_csphk64_separable4x4x512_truncfour_tv0']['rmse'].append(db3D_csphk64_separable4x4x512_truncfour_tv0_rmse);metrics_all['db3D_csphk64_separable4x4x512_truncfour_tv0']['mae'].append(db3D_csphk64_separable4x4x512_truncfour_tv0_mae);metrics_all['db3D_csphk64_separable4x4x512_truncfour_tv0']['mse'].append(db3D_csphk64_separable4x4x512_truncfour_tv0_mse)
             metrics_all['db3D_csph1DGlobal2DLocal4xDown_k128_truncfour_tv0']['rmse'].append(db3D_csph1DGlobal2DLocal4xDown_k128_truncfour_tv0_rmse);metrics_all['db3D_csph1DGlobal2DLocal4xDown_k128_truncfour_tv0']['mae'].append(db3D_csph1DGlobal2DLocal4xDown_k128_truncfour_tv0_mae);metrics_all['db3D_csph1DGlobal2DLocal4xDown_k128_truncfour_tv0']['mse'].append(db3D_csph1DGlobal2DLocal4xDown_k128_truncfour_tv0_mse)
@@ -320,26 +332,30 @@ if __name__=='__main__':
                 plt.title('db3D_d2d \n mse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db3D_d2d_mse, db3D_d2d_mae*100, db3D_d2d_perc_errs),fontsize=14)
                 plt.colorbar()
                 plt.subplot(2,3,3)
-                # plt.imshow(db3D_csph1Dk8_grayfour_tv0_depths, vmin=min_depth, vmax=max_depth); 
-                # plt.title('db3D_csph1Dk8_grayfour \n mse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db3D_csph1Dk8_grayfour_tv0_mse, db3D_csph1Dk8_grayfour_tv0_mae*100, db3D_csph1Dk8_grayfour_tv0_perc_errs),fontsize=14)
-                plt.imshow(db3D_csph1Dk16_grayfour_tv0_depths, vmin=min_depth, vmax=max_depth); 
-                plt.title('db3D_csph1Dk16_grayfour \n mse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db3D_csph1Dk16_grayfour_tv0_mse, db3D_csph1Dk16_grayfour_tv0_mae*100, db3D_csph1Dk16_grayfour_tv0_perc_errs),fontsize=14)
+                plt.imshow(db3D_csph1Dk8_grayfour_tv0_depths, vmin=min_depth, vmax=max_depth); 
+                plt.title('db3D_csph1Dk8_grayfour \n mse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db3D_csph1Dk8_grayfour_tv0_mse, db3D_csph1Dk8_grayfour_tv0_mae*100, db3D_csph1Dk8_grayfour_tv0_perc_errs),fontsize=14)
+                # plt.imshow(db3D_csph1Dk16_grayfour_tv0_depths, vmin=min_depth, vmax=max_depth); 
+                # plt.title('db3D_csph1Dk16_grayfour \n mse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db3D_csph1Dk16_grayfour_tv0_mse, db3D_csph1Dk16_grayfour_tv0_mae*100, db3D_csph1Dk16_grayfour_tv0_perc_errs),fontsize=14)
                 plt.colorbar()
                 plt.subplot(2,3,4)
                 # plt.imshow(db3D_csph1D2Dk32down2_grayfour_tv0_depths, vmin=min_depth, vmax=max_depth); 
                 # plt.title('db3D_csph1D2Dk32down2_grayfour \n mse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db3D_csph1D2Dk32down2_grayfour_tv0_mse, db3D_csph1D2Dk32down2_grayfour_tv0_mae*100, db3D_csph1D2Dk32down2_grayfour_tv0_perc_errs),fontsize=14)
+                plt.imshow(db3D_csphk32_separable2x2x1024_grayfour_tv0_depths, vmin=min_depth, vmax=max_depth); 
+                plt.title('db3D_csphk32_separable2x2x1024_grayfour \n mse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db3D_csphk32_separable2x2x1024_grayfour_tv0_mse, db3D_csphk32_separable2x2x1024_grayfour_tv0_mae*100, db3D_csphk32_separable2x2x1024_grayfour_tv0_perc_errs),fontsize=14)
                 plt.colorbar()
                 plt.subplot(2,3,5)
+                plt.imshow(db3D_csphk64_separable4x4x512_truncfour_tv0_depths, vmin=min_depth, vmax=max_depth); 
+                plt.title('db3D_csphk64_separable4x4x512_truncfour \n mse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db3D_csphk64_separable4x4x512_truncfour_tv0_mse, db3D_csphk64_separable4x4x512_truncfour_tv0_mae*100, db3D_csphk64_separable4x4x512_truncfour_tv0_perc_errs),fontsize=14)
                 # plt.imshow(db3D_csph1DGlobal2DLocal4xDown_k128_truncfour_tv0_depths, vmin=min_depth, vmax=max_depth); 
                 # plt.title('db3D_csph1DGlobal2DLocal4xDown_k128_truncfour \n mse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db3D_csph1DGlobal2DLocal4xDown_k128_truncfour_tv0_mse, db3D_csph1DGlobal2DLocal4xDown_k128_truncfour_tv0_mae*100, db3D_csph1DGlobal2DLocal4xDown_k128_truncfour_tv0_perc_errs),fontsize=14)
-                plt.imshow(db3D_csph1D2Dk64down2_grayfour_tv0_depths, vmin=min_depth, vmax=max_depth); 
-                plt.title('db3D_csph1D2Dk64down2_grayfour \n mse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db3D_csph1D2Dk64down2_grayfour_tv0_mse, db3D_csph1D2Dk64down2_grayfour_tv0_mae*100, db3D_csph1D2Dk64down2_grayfour_tv0_perc_errs),fontsize=14)
+                # plt.imshow(db3D_csph1D2Dk64down2_grayfour_tv0_depths, vmin=min_depth, vmax=max_depth); 
+                # plt.title('db3D_csph1D2Dk64down2_grayfour \n mse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db3D_csph1D2Dk64down2_grayfour_tv0_mse, db3D_csph1D2Dk64down2_grayfour_tv0_mae*100, db3D_csph1D2Dk64down2_grayfour_tv0_perc_errs),fontsize=14)
                 plt.colorbar()
                 plt.subplot(2,3,6)
-                # plt.imshow(db3D_csphk128_separable4x4x1024_truncfour_tv0_depths, vmin=min_depth, vmax=max_depth); 
-                # plt.title('db3D_csphk128_separable4x4x1024_truncfour \n mse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db3D_csphk128_separable4x4x1024_truncfour_tv0_mse, db3D_csphk128_separable4x4x1024_truncfour_tv0_mae*100, db3D_csphk128_separable4x4x1024_truncfour_tv0_perc_errs),fontsize=14)
-                plt.imshow(db3D_csphk64_separable2x2x1024_grayfour_tv0_depths, vmin=min_depth, vmax=max_depth); 
-                plt.title('db3D_csphk64_separable2x2x1024_grayfour \n mse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db3D_csphk64_separable2x2x1024_grayfour_tv0_mse, db3D_csphk64_separable2x2x1024_grayfour_tv0_mae*100, db3D_csphk64_separable2x2x1024_grayfour_tv0_perc_errs),fontsize=14)
+                plt.imshow(db3D_csphk128_separable4x4x1024_truncfour_tv0_depths, vmin=min_depth, vmax=max_depth); 
+                plt.title('db3D_csphk128_separable4x4x1024_truncfour \n mse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db3D_csphk128_separable4x4x1024_truncfour_tv0_mse, db3D_csphk128_separable4x4x1024_truncfour_tv0_mae*100, db3D_csphk128_separable4x4x1024_truncfour_tv0_perc_errs),fontsize=14)
+                # plt.imshow(db3D_csphk64_separable2x2x1024_grayfour_tv0_depths, vmin=min_depth, vmax=max_depth); 
+                # plt.title('db3D_csphk64_separable2x2x1024_grayfour \n mse: {:.3f}m | mae: {:.2f}cm \n perc. errs: {}'.format(db3D_csphk64_separable2x2x1024_grayfour_tv0_mse, db3D_csphk64_separable2x2x1024_grayfour_tv0_mae*100, db3D_csphk64_separable2x2x1024_grayfour_tv0_perc_errs),fontsize=14)
                 plt.colorbar()
                 out_fname = 'depths_' + scene_fname
                 plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname)
@@ -479,7 +495,9 @@ if __name__=='__main__':
     print("    db3D_d2d_tv0: {:.3f} | {:.2f}cm | {:.2f} ".format(calc_mean_rmse(metrics_all['db3D_d2d_tv0']),calc_mean_mae(metrics_all['db3D_d2d_tv0']),calc_mean_mse(metrics_all['db3D_d2d_tv0'])))
     print("    db3D_csphk128_separable4x4x1024_truncfour_tv0: {:.3f} | {:.2f}cm | {:.2f} ".format(calc_mean_rmse(metrics_all['db3D_csphk128_separable4x4x1024_truncfour_tv0']),calc_mean_mae(metrics_all['db3D_csphk128_separable4x4x1024_truncfour_tv0']),calc_mean_mse(metrics_all['db3D_csphk128_separable4x4x1024_truncfour_tv0'])))
     print("    db3D_csphk64_separable4x4x512_truncfour_tv0: {:.3f} | {:.2f}cm | {:.2f} ".format(calc_mean_rmse(metrics_all['db3D_csphk64_separable4x4x512_truncfour_tv0']),calc_mean_mae(metrics_all['db3D_csphk64_separable4x4x512_truncfour_tv0']),calc_mean_mse(metrics_all['db3D_csphk64_separable4x4x512_truncfour_tv0'])))
+    print("    db3D_csphk32_separable2x2x1024_grayfour_tv0: {:.3f} | {:.2f}cm | {:.2f} ".format(calc_mean_rmse(metrics_all['db3D_csphk32_separable2x2x1024_grayfour_tv0']),calc_mean_mae(metrics_all['db3D_csphk32_separable2x2x1024_grayfour_tv0']),calc_mean_mse(metrics_all['db3D_csphk32_separable2x2x1024_grayfour_tv0'])))
     print("    db3D_csphk64_separable2x2x1024_grayfour_tv0: {:.3f} | {:.2f}cm | {:.2f} ".format(calc_mean_rmse(metrics_all['db3D_csphk64_separable2x2x1024_grayfour_tv0']),calc_mean_mae(metrics_all['db3D_csphk64_separable2x2x1024_grayfour_tv0']),calc_mean_mse(metrics_all['db3D_csphk64_separable2x2x1024_grayfour_tv0'])))
+    print("    db3D_csphk256_separable4x4x1024_truncfour_tv0: {:.3f} | {:.2f}cm | {:.2f} ".format(calc_mean_rmse(metrics_all['db3D_csphk256_separable4x4x1024_truncfour_tv0']),calc_mean_mae(metrics_all['db3D_csphk256_separable4x4x1024_truncfour_tv0']),calc_mean_mse(metrics_all['db3D_csphk256_separable4x4x1024_truncfour_tv0'])))
     print("    db3D_csph1DGlobal2DLocal4xDown_k128_truncfour_tv0: {:.3f} | {:.2f}cm | {:.2f} ".format(calc_mean_rmse(metrics_all['db3D_csph1DGlobal2DLocal4xDown_k128_truncfour_tv0']),calc_mean_mae(metrics_all['db3D_csph1DGlobal2DLocal4xDown_k128_truncfour_tv0']),calc_mean_mse(metrics_all['db3D_csph1DGlobal2DLocal4xDown_k128_truncfour_tv0'])))
     print("    db3D_csph1D2Dk32down2_grayfour_tv0: {:.3f} | {:.2f}cm | {:.2f} ".format(calc_mean_rmse(metrics_all['db3D_csph1D2Dk32down2_grayfour_tv0']),calc_mean_mae(metrics_all['db3D_csph1D2Dk32down2_grayfour_tv0']),calc_mean_mse(metrics_all['db3D_csph1D2Dk32down2_grayfour_tv0'])))
     print("    db3D_csph1D2Dk64down2_grayfour_tv0: {:.3f} | {:.2f}cm | {:.2f} ".format(calc_mean_rmse(metrics_all['db3D_csph1D2Dk64down2_grayfour_tv0']),calc_mean_mae(metrics_all['db3D_csph1D2Dk64down2_grayfour_tv0']),calc_mean_mse(metrics_all['db3D_csph1D2Dk64down2_grayfour_tv0'])))

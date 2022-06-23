@@ -28,25 +28,30 @@
 # python train.py ++experiment=test_csph model=DDFN_C64B10_CSPH1DGlobal2DLocal4xDown ++model.model_params.init=TruncFourier ++model.model_params.k=128 ++train_params.p_tv=0.0 ++train_params.epoch=20 ++train_params.lri=1e-3 ++random_seed=1234 ++train_params.batch_size=4
 
 
-# STATUS: DONE Running Locally
+# STATUS: [DONE] Running Locally
 # CSPH Separable GrayFourier K = 64 | 2x2x1024 (64x compression)
 # python train.py ++experiment=test_csph model=DDFN_C64B10_CSPH ++model.model_params.tblock_init=HybridGrayFourier ++model.model_params.k=64 ++train_params.p_tv=0.0 ++train_params.epoch=20 ++train_params.lri=1e-3 ++random_seed=1234 ++train_params.batch_size=4
 
-# STATUS: DONE Running compoptics
+# STATUS: Running compoptics
+# CSPH Separable GrayFourier K = 256 | 4x4x1024 (64x compression)
+python train.py ++experiment=test_csph model=DDFN_C64B10_CSPH ++model.model_params.tblock_init=TruncFourier ++model.model_params.k=256 ++model.model_params.spatial_down_factor=4 ++train_params.p_tv=0.0 ++train_params.epoch=20 ++train_params.lri=1e-3 ++random_seed=1234 ++train_params.batch_size=4
+
+
+# STATUS: [DONE] Running compoptics
 # CSPH Separable TruncFourier K = 128 | 4x4x1024 (128x compression)
 # python train.py ++experiment=test_csph model=DDFN_C64B10_CSPH ++model.model_params.tblock_init=TruncFourier ++model.model_params.k=128 ++model.model_params.spatial_down_factor=4 ++train_params.p_tv=0.0 ++train_params.epoch=20 ++train_params.lri=1e-3 ++random_seed=1234 ++train_params.batch_size=4
 
 
-# STATUS: Running Fangzhou
+# STATUS: [DONE] Running Fangzhou
 # CSPH Separable GrayFourier K = 32 | 2x2x1024 (128x compression)
-python train.py ++experiment=test_csph model=DDFN_C64B10_CSPH ++model.model_params.tblock_init=HybridGrayFourier ++model.model_params.k=32 ++train_params.p_tv=0.0 ++train_params.epoch=20 ++train_params.lri=1e-3 ++random_seed=1234 ++train_params.batch_size=4
+# python train.py ++experiment=test_csph model=DDFN_C64B10_CSPH ++model.model_params.tblock_init=HybridGrayFourier ++model.model_params.k=32 ++train_params.p_tv=0.0 ++train_params.epoch=20 ++train_params.lri=1e-3 ++random_seed=1234 ++train_params.batch_size=4
 
 
-# STATUS:  Running locally
+# STATUS: [DONE] Running locally
 # CSPH Separable TruncFourier K = 64 | 4x4x512 (128x compression)
-python train.py ++experiment=test_csph model=DDFN_C64B10_CSPH ++model.model_params.tblock_init=TruncFourier ++model.model_params.k=64 ++model.model_params.spatial_down_factor=4 ++model.model_params.nt_blocks=2 ++train_params.p_tv=0.0 ++train_params.epoch=20 ++train_params.lri=1e-3 ++random_seed=1234 ++train_params.batch_size=4
+# python train.py ++experiment=test_csph model=DDFN_C64B10_CSPH ++model.model_params.tblock_init=TruncFourier ++model.model_params.k=64 ++model.model_params.spatial_down_factor=4 ++model.model_params.nt_blocks=2 ++train_params.p_tv=0.0 ++train_params.epoch=20 ++train_params.lri=1e-3 ++random_seed=1234 ++train_params.batch_size=4
 
 
-# STATUS: DONE Running compoptics
+# STATUS: [DONE] Running compoptics
 # CSPH Separable TruncFourier K = 128 | 4x4x1024 (128x compression)
-python train.py ++experiment=test_csph model=DDFN_C64B10_CSPH ++model.model_params.tblock_init=TruncFourier ++model.model_params.k=128 ++model.model_params.spatial_down_factor=4 ++train_params.p_tv=0.0 ++train_params.epoch=20 ++train_params.lri=1e-3 ++random_seed=1234 ++train_params.batch_size=4
+# python train.py ++experiment=test_csph model=DDFN_C64B10_CSPH ++model.model_params.tblock_init=TruncFourier ++model.model_params.k=128 ++model.model_params.spatial_down_factor=4 ++train_params.p_tv=0.0 ++train_params.epoch=20 ++train_params.lri=1e-3 ++random_seed=1234 ++train_params.batch_size=4
