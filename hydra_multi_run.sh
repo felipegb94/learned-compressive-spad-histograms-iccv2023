@@ -55,3 +55,39 @@ python train.py ++experiment=test_csph model=DDFN_C64B10_CSPH ++model.model_para
 # STATUS: [DONE] Running compoptics
 # CSPH Separable TruncFourier K = 128 | 4x4x1024 (128x compression)
 # python train.py ++experiment=test_csph model=DDFN_C64B10_CSPH ++model.model_params.tblock_init=TruncFourier ++model.model_params.k=128 ++model.model_params.spatial_down_factor=4 ++train_params.p_tv=0.0 ++train_params.epoch=20 ++train_params.lri=1e-3 ++random_seed=1234 ++train_params.batch_size=4
+
+
+############ Tests
+
+# STATUS:  Running locally
+# CSPH Separable HybridGrayFourier K = 128 | 4x4x1024 (128x compression)
+python train.py ++experiment=test_csph model=DDFN_C64B10_CSPH 
+    ++model.model_params.tblock_init=HybridGrayFourier 
+    ++model.model_params.k=128 
+    ++model.model_params.spatial_down_factor=4 
+    ++model.model_params.nt_blocks=1 
+    ++model.model_params.optimize_tdim_codes=false 
+    ++model.model_params.encoding_type=separable 
+    ++train_params.p_tv=0.0 
+    ++train_params.epoch=1 
+    ++train_params.lri=1e-3 ++random_seed=1234 ++train_params.batch_size=4
+
+
+# STATUS:  Running locally
+# CSPH Separable HybridGrayFourier K = 128 | 4x4x1024 (128x compression)
+python train.py 
+    ++experiment=test_csph model=DDFN_C64B10_CSPH  
+    ++model.model_params.tblock_init=Rand  
+    ++model.model_params.k=128  
+    ++model.model_params.spatial_down_factor=4  
+    ++model.model_params.nt_blocks=1  
+    ++model.model_params.optimize_tdim_codes=true  
+    ++model.model_params.encoding_type=separable  
+    ++train_params.p_tv=0.0  ++train_params.epoch=1  ++train_params.lri=1e-3 ++random_seed=1234 ++train_params.batch_size=4
+
+# STATUS:  Running locally
+# CSPH Separable HybridGrayFourier K = 128 | 4x4x1024 (128x compression)
+python train.py ++experiment=test_csph model=DDFN_C64B10_CSPH ++model.model_params.tblock_init=Rand ++model.model_params.k=128 ++model.model_params.spatial_down_factor=4 ++model.model_params.nt_blocks=1 ++model.model_params.optimize_tdim_codes=true ++model.model_params.encoding_type=full ++train_params.p_tv=0.0 ++train_params.epoch=1 ++train_params.lri=1e-3 ++random_seed=1234 ++train_params.batch_size=4
+
+
+python train.py ++experiment=test_csph model=DDFN_C64B10_CSPH ++model.model_params.tblock_init=HybridGrayFourier ++model.model_params.k=128 ++model.model_params.spatial_down_factor=4 ++model.model_params.nt_blocks=1 ++model.model_params.optimize_tdim_codes=true ++model.model_params.encoding_type=full ++train_params.p_tv=0.0 ++train_params.epoch=1 ++train_params.lri=1e-3 ++random_seed=1234 ++train_params.batch_size=4

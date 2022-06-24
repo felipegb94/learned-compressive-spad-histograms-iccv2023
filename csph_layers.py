@@ -251,6 +251,11 @@ class CSPHEncodingLayer(nn.Module):
 		self.encoding_type = encoding_type
 		self.encoding_kernel_dims = (self.tblock_len, self.spatial_down_factor, self.spatial_down_factor)
 		self.encoding_kernel_stride = self.encoding_kernel_dims
+
+		print("Initialization a CSPH Encoding Layer:")
+		print("    - Encoding Type: {}".format(self.encoding_type))
+		print("    - Encoding Kernel Dims: {}".format(self.encoding_kernel_dims))
+
 		if(self.encoding_type == 'separable'):
 			# Separable convolution encoding
 			# First, define a tblock_lenx1x1 convolution kernel
@@ -260,8 +265,14 @@ class CSPHEncodingLayer(nn.Module):
 										, stride=(self.tblock_len, 1, 1)
 										, padding=0, dilation = 1, bias=False 
 			)
-			# init weights for tdim layer
-			self.Cmat_tdim.weight.data = torch.from_numpy(self.Cmat_tdim_init.transpose()[:,np.newaxis,:,np.newaxis,np.newaxis]).type(self.Cmat_tdim.weight.data.dtype)
+			# If we use rand init, leave the matrix as is, but store the weights
+			if(self.tblock_init == 'Rand'):
+				self.Cmat_tdim_init = torch.clone(self.Cmat_tdim.weight.data).cpu().numpy() 
+			else:
+				# init weights for tdim layer
+				self.Cmat_tdim.weight.data = torch.from_numpy(self.Cmat_tdim_init.transpose()[:,np.newaxis,:,np.newaxis,np.newaxis]).type(self.Cmat_tdim.weight.data.dtype)
+			# Only optimize the codes if neeeded
+			self.Cmat_tdim.weight.requires_grad = self.optimize_tdim_codes
 
 			self.Cmat_xydim = torch.nn.Conv3d( in_channels=self.k
 										, out_channels=self.k 
@@ -270,6 +281,7 @@ class CSPHEncodingLayer(nn.Module):
 										, padding=0, dilation=1, bias=False 
 										, groups=self.k
 			)
+
 
 			self.csph_coding_layer = nn.Sequential( OrderedDict([
 														('Cmat_tdim', self.Cmat_tdim)
@@ -283,6 +295,15 @@ class CSPHEncodingLayer(nn.Module):
 										, stride=self.encoding_kernel_stride
 										, padding=0, dilation = 1, bias=False 
 			)
+			if(self.tblock_init == 'Rand'):
+				self.Cmat_tdim_init = torch.clone(self.Cmat_txydim.weight.data).cpu().numpy() 
+			else:
+				# for each row and col set to the initialization codes
+				for i in range(self.spatial_down_factor):
+					for j in range(self.spatial_down_factor):
+						self.Cmat_txydim.weight.data[..., i, j] = torch.from_numpy(self.Cmat_tdim_init.transpose()[:,np.newaxis,:]).type(self.Cmat_txydim.weight.data.dtype)
+				self.Cmat_tdim_init = torch.clone(self.Cmat_txydim.weight.data).cpu().numpy() 
+			
 			self.csph_coding_layer = nn.Sequential( OrderedDict([
 														('Cmat_txydim', self.Cmat_txydim)
 			]))
@@ -290,9 +311,6 @@ class CSPHEncodingLayer(nn.Module):
 		else:
 			raise ValueError('Invalid encoding_type ({}) given as input.'.format(self.encoding_type))
 
-		print("Initialization a CSPH Encoding Layer:")
-		print("    - Encoding Type: {}".format(self.encoding_type))
-		print("    - Encoding Kernel Dims: {}".format(self.encoding_kernel_dims))
 		num_params = sum(p.numel() for p in self.csph_coding_layer.parameters())
 		print("    - Num CSPH Params: {}".format(num_params))
 		assert(expected_num_params == num_params), "Expected number of params does not match the coding layer params"
