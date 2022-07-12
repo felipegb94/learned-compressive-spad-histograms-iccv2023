@@ -24,11 +24,30 @@ if __name__=='__main__':
 	# ckpt_fname = 'epoch=00-step=1731-avgvalrmse=0.0324.ckpt'
 	# ckpt_fname = 'epoch=18-step=64065-avgvalrmse=0.0161.ckpt'
 
-	db3D_csphk128_separable4x4x1024_truncfour_opt_tv0_model_name = 'DDFN_C64B10_CSPH/k128_down4_Mt1_TruncFourier-opt-True_separable/loss-kldiv_tv-0.0'
-	db3D_csphk128_separable4x4x1024_truncfour_opt_tv0_result_dirpath = os.path.join(base_dirpath, db3D_csphk128_separable4x4x1024_truncfour_opt_tv0_model_name, '2022-06-18_203447/')
-	model_name = db3D_csphk128_separable4x4x1024_truncfour_opt_tv0_model_name
-	model_dirpath = db3D_csphk128_separable4x4x1024_truncfour_opt_tv0_result_dirpath
-	ckpt_fname = 'epoch=17-step=62333-avgvalrmse=0.0197'
+	# db3D_csphk128_separable4x4x1024_truncfour_opt_tv0_model_name = 'DDFN_C64B10_CSPH/k128_down4_Mt1_TruncFourier-opt-True_separable/loss-kldiv_tv-0.0'
+	# db3D_csphk128_separable4x4x1024_truncfour_opt_tv0_result_dirpath = os.path.join(base_dirpath, db3D_csphk128_separable4x4x1024_truncfour_opt_tv0_model_name, '2022-06-18_203447/')
+	# model_name = db3D_csphk128_separable4x4x1024_truncfour_opt_tv0_model_name
+	# model_dirpath = db3D_csphk128_separable4x4x1024_truncfour_opt_tv0_result_dirpath
+	# ckpt_fname = 'epoch=17-step=62333-avgvalrmse=0.0197'
+
+	# db3D_csphk32_separable2x2x1024_grayfour_opt_tv0_model_name = 'DDFN_C64B10_CSPH/k32_down2_Mt1_HybridGrayFourier-opt-True_separable/loss-kldiv_tv-0.0'
+	# db3D_csphk32_separable2x2x1024_grayfour_opt_tv0_result_dirpath = os.path.join(base_dirpath, db3D_csphk32_separable2x2x1024_grayfour_opt_tv0_model_name, '2022-06-21_230853/')
+	# model_name = db3D_csphk32_separable2x2x1024_grayfour_opt_tv0_model_name
+	# model_dirpath = db3D_csphk32_separable2x2x1024_grayfour_opt_tv0_result_dirpath
+	# ckpt_fname = 'epoch=19-step=67528-avgvalrmse=0.0174'
+
+	# db3D_csphk128_separable4x4x1024_truncfour_opt_tv0_model_name = 'DDFN_C64B10_CSPH/k128_down4_Mt1_TruncFourier-opt-True_separable/loss-kldiv_tv-0.0'
+	# db3D_csphk128_separable4x4x1024_truncfour_opt_tv0_result_dirpath = os.path.join(base_dirpath, db3D_csphk128_separable4x4x1024_truncfour_opt_tv0_model_name, '2022-06-18_203447/')
+	# model_name = db3D_csphk128_separable4x4x1024_truncfour_opt_tv0_model_name
+	# model_dirpath = db3D_csphk128_separable4x4x1024_truncfour_opt_tv0_result_dirpath
+	# ckpt_fname = 'epoch=17-step=62333-avgvalrmse=0.0197'
+
+	# db3D_csphk256_separable4x4x1024_truncfour_opt_tv0_model_name = 'DDFN_C64B10_CSPH/k256_down4_Mt1_TruncFourier-opt-True_separable/loss-kldiv_tv-0.0'
+	# db3D_csphk256_separable4x4x1024_truncfour_opt_tv0_result_dirpath = os.path.join(base_dirpath, db3D_csphk256_separable4x4x1024_truncfour_opt_tv0_model_name, '2022-06-22_130057/')
+	# model_name = db3D_csphk256_separable4x4x1024_truncfour_opt_tv0_model_name
+	# model_dirpath = db3D_csphk256_separable4x4x1024_truncfour_opt_tv0_result_dirpath
+	# ckpt_fname = 'epoch=19-step=67528-avgvalrmse=0.0194'
+
 
 	# db3D_csphk64_separable4x4x512_truncfour_opt_tv0_model_name = 'DDFN_C64B10_CSPH/k64_down4_Mt2_TruncFourier-opt-True_separable/loss-kldiv_tv-0.0'
 	# db3D_csphk64_separable4x4x512_truncfour_opt_tv0_result_dirpath = os.path.join(base_dirpath, db3D_csphk64_separable4x4x512_truncfour_opt_tv0_model_name, '2022-06-20_111348')
@@ -93,7 +112,7 @@ if __name__=='__main__':
 	# Plot the first 4 time domain codes
 	plt.clf()
 	plt.subplot(2,1,1)
-	plt.plot(Cmat_tdim.transpose()[:,0:10:2])
+	plt.plot(Cmat_tdim.transpose()[:,1:20:4])
 	plt.ylim(ylim)
 	plt.title("Model: {}, \n ckpt: {}".format(model_name.split('/')[1], ckpt_fname))
 	plt.subplot(2,1,2)

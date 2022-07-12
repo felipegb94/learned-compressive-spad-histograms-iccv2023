@@ -60,9 +60,18 @@ simulation_params_E = [3 100;
                      2 100;
                      1 100];
 
+% Extra high SNR noise levels
+simulation_params_highSNR = [50, 2;
+                            50, 5;
+                            50, 10       
+]
+
+
 % Select the simulation params to use
 % for test, use 9typical or 3 extra low SBR noise levels
 simulation_params = simulation_params_T;
+simulation_params = simulation_params_highSNR;
+
 
 t_s = tic;
 for ss = 1:length(scenes)
