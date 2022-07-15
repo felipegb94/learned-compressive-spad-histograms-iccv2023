@@ -100,3 +100,29 @@ python train.py ++experiment=spatial_down_ablation model=DDFN_C64B10_CSPH \
     ++train_params.p_tv=0.0 \
     ++train_params.epoch=30 \
     ++train_params.lri=1e-3 ++random_seed=1234 ++train_params.batch_size=4
+
+
+## Compression Knob Experiments
+# Exp 1: CSPH Separable HybridGrayFourier_opt k=512 | 4x4x1024 (32x compression)
+python train.py ++experiment=compression_vs_perf model=DDFN_C64B10_CSPH \
+    ++model.model_params.tblock_init=HybridGrayFourier \
+    ++model.model_params.k=512 \
+    ++model.model_params.spatial_down_factor=4 \
+    ++model.model_params.nt_blocks=1 \
+    ++model.model_params.optimize_tdim_codes=true \
+    ++model.model_params.encoding_type=separable \
+    ++train_params.p_tv=0.0 \
+    ++train_params.epoch=30 \
+    ++train_params.lri=1e-3 ++random_seed=1235 ++train_params.batch_size=4
+
+# Exp 2: CSPH Separable HybridGrayFourier_opt k=1024 | 4x4x1024 (16x compression)
+python train.py ++experiment=compression_vs_perf model=DDFN_C64B10_CSPH \
+    ++model.model_params.tblock_init=HybridGrayFourier \
+    ++model.model_params.k=1024 \
+    ++model.model_params.spatial_down_factor=4 \
+    ++model.model_params.nt_blocks=1 \
+    ++model.model_params.optimize_tdim_codes=true \
+    ++model.model_params.encoding_type=separable \
+    ++train_params.p_tv=0.0 \
+    ++train_params.epoch=30 \
+    ++train_params.lri=1e-3 ++random_seed=1235 ++train_params.batch_size=4
