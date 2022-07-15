@@ -66,11 +66,17 @@ simulation_params_highSNR = [50, 2;
                             50, 10       
 ]
 
+simulation_params_highFlux = [10, 200;
+                              10, 500;
+                              10, 1000       
+]
+
 
 % Select the simulation params to use
 % for test, use 9typical or 3 extra low SBR noise levels
 simulation_params = simulation_params_T;
 simulation_params = simulation_params_highSNR;
+simulation_params = simulation_params_highFlux;
 
 
 t_s = tic;

@@ -1,0 +1,19 @@
+# Plain Deep Boosting Model from Peng et al., 2020
+
+# Model ID is used to select the correct model objcet
+model_id: DDFN_C64B10_CSPH3D
+model_params:
+  in_channels: 1
+  k: 16
+  spatial_down_factor: 4
+  optimize_tdim_codes: true
+  nt_blocks: 1
+  tblock_init: Rand
+  # tblock_init: TruncFourier
+  # tblock_init: CoarseHist
+  encoding_type: full
+
+# Model name is used for saving results
+model_name: ${.model_id}/k${.model_params.k}_down${.model_params.spatial_down_factor}_Mt${.model_params.nt_blocks}_${.model_params.tblock_init}-opt-${.model_params.optimize_tdim_codes}_${.model_params.encoding_type}
+
+data_loss_id: kldiv

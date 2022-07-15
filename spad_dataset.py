@@ -177,7 +177,11 @@ class SpadDataset(torch.utils.data.Dataset):
         bins = torch.from_numpy(bins)
         est_bins_argmax = torch.from_numpy(est_bins_argmax)
         est_bins_argmax_hist = torch.from_numpy(est_bins_argmax_hist)
-        
+        # make sure these parameters have a supported data type by dataloader (uint16 is not supported)
+        spad_data['SBR'] = spad_data['SBR'].astype(np.float32)
+        spad_data['mean_signal_photons'] = spad_data['mean_signal_photons'].astype(np.int32)
+        spad_data['mean_background_photons'] = spad_data['mean_background_photons'].astype(np.int32)
+
         sample = {
             'rates': rates 
             , 'spad': spad 

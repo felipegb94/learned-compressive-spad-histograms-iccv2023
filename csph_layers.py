@@ -369,6 +369,77 @@ class CSPHDecodingLayer(nn.Module):
 
 		return decoded_out.unsqueeze(1)
 
+
+class CSPH3DLayer(nn.Module):
+	def __init__(self, k=2, num_bins=1024, 
+					tblock_init='Rand', h_irf=None, optimize_tdim_codes=False,
+					nt_blocks=1, spatial_down_factor=1, 
+					encoding_type='full'
+				):
+		# Init parent class
+		super(CSPH3DLayer, self).__init__()
+		# Validate some input params
+		assert((num_bins % nt_blocks) == 0), "Number of bins should be divisible by number of time blocks"
+
+		self.num_bins = num_bins
+		self.k = k
+		self.tblock_init=tblock_init
+		self.optimize_tdim_codes=optimize_tdim_codes
+		self.nt_blocks=nt_blocks
+		self.tblock_len = int(self.num_bins / nt_blocks) 
+		self.spatial_down_factor=spatial_down_factor
+		# Pad IRF with zeros if needed
+		self.h_irf = pad_h_irf(h_irf, num_bins=self.tblock_len) # This is used to select the frequencies that will be used in HybridGrayFourier
+		
+		# Initialize the encoding layer
+		self.encoding_type = encoding_type
+		self.encoding_kernel_dims = (self.tblock_len, self.spatial_down_factor, self.spatial_down_factor)
+		self.encoding_kernel_stride = self.encoding_kernel_dims
+
+		print("Initialization a CSPH Encoding Layer:")
+		print("    - Encoding Type: {}".format(self.encoding_type))
+		print("    - Encoding Kernel Dims: {}".format(self.encoding_kernel_dims))
+
+		if(self.encoding_type == 'full'):
+			self.Cmat_txydim = torch.nn.Conv3d( in_channels=1
+										, out_channels=self.k 
+										, kernel_size=self.encoding_kernel_dims
+										, stride=self.encoding_kernel_stride
+										, padding=0, dilation = 1, bias=False 
+			)
+			
+			# self.Cmat_transpose_txydim = torch.nn.ConvTranspose3d( in_channels=self.k
+			# 							, out_channels=1
+			# 							, kernel_size=self.encoding_kernel_dims
+			# 							, stride=self.encoding_kernel_stride
+			# 							, padding=0, dilation = 1, bias=False 
+			# )
+			# self.Cmat_transpose_txydim.weight = self.Cmat_txydim.weight
+
+			self.csph_layer = nn.Sequential( OrderedDict([
+														('Cmat_txydim', self.Cmat_txydim)
+			]))
+			expected_num_params = self.k*self.encoding_kernel_dims[0]*self.encoding_kernel_dims[1]*self.encoding_kernel_dims[2]
+		else:
+			raise ValueError('Invalid encoding_type ({}) given as input.'.format(self.encoding_type))
+
+		num_params = sum(p.numel() for p in self.csph_layer.parameters())
+		print("    - Num CSPH Params: {}".format(num_params))
+		assert(expected_num_params == num_params), "Expected number of params does not match the coding layer params"
+		self.Cmat_size = num_params
+
+
+	def forward(self, inputs):
+		'''
+			Expected input dims == (Batch, Nt, Nr, Nc)
+		'''
+		## Compute compressive histogram
+		B = self.csph_layer(inputs)
+		## Upsample using the transposed coding matrix
+		X = F.conv_transpose3d(B, weight=self.Cmat_txydim.weight, bias=None, stride=self.encoding_kernel_stride)
+
+		return X
+
 if __name__=='__main__':
 	import matplotlib.pyplot as plt
 
@@ -496,4 +567,10 @@ if __name__=='__main__':
 		print("    Mean = {}".format(abs_diff.flatten().mean()))
 		
 		
+	csph3d_layer_obj = CSPH3DLayer(k=k, num_bins=nt 
+									, tblock_init=init_param, optimize_tdim_codes=optimize_tdim_codes
+									, spatial_down_factor=spatial_block_dim, encoding_type='full'
+									, nt_blocks=nt_blocks)
+	csph3d_layer_out = csph3d_layer_obj(inputs.unsqueeze(1))
+
 

@@ -70,7 +70,9 @@ def train(cfg):
 			#  	) # Runs single batch
 			trainer = pl.Trainer(accelerator="gpu", devices=1, max_epochs=cfg.train_params.epoch, 
 				logger=tb_logger, callbacks=callbacks, 
-				log_every_n_steps=10, val_check_interval=0.5,track_grad_norm=2) # 
+				log_every_n_steps=10, val_check_interval=0.5
+				# ,track_grad_norm=2
+				) # 
 		else:
 			# trainer = pl.Trainer(
 			# 	limit_train_batches=15, limit_val_batches=3, max_epochs=3, log_every_n_steps=1, 
@@ -80,7 +82,9 @@ def train(cfg):
 			# 	log_every_n_steps=10, val_check_interval=1.0, track_grad_norm=2) # 
 			trainer = pl.Trainer(max_epochs=cfg.train_params.epoch, 
 				logger=tb_logger, callbacks=callbacks, 
-				log_every_n_steps=10, val_check_interval=0.5,track_grad_norm=2) # 
+				log_every_n_steps=10, val_check_interval=0.5
+				# ,track_grad_norm=2 
+				) # 
 
 	trainer.fit(lit_model, train_dataloaders=train_loader, val_dataloaders=val_loader)
 
