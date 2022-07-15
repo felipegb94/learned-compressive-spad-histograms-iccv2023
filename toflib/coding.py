@@ -995,7 +995,7 @@ class FourierCoding(Coding):
 		'''
 		# Init some params
 		self.n_maxres = n_maxres
-		self.n_maxfreqs = self.n_maxres // 2
+		self.n_maxfreqs = (self.n_maxres // 2) + 1
 		self.freq_idx = to_nparray(freq_idx)
 		self.n_freqs = self.freq_idx.size
 		self.max_n_sinusoid_codes = self.k*self.n_freqs
@@ -1005,7 +1005,7 @@ class FourierCoding(Coding):
 			self.n_sinusoid_codes = np.min([self.max_n_sinusoid_codes, self.n_codes])
 		# Check input args
 		assert(self.freq_idx.ndim == 1), "Number of dimensions for freq_idx should be 1"
-		assert(self.n_freqs <= (self.n_maxres // 2)), "Number of frequencies cannot exceed the number of points at the max resolution"
+		assert(self.n_freqs <= self.n_maxfreqs), "Number of frequencies cannot exceed the number of points at the max resolution"
 		# Initialize and populate the matrix with zero mean sinusoids
 		self.C = np.zeros((self.n_maxres, self.n_sinusoid_codes))
 
