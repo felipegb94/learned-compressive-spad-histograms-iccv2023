@@ -98,3 +98,8 @@ python train.py ++experiment=test_csph3d model=DDFN_C64B10_CSPH3D ++model.model_
 
 # running in compoptics
 python train.py ++experiment=test_csph3d model=DDFN_C64B10_CSPH3D ++model.model_params.tblock_init=Rand ++model.model_params.k=16 ++model.model_params.spatial_down_factor=4 ++model.model_params.nt_blocks=8 ++model.model_params.optimize_tdim_codes=true ++model.model_params.encoding_type=full ++train_params.p_tv=0.0 ++train_params.epoch=30 ++train_params.lri=1e-3 ++random_seed=1235 ++train_params.batch_size=4
+
+python train.py ++experiment=test_csph3d model=DDFN_C64B10_CSPH3D ++model.model_params.tblock_init=Rand ++model.model_params.k=16 ++model.model_params.spatial_down_factor=4 ++model.model_params.nt_blocks=16 ++model.model_params.optimize_tdim_codes=true ++model.model_params.encoding_type=full ++train_params.p_tv=0.0 ++train_params.epoch=30 ++train_params.lri=1e-3 ++random_seed=1235 ++train_params.batch_size=4
+
+# Run locally
+python train.py ++experiment=test_csph3d model=DDFN_C64B10_CSPH3D ++model.model_params.tblock_init=Rand ++model.model_params.k=32 ++model.model_params.spatial_down_factor=4 ++model.model_params.nt_blocks=16 ++model.model_params.optimize_tdim_codes=true ++model.model_params.encoding_type=full ++train_params.p_tv=0.0 ++train_params.epoch=30 ++train_params.lri=1e-3 ++random_seed=1235 ++train_params.batch_size=4
