@@ -1,7 +1,7 @@
 #### Standard Library Imports
-from cmath import nan
 import sys
 sys.path.append('../')
+sys.path.append('./')
 
 #### Library imports
 import torch
@@ -32,7 +32,7 @@ if __name__=='__main__':
 	# pl.seed_everything(2)
 	## Generate inputs
 	k=64
-	(bt, br, bc) = (1024, 1, 1)
+	(bt, br, bc) = (128, 4, 4)
 	batch_size = 4
 	(nt, nr, nc) = (1024, 32, 32)
 	use_gpu = True
