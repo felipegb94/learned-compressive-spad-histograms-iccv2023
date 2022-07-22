@@ -32,7 +32,7 @@ if __name__=='__main__':
 	# pl.seed_everything(2)
 	## Generate inputs
 	k=64
-	(bt, br, bc) = (128, 4, 4)
+	(bt, br, bc) = (1024, 1, 1)
 	batch_size = 4
 	(nt, nr, nc) = (1024, 32, 32)
 	use_gpu = True
@@ -122,6 +122,9 @@ if __name__=='__main__':
 	unfilt_backproj_tconv_layer = UnfiltBackproj3DTransposeConv()
 	(unfilt_backproj_full_tconv_time, H_hat_full_tconv_np) = time_full_unfilt_backproj(unfilt_backproj_tconv_layer, y=csph_full, W=conv3d_txy.weight)
 
+	## Unfiltered backprojection FULL (batch implementation)
+	unfilt_backproj_batch_layer = UnfiltBackproj3DBatch()
+	(unfilt_backproj_full_batch_time, H_hat_full_batch_np) = time_full_unfilt_backproj(unfilt_backproj_batch_layer, y=csph_full, W=conv3d_txy.weight)
 
 	# ## Unfiltered backprojection FULL (for loop implementation)
 	# with Timer("Unfiltered Backproj FULL (for loop):"):
