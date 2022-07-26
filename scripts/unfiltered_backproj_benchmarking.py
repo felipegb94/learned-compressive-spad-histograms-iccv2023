@@ -1,5 +1,6 @@
 #### Standard Library Imports
 import sys
+import os
 sys.path.append('../')
 sys.path.append('./')
 
@@ -12,6 +13,7 @@ breakpoint = debugger.set_trace
 
 #### Local imports
 from research_utils.timer import Timer
+from research_utils import io_ops
 from unfilt_backproj_3D import *
 
 def time_full_unfilt_backproj(backproj_layer, y, W):
@@ -28,16 +30,34 @@ def time_full_unfilt_backproj(backproj_layer, y, W):
 		H_hat_full_np = -1
 	return wall_time, H_hat_full_np
 
+def append_benchmark_data(benchmark_data, method_id, wall_time):
+	if(not (method_id in benchmark_data.keys())):
+		benchmark_data[method_id] = []
+	benchmark_data[method_id].append(wall_time)
+
 if __name__=='__main__':
 	# pl.seed_everything(2)
 	## Generate inputs
-	k=64
+	k=8
 	(bt, br, bc) = (128, 4, 4)
 	batch_size = 4
 	(nt, nr, nc) = (1024, 32, 32)
-	use_gpu = True
+	use_gpu = False
 	if(torch.cuda.is_available() and use_gpu): device = torch.device("cuda:0")
 	else: device = torch.device("cpu")
+
+	device_name = torch.cuda.get_device_name(0).replace(" ", "")
+	benchmark_fname = 'unfilt_backproj_benchmark_'+device_name+'.json'
+	benchmark_dirpath = './scripts/benchmark_results'
+	if(os.path.basename(os.getcwd()) == 'scripts'): benchmark_dirpath = './benchmark_results'
+	os.makedirs(benchmark_dirpath, exist_ok=True)
+	benchmark_fpath =  os.path.join(benchmark_dirpath, benchmark_fname)
+	
+	# Load benchmark data
+	if(os.path.exists(benchmark_fpath)): benchmark_data = io_ops.load_json(benchmark_fpath)
+	else: benchmark_data = {}
+
+	if(not (device.type in benchmark_data.keys())): benchmark_data[device.type] = {}
 
 	# Full 3d histogram image
 	H = torch.randn((batch_size, 1, nt, nr, nc))
@@ -117,14 +137,17 @@ if __name__=='__main__':
 	## Unfiltered backprojection FULL (for loop implementation)
 	unfilt_backproj_forloop_layer = UnfiltBackproj3DForLoop()
 	(unfilt_backproj_full_forloop_time, H_hat_full_forloop_np) = time_full_unfilt_backproj(unfilt_backproj_forloop_layer, y=csph_full, W=conv3d_txy.weight)
-	
+	append_benchmark_data(benchmark_data[device.type], unfilt_backproj_forloop_layer.__class__.__name__, unfilt_backproj_full_forloop_time)
+
 	## Unfiltered backprojection FULL (transposed 3d conv implementation)
 	unfilt_backproj_tconv_layer = UnfiltBackproj3DTransposeConv()
 	(unfilt_backproj_full_tconv_time, H_hat_full_tconv_np) = time_full_unfilt_backproj(unfilt_backproj_tconv_layer, y=csph_full, W=conv3d_txy.weight)
+	append_benchmark_data(benchmark_data[device.type], unfilt_backproj_tconv_layer.__class__.__name__, unfilt_backproj_full_tconv_time)
 
 	## Unfiltered backprojection FULL (batch implementation)
 	unfilt_backproj_batch_layer = UnfiltBackproj3DBatch()
 	(unfilt_backproj_full_batch_time, H_hat_full_batch_np) = time_full_unfilt_backproj(unfilt_backproj_batch_layer, y=csph_full, W=conv3d_txy.weight)
+	append_benchmark_data(benchmark_data[device.type], unfilt_backproj_batch_layer.__class__.__name__, unfilt_backproj_full_batch_time)
 
 	# ## Unfiltered backprojection FULL (for loop implementation)
 	# with Timer("Unfiltered Backproj FULL (for loop):"):
@@ -225,9 +248,7 @@ if __name__=='__main__':
 	# 	print("Error caugh - " + str(e))
 	# torch.cuda.empty_cache()
 
-
-
-
-
 	# # assert(H_hat_full_tconv.shape == H_hat_full.shape), "Dimension mismatch between H_hat_full and H_hat_tconv"
 
+
+	io_ops.write_json(benchmark_fpath, benchmark_data)

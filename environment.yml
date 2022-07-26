@@ -173,11 +173,17 @@ dependencies:
     - antlr4-python3-runtime==4.8
     - beautifulsoup4==4.11.1
     - colorlog==6.6.0
+    - deprecated==1.2.13
     - filelock==3.6.0
     - gdown==4.4.0
+    - humanize==4.2.3
     - hydra-colorlog==1.1.0
     - hydra-core==1.1.2
     - importlib-resources==5.2.3
+    - nibabel==4.0.1
     - omegaconf==2.1.2
+    - simpleitk==2.1.1.2
     - soupsieve==2.3.2.post1
+    - torchio==0.18.82
+    - wrapt==1.14.1
 prefix: /home/felipe/miniconda3/envs/lightning
