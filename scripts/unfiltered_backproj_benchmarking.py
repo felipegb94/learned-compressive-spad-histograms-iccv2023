@@ -61,20 +61,20 @@ if __name__=='__main__':
 	# pl.seed_everything(2)
 	## Generate inputs configurtations
 
-	## Experiment 1: bt vs. runtime
-	k_all=[64]
-	bt_all=[32,64,128,256,512,1024]
-	brbc_all=[(4,4)]
+	# ## Experiment 1: bt vs. runtime
+	# k_all=[64]
+	# bt_all=[32,64,128,256,512,1024]
+	# brbc_all=[(4,4)]
 
 	# ## Experiment 2: K vs. runtime
 	# k_all=[32,64,128,256,512]
 	# bt_all=[1024]
 	# brbc_all=[(4,4)]
 
-	# ## Experiment 3: spatial vs. runtime
-	# k_all=[64]
-	# bt_all=[1024]
-	# brbc_all=[(1,1), (2,2), (4,4), (8,8)]
+	## Experiment 3: spatial vs. runtime
+	k_all=[128]
+	bt_all=[1024]
+	brbc_all=[(1,1), (2,2), (4,4), (8,8)]
 
 	params_configs_all = []
 	for k in k_all:
