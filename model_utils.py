@@ -81,6 +81,7 @@ def init_model_from_id(cfg, irf=None):
 						, nt_blocks = cfg.model.model_params.nt_blocks
 						, tblock_init = cfg.model.model_params.tblock_init
 						, optimize_tdim_codes = cfg.model.model_params.optimize_tdim_codes
+						, optimize_codes = cfg.model.model_params.optimize_codes
 						, encoding_type = cfg.model.model_params.encoding_type
 						, num_bins = cfg.dataset.nt
 						, h_irf = irf

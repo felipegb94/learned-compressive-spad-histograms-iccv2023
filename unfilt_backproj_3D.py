@@ -38,7 +38,7 @@ class UnfiltBackproj3DTransposeConv(nn.Module):
 			W: coding matrix - 3D conv filters applied to the input to get y --> (K, 1, b1, b2, b3)
 			K: number of channels == number of coded measurements/projections of signal x
 		'''
-		verify_input_tensors(y, W)
+		# verify_input_tensors(y, W)
 		kernel3d_size = W.shape[-3:]
 		xhat = F.conv_transpose3d(y, weight=W, bias=None, stride=kernel3d_size)
 		return xhat
