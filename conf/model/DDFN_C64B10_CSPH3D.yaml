@@ -15,6 +15,6 @@ model_params:
   encoding_type: full
 
 # Model name is used for saving results
-model_name: ${.model_id}/k${.model_params.k}_down${.model_params.spatial_down_factor}_Mt${.model_params.nt_blocks}_${.model_params.tblock_init}-opt-${.model_params.optimize_tdim_codes}-${.model_params.optimize_codes}_${.model_params.encoding_type}
+model_name: ${.model_id}/k${.model_params.k}_down${.model_params.spatial_down_factor}_Mt${.model_params.nt_blocks}_${.model_params.tblock_init}-optCt=${.model_params.optimize_tdim_codes}-optC=${.model_params.optimize_codes}_${.model_params.encoding_type}
 
 data_loss_id: kldiv
