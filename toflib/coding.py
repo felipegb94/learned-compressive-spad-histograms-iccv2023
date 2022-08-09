@@ -1487,7 +1487,7 @@ class HybridGrayBasedFourierCoding(FourierCoding):
 				freq_idx[curr_idx] = curr_freq_idx
 				n_remaining_freqs -= 1
 		## If we ran out of high confidence frequencies add the low confidence ones
-		print(n_remaining_freqs)
+		# print(n_remaining_freqs)
 		for i in range(n_remaining_freqs):
 			curr_idx = n_freqs - n_remaining_freqs + i
 			print(curr_idx)
