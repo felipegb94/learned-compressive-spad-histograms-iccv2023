@@ -203,11 +203,11 @@ train_dataset: nyuv2_64x64x1024_80ps
 # model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/2022-07-16_122403
 # ckpt_id: epoch=29-step=102158-avgvalrmse=0.0146.ckpt #  0.01748 | 
 
-# # 64x compression
-# model_name: DDFN_C64B10_CSPH3D/k16_down4_Mt16_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0
-# experiment_name: test_csph3d
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/2022-07-16_142109
-# ckpt_id: epoch=24-step=84843-avgvalrmse=0.0169.ckpt # 0.02163 | 
+# 64x compression
+model_name: DDFN_C64B10_CSPH3D/k16_down4_Mt16_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0
+experiment_name: test_csph3d
+model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/2022-07-16_142109
+ckpt_id: epoch=24-step=84843-avgvalrmse=0.0169.ckpt # 0.02163 | 
 
 # # 128x compression
 # model_name: DDFN_C64B10_CSPH3D/k16_down4_Mt8_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0
@@ -228,17 +228,17 @@ train_dataset: nyuv2_64x64x1024_80ps
 # model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/2022-08-05_155940
 # ckpt_id: epoch=27-step=96963-avgvalrmse=0.0173.ckpt # 0.02132 |
 
-# 64x compression (K=256 4x4x1024)
-model_name: DDFN_C64B10_CSPH3D/k256_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0
-experiment_name: test_csph3d
-model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/2022-08-05_141013
-ckpt_id: epoch=29-step=103889-avgvalrmse=0.0175 #  |
+# # 64x compression (K=256 4x4x1024)
+# model_name: DDFN_C64B10_CSPH3D/k256_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0
+# experiment_name: test_csph3d
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/2022-08-05_141013
+# ckpt_id: epoch=29-step=103889-avgvalrmse=0.0175 # 0.0206 |
 
 # # 128x compression (K=128 4x4x1024)
 # model_name: DDFN_C64B10_CSPH3D/k128_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0
 # experiment_name: test_csph3d
 # model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/2022-07-31_145411
-# ckpt_id: epoch=24-step=84843-avgvalrmse=0.0182.ckpt # 0.0228 |
+# ckpt_id: epoch=26-step=91769-avgvalrmse=0.0180.ckpt # 0.0240 |
 
 # # 256x compression (K=64 4x4x1024)
 # model_name: DDFN_C64B10_CSPH3D/k64_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0
