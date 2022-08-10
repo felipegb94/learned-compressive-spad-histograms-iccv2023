@@ -26,8 +26,6 @@ def test(cfg):
 
 	pl.seed_everything(1234)
 
-	torch.backends.cudnn.benchmark = False
-
 	logger.info("\n" + OmegaConf.to_yaml(cfg))
 	logger.info("Number of assigned GPUs: {}".format(cfg.params.gpu_num))
 	logger.info("Number of available GPUs: {} {}".format(torch.cuda.device_count(), torch.cuda.get_device_name(torch.cuda.current_device())))
@@ -70,7 +68,7 @@ def test(cfg):
 	logger.info("    torch.backends.cudnn.deterministic: {}".format(torch.backends.cudnn.deterministic))
 
 	if(cfg.params.cuda):
-		trainer = pl.Trainer(accelerator="gpu", devices=1, logger=tb_logger, callbacks=callbacks, benchmark=torch.backends.cudnn.benchmark) # 
+		trainer = pl.Trainer(accelerator="gpu", devices=1, logger=tb_logger, callbacks=callbacks, benchmark=False) # 
 	else:
 		trainer = pl.Trainer(logger=tb_logger, callbacks=callbacks) # 
 
