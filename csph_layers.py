@@ -470,12 +470,6 @@ class CSPH3DLayer(nn.Module):
 			(self.Cmat_xydim, W2d) = get_rand_torch_conv3d(k, k, kernel3d_W2d_size, separable=True)
 			# Only optimize code if needed
 			self.Cmat_xydim.weight.requires_grad = self.optimize_codes
-
-			self.csph_coding_layer = nn.Sequential( OrderedDict([
-														('Cmat_tdim', self.Cmat_tdim)
-														, ('Cmat_xydim', self.Cmat_xydim)
-			]))
-
 			## Set the method to obtain the weights for unfiltered backprojection
 			self.get_unfilt_backproj_W3d = self.get_unfilt_backproj_W3d_separable
 			## Set the coding layer
