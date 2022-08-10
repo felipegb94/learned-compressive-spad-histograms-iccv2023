@@ -70,7 +70,7 @@ def train(cfg):
 			#  	) # Runs single batch
 			trainer = pl.Trainer(accelerator="gpu", devices=1, max_epochs=cfg.train_params.epoch, 
 				logger=tb_logger, callbacks=callbacks, 
-				log_every_n_steps=10, val_check_interval=0.5
+				log_every_n_steps=10, val_check_interval=0.5, benchmark=False
 				# ,track_grad_norm=2
 				) # 
 		else:

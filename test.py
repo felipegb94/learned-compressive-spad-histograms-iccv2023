@@ -62,8 +62,13 @@ def test(cfg):
 
 	model, ckpt_fpath = load_model_from_ckpt(cfg.model_name, ckpt_id, logger=logger)
 
+	logger.info("cuda flags BEFORE Trainer object:")
+	logger.info("    torch.backends.cudnn.benchmark: {}".format(torch.backends.cudnn.benchmark))
+	logger.info("    torch.backends.cudnn.enabled: {}".format(torch.backends.cudnn.enabled))
+	logger.info("    torch.backends.cudnn.deterministic: {}".format(torch.backends.cudnn.deterministic))
+
 	if(cfg.params.cuda):
-		trainer = pl.Trainer(accelerator="gpu", devices=1, logger=tb_logger, callbacks=callbacks) # 
+		trainer = pl.Trainer(accelerator="gpu", devices=1, logger=tb_logger, callbacks=callbacks, benchmark=False) # 
 	else:
 		trainer = pl.Trainer(logger=tb_logger, callbacks=callbacks) # 
 
