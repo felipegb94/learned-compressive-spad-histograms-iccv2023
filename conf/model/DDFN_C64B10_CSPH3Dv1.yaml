@@ -1,0 +1,20 @@
+## CSPH3Dv1 Model
+# This model uses the CSPH3Dv1 model for encoding/decoding and then as the backbone deep model for depth estimation it uses Plain Deep Boosting Model from Peng et al., 2020
+# The only difference between CSPH3D and CSPH3Dv1 is how the coding matrix weights are stored inside the module to make the code cleaner, but other than that their performance should be identical.
+
+# Model ID is used to select the correct model objcet
+model_id: DDFN_C64B10_CSPH3Dv1
+model_params:
+  in_channels: 1
+  k: 16
+  spatial_down_factor: 4
+  optimize_tdim_codes: true
+  optimize_codes: true
+  nt_blocks: 1
+  tblock_init: Rand
+  encoding_type: full
+
+# Model name is used for saving results
+model_name: ${.model_id}/k${.model_params.k}_down${.model_params.spatial_down_factor}_Mt${.model_params.nt_blocks}_${.model_params.tblock_init}-optCt=${.model_params.optimize_tdim_codes}-optC=${.model_params.optimize_codes}_${.model_params.encoding_type}
+
+data_loss_id: kldiv

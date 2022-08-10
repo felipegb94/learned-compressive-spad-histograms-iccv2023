@@ -66,6 +66,20 @@ def get_temporal_cmat_init(k, num_bins, init_id, h_irf=None):
 		assert(False), "Invalid CSPH1D init ID"
 	return Cmat_init
 
+def get_rand_torch_conv3d(in_ch, k, kernel3d_size, separable=False):
+	# Conv kernel for spatial dims
+	stride3d_size = kernel3d_size
+	if(separable): groups = k
+	else: groups = 1
+	conv3d_layer = torch.nn.Conv3d(in_channels=in_ch
+										, out_channels=k
+										, kernel_size=kernel3d_size
+										, stride=stride3d_size
+										, groups=groups
+										, padding=0, dilation=1, bias=False)
+	W3d = conv3d_layer.weight.data
+	return (conv3d_layer, W3d)
+
 def get_rand_torch_conv3d_W(k, kernel3d_size, separable=False):
 	'''
 		Random initialization of a torch.nn.Parameter that requires grad by default
@@ -81,15 +95,6 @@ def get_rand_torch_conv3d_W(k, kernel3d_size, separable=False):
 	in_f = kernel3d_size[0]*kernel3d_size[1]*kernel3d_size[2]
 	torch.nn.init.uniform_(conv3d_tensor, a=-1./math.sqrt(in_f), b=1./math.sqrt(in_f))
 	conv3d_W = torch.nn.Parameter(conv3d_tensor, requires_grad=True) 
-	# stride3d_size = kernel3d_size
-	# conv3d_layer = torch.nn.Conv3d(in_channels=in_ch
-	# 									, out_channels=k
-	# 									, kernel_size=kernel3d_size
-	# 									, stride=stride3d_size
-	# 									, groups=groups
-	# 									, padding=0, dilation=1, bias=False)
-	# W3d = conv3d_layer.weight.data
-	# return (conv3d_layer, W3d)
 	return conv3d_W
 
 class CSPH1DGlobalEncodingLayer(nn.Module):
@@ -252,6 +257,131 @@ class CSPH1DGlobal2DLocalLayer4xDown(nn.Module):
 		B4 = self.csph1D_decoding(B3_2)
 		return B4, B2
 
+class CSPH3DLayerv1(nn.Module):
+	'''
+		Same as CSPH3DLayer but it uses an older CSPH3D layer implementation that stores the coding matrix weights inside an nn.Conv3d module. The overall performance should be the same
+	'''
+	def __init__(self, k=2, num_bins=1024, 
+					tblock_init='Rand', h_irf=None, optimize_tdim_codes=False, optimize_codes=True, 
+					nt_blocks=1, spatial_down_factor=1, 
+					encoding_type='full'
+				):
+		# Init parent class
+		super(CSPH3DLayerv1, self).__init__()
+		# Validate some input params
+		assert((num_bins % nt_blocks) == 0), "Number of bins should be divisible by number of time blocks"
+
+		self.num_bins = num_bins
+		self.k = k
+		self.tblock_init=tblock_init
+		self.optimize_tdim_codes=optimize_tdim_codes
+		self.optimize_codes=optimize_codes
+		self.nt_blocks=nt_blocks
+		self.tblock_len = int(self.num_bins / nt_blocks) 
+		self.spatial_down_factor=spatial_down_factor
+		# Pad IRF with zeros if needed
+		self.h_irf = pad_h_irf(h_irf, num_bins=self.tblock_len) # This is used to select the frequencies that will be used in HybridGrayFourier
+		# Get initialization matrix for the temporal dimension block
+		self.Cmat_tdim_init = get_temporal_cmat_init(k=k, num_bins=self.tblock_len, init_id=tblock_init, h_irf=self.h_irf)
+		# reshape matrix to have the shape of a convolutional kernel in 3D
+		W1d = torch.from_numpy(self.Cmat_tdim_init.transpose()[:,np.newaxis,:,np.newaxis,np.newaxis])
+		
+		# Initialize the encoding layer
+		self.encoding_type = encoding_type
+		self.encoding_kernel_dims = (self.tblock_len, self.spatial_down_factor, self.spatial_down_factor)
+		self.encoding_kernel_stride = self.encoding_kernel_dims
+
+		print("Initialization a CSPH Encoding Layer:")
+		print("    - Encoding Type: {}".format(self.encoding_type))
+		print("    - Optimized tdim codes: {}".format(self.optimize_tdim_codes and self.optimize_codes))
+		print("    - Optimized spatial codes: {}".format(self.optimize_codes))
+		print("    - Optimized codes: {}".format(self.optimize_codes))
+		print("    - Encoding Kernel Dims: {}".format(self.encoding_kernel_dims))
+		print("    - Number of Filters/Codes: {}".format(self.k))
+
+		self.unfiltered_backproj_layer = UnfiltBackproj3DTransposeConv()
+
+		if(self.encoding_type == 'full'):
+			# initalize a random conv3d layer
+			(self.Cmat_txydim, _) = get_rand_torch_conv3d(1, k, self.encoding_kernel_dims, separable=False)
+
+			# If tblock init was not rand, initialize with the Cmat_tdim_init
+			if(not (self.tblock_init == 'Rand')):
+				## Initialize the weights
+				# change the type  for W1d
+				W1d = W1d.type(self.Cmat_txydim.weight.data.dtype)
+				# get a random W2d initialized with pytorch conv layer
+				kernel3d_W2d_size = (1, self.encoding_kernel_dims[-2], self.encoding_kernel_dims[-1])
+				(_, W2d) = get_rand_torch_conv3d(k, k, kernel3d_W2d_size, separable=True)
+				# init weights
+				self.Cmat_txydim.weight.data = W1d*W2d
+			# optimize codes only if this flag is set
+			# sometimes we may want to compare against codes that are not optimized or with random codes
+			self.Cmat_txydim.weight.requires_grad = self.optimize_codes
+
+			self.csph_layer = nn.Sequential( OrderedDict([
+														('Cmat_txydim', self.Cmat_txydim)
+			]))
+			## Set the method to obtain the weights for unfiltered backprojection
+			self.get_unfilt_backproj_W3d = self.get_unfilt_backproj_W3d_full
+			expected_num_params = self.k*self.encoding_kernel_dims[0]*self.encoding_kernel_dims[1]*self.encoding_kernel_dims[2]
+		elif(self.encoding_type == 'separable'):
+			# Separable convolution encoding
+			## Initialize time domain coding layer
+			# initalize a random conv3d layer but with last 2 dims as 1 (note first layer is not init as separable)
+			(self.Cmat_tdim, _) = get_rand_torch_conv3d(1, k, (self.tblock_len, 1, 1), separable=False)
+			# If we use rand init, leave the matrix as is, but store the weights
+			if(self.tblock_init == 'Rand'):
+				self.Cmat_tdim_init = torch.clone(self.Cmat_tdim.weight.data).cpu().numpy() 
+			else:
+				# init weights for tdim layer
+				self.Cmat_tdim.weight.data = torch.from_numpy(self.Cmat_tdim_init.transpose()[:,np.newaxis,:,np.newaxis,np.newaxis]).type(self.Cmat_tdim.weight.data.dtype)
+			# Only optimize the codes if neeeded
+			self.Cmat_tdim.weight.requires_grad = self.optimize_tdim_codes and self.optimize_codes
+
+			## Initialize spatial domain encoding layer
+			# get a random W2d initialized with pytorch conv layer
+			kernel3d_W2d_size = (1, self.encoding_kernel_dims[-2], self.encoding_kernel_dims[-1])
+			(self.Cmat_xydim, W2d) = get_rand_torch_conv3d(k, k, kernel3d_W2d_size, separable=True)
+			# Only optimize code if needed
+			self.Cmat_xydim.weight.requires_grad = self.optimize_codes
+			## Set the method to obtain the weights for unfiltered backprojection
+			self.get_unfilt_backproj_W3d = self.get_unfilt_backproj_W3d_separable
+			## Set the coding layer
+			self.csph_layer = nn.Sequential( OrderedDict([
+														('Cmat_tdim', self.Cmat_tdim)
+														, ('Cmat_xydim', self.Cmat_xydim)
+			]))
+			expected_num_params = (self.k*self.tblock_len) + (self.k*self.spatial_down_factor*self.spatial_down_factor)
+		else:
+			raise ValueError('Invalid encoding_type ({}) given as input.'.format(self.encoding_type))
+
+		num_params = sum(p.numel() for p in self.csph_layer.parameters())
+		print("    - Num CSPH Params: {}".format(num_params))
+		assert(expected_num_params == num_params), "Expected number of params does not match the coding layer params"
+		self.Cmat_size = num_params
+
+	def get_unfilt_backproj_W3d_full(self):
+		'''
+			If we use the full coding matrix, we use these weights for unfiltered backjprojection
+		'''
+		return self.Cmat_txydim.weight
+
+	def get_unfilt_backproj_W3d_separable(self):
+		'''
+			If we use a separable coding matrix, we use the outer product of the time and spatial domain for the unfiltered backprojection
+		'''
+		return self.Cmat_tdim.weight*self.Cmat_xydim.weight
+
+	def forward(self, inputs):
+		'''
+			Expected input dims == (Batch, Nt, Nr, Nc)
+		'''
+		## Compute compressive histogram
+		B = self.csph_layer(inputs)
+		## Upsample using unfiltered backprojection (similar to transposed convolution, but with fixed weights)
+		X = self.unfiltered_backproj_layer(y=B, W=self.get_unfilt_backproj_W3d())
+		return X
 class CSPHEncodingLayer(nn.Module):
 	def __init__(self, k=2, num_bins=1024, 
 					tblock_init='TruncFourier', h_irf=None, optimize_tdim_codes=False,

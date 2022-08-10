@@ -104,7 +104,7 @@ if __name__=='__main__':
 	os.makedirs(out_dirpath, exist_ok=True)
 
 	plot_results = False
-	plot_compression_vs_perf = True
+	plot_compression_vs_perf = False
 
 	## Scene ID and Params
 	scene_ids = ['spad_Art', 'spad_Reindeer', 'spad_Books', 'spad_Moebius', 'spad_Bowling1', 'spad_Dolls', 'spad_Laundry', 'spad_Plastic']
@@ -169,21 +169,21 @@ if __name__=='__main__':
 
 	## CSPH3D Models with Unfiltered Backprojection Ups 
 	model_metrics_all['db3D_csph3Dk512_full4x4x1024_opt_rand_tv0'] = {}
-	model_metrics_all['db3D_csph3Dk512_full4x4x1024_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-08-05_155940/'
+	model_metrics_all['db3D_csph3Dk512_full4x4x1024_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k512_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-08-05_155940/'
 	model_metrics_all['db3D_csph3Dk256_full4x4x1024_opt_rand_tv0'] = {}
-	model_metrics_all['db3D_csph3Dk256_full4x4x1024_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3D/k256_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-08-05_141013/'
+	model_metrics_all['db3D_csph3Dk256_full4x4x1024_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k256_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-08-05_141013/'
 	model_metrics_all['db3D_csph3Dk128_full4x4x1024_opt_rand_tv0'] = {}
-	model_metrics_all['db3D_csph3Dk128_full4x4x1024_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3D/k128_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-07-31_145411/'
+	model_metrics_all['db3D_csph3Dk128_full4x4x1024_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k128_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-07-31_145411/'
 	model_metrics_all['db3D_csph3Dk64_full4x4x1024_opt_rand_tv0'] = {}
-	model_metrics_all['db3D_csph3Dk64_full4x4x1024_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3D/k64_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-07-25_212205/'
+	model_metrics_all['db3D_csph3Dk64_full4x4x1024_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k64_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-07-25_212205/'
 	model_metrics_all['db3D_csph3Dk8_full4x4x128_opt_rand_tv0'] = {}
-	model_metrics_all['db3D_csph3Dk8_full4x4x128_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3D/k8_down4_Mt8_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-07-13_171326/'
+	model_metrics_all['db3D_csph3Dk8_full4x4x128_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k8_down4_Mt8_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-07-13_171326/'
 	model_metrics_all['db3D_csph3Dk16_full4x4x128_opt_rand_tv0'] = {}
-	model_metrics_all['db3D_csph3Dk16_full4x4x128_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3D/k16_down4_Mt8_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-07-13_193650/'
+	model_metrics_all['db3D_csph3Dk16_full4x4x128_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k16_down4_Mt8_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-07-13_193650/'
 	model_metrics_all['db3D_csph3Dk16_full4x4x64_opt_rand_tv0'] = {}
-	model_metrics_all['db3D_csph3Dk16_full4x4x64_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3D/k16_down4_Mt16_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-07-16_142109/'
+	model_metrics_all['db3D_csph3Dk16_full4x4x64_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k16_down4_Mt16_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-07-16_142109/'
 	model_metrics_all['db3D_csph3Dk32_full4x4x64_opt_rand_tv0'] = {}
-	model_metrics_all['db3D_csph3Dk32_full4x4x64_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3D/k32_down4_Mt16_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-07-16_122403/'
+	model_metrics_all['db3D_csph3Dk32_full4x4x64_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k32_down4_Mt16_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-07-16_122403/'
 
 	## [OLD] CSPH models with learned ups
 	model_metrics_all['db3D_csphk64_separable4x4x1024_opt_grayfour_tv0'] = {}
