@@ -496,7 +496,7 @@ class CSPH3DLayer(nn.Module):
 		'''
 			If we use the full coding matrix, we use these weights for unfiltered backjprojection
 		'''
-		return self.Cmat_txydim.weight
+		return self.Cmat_txydim.weight # self.Cmat_txydim = nn.Conv3d
 
 	def get_unfilt_backproj_W3d_separable(self):
 		'''
@@ -510,8 +510,23 @@ class CSPH3DLayer(nn.Module):
 		'''
 		## Compute compressive histogram
 		B = self.csph_layer(inputs)
+		# Get the weights from the first layer (if separable this is the outerproduct of two matrices)
+		W = self.get_unfilt_backproj_W3d()
 		## Upsample using unfiltered backprojection (similar to transposed convolution, but with fixed weights)
-		X = self.unfiltered_backproj_layer(y=B, W=self.get_unfilt_backproj_W3d())
+		# X = self.unfiltered_backproj_layer(y=B, W=W)
+		torch.cuda.synchronize()
+		from research_utils.timer import Timer
+		print("CSPH3D fn cuda flags:")
+		print("    torch.backends.cudnn.benchmark: {}".format(torch.backends.cudnn.benchmark))
+		print("    torch.backends.cudnn.enabled: {}".format(torch.backends.cudnn.enabled))
+		print("    torch.backends.cudnn.deterministic: {}".format(torch.backends.cudnn.deterministic))
+		with Timer('OOP Implementation'):
+			X = self.unfiltered_backproj_layer(y=B, W=W)
+			torch.cuda.synchronize()
+		with Timer('functional Implementation'):
+			xhat = F.conv_transpose3d(B, weight=W, bias=None, stride=W.shape[-3:])
+			torch.cuda.synchronize()
+		breakpoint()
 		return X
 
 if __name__=='__main__':
