@@ -104,7 +104,7 @@ if __name__=='__main__':
 	os.makedirs(out_dirpath, exist_ok=True)
 
 	plot_results = False
-	plot_compression_vs_perf = False
+	plot_compression_vs_perf = True
 
 	## Scene ID and Params
 	scene_ids = ['spad_Art', 'spad_Reindeer', 'spad_Books', 'spad_Moebius', 'spad_Bowling1', 'spad_Dolls', 'spad_Laundry', 'spad_Plastic']
@@ -115,14 +115,14 @@ if __name__=='__main__':
 	# # scene_ids = ['spad_Books']
 	# scene_ids = ['spad_Reindeer']
 	# scene_ids = ['spad_Plastic']
-	# sbr_params = ['10_10']
+	sbr_params = ['10_10']
 
 	compression_lvl = '32x' 
 
 	test_set_id = 'test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
 
 	model_metrics_all = {}
-	metrics_all = {}
+	# metrics_all = {}
 
 	## Ground truth and basic baselines (no need to specifi dirpath for these ones since they are loaded from the gt data file)
 	gt_data_dirpath = 'data_gener/TestData/middlebury/processed/SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
@@ -168,17 +168,21 @@ if __name__=='__main__':
 	model_metrics_all['db3D_csph1Dk64_coarsehist_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_CSPH1D/k64_CoarseHist/loss-kldiv_tv-0.0/2022-05-17_224020/'
 
 	## CSPH3D Models with Unfiltered Backprojection Ups 
+	model_metrics_all['db3D_csph3Dk512_full4x4x1024_opt_rand_tv0'] = {}
+	model_metrics_all['db3D_csph3Dk512_full4x4x1024_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-08-05_155940/'
+	model_metrics_all['db3D_csph3Dk256_full4x4x1024_opt_rand_tv0'] = {}
+	model_metrics_all['db3D_csph3Dk256_full4x4x1024_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3D/k256_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-08-05_141013/'
 	model_metrics_all['db3D_csph3Dk128_full4x4x1024_opt_rand_tv0'] = {}
-	model_metrics_all['db3D_csph3Dk64_full4x4x1024_opt_rand_tv0'] = {}
-	model_metrics_all['db3D_csph3Dk8_full4x4x128_opt_rand_tv0'] = {}
-	model_metrics_all['db3D_csph3Dk16_full4x4x128_opt_rand_tv0'] = {}
-	model_metrics_all['db3D_csph3Dk16_full4x4x64_opt_rand_tv0'] = {}
-	model_metrics_all['db3D_csph3Dk32_full4x4x64_opt_rand_tv0'] = {}
 	model_metrics_all['db3D_csph3Dk128_full4x4x1024_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3D/k128_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-07-31_145411/'
+	model_metrics_all['db3D_csph3Dk64_full4x4x1024_opt_rand_tv0'] = {}
 	model_metrics_all['db3D_csph3Dk64_full4x4x1024_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3D/k64_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-07-25_212205/'
+	model_metrics_all['db3D_csph3Dk8_full4x4x128_opt_rand_tv0'] = {}
 	model_metrics_all['db3D_csph3Dk8_full4x4x128_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3D/k8_down4_Mt8_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-07-13_171326/'
+	model_metrics_all['db3D_csph3Dk16_full4x4x128_opt_rand_tv0'] = {}
 	model_metrics_all['db3D_csph3Dk16_full4x4x128_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3D/k16_down4_Mt8_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-07-13_193650/'
+	model_metrics_all['db3D_csph3Dk16_full4x4x64_opt_rand_tv0'] = {}
 	model_metrics_all['db3D_csph3Dk16_full4x4x64_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3D/k16_down4_Mt16_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-07-16_142109/'
+	model_metrics_all['db3D_csph3Dk32_full4x4x64_opt_rand_tv0'] = {}
 	model_metrics_all['db3D_csph3Dk32_full4x4x64_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3D/k32_down4_Mt16_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-07-16_122403/'
 
 	## [OLD] CSPH models with learned ups
@@ -369,76 +373,76 @@ if __name__=='__main__':
 		compression_vs_perf['mae'] = {}
 		compression_rates = [16, 32, 64, 128, 256]
 		compression_vs_perf['db3D'] = 'No Compression'
-		compression_vs_perf['mae']['db3D'] = [calc_mean_mae(metrics_all['db3D'])]*len(compression_rates)
+		compression_vs_perf['mae']['db3D'] = [calc_mean_mae(model_metrics_all['db3D'])]*len(compression_rates)
 		compression_vs_perf['db3D_d2d'] = 'Argmax Compression (Large Memory)'
-		compression_vs_perf['mae']['db3D_d2d'] = [calc_mean_mae(metrics_all['db3D_d2d'])]*len(compression_rates)
+		compression_vs_perf['mae']['db3D_d2d'] = [calc_mean_mae(model_metrics_all['db3D_d2d'])]*len(compression_rates)
 		compression_vs_perf['db3D_csph3D_full4x4x1024_opt_rand_tv0'] = 'CSPH3D + Full4x4x1024 + Backproj Up'
 		compression_vs_perf['mae']['db3D_csph3D_full4x4x1024_opt_rand_tv0'] = [ \
 			np.nan
-			, np.nan
-			, np.nan
-			, calc_mean_mae(metrics_all['db3D_csph3Dk128_full4x4x1024_opt_rand_tv0'])
-			, calc_mean_mae(metrics_all['db3D_csph3Dk64_full4x4x1024_opt_rand_tv0'])
+			, calc_mean_mae(model_metrics_all['db3D_csph3Dk512_full4x4x1024_opt_rand_tv0'])
+			, calc_mean_mae(model_metrics_all['db3D_csph3Dk256_full4x4x1024_opt_rand_tv0'])
+			, calc_mean_mae(model_metrics_all['db3D_csph3Dk128_full4x4x1024_opt_rand_tv0'])
+			, calc_mean_mae(model_metrics_all['db3D_csph3Dk64_full4x4x1024_opt_rand_tv0'])
 			]
 		compression_vs_perf['db3D_csph3D_full4x4x128_opt_rand_tv0'] = 'CSPH3D + Full4x4x128 + Backproj Up'
 		compression_vs_perf['mae']['db3D_csph3D_full4x4x128_opt_rand_tv0'] = [ \
 			np.nan
-			, calc_mean_mae(metrics_all['db3D_csph3Dk32_full4x4x64_opt_rand_tv0'])
-			, calc_mean_mae(metrics_all['db3D_csph3Dk16_full4x4x64_opt_rand_tv0'])
-			, calc_mean_mae(metrics_all['db3D_csph3Dk16_full4x4x128_opt_rand_tv0'])
-			, calc_mean_mae(metrics_all['db3D_csph3Dk8_full4x4x128_opt_rand_tv0'])
+			, calc_mean_mae(model_metrics_all['db3D_csph3Dk32_full4x4x64_opt_rand_tv0'])
+			, calc_mean_mae(model_metrics_all['db3D_csph3Dk16_full4x4x64_opt_rand_tv0'])
+			, calc_mean_mae(model_metrics_all['db3D_csph3Dk16_full4x4x128_opt_rand_tv0'])
+			, calc_mean_mae(model_metrics_all['db3D_csph3Dk8_full4x4x128_opt_rand_tv0'])
 			]
 		compression_vs_perf['db3D_csph_separable4x4x1024_opt_four_tv0'] = 'CSPH3D + Separable4x4x1024 + Learned Up'
 		compression_vs_perf['mae']['db3D_csph_separable4x4x1024_opt_four_tv0'] = [ \
 			np.nan
-			, calc_mean_mae(metrics_all['db3D_csphk512_separable4x4x1024_opt_grayfour_tv0'])
-			, calc_mean_mae(metrics_all['db3D_csphk256_separable4x4x1024_opt_truncfour_tv0'])
-			, calc_mean_mae(metrics_all['db3D_csphk128_separable4x4x1024_opt_truncfour_tv0'])
-			, calc_mean_mae(metrics_all['db3D_csphk64_separable4x4x1024_opt_grayfour_tv0'])
+			, calc_mean_mae(model_metrics_all['db3D_csphk512_separable4x4x1024_opt_grayfour_tv0'])
+			, calc_mean_mae(model_metrics_all['db3D_csphk256_separable4x4x1024_opt_truncfour_tv0'])
+			, calc_mean_mae(model_metrics_all['db3D_csphk128_separable4x4x1024_opt_truncfour_tv0'])
+			, calc_mean_mae(model_metrics_all['db3D_csphk64_separable4x4x1024_opt_grayfour_tv0'])
 			]
 		compression_vs_perf['db3D_csph1D_grayfour_tv0'] = 'CSPH1D + GrayFour1x1x1024 + ZNCC Up'
 		compression_vs_perf['mae']['db3D_csph1D_grayfour_tv0'] = [ \
-			calc_mean_mae(metrics_all['db3D_csph1Dk64_grayfour_tv0'])
-			, calc_mean_mae(metrics_all['db3D_csph1Dk32_grayfour_tv0'])
-			, calc_mean_mae(metrics_all['db3D_csph1Dk16_grayfour_tv0'])
-			, calc_mean_mae(metrics_all['db3D_csph1Dk8_grayfour_tv0'])
+			calc_mean_mae(model_metrics_all['db3D_csph1Dk64_grayfour_tv0'])
+			, calc_mean_mae(model_metrics_all['db3D_csph1Dk32_grayfour_tv0'])
+			, calc_mean_mae(model_metrics_all['db3D_csph1Dk16_grayfour_tv0'])
+			, calc_mean_mae(model_metrics_all['db3D_csph1Dk8_grayfour_tv0'])
 			, np.nan
 			]
 		compression_vs_perf['db3D_csph1Dk64_coarsehist_tv0'] = 'Coarse Hist with 64 bins (16x compression)'
-		compression_vs_perf['mae']['db3D_csph1Dk64_coarsehist_tv0'] = [ calc_mean_mae(metrics_all['db3D_csph1Dk64_coarsehist_tv0'])]*len(compression_rates)
+		compression_vs_perf['mae']['db3D_csph1Dk64_coarsehist_tv0'] = [ calc_mean_mae(model_metrics_all['db3D_csph1Dk64_coarsehist_tv0'])]*len(compression_rates)
 		
 		compression_vs_perf['mse'] = {}
-		compression_vs_perf['mse']['db3D'] = [calc_mean_mse(metrics_all['db3D'])]*len(compression_rates)
-		compression_vs_perf['mse']['db3D_d2d'] = [calc_mean_mse(metrics_all['db3D_d2d'])]*len(compression_rates)
+		compression_vs_perf['mse']['db3D'] = [calc_mean_mse(model_metrics_all['db3D'])]*len(compression_rates)
+		compression_vs_perf['mse']['db3D_d2d'] = [calc_mean_mse(model_metrics_all['db3D_d2d'])]*len(compression_rates)
 		compression_vs_perf['mse']['db3D_csph3D_full4x4x1024_opt_rand_tv0'] = [ \
 			np.nan
-			, np.nan
-			, np.nan
-			, calc_mean_mse(metrics_all['db3D_csph3Dk128_full4x4x1024_opt_rand_tv0'])
-			, calc_mean_mse(metrics_all['db3D_csph3Dk64_full4x4x1024_opt_rand_tv0'])
+			, calc_mean_mse(model_metrics_all['db3D_csph3Dk512_full4x4x1024_opt_rand_tv0'])
+			, calc_mean_mse(model_metrics_all['db3D_csph3Dk256_full4x4x1024_opt_rand_tv0'])
+			, calc_mean_mse(model_metrics_all['db3D_csph3Dk128_full4x4x1024_opt_rand_tv0'])
+			, calc_mean_mse(model_metrics_all['db3D_csph3Dk64_full4x4x1024_opt_rand_tv0'])
 			]
 		compression_vs_perf['mse']['db3D_csph3D_full4x4x128_opt_rand_tv0'] = [ \
 			np.nan
-			, calc_mean_mse(metrics_all['db3D_csph3Dk32_full4x4x64_opt_rand_tv0'])
-			, calc_mean_mse(metrics_all['db3D_csph3Dk16_full4x4x64_opt_rand_tv0'])
-			, calc_mean_mse(metrics_all['db3D_csph3Dk16_full4x4x128_opt_rand_tv0'])
-			, calc_mean_mse(metrics_all['db3D_csph3Dk8_full4x4x128_opt_rand_tv0'])
+			, calc_mean_mse(model_metrics_all['db3D_csph3Dk32_full4x4x64_opt_rand_tv0'])
+			, calc_mean_mse(model_metrics_all['db3D_csph3Dk16_full4x4x64_opt_rand_tv0'])
+			, calc_mean_mse(model_metrics_all['db3D_csph3Dk16_full4x4x128_opt_rand_tv0'])
+			, calc_mean_mse(model_metrics_all['db3D_csph3Dk8_full4x4x128_opt_rand_tv0'])
 			]
 		compression_vs_perf['mse']['db3D_csph_separable4x4x1024_opt_four_tv0'] = [ \
 			np.nan
-			, calc_mean_mse(metrics_all['db3D_csphk512_separable4x4x1024_opt_grayfour_tv0'])
-			, calc_mean_mse(metrics_all['db3D_csphk256_separable4x4x1024_opt_truncfour_tv0'])
-			, calc_mean_mse(metrics_all['db3D_csphk128_separable4x4x1024_opt_truncfour_tv0'])
-			, calc_mean_mse(metrics_all['db3D_csphk64_separable4x4x1024_opt_grayfour_tv0'])
+			, calc_mean_mse(model_metrics_all['db3D_csphk512_separable4x4x1024_opt_grayfour_tv0'])
+			, calc_mean_mse(model_metrics_all['db3D_csphk256_separable4x4x1024_opt_truncfour_tv0'])
+			, calc_mean_mse(model_metrics_all['db3D_csphk128_separable4x4x1024_opt_truncfour_tv0'])
+			, calc_mean_mse(model_metrics_all['db3D_csphk64_separable4x4x1024_opt_grayfour_tv0'])
 			]
 		compression_vs_perf['mse']['db3D_csph1D_grayfour_tv0'] = [ \
-			calc_mean_mse(metrics_all['db3D_csph1Dk64_grayfour_tv0'])
-			, calc_mean_mse(metrics_all['db3D_csph1Dk32_grayfour_tv0'])
-			, calc_mean_mse(metrics_all['db3D_csph1Dk16_grayfour_tv0'])
-			, calc_mean_mse(metrics_all['db3D_csph1Dk8_grayfour_tv0'])
+			calc_mean_mse(model_metrics_all['db3D_csph1Dk64_grayfour_tv0'])
+			, calc_mean_mse(model_metrics_all['db3D_csph1Dk32_grayfour_tv0'])
+			, calc_mean_mse(model_metrics_all['db3D_csph1Dk16_grayfour_tv0'])
+			, calc_mean_mse(model_metrics_all['db3D_csph1Dk8_grayfour_tv0'])
 			, np.nan
 			]
-		compression_vs_perf['mse']['db3D_csph1Dk64_coarsehist_tv0'] = [ calc_mean_mse(metrics_all['db3D_csph1Dk64_coarsehist_tv0'])]*len(compression_rates)
+		compression_vs_perf['mse']['db3D_csph1Dk64_coarsehist_tv0'] = [ calc_mean_mse(model_metrics_all['db3D_csph1Dk64_coarsehist_tv0'])]*len(compression_rates)
 		  
 		
 		plt.clf()
