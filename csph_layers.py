@@ -66,19 +66,20 @@ def get_temporal_cmat_init(k, num_bins, init_id, h_irf=None):
 		assert(False), "Invalid CSPH1D init ID"
 	return Cmat_init
 
-def get_rand_torch_conv3d_W(in_ch, k, kernel3d_size, separable=False):
+def get_rand_torch_conv3d_W(k, kernel3d_size, separable=False):
 	'''
 		Random initialization of a torch.nn.Parameter that requires grad by default
 	'''
-	# Conv kernel for spatial dims
-	if(separable): groups = k
-	else: groups = 1
 	out_ch = k
-	conv3d_weight_shape = (out_ch, in_ch / groups) + kernel3d_size
+	## Set the size of the 3D convolutional kernel  
+	# If not separable, we expect in_ch == 1 since this is for the first layer
+	# If separable, we expect in_ch == k, so the second dim is (in_ch / groups) where groups = k, so we get the second dim as 1
+	# In both cases we get the same shape so:
+	conv3d_weight_shape = (out_ch, 1) + kernel3d_size
 	conv3d_tensor = torch.empty(conv3d_weight_shape)
 	# Although we implement W as a convolutional kernel, it really is applying a linear transform to an image block of size kernel3d_size and projecting it into a K-dimensional space. So we want to initialize things just like a linear layer where the number of input features is actually the size of the kernel 
-	in_features = kernel3d_size[0]*kernel3d_size[1]*kernel3d_size[2]
-	torch.nn.init.uniform_(conv3d_tensor, a=-1./math.sqrt(in_features), b=1./math.sqrt(in_features))
+	in_f = kernel3d_size[0]*kernel3d_size[1]*kernel3d_size[2]
+	torch.nn.init.uniform_(conv3d_tensor, a=-1./math.sqrt(in_f), b=1./math.sqrt(in_f))
 	conv3d_W = torch.nn.Parameter(conv3d_tensor, requires_grad=True) 
 	# stride3d_size = kernel3d_size
 	# conv3d_layer = torch.nn.Conv3d(in_channels=in_ch
@@ -425,35 +426,34 @@ class CSPH3DLayer(nn.Module):
 		
 		# Initialize the encoding layer
 		self.encoding_type = encoding_type
-		self.encoding_kernel_dims = (self.tblock_len, self.spatial_down_factor, self.spatial_down_factor)
-		self.encoding_kernel_stride_txy = self.encoding_kernel_dims
-		self.encoding_kernel_stride_t = (self.encoding_kernel_dims[0], 1, 1)
-		self.encoding_kernel_stride_xy = (1, self.encoding_kernel_dims[1], self.encoding_kernel_dims[2])
+		self.encoding_kernel3d_dims = (self.tblock_len, self.spatial_down_factor, self.spatial_down_factor)
+		self.encoding_kernel3d_txy = self.encoding_kernel3d_dims
+		self.encoding_kernel3d_t = (self.encoding_kernel3d_dims[0], 1, 1)
+		self.encoding_kernel3d_xy = (1, self.encoding_kernel3d_dims[1], self.encoding_kernel3d_dims[2])
 
 		print("Initialization a CSPH Encoding Layer:")
 		print("    - Encoding Type: {}".format(self.encoding_type))
 		print("    - Optimized tdim codes: {}".format(self.optimize_tdim_codes and self.optimize_codes))
 		print("    - Optimized spatial codes: {}".format(self.optimize_codes))
 		print("    - Optimized codes: {}".format(self.optimize_codes))
-		print("    - Encoding Kernel Dims: {}".format(self.encoding_kernel_dims))
+		print("    - Encoding Kernel Dims: {}".format(self.encoding_kernel3d_dims))
 		print("    - Number of Filters/Codes: {}".format(self.k))
 
 		self.unfiltered_backproj_layer = UnfiltBackproj3DTransposeConv()
-
 		if(self.encoding_type == 'full'):
 			# initalize a random conv3d layer
-			self.Cmat_txydim = get_rand_torch_conv3d_W(1, k, self.encoding_kernel_dims, separable=False)
+			self.Cmat_txydim = get_rand_torch_conv3d_W(k, self.encoding_kernel3d_dims, separable=False)
 			# If tblock init was not rand, initialize with the Cmat_tdim_init
 			if(not (self.tblock_init == 'Rand')):
 				## Initialize the weights
 				# change the type  for W1d
-				W1d = W1d.type(self.Cmat_txydim.weight.data.dtype)
+				W1d = W1d.type(self.Cmat_txydim.data.dtype)
 				# get a random W2d initialized with pytorch conv layer
-				kernel3d_W2d_size = (1, self.encoding_kernel_dims[-2], self.encoding_kernel_dims[-1])
-				W2d = get_rand_torch_conv3d_W(k, k, kernel3d_W2d_size, separable=True)
-				# init weights
-				breakpoint() # check that we get a parameter out
-				self.Cmat_txydim = W1d*W2d
+				W2d = get_rand_torch_conv3d_W(k, self.encoding_kernel3d_xy, separable=True)
+				## re-init the parameter tensor
+				self.Cmat_txydim = nn.Parameter(W1d*(W2d.data), requires_grad=True)
+			## store the initial matrix
+			self.Cmat_txydim_init = torch.clone(self.Cmat_txydim.data).cpu().numpy()
 			# optimize codes only if this flag is set
 			# sometimes we may want to compare against codes that are not optimized or with random codes
 			self.Cmat_txydim.requires_grad = self.optimize_codes
@@ -462,15 +462,15 @@ class CSPH3DLayer(nn.Module):
 			## Set the method to obtain the weights for unfiltered backprojection
 			self.get_unfilt_backproj_W3d = self.get_unfilt_backproj_W3d_full
 			## Compute the expected number of parameters
-			expected_num_params = self.k*self.encoding_kernel_dims[0]*self.encoding_kernel_dims[1]*self.encoding_kernel_dims[2]
+			expected_num_params = self.k*self.encoding_kernel3d_dims[0]*self.encoding_kernel3d_dims[1]*self.encoding_kernel3d_dims[2]
 		elif(self.encoding_type == 'separable'):
-			# Separable convolution encoding
+			## Separable convolution encoding
 			## Initialize time domain coding layer
 			# initalize a random conv3d layer but with last 2 dims as 1 (note first layer is not init as separable)
-			self.Cmat_tdim = get_rand_torch_conv3d_W(1, k, (self.tblock_len, 1, 1), separable=False)
+			self.Cmat_tdim = get_rand_torch_conv3d_W(k, self.encoding_kernel3d_t, separable=False)
 			# If we use rand init, leave the matrix as is, but store a copy of the weights
 			if(self.tblock_init == 'Rand'):
-				self.Cmat_tdim_init = torch.clone(self.Cmat_tdim).data.cpu().numpy() 
+				self.Cmat_tdim_init = torch.clone(self.Cmat_tdim.data).cpu().numpy() 
 			else:
 				# init weights for tdim layer
 				self.Cmat_tdim.data = torch.from_numpy(self.Cmat_tdim_init.transpose()[:,np.newaxis,:,np.newaxis,np.newaxis]).type(self.Cmat_tdim.dtype)
@@ -478,8 +478,8 @@ class CSPH3DLayer(nn.Module):
 			self.Cmat_tdim.requires_grad = self.optimize_tdim_codes and self.optimize_codes
 			## Initialize spatial domain encoding layer
 			# get a random W2d initialized with pytorch conv layer
-			kernel3d_W2d_size = (1, self.encoding_kernel_dims[-2], self.encoding_kernel_dims[-1])
-			self.Cmat_xydim = get_rand_torch_conv3d_W(k, k, kernel3d_W2d_size, separable=True)
+			self.Cmat_xydim = get_rand_torch_conv3d_W( k, self.encoding_kernel3d_xy, separable=True)
+			self.Cmat_xydim_init = torch.clone(self.Cmat_xydim.data).cpu().numpy()
 			# Only optimize code if needed
 			self.Cmat_xydim.requires_grad = self.optimize_codes
 			## Set the function to compute the compressive histogram
@@ -490,8 +490,8 @@ class CSPH3DLayer(nn.Module):
 			expected_num_params = (self.k*self.tblock_len) + (self.k*self.spatial_down_factor*self.spatial_down_factor)
 		else:
 			raise ValueError('Invalid encoding_type ({}) given as input.'.format(self.encoding_type))
-
-		num_params = sum(p.numel() for p in self.csph_layer.parameters())
+		## Verify that the number of parameters we estimated above matches what we get
+		num_params = sum(p.numel() for p in self.parameters())
 		print("    - Num CSPH Params: {}".format(num_params))
 		assert(expected_num_params == num_params), "Expected number of params does not match the coding layer params"
 		self.Cmat_size = num_params
@@ -500,28 +500,28 @@ class CSPH3DLayer(nn.Module):
 		'''
 			Assume a full coding matrix representation
 		'''
-		B = F.conv3d(inputs, self.Cmat_txydim, bias=None, stride=self.encoding_kernel_stride_txy, padding=0, dilation = 0, groups = 1)
+		B = F.conv3d(inputs, self.Cmat_txydim, bias=None, stride=self.encoding_kernel3d_txy, padding=0, dilation = 1, groups = 1)
 		return B
 
 	def csph_layer_separable(self, inputs):
 		'''
 			Assume a separable coding matrix representation where the 1st dim is independent from 2nd and 3rd
 		'''
-		B1 = F.conv3d(inputs, self.Cmat_t, bias=None, stride=self.encoding_kernel_stride_t, padding=0, dilation = 0, groups = 1)
-		B = F.conv3d(B1, self.Cmat_xy, bias=None, stride=self.encoding_kernel_stride_xy, padding=0, dilation = 0, groups = self.k)
+		B1 = F.conv3d(inputs, self.Cmat_tdim, bias=None, stride=self.encoding_kernel3d_t, padding=0, dilation = 1, groups = 1)
+		B = F.conv3d(B1, self.Cmat_xydim, bias=None, stride=self.encoding_kernel3d_xy, padding=0, dilation = 1, groups = self.k)
 		return B
 
 	def get_unfilt_backproj_W3d_full(self):
 		'''
 			If we use the full coding matrix, we use these weights for unfiltered backjprojection
 		'''
-		return self.Cmat_txydim.weight # self.Cmat_txydim = nn.Conv3d
+		return self.Cmat_txydim # self.Cmat_txydim = nn.Conv3d
 
 	def get_unfilt_backproj_W3d_separable(self):
 		'''
 			If we use a separable coding matrix, we use the outer product of the time and spatial domain for the unfiltered backprojection
 		'''
-		return self.Cmat_tdim.weight*self.Cmat_xydim.weight
+		return self.Cmat_tdim*self.Cmat_xydim
 
 	def forward(self, inputs):
 		'''
@@ -532,30 +532,17 @@ class CSPH3DLayer(nn.Module):
 		# Get the weights from the first layer (if separable this is the outerproduct of two matrices)
 		W = self.get_unfilt_backproj_W3d()
 		## Upsample using unfiltered backprojection (similar to transposed convolution, but with fixed weights)
-		# X = self.unfiltered_backproj_layer(y=B, W=W)
-		torch.cuda.synchronize()
-		from research_utils.timer import Timer
-		print("CSPH3D fn cuda flags:")
-		print("    torch.backends.cudnn.benchmark: {}".format(torch.backends.cudnn.benchmark))
-		print("    torch.backends.cudnn.enabled: {}".format(torch.backends.cudnn.enabled))
-		print("    torch.backends.cudnn.deterministic: {}".format(torch.backends.cudnn.deterministic))
-		with Timer('OOP Implementation'):
-			X = self.unfiltered_backproj_layer(y=B, W=W)
-			torch.cuda.synchronize()
-		with Timer('functional Implementation'):
-			xhat = F.conv_transpose3d(B, weight=W, bias=None, stride=W.shape[-3:])
-			torch.cuda.synchronize()
-		breakpoint()
+		X = self.unfiltered_backproj_layer(y=B, W=W)
 		return X
 
 if __name__=='__main__':
 	import matplotlib.pyplot as plt
 
 	# Select device
-	use_gpu = True
+	use_gpu = False
 	if(torch.cuda.is_available() and use_gpu): device = torch.device("cuda:0")
 	else: device = torch.device("cpu")
-
+	
 	# Set random input
 	k=32
 	optimize_tdim_codes = True
@@ -703,17 +690,17 @@ if __name__=='__main__':
 
 	plt.clf()
 	plt.subplot(3,1,1)
-	plt.plot(csph3d_full_layer_obj.Cmat_txydim.weight.data.detach().cpu().numpy()[0,0,:,0,0], label='{}-full-k=0-0,0'.format(init_param))
-	plt.plot(csph3d_separable_layer_obj.Cmat_tdim.weight.data.detach().cpu().numpy()[0,0,:,0,0], label='{}-separable-tdim-k=0'.format(init_param))
-	plt.plot(csph3d_separable_layer_obj.Cmat_xydim.weight.data.detach().cpu().numpy()[0,0,0,0,0]*csph3d_separable_layer_obj.Cmat_tdim.weight.data.detach().cpu().numpy()[0,0,:,0,0], label='{}-separable-txydim-k=0-0,0'.format(init_param))
+	plt.plot(csph3d_full_layer_obj.Cmat_txydim.data.detach().cpu().numpy()[0,0,:,0,0], label='{}-full-k=0-0,0'.format(init_param))
+	plt.plot(csph3d_separable_layer_obj.Cmat_tdim.data.detach().cpu().numpy()[0,0,:,0,0], label='{}-separable-tdim-k=0'.format(init_param))
+	plt.plot(csph3d_separable_layer_obj.Cmat_xydim.data.detach().cpu().numpy()[0,0,0,0,0]*csph3d_separable_layer_obj.Cmat_tdim.data.detach().cpu().numpy()[0,0,:,0,0], label='{}-separable-txydim-k=0-0,0'.format(init_param))
 	plt.legend()
 	plt.subplot(3,1,2)
-	plt.plot(csph3d_full_layer_obj.Cmat_txydim.weight.data.detach().cpu().numpy()[0,0,:,1,1], label='{}-full-k=0-1,1'.format(init_param))
-	plt.plot(csph3d_separable_layer_obj.Cmat_tdim.weight.data.detach().cpu().numpy()[0,0,:,0,0], label='{}-separable-tdim-k=0'.format(init_param))
-	plt.plot(csph3d_separable_layer_obj.Cmat_xydim.weight.data.detach().cpu().numpy()[0,0,0,1,1]*csph3d_separable_layer_obj.Cmat_tdim.weight.data.detach().cpu().numpy()[0,0,:,0,0], label='{}-separable-txydim-k=0-1,1'.format(init_param))
+	plt.plot(csph3d_full_layer_obj.Cmat_txydim.data.detach().cpu().numpy()[0,0,:,1,1], label='{}-full-k=0-1,1'.format(init_param))
+	plt.plot(csph3d_separable_layer_obj.Cmat_tdim.data.detach().cpu().numpy()[0,0,:,0,0], label='{}-separable-tdim-k=0'.format(init_param))
+	plt.plot(csph3d_separable_layer_obj.Cmat_xydim.data.detach().cpu().numpy()[0,0,0,1,1]*csph3d_separable_layer_obj.Cmat_tdim.data.detach().cpu().numpy()[0,0,:,0,0], label='{}-separable-txydim-k=0-1,1'.format(init_param))
 	plt.legend()
 	plt.subplot(3,1,3)
-	plt.plot(csph3d_full_layer_obj.Cmat_txydim.weight.data.detach().cpu().numpy()[2,0,:,1,1], label='{}-full-k=2-1,1'.format(init_param))
-	plt.plot(csph3d_separable_layer_obj.Cmat_tdim.weight.data.detach().cpu().numpy()[2,0,:,0,0], label='{}-separable-tdim-k=2'.format(init_param))
-	plt.plot(csph3d_separable_layer_obj.Cmat_xydim.weight.data.detach().cpu().numpy()[2,0,0,1,1]*csph3d_separable_layer_obj.Cmat_tdim.weight.data.detach().cpu().numpy()[2,0,:,0,0], label='{}-separable-txydim-k=2-1,1'.format(init_param))
+	plt.plot(csph3d_full_layer_obj.Cmat_txydim.data.detach().cpu().numpy()[2,0,:,1,1], label='{}-full-k=2-1,1'.format(init_param))
+	plt.plot(csph3d_separable_layer_obj.Cmat_tdim.data.detach().cpu().numpy()[2,0,:,0,0], label='{}-separable-tdim-k=2'.format(init_param))
+	plt.plot(csph3d_separable_layer_obj.Cmat_xydim.data.detach().cpu().numpy()[2,0,0,1,1]*csph3d_separable_layer_obj.Cmat_tdim.data.detach().cpu().numpy()[2,0,:,0,0], label='{}-separable-txydim-k=2-1,1'.format(init_param))
 	plt.legend()
