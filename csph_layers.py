@@ -2,6 +2,7 @@
 import os
 from pickletools import optimize
 from typing import OrderedDict
+import math
 
 #### Library imports
 import numpy as np
@@ -65,19 +66,30 @@ def get_temporal_cmat_init(k, num_bins, init_id, h_irf=None):
 		assert(False), "Invalid CSPH1D init ID"
 	return Cmat_init
 
-def get_rand_torch_conv3d(in_ch, k, kernel3d_size, separable=False):
+def get_rand_torch_conv3d_W(in_ch, k, kernel3d_size, separable=False):
+	'''
+		Random initialization of a torch.nn.Parameter that requires grad by default
+	'''
 	# Conv kernel for spatial dims
-	stride3d_size = kernel3d_size
 	if(separable): groups = k
 	else: groups = 1
-	conv3d_layer = torch.nn.Conv3d(in_channels=in_ch
-										, out_channels=k
-										, kernel_size=kernel3d_size
-										, stride=stride3d_size
-										, groups=groups
-										, padding=0, dilation=1, bias=False)
-	W3d = conv3d_layer.weight.data
-	return (conv3d_layer, W3d)
+	out_ch = k
+	conv3d_weight_shape = (out_ch, in_ch / groups) + kernel3d_size
+	conv3d_tensor = torch.empty(conv3d_weight_shape)
+	# Although we implement W as a convolutional kernel, it really is applying a linear transform to an image block of size kernel3d_size and projecting it into a K-dimensional space. So we want to initialize things just like a linear layer where the number of input features is actually the size of the kernel 
+	in_features = kernel3d_size[0]*kernel3d_size[1]*kernel3d_size[2]
+	torch.nn.init.uniform_(conv3d_tensor, a=-1./math.sqrt(in_features), b=1./math.sqrt(in_features))
+	conv3d_W = torch.nn.Parameter(conv3d_tensor, requires_grad=True) 
+	# stride3d_size = kernel3d_size
+	# conv3d_layer = torch.nn.Conv3d(in_channels=in_ch
+	# 									, out_channels=k
+	# 									, kernel_size=kernel3d_size
+	# 									, stride=stride3d_size
+	# 									, groups=groups
+	# 									, padding=0, dilation=1, bias=False)
+	# W3d = conv3d_layer.weight.data
+	# return (conv3d_layer, W3d)
+	return conv3d_W
 
 class CSPH1DGlobalEncodingLayer(nn.Module):
 	def __init__(self, k=2, num_bins=1024, init='TruncFourier', h_irf=None, optimize_weights=False):
@@ -414,7 +426,9 @@ class CSPH3DLayer(nn.Module):
 		# Initialize the encoding layer
 		self.encoding_type = encoding_type
 		self.encoding_kernel_dims = (self.tblock_len, self.spatial_down_factor, self.spatial_down_factor)
-		self.encoding_kernel_stride = self.encoding_kernel_dims
+		self.encoding_kernel_stride_txy = self.encoding_kernel_dims
+		self.encoding_kernel_stride_t = (self.encoding_kernel_dims[0], 1, 1)
+		self.encoding_kernel_stride_xy = (1, self.encoding_kernel_dims[1], self.encoding_kernel_dims[2])
 
 		print("Initialization a CSPH Encoding Layer:")
 		print("    - Encoding Type: {}".format(self.encoding_type))
@@ -428,8 +442,7 @@ class CSPH3DLayer(nn.Module):
 
 		if(self.encoding_type == 'full'):
 			# initalize a random conv3d layer
-			(self.Cmat_txydim, _) = get_rand_torch_conv3d(1, k, self.encoding_kernel_dims, separable=False)
-
+			self.Cmat_txydim = get_rand_torch_conv3d_W(1, k, self.encoding_kernel_dims, separable=False)
 			# If tblock init was not rand, initialize with the Cmat_tdim_init
 			if(not (self.tblock_init == 'Rand')):
 				## Initialize the weights
@@ -437,52 +450,43 @@ class CSPH3DLayer(nn.Module):
 				W1d = W1d.type(self.Cmat_txydim.weight.data.dtype)
 				# get a random W2d initialized with pytorch conv layer
 				kernel3d_W2d_size = (1, self.encoding_kernel_dims[-2], self.encoding_kernel_dims[-1])
-				(_, W2d) = get_rand_torch_conv3d(k, k, kernel3d_W2d_size, separable=True)
+				W2d = get_rand_torch_conv3d_W(k, k, kernel3d_W2d_size, separable=True)
 				# init weights
-				self.Cmat_txydim.weight.data = W1d*W2d
+				breakpoint() # check that we get a parameter out
+				self.Cmat_txydim = W1d*W2d
 			# optimize codes only if this flag is set
 			# sometimes we may want to compare against codes that are not optimized or with random codes
-			self.Cmat_txydim.weight.requires_grad = self.optimize_codes
-
-			self.csph_layer = nn.Sequential( OrderedDict([
-														('Cmat_txydim', self.Cmat_txydim)
-			]))
+			self.Cmat_txydim.requires_grad = self.optimize_codes
+			## Set the function to compute the compressive histogram
+			self.csph_layer = self.csph_layer_full
 			## Set the method to obtain the weights for unfiltered backprojection
 			self.get_unfilt_backproj_W3d = self.get_unfilt_backproj_W3d_full
+			## Compute the expected number of parameters
 			expected_num_params = self.k*self.encoding_kernel_dims[0]*self.encoding_kernel_dims[1]*self.encoding_kernel_dims[2]
 		elif(self.encoding_type == 'separable'):
 			# Separable convolution encoding
 			## Initialize time domain coding layer
 			# initalize a random conv3d layer but with last 2 dims as 1 (note first layer is not init as separable)
-			(self.Cmat_tdim, _) = get_rand_torch_conv3d(1, k, (self.tblock_len, 1, 1), separable=False)
-			# If we use rand init, leave the matrix as is, but store the weights
+			self.Cmat_tdim = get_rand_torch_conv3d_W(1, k, (self.tblock_len, 1, 1), separable=False)
+			# If we use rand init, leave the matrix as is, but store a copy of the weights
 			if(self.tblock_init == 'Rand'):
-				self.Cmat_tdim_init = torch.clone(self.Cmat_tdim.weight.data).cpu().numpy() 
+				self.Cmat_tdim_init = torch.clone(self.Cmat_tdim).data.cpu().numpy() 
 			else:
 				# init weights for tdim layer
-				self.Cmat_tdim.weight.data = torch.from_numpy(self.Cmat_tdim_init.transpose()[:,np.newaxis,:,np.newaxis,np.newaxis]).type(self.Cmat_tdim.weight.data.dtype)
+				self.Cmat_tdim.data = torch.from_numpy(self.Cmat_tdim_init.transpose()[:,np.newaxis,:,np.newaxis,np.newaxis]).type(self.Cmat_tdim.dtype)
 			# Only optimize the codes if neeeded
-			self.Cmat_tdim.weight.requires_grad = self.optimize_tdim_codes and self.optimize_codes
-
+			self.Cmat_tdim.requires_grad = self.optimize_tdim_codes and self.optimize_codes
 			## Initialize spatial domain encoding layer
 			# get a random W2d initialized with pytorch conv layer
 			kernel3d_W2d_size = (1, self.encoding_kernel_dims[-2], self.encoding_kernel_dims[-1])
-			(self.Cmat_xydim, W2d) = get_rand_torch_conv3d(k, k, kernel3d_W2d_size, separable=True)
+			self.Cmat_xydim = get_rand_torch_conv3d_W(k, k, kernel3d_W2d_size, separable=True)
 			# Only optimize code if needed
-			self.Cmat_xydim.weight.requires_grad = self.optimize_codes
-
-			self.csph_coding_layer = nn.Sequential( OrderedDict([
-														('Cmat_tdim', self.Cmat_tdim)
-														, ('Cmat_xydim', self.Cmat_xydim)
-			]))
-
+			self.Cmat_xydim.requires_grad = self.optimize_codes
+			## Set the function to compute the compressive histogram
+			self.csph_layer = self.csph_layer_separable
 			## Set the method to obtain the weights for unfiltered backprojection
 			self.get_unfilt_backproj_W3d = self.get_unfilt_backproj_W3d_separable
-			## Set the coding layer
-			self.csph_layer = nn.Sequential( OrderedDict([
-														('Cmat_tdim', self.Cmat_tdim)
-														, ('Cmat_xydim', self.Cmat_xydim)
-			]))
+			## Compute the expected number of parameters
 			expected_num_params = (self.k*self.tblock_len) + (self.k*self.spatial_down_factor*self.spatial_down_factor)
 		else:
 			raise ValueError('Invalid encoding_type ({}) given as input.'.format(self.encoding_type))
@@ -491,6 +495,21 @@ class CSPH3DLayer(nn.Module):
 		print("    - Num CSPH Params: {}".format(num_params))
 		assert(expected_num_params == num_params), "Expected number of params does not match the coding layer params"
 		self.Cmat_size = num_params
+
+	def csph_layer_full(self, inputs):
+		'''
+			Assume a full coding matrix representation
+		'''
+		B = F.conv3d(inputs, self.Cmat_txydim, bias=None, stride=self.encoding_kernel_stride_txy, padding=0, dilation = 0, groups = 1)
+		return B
+
+	def csph_layer_separable(self, inputs):
+		'''
+			Assume a separable coding matrix representation where the 1st dim is independent from 2nd and 3rd
+		'''
+		B1 = F.conv3d(inputs, self.Cmat_t, bias=None, stride=self.encoding_kernel_stride_t, padding=0, dilation = 0, groups = 1)
+		B = F.conv3d(B1, self.Cmat_xy, bias=None, stride=self.encoding_kernel_stride_xy, padding=0, dilation = 0, groups = self.k)
+		return B
 
 	def get_unfilt_backproj_W3d_full(self):
 		'''
