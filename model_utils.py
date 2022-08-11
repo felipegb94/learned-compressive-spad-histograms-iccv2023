@@ -86,6 +86,22 @@ def init_model_from_id(cfg, irf=None):
 						, num_bins = cfg.dataset.nt
 						, h_irf = irf
 						)
+	elif(cfg.model.model_id == 'DDFN_C64B10_CSPH3Dv1'):
+		lit_model = LITPlainDeepBoostingCSPH3Dv1(
+						init_lr = cfg.train_params.lri
+						, lr_decay_gamma = cfg.train_params.lr_decay_gamma
+						, p_tv = cfg.train_params.p_tv
+						, in_channels = cfg.model.model_params.in_channels
+						, k = cfg.model.model_params.k
+						, spatial_down_factor = cfg.model.model_params.spatial_down_factor
+						, nt_blocks = cfg.model.model_params.nt_blocks
+						, tblock_init = cfg.model.model_params.tblock_init
+						, optimize_tdim_codes = cfg.model.model_params.optimize_tdim_codes
+						, optimize_codes = cfg.model.model_params.optimize_codes
+						, encoding_type = cfg.model.model_params.encoding_type
+						, num_bins = cfg.dataset.nt
+						, h_irf = irf
+						)
 	elif(cfg.model.model_id == 'DDFN_C64B10_CSPH1D'):
 		lit_model = LITPlainDeepBoostingCSPH1D(
 						init_lr = cfg.train_params.lri
