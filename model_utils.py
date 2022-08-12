@@ -40,7 +40,6 @@ def get_latest_end_of_epoch_ckpt(ckpt_dirpath):
 	if(len(end_of_epoch_ckpt_fpaths) == 0): return None
 	## Sort filenames from lowest to highest.
 	end_of_epoch_ckpt_fpaths.sort()
-	breakpoint()
 	latest_ckpt_fname = end_of_epoch_ckpt_fpaths[-1]
 	return latest_ckpt_fname
 
