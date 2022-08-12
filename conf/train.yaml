@@ -5,7 +5,7 @@ hydra:
     # dir: outputs/${data.name}/${model.name}/${experiment}/${now:%Y-%m-%d_%H%M%S}
     # dir: outputs/${dataset.name}/${model.model_name}/${experiment}/${now:%Y-%m-%d_%H%M%S}
     # dir: outputs/${dataset.name}/${experiment}/${model.model_name}/${now:%Y-%m-%d_%H%M%S}
-    dir: outputs/${dataset.name}/${experiment}/${model.model_name}/loss-${model.data_loss_id}_tv-${train_params.p_tv}/${now:%Y-%m-%d_%H%M%S}
+    dir: outputs/${dataset.name}/${experiment}/${model.model_name}/loss-${model.data_loss_id}_tv-${train_params.p_tv}/run-latest_${now:%Y-%m-%d_%H%M%S}
 
 #### Useful variables to have
 # path to original working directory
@@ -29,6 +29,9 @@ defaults:
   # enable color logging
   - override hydra/hydra_logging: colorlog
   - override hydra/job_logging: colorlog
+
+# Attempt to resume training from previous run
+resume_train: true
 
 # Global configurations shared between different modules
 experiment: debug

@@ -10,6 +10,7 @@ from IPython.core import debugger
 breakpoint = debugger.set_trace
 
 #### Local imports
+from research_utils import io_ops
 from model_ddfn_64_B10_CGNL_ori import LITDeepBoosting, LITPlainDeepBoosting
 from model_ddfn_64_B10_CGNL_ori_old import LITDeepBoostingOriginal
 from model_ddfn_64_B10_CGNL_ori_depth2depth import LITDeepBoostingDepth2Depth, LITPlainDeepBoostingDepth2Depth
@@ -24,7 +25,24 @@ from model_unet2D_csph import LITUnet2DCSPH1D, LITUnet2DCSPH1D2Phasor, LITUnet2D
 
 
 def count_parameters(model):
+	'''
+		count all parameters inside an object derived from nn.Module
+	'''
 	return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
+def get_latest_end_of_epoch_ckpt(ckpt_dirpath):
+	'''
+		Get all checkpoints that are logged at end of epoch. These are the ones we can use for restarting training from a known state.
+	'''
+	## Get the fpaths
+	end_of_epoch_ckpt_fpaths = io_ops.get_filepaths_in_dir(ckpt_dirpath, match_str_pattern='end-of-epoch', only_filenames=True,keep_ext=True)
+	## If no ckpt is found return
+	if(len(end_of_epoch_ckpt_fpaths) == 0): return None
+	## Sort filenames from lowest to highest.
+	end_of_epoch_ckpt_fpaths.sort()
+	breakpoint()
+	latest_ckpt_fname = end_of_epoch_ckpt_fpaths[-1]
+	return latest_ckpt_fname
 
 def init_model_from_id(cfg, irf=None):
 	if(cfg.model.model_id == 'DDFN_C64B10_NL'):
