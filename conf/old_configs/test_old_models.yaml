@@ -1,0 +1,366 @@
+hydra: 
+  run:
+    # Configure output dir of each experiment programmatically from the arguments
+    # Example "outputs/mnist/classifier/baseline/2021-03-10-141516"
+    # dir: outputs/${data.name}/${model.name}/${experiment}/${now:%Y-%m-%d_%H%M%S}
+    # dir: outputs/${dataset.name}/${.model_name}/${experiment}/${experiment_id}
+    dir: ${model_dirpath}
+
+defaults:
+  - io_dirpaths
+  - _self_
+  - dataset: middlebury
+  # - dataset: nyuv2_min
+  # - dataset: nyuv2
+  # enable color logging
+  - override hydra/hydra_logging: colorlog
+  - override hydra/job_logging: colorlog
+
+train_dataset: nyuv2_64x64x1024_80ps
+
+## Peng et al., 2020 --> Full trained model NO gradient decay
+# model_dirpath: outputs/${.model_name}/debug_nyuv2/2022-04-19_205134
+
+# ## Peng et al., 2020 --> Full trained model with gradient decay
+# model_name: DDFN_C64B10_NL_original
+# model_dirpath: outputs/${.train_dataset}/debug/${.model_name}/debug/2022-04-20_185832
+# ckpt_id: epoch=05-step=19910-avgvalrmse=0.0281
+
+# ## Peng et al., 2020 (Plain Deep Boosting w/out NL) --> Full trained model with gradient decay
+# model_name: DDFN_C64B10
+# model_dirpath: outputs/${.train_dataset}/debug/DDFN_C64B10/2022-04-25_192521
+# ckpt_id: epoch=05-step=19910-avgvalrmse=0.0287 # | 0.0177 | 0.0203
+
+# ## 3D DB Non-Local Depth2Depth Model --> Full trained model with gradient decay
+# model_name: DDFN_C64B10_NL_Depth2Depth
+# model_dirpath: outputs/${.train_dataset}/debug/${.model_name}/debug/2022-04-22_134732
+# ckpt_id: epoch=05-step=19045-avgvalrmse=0.0363
+
+# ## 3D DB Plain Depth2Depth Model --> Full trained model with gradient decay
+# model_name: DDFN_C64B10_Depth2Depth
+# model_dirpath: outputs/${.train_dataset}/debug/${.model_name}/loss-kldiv_tv-1e-5/2022-05-02_085659
+# ckpt_id: epoch=05-step=19910-avgvalrmse=0.0357 # | 0.0239 | 0.0276
+
+# ## 3D DB Plain Depth2Depth Model (No TV) --> Full trained model with gradient decay
+# model_name: DDFN_C64B10_Depth2Depth
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/debug/${.model_name}/loss-kldiv_tv-0.0/2022-05-07_171658
+# ckpt_id: epoch=08-step=28569-avgvalrmse=0.0263 # | 0.0292
+
+# ## K=8 FourierGray 3D DB Plain CSPH1D Model (No TV | LR=1e-3) --> Full trained model with gradient decay
+# model_name: DDFN_C64B10_CSPH1D/k8_HybridFourierGray/loss-kldiv_tv-0.0
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/test_csph/${.model_name}/2022-05-26_084337
+# ckpt_id: epoch=17-step=62333-avgvalrmse=0.0219 # 0.0403 | 0.0356
+
+# ## K=8 HybridGrayFourier 3D DB Plain CSPH1D Model (No TV | LR=1e-3) --> Full trained model with gradient decay
+# model_name: DDFN_C64B10_CSPH1D/k8_HybridGrayFourier/loss-kldiv_tv-0.0
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/test_csph/${.model_name}/2022-05-27_181604
+# ckpt_id: epoch=19-step=67528-avgvalrmse=0.0201 # 0.0442 | 0.0320 | 
+
+# ## K=16 HybridGrayFourier 3D DB Plain CSPH1D Model (No TV) --> Full trained model with gradient decay
+# model_name: DDFN_C64B10_CSPH1D/k16_HybridGrayFourier/loss-kldiv_tv-0.0
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/debug/${.model_name}/2022-05-11_070443
+# ckpt_id: epoch=09-step=33762-avgvalrmse=0.0225 # ~0.034
+
+# ## K=16 HybridGrayFourier 3D DB Plain CSPH1D Model (No TV, Higher LR) --> Full trained model with gradient decay
+# model_name: DDFN_C64B10_CSPH1D/k16_HybridGrayFourier/loss-kldiv_tv-0.0
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/test_csph/${.model_name}/2022-05-20_194518
+# ckpt_id: epoch=19-step=69259-avgvalrmse=0.0184 # 0.029 | 0.0203
+
+# ## K=16 TruncFourier 3D DB Plain CSPH1D Model (No TV) --> Full trained model with gradient decay
+# model_name: DDFN_C64B10_CSPH1D/k16_TruncFourier/loss-kldiv_tv-0.0
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/debug/${.model_name}/2022-05-14_175011
+# ckpt_id: epoch=09-step=34629-avgvalrmse=0.0213 # 0.040
+
+# ## K=16 TruncFourier 3D DB Plain CSPH1D Model (No TV | LR=1e-3) --> Full trained model with gradient decay
+# model_name: DDFN_C64B10_CSPH1D/k16_TruncFourier/loss-kldiv_tv-0.0
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/test_csph/${.model_name}/2022-05-19_142207
+# ckpt_id: epoch=19-step=69259-avgvalrmse=0.0170 # 0.0346
+
+# ## K=16 CoarseHist 3D DB Plain CSPH1D Model (No TV) --> Full trained model with gradient decay
+# model_name: DDFN_C64B10_CSPH1D/k16_CoarseHist/loss-kldiv_tv-0.0
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/debug/${.model_name}/2022-05-15_103103
+# ckpt_id: epoch=09-step=34629-avgvalrmse=0.0257 #
+
+# ## K=32 HybridGrayFourier 3D DB Plain CSPH1D Model (No TV | LR=1e-3) --> Full trained model with gradient decay
+# model_name: DDFN_C64B10_CSPH1D/k32_HybridGrayFourier/loss-kldiv_tv-0.0
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/test_csph/${.model_name}/2022-05-20_194601
+# ckpt_id: epoch=19-step=69259-avgvalrmse=0.0152 # 0.0208 | 
+
+# ## K=32 TruncFourier 3D DB Plain CSPH1D Model (No TV | LR=1e-3) --> Full trained model with gradient decay
+# model_name: DDFN_C64B10_CSPH1D/k32_TruncFourier/loss-kldiv_tv-0.0
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/test_csph/${.model_name}/2022-05-26_075946
+# ckpt_id: epoch=18-step=64065-avgvalrmse=0.0150 # 0.0199
+
+
+# ## K=64 HybridGrayFourier 3D DB Plain CSPH1D Model (No TV) --> Full trained model with gradient decay
+# model_name: DDFN_C64B10_CSPH1D/k64_HybridGrayFourier/loss-kldiv_tv-0.0
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/debug/${.model_name}/2022-05-18_050753
+# ckpt_id: epoch=09-step=34629-avgvalrmse=0.0183 # 0.0179
+
+# ## K=64 TruncFourier 3D DB Plain CSPH1D Model (No TV) --> Full trained model with gradient decay
+# model_name: DDFN_C64B10_CSPH1D/k64_TruncFourier/loss-kldiv_tv-0.0
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/debug/${.model_name}/2022-05-17_121426
+# ckpt_id: epoch=09-step=34629-avgvalrmse=0.0184 # 0.0177
+
+# ## K=64 CoarseHist 3D DB Plain CSPH1D Model (No TV) --> Full trained model with gradient decay
+# model_name: DDFN_C64B10_CSPH1D/k64_CoarseHist/loss-kldiv_tv-0.0
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/debug/${.model_name}/2022-05-17_224020
+# ckpt_id: epoch=09-step=32898-avgvalrmse=0.0198 # ~0.0413
+
+# ## CSPH1D2D (learned) K=32 HybridGrayFourier (No TV) 
+# model_name: DDFN_C64B10_CSPH1D2D/k32_down2_HybridGrayFourier/loss-kldiv_tv-0.0
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/test_csph/${.model_name}/2022-06-03_140623
+# ckpt_id: epoch=19-step=69259-avgvalrmse=0.0182 # 0.0271
+
+# ## CSPH1D2D (learned) K=64 HybridGrayFourier (No TV) 
+# model_name: DDFN_C64B10_CSPH1D2D/k64_down2_HybridGrayFourier/loss-kldiv_tv-0.0
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/test_csph/${.model_name}/2022-05-24_220441
+# ckpt_id: epoch=19-step=67528-avgvalrmse=0.0168 # 0.02109
+
+# ## CSPH1D2D (Learned Down, ZNCC Up) K=128 HybridGrayFourier (No TV) 
+# model_name: DDFN_C64B10_CSPH1D2D/k128_down2_HybridGrayFourier/loss-kldiv_tv-0.0
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/test_csph/${.model_name}/2022-05-25_182959_zncc
+# ckpt_id: epoch=18-step=64065-avgvalrmse=0.0169 # 0.0173
+
+
+# ## CSPH1D2D (learned) K=128 HybridGrayFourier (No TV) 
+# model_name: DDFN_C64B10_CSPH1D2D/k128_down2_HybridGrayFourier/loss-kldiv_tv-0.0
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/test_csph/${.model_name}/2022-06-05_181812
+# ckpt_id: epoch=19-step=67528-avgvalrmse=0.0163 # 0.0169 
+
+# ## CSPH1DGlobal2DLocal4xDown (learned) K=128 TruncFourir (No TV) 
+# model_name: DDFN_C64B10_CSPH1DGlobal2DLocal4xDown/k128_down4_TruncFourier/loss-kldiv_tv-0.0
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/test_csph/${.model_name}/2022-06-06_131240
+# ckpt_id: epoch=16-step=58870-avgvalrmse=0.0262 # 0.0398
+
+# ## K=64 CSPH Separable 2x2x1024 (learned spatial, learned up) HybridGrayFourier (No TV) 
+# model_name: DDFN_C64B10_CSPH/k64_down2_Mt1_HybridGrayFourier-opt-True_separable/loss-kldiv_tv-0.0
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/test_csph/${.model_name}/2022-06-18_183013
+# ckpt_id: epoch=18-step=64065-avgvalrmse=0.0161 # 0.01964 | 0.0172
+
+# # ## 128x compression K=64 CSPH Separable 4x4x512 (learned spatial, learned up) TruncFourier (No TV) 
+# model_name: DDFN_C64B10_CSPH/k64_down4_Mt2_TruncFourier-opt-True_separable/loss-kldiv_tv-0.0
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/test_csph/${.model_name}/2022-06-20_111348
+# ckpt_id: epoch=19-step=69259-avgvalrmse=0.0205 # 0.02548
+
+# # ## 128x compression K=32 CSPH Separable 2x2x1024 (learned spatial, learned up) TruncFourier (No TV) 
+# model_name: DDFN_C64B10_CSPH/k32_down2_Mt1_HybridGrayFourier-opt-True_separable/loss-kldiv_tv-0.0
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/test_csph/${.model_name}/2022-06-21_230853
+# ckpt_id: epoch=19-step=67528-avgvalrmse=0.0174 # 0.02396 | 0.0215
+
+# ## 128x compression K=128 CSPH Separable 4x4x1024 (learned spatial, learned up) TruncFourier (No TV) 
+# model_name: DDFN_C64B10_CSPH/k128_down4_Mt1_TruncFourier-opt-True_separable/loss-kldiv_tv-0.0
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/test_csph/${.model_name}/2022-06-18_203447
+# ckpt_id: epoch=17-step=62333-avgvalrmse=0.0197 # 0.0247 | 0.0227
+
+# # ## 64x compression K=256 CSPH Separable 4x4x1024 (learned spatial, learned up) TruncFourier (No TV) 
+# model_name: DDFN_C64B10_CSPH/k256_down4_Mt1_TruncFourier-opt-True_separable/loss-kldiv_tv-0.0
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/test_csph/${.model_name}/2022-06-22_130057
+# # ckpt_id: epoch=19-step=67528-avgvalrmse=0.0194 # 0.0243 | 0.0223
+# # ckpt_id: epoch=24-step=86574-avgvalrmse=0.0190 #  | 0.0217
+# ckpt_id: epoch=29-step=103889-avgvalrmse=0.0187 # | 0.0212
+
+#####################
+## Temporal Downsampling Ablation (3D CSPH with Learned Upsampling layer)
+
+## 32x compression K=512 Separable CSPH 4x4x1024 GrayFourier-opt-True (No TV) 
+# model_name: DDFN_C64B10_CSPH/k512_down4_Mt1_HybridGrayFourier-opt-True_separable/loss-kldiv_tv-0.0
+# experiment_name: compression_vs_perf
+# model_dirpath: outputs_fmu/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/2022-07-16_113012
+# ckpt_id: epoch=26-step=91769-avgvalrmse=0.0191.ckpt # 0.0240
+
+# ## 256x compression K=64 Separable CSPH 4x4x1024 GrayFourier-opt-True (No TV) 
+# model_name: DDFN_C64B10_CSPH/k64_down4_Mt1_HybridGrayFourier-opt-True_separable/loss-kldiv_tv-0.0
+# experiment_name: temporal_down_ablation
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/2022-06-24_094328
+# ckpt_id: epoch=28-step=98695-avgvalrmse=0.0192 # 0.0256 | 0.0233
+# # ckpt_id: epoch=19-step=69259-avgvalrmse=0.0198 # | 0.0237
+
+# ## 256x compression K=32 Separable CSPH 4x4x512 GrayFourier-opt-True (No TV) 
+# model_name: DDFN_C64B10_CSPH/k32_down4_Mt2_HybridGrayFourier-opt-True_separable/loss-kldiv_tv-0.0
+# experiment_name: temporal_down_ablation
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/2022-06-26_172638
+# ckpt_id: epoch=29-step=103889-avgvalrmse=0.0203.ckpt # 0.027 | 0.0247
+
+# ## 256x compression K=16 Separable CSPH 4x4x256 GrayFourier-opt-True (No TV) 
+# model_name: DDFN_C64B10_CSPH/k16_down4_Mt4_HybridGrayFourier-opt-True_separable/loss-kldiv_tv-0.0
+# experiment_name: temporal_down_ablation
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/2022-06-29_190259
+# ckpt_id: epoch=28-step=100426-avgvalrmse=0.0205.ckpt # 0.0283 | 0.0259
+
+# ## 256x compression K=8 Separable CSPH 4x4x256 GrayFourier-opt-True (No TV) 
+# model_name: DDFN_C64B10_CSPH/k8_down4_Mt8_HybridGrayFourier-opt-True_separable/loss-kldiv_tv-0.0
+# experiment_name: temporal_down_ablation
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/2022-07-02_023357
+# ckpt_id: epoch=25-step=90037-avgvalrmse=0.0221.ckpt # 0.0290 | 0.0281
+
+# #####################
+# ## 3D CSPH with Pseudo-inverse Upsampling
+
+# # 32x compression --> mt=16, mr,mc=8, k=32
+# model_name: DDFN_C64B10_CSPH3Dv1/k32_down4_Mt16_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0
+# experiment_name: test_csph3d
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/2022-07-16_122403
+# ckpt_id: epoch=29-step=102158-avgvalrmse=0.0146.ckpt #  0.01748 |  
+
+# # 64x compression
+# model_name: DDFN_C64B10_CSPH3Dv1/k16_down4_Mt16_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0
+# experiment_name: test_csph3d
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/2022-07-16_142109
+# ckpt_id: epoch=24-step=84843-avgvalrmse=0.0169.ckpt # 0.02163 | 
+
+# # 128x compression
+# model_name: DDFN_C64B10_CSPH3Dv1/k16_down4_Mt8_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0
+# experiment_name: test_csph3d
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/2022-07-13_193650
+# ckpt_id: epoch=29-step=103889-avgvalrmse=0.0189.ckpt # 0.0248 | 
+
+# # 256x compression
+# model_name: DDFN_C64B10_CSPH3Dv1/k8_down4_Mt8_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0
+# experiment_name: test_csph3d
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/2022-07-13_171326
+# ckpt_id: epoch=27-step=96963-avgvalrmse=0.0220.ckpt # 0.0319 | 
+
+
+# 32x compression (K=512 4x4x1024)
+model_name: DDFN_C64B10_CSPH3Dv1/k512_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0
+experiment_name: test_csph3d
+model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/2022-08-05_155940
+ckpt_id: epoch=27-step=96963-avgvalrmse=0.0173.ckpt # 0.02132 |
+
+# # 64x compression (K=256 4x4x1024)
+# model_name: DDFN_C64B10_CSPH3Dv1/k256_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0
+# experiment_name: test_csph3d
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/2022-08-05_141013
+# ckpt_id: epoch=29-step=103889-avgvalrmse=0.0175 # 0.0206 |
+
+# # 128x compression (K=128 4x4x1024)
+# model_name: DDFN_C64B10_CSPH3Dv1/k128_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0
+# experiment_name: test_csph3d
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/2022-07-31_145411
+# ckpt_id: epoch=26-step=91769-avgvalrmse=0.0180.ckpt # 0.0240 |
+
+# # 256x compression (K=64 4x4x1024)
+# model_name: DDFN_C64B10_CSPH3Dv1/k64_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0
+# experiment_name: test_csph3d
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/2022-07-25_212205
+# # ckpt_id: epoch=17-step=62333-avgvalrmse=0.0201 #  0.0264 |
+# ckpt_id: epoch=28-step=98695-avgvalrmse=0.0193.ckpt # 0.0254 |
+
+#################### Test new CSPH3D
+
+# # 32x compression (K=512 4x4x1024)
+# model_name: DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0
+# experiment_name: test_csph3d
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/2022-08-10_162141
+# ckpt_id: epoch=28-step=98695-avgvalrmse=0.0171.ckpt # 0.0191 | 
+
+#####################
+
+# ## 3D DB Plain CSPH1D Model (1e-5 TV) -- With seed 1234 and 0th harmonic
+# model_name: DDFN_C64B10_CSPH1D/k16_HybridGrayFourier/loss-kldiv_tv-1e-05
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/debug/${.model_name}/2022-05-13_203112
+# ckpt_id: epoch=06-step=22509-avgvalrmse=0.0308
+
+# ## Compressive --> Full trained model with gradient decay
+# model_name: DDFN_C64B10_NL_Compressive
+# model_dirpath: outputs/${.train_dataset}/debug/${.model_name}/debug/2022-04-23_132059
+# ckpt_id: epoch=06-step=23373-avgvalrmse=0.0320
+
+# ## CompressiveWithBias --> Full trained model with gradient decay
+# model_name: DDFN_C64B10_NL_CompressiveWithBias
+# model_dirpath: outputs/${.train_dataset}/debug/${.model_name}/debug/2022-04-24_142932
+# ckpt_id: epoch=05-step=18180-avgvalrmse=0.0323
+
+
+# ## 2D Depth2Depth Model --> Full trained model with gradient decay
+# model_name: DDFN2D_Depth2Depth/B-12_MS-8
+# model_dirpath: outputs/${.train_dataset}/debug/${.model_name}/debug/2022-04-27_103314
+# ckpt_id: epoch=29-step=103022-avgvalrmse=0.0306 # use last one
+
+# ## 2D 01Inputs Depth2Depth Model --> Full trained model with gradient decay
+# model_name: DDFN2D_Depth2Depth_01Inputs/B-12_MS-8
+# model_dirpath: outputs/${.train_dataset}/debug/${.model_name}/debug/2022-04-27_104532
+# ckpt_id: epoch=29-step=101292-avgvalrmse=0.0280 # use last one
+
+# ## 2D 01Inputs Depth2Depth Model --> Full trained model with gradient decay
+# model_name: DDFN2D_Depth2Depth_01Inputs/B-12_MS-8/loss-L1_tv-0.001
+# model_dirpath: outputs/${.train_dataset}/debug/${.model_name}/2022-05-03_183044
+# ckpt_id: epoch=24-step=86572-avgvalrmse=0.0470 # use last one
+
+# ## 2D 01Inputs Depth2Depth Model --> Full trained model with gradient decay
+# model_name: DDFN2D_Depth2Depth_01Inputs/B-12_MS-8/loss-L1_tv-0.0001
+# model_dirpath: outputs/${.train_dataset}/debug/${.model_name}/2022-05-03_183002
+# ckpt_id: epoch=24-step=86572-avgvalrmse=0.0286
+
+# ## 2D 01Inputs Depth2Depth Model --> Full trained model with gradient decay
+# model_name: DDFN2D_Depth2Depth_01Inputs/B-12_MS-8/loss-L1_tv-3e-05
+# model_dirpath: outputs/${.train_dataset}/debug/${.model_name}/2022-05-03_185303
+# ckpt_id: epoch=25-step=90035-avgvalrmse=0.0285 # use last one
+
+# ## 2D 01Inputs Depth2Depth Model --> Full trained model with gradient decay
+# model_name: DDFN2D_Depth2Depth_01Inputs/B-12_MS-8/loss-L1_tv-1e-10
+# model_dirpath: outputs/${.train_dataset}/debug/${.model_name}/2022-05-03_183128
+# ckpt_id: epoch=26-step=92633-avgvalrmse=0.0279 # use last one
+
+# ## 2D 01Inputs Depth2Depth Model --> Full trained model with gradient decay
+# model_name: DDFN2D_Depth2Depth_01Inputs/B-24_MS-8
+# model_dirpath: outputs/${.train_dataset}/debug/${.model_name}/2022-04-28_163253
+# ckpt_id: epoch=26-step=91768-avgvalrmse=0.0267
+
+# ## 01Inputs Depth2Depth LARGE Model --> Full trained model with gradient decay
+# model_name: DDFN2D_Depth2Depth_01Inputs/B-16_MS-8
+# model_dirpath: outputs/${.train_dataset}/debug/${.model_name}/2022-05-01_172344
+# ckpt_id: epoch=46-step=161893-avgvalrmse=0.0240 #0.075
+
+# ## 01Inputs Depth2Depth LARGE Model --> Full trained model with gradient decay
+# model_name: DDFN2D_Depth2Depth_01Inputs/B-16_MS-8/loss-L1_tv-1e-05
+# model_dirpath: outputs/${.train_dataset}/debug/${.model_name}/2022-05-16_001704
+# ckpt_id: epoch=33-step=117741-avgvalrmse=0.0257 # 0.088
+
+# ## 01Inputs Depth2Depth LARGE Model --> Full trained model with gradient decay
+# model_name: DDFN2D_Depth2Depth_01Inputs/B-16_MS-8/loss-L1_tv-1e-05
+# model_dirpath: outputs_fmu/outputs/${.train_dataset}/debug/${.model_name}/2022-05-19_143256
+# ckpt_id: epoch=49-step=173149-avgvalrmse=0.0247 # 0.081
+
+# ## 01Inputs Depth2Depth VERY LARGE Model --> Full trained model with gradient decay
+# model_name: DDFN2D_Depth2Depth_01Inputs/B-22_MS-8/loss-L1_tv-1e-05
+# model_dirpath: outputs/${.train_dataset}/debug/${.model_name}/2022-05-20_103921
+# ckpt_id: epoch=49-step=173149-avgvalrmse=0.0243 # 0.07635480910539627
+
+# ## Phasor2Depth LARGE Model (7 freqs) --> Full trained model with gradient decay
+# model_name: DDFN2D_Phasor2Depth7Freqs/B-16_MS-8/loss-L1_tv-1e-05
+# model_dirpath: outputs/${.train_dataset}/test/${.model_name}/2022-05-05_122615_7freqs
+# ckpt_id: epoch=30-step=53692-avgvalrmse=0.0279 # 0.069, 
+
+# ## Phasor2Depth LARGE Model (ALL freqs, BATCH==4) --> Full trained model with gradient decay
+# model_name: DDFN2D_Phasor2Depth/B-16_MS-8/loss-L1_tv-1e-05
+# model_dirpath: outputs/${.train_dataset}/test/${.model_name}/2022-05-14_133347
+# ckpt_id: epoch=29-step=102158-avgvalrmse=0.0287 # 0.113, 
+
+# ## Phasor2Depth LARGE Model (ALL freqs BATCH==8) --> Full trained model with gradient decay
+# model_name: DDFN2D_Phasor2Depth/B-16_MS-8/loss-L1_tv-1e-05/
+# model_dirpath: outputs/${.train_dataset}/test/${.model_name}/2022-05-18_042156
+# ckpt_id: epoch=35-step=64948-avgvalrmse=0.0282 #  0.111
+
+# ## Phasor2Depth LARGE Model (ALL freqs) --> Full trained model with gradient decay
+# model_name: DDFN2D_Phasor2Depth/B-16_MS-8/loss-L1_tv-0.0/
+# model_dirpath: outputs/${.train_dataset}/test/${.model_name}/2022-05-12_145104
+# ckpt_id: epoch=29-step=103889-avgvalrmse=0.0291 # 0.104, 
+
+
+# ## Depth2Depth2Hist Model --> Full trained model with gradient decay
+# model_name: DDFN2D_Depth2Depth2Hist_01Inputs/B-12_MS-8
+# model_dirpath: outputs/${.train_dataset}/debug/${.model_name}/2022-05-02_214727
+# ckpt_id: epoch=42-step=148041-avgvalrmse=0.0281
+
+
+params:
+  gpu_num: 1
+  batch_size: 1
+  num_workers: 8
+  cuda: true
+  noise_idx: null
+  test_datalist_fpath: ${io_dirpaths.datalists_dirpath}/${dataset.test_datalist_fname}
+
+
