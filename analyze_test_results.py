@@ -100,11 +100,11 @@ if __name__=='__main__':
 	experiment_name = 'temporal_down_ablation'
 	experiment_name = 'csph3D_results'
 
-	out_dirpath = os.path.join('./results/week_2022-08-08/test_results', experiment_name)
+	out_dirpath = os.path.join('./results/week_2022-08-15/test_results', experiment_name)
 	os.makedirs(out_dirpath, exist_ok=True)
 
 	plot_results = False
-	plot_compression_vs_perf = False
+	plot_compression_vs_perf = True
 
 	## Scene ID and Params
 	scene_ids = ['spad_Art', 'spad_Reindeer', 'spad_Books', 'spad_Moebius', 'spad_Bowling1', 'spad_Dolls', 'spad_Laundry', 'spad_Plastic']
@@ -115,7 +115,7 @@ if __name__=='__main__':
 	# # scene_ids = ['spad_Books']
 	# scene_ids = ['spad_Reindeer']
 	# scene_ids = ['spad_Plastic']
-	sbr_params = ['10_10']
+	sbr_params = ['2_50']
 
 	compression_lvl = '32x' 
 
@@ -169,7 +169,8 @@ if __name__=='__main__':
 
 	## CSPH3D Models with Unfiltered Backprojection Ups 
 	model_metrics_all['db3D_csph3Dk512_full4x4x1024_opt_rand_tv0'] = {}
-	model_metrics_all['db3D_csph3Dk512_full4x4x1024_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k512_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-08-05_155940/'
+	model_metrics_all['db3D_csph3Dk512_full4x4x1024_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-08-10_162141/'
+	# model_metrics_all['db3D_csph3Dk512_full4x4x1024_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k512_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-08-05_155940/'
 	model_metrics_all['db3D_csph3Dk256_full4x4x1024_opt_rand_tv0'] = {}
 	model_metrics_all['db3D_csph3Dk256_full4x4x1024_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k256_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-08-05_141013/'
 	model_metrics_all['db3D_csph3Dk128_full4x4x1024_opt_rand_tv0'] = {}

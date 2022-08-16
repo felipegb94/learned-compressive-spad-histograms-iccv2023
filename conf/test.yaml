@@ -247,6 +247,14 @@ ckpt_id: epoch=27-step=96963-avgvalrmse=0.0173.ckpt # 0.02132 |
 # # ckpt_id: epoch=17-step=62333-avgvalrmse=0.0201 #  0.0264 |
 # ckpt_id: epoch=28-step=98695-avgvalrmse=0.0193.ckpt # 0.0254 |
 
+#################### Test new CSPH3D
+
+# # 32x compression (K=512 4x4x1024)
+# model_name: DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0
+# experiment_name: test_csph3d
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/2022-08-10_162141
+# ckpt_id: epoch=28-step=98695-avgvalrmse=0.0171.ckpt # 0.0191 | 
+
 #####################
 
 # ## 3D DB Plain CSPH1D Model (1e-5 TV) -- With seed 1234 and 0th harmonic
