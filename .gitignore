@@ -41,6 +41,11 @@ old/testing/TestOut
 old/training/output
 old/training_debug/output
 
+old_PENonLocal/testing/preTrain
+old_PENonLocal/testing/TestOut
+old_PENonLocal/training/output
+old_PENonLocal/training_debug/output
+
 train_intensity.txt
 val_intensity.txt
 
