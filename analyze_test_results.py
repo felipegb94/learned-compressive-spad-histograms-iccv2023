@@ -99,6 +99,7 @@ if __name__=='__main__':
 	experiment_name = '64xcompression_csphseparable_comparissons'
 	experiment_name = 'temporal_down_ablation'
 	experiment_name = 'csph3D_results'
+	experiment_name = 'csph3D_full_vs_separable'
 
 	out_dirpath = os.path.join('./results/week_2022-08-15/test_results', experiment_name)
 	os.makedirs(out_dirpath, exist_ok=True)
@@ -115,7 +116,7 @@ if __name__=='__main__':
 	# # scene_ids = ['spad_Books']
 	# scene_ids = ['spad_Reindeer']
 	# scene_ids = ['spad_Plastic']
-	sbr_params = ['2_50']
+	sbr_params = ['2_10']
 
 	compression_lvl = '32x' 
 
@@ -141,7 +142,7 @@ if __name__=='__main__':
 	model_metrics_all['db3D_nl_d2d'] = {}
 	model_metrics_all['db3D_nl_d2d']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_NL_Depth2Depth/debug/2022-04-22_134732/'
 	model_metrics_all['db3D_d2d'] = {}
-	model_metrics_all['db3D_d2d']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_Depth2Depth/2022-05-02_085659/'
+	model_metrics_all['db3D_d2d']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_Depth2Depth/loss-kldiv_tv-1e-5/2022-05-02_085659/'
 	model_metrics_all['db3D_d2d_tv0'] = {}
 	model_metrics_all['db3D_d2d_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_Depth2Depth/loss-kldiv_tv-0.0/2022-05-07_171658/'
 
@@ -168,6 +169,24 @@ if __name__=='__main__':
 	model_metrics_all['db3D_csph1Dk64_coarsehist_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_CSPH1D/k64_CoarseHist/loss-kldiv_tv-0.0/2022-05-17_224020/'
 
 	## CSPH3D Models with Unfiltered Backprojection Ups 
+	model_metrics_all['db3D_csph3Dk512_separable4x4x1024_opt_grayfour_tv0'] = {}
+	model_metrics_all['db3D_csph3Dk512_separable4x4x1024_opt_grayfour_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k512_down4_Mt1_HybridGrayFourier-optCt=True-optC=True_separable/loss-kldiv_tv-0.0/2022-08-10_013956/'
+	model_metrics_all['db3D_csph3Dk256_separable4x4x1024_opt_grayfour_tv0'] = {}
+	model_metrics_all['db3D_csph3Dk256_separable4x4x1024_opt_grayfour_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k256_down4_Mt1_HybridGrayFourier-optCt=True-optC=True_separable/loss-kldiv_tv-0.0/2022-08-10_014005/'
+	model_metrics_all['db3D_csph3Dk128_separable4x4x1024_opt_grayfour_tv0'] = {}
+	model_metrics_all['db3D_csph3Dk128_separable4x4x1024_opt_grayfour_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k128_down4_Mt1_HybridGrayFourier-optCt=True-optC=True_separable/loss-kldiv_tv-0.0/2022-08-10_014115/'
+	model_metrics_all['db3D_csph3Dk64_separable4x4x1024_opt_grayfour_tv0'] = {}
+	model_metrics_all['db3D_csph3Dk64_separable4x4x1024_opt_grayfour_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k64_down4_Mt1_HybridGrayFourier-optCt=True-optC=True_separable/loss-kldiv_tv-0.0/2022-08-10_014223/'
+
+	model_metrics_all['db3D_csph3Dk512_separable4x4x1024_opt_rand_tv0'] = {}
+	model_metrics_all['db3D_csph3Dk512_separable4x4x1024_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k512_down4_Mt1_Rand-optCt=True-optC=True_separable/loss-kldiv_tv-0.0/2022-08-11_145814/'
+	model_metrics_all['db3D_csph3Dk256_separable4x4x1024_opt_rand_tv0'] = {}
+	model_metrics_all['db3D_csph3Dk256_separable4x4x1024_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k256_down4_Mt1_Rand-optCt=True-optC=True_separable/loss-kldiv_tv-0.0/2022-08-11_145814/'
+	model_metrics_all['db3D_csph3Dk128_separable4x4x1024_opt_rand_tv0'] = {}
+	model_metrics_all['db3D_csph3Dk128_separable4x4x1024_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k128_down4_Mt1_Rand-optCt=True-optC=True_separable/loss-kldiv_tv-0.0/2022-08-11_145813/'
+	model_metrics_all['db3D_csph3Dk64_separable4x4x1024_opt_rand_tv0'] = {}
+	model_metrics_all['db3D_csph3Dk64_separable4x4x1024_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k64_down4_Mt1_Rand-optCt=True-optC=True_separable/loss-kldiv_tv-0.0/2022-08-11_145814/'
+
 	model_metrics_all['db3D_csph3Dk512_full4x4x1024_opt_rand_tv0'] = {}
 	model_metrics_all['db3D_csph3Dk512_full4x4x1024_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-08-10_162141/'
 	# model_metrics_all['db3D_csph3Dk512_full4x4x1024_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k512_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-08-05_155940/'
@@ -186,29 +205,29 @@ if __name__=='__main__':
 	model_metrics_all['db3D_csph3Dk32_full4x4x64_opt_rand_tv0'] = {}
 	model_metrics_all['db3D_csph3Dk32_full4x4x64_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k32_down4_Mt16_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-07-16_122403/'
 
-	## [OLD] CSPH models with learned ups
-	model_metrics_all['db3D_csphk64_separable4x4x1024_opt_grayfour_tv0'] = {}
-	model_metrics_all['db3D_csphk64_separable4x4x1024_opt_grayfour_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/temporal_down_ablation/DDFN_C64B10_CSPH/k64_down4_Mt1_HybridGrayFourier-opt-True_separable/loss-kldiv_tv-0.0/2022-06-24_094328/'
-	model_metrics_all['db3D_csphk32_separable4x4x512_opt_grayfour_tv0'] = {}
-	model_metrics_all['db3D_csphk32_separable4x4x512_opt_grayfour_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/temporal_down_ablation/DDFN_C64B10_CSPH/k32_down4_Mt2_HybridGrayFourier-opt-True_separable/loss-kldiv_tv-0.0/2022-06-26_172638/'
-	model_metrics_all['db3D_csphk16_separable4x4x256_opt_grayfour_tv0'] = {}
-	model_metrics_all['db3D_csphk16_separable4x4x256_opt_grayfour_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/temporal_down_ablation/DDFN_C64B10_CSPH/k16_down4_Mt4_HybridGrayFourier-opt-True_separable/loss-kldiv_tv-0.0/2022-06-29_190259/'
-	model_metrics_all['db3D_csphk8_separable4x4x128_opt_grayfour_tv0'] = {}
-	model_metrics_all['db3D_csphk8_separable4x4x128_opt_grayfour_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/temporal_down_ablation/DDFN_C64B10_CSPH/k8_down4_Mt8_HybridGrayFourier-opt-True_separable/loss-kldiv_tv-0.0/2022-07-02_023357/'
-	model_metrics_all['db3D_csphk64_separable2x2x1024_opt_grayfour_tv0'] = {}
-	model_metrics_all['db3D_csphk64_separable2x2x1024_opt_grayfour_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph/DDFN_C64B10_CSPH/k64_down2_Mt1_HybridGrayFourier-opt-True_separable/loss-kldiv_tv-0.0/2022-06-18_183013/'
-	model_metrics_all['db3D_csphk512_separable4x4x1024_opt_grayfour_tv0'] = {}
-	model_metrics_all['db3D_csphk512_separable4x4x1024_opt_grayfour_tv0']['dirpath'] = 'outputs_fmu/nyuv2_64x64x1024_80ps/compression_vs_perf/DDFN_C64B10_CSPH/k512_down4_Mt1_HybridGrayFourier-opt-True_separable/loss-kldiv_tv-0.0/2022-07-16_113012/'
-	model_metrics_all['db3D_csphk512_separable4x4x1024_opt_grayfour_tv0'] = {}
-	model_metrics_all['db3D_csphk512_separable4x4x1024_opt_grayfour_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/compression_vs_perf/DDFN_C64B10_CSPH/k512_down4_Mt1_HybridGrayFourier-opt-True_separable/loss-kldiv_tv-0.0/2022-07-16_113012/'
-	model_metrics_all['db3D_csphk256_separable4x4x1024_opt_truncfour_tv0'] = {}
-	model_metrics_all['db3D_csphk256_separable4x4x1024_opt_truncfour_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph/DDFN_C64B10_CSPH/k256_down4_Mt1_TruncFourier-opt-True_separable/loss-kldiv_tv-0.0/2022-06-22_130057/'
-	model_metrics_all['db3D_csphk128_separable4x4x1024_opt_truncfour_tv0'] = {}
-	model_metrics_all['db3D_csphk128_separable4x4x1024_opt_truncfour_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph/DDFN_C64B10_CSPH/k128_down4_Mt1_TruncFourier-opt-True_separable/loss-kldiv_tv-0.0/2022-06-18_203447/'
-	model_metrics_all['db3D_csphk64_separable4x4x512_opt_truncfour_tv0'] = {}
-	model_metrics_all['db3D_csphk64_separable4x4x512_opt_truncfour_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph/DDFN_C64B10_CSPH/k64_down4_Mt2_TruncFourier-opt-True_separable/loss-kldiv_tv-0.0/2022-06-20_111348/'
-	model_metrics_all['db3D_csphk32_separable2x2x1024_opt_grayfour_tv0'] = {}
-	model_metrics_all['db3D_csphk32_separable2x2x1024_opt_grayfour_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph/DDFN_C64B10_CSPH/k32_down2_Mt1_HybridGrayFourier-opt-True_separable/loss-kldiv_tv-0.0/2022-06-21_230853/'
+	# ## [OLD] CSPH models with learned ups
+	# model_metrics_all['db3D_csphk64_separable4x4x1024_opt_grayfour_tv0'] = {}
+	# model_metrics_all['db3D_csphk64_separable4x4x1024_opt_grayfour_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/temporal_down_ablation/DDFN_C64B10_CSPH/k64_down4_Mt1_HybridGrayFourier-opt-True_separable/loss-kldiv_tv-0.0/2022-06-24_094328/'
+	# model_metrics_all['db3D_csphk32_separable4x4x512_opt_grayfour_tv0'] = {}
+	# model_metrics_all['db3D_csphk32_separable4x4x512_opt_grayfour_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/temporal_down_ablation/DDFN_C64B10_CSPH/k32_down4_Mt2_HybridGrayFourier-opt-True_separable/loss-kldiv_tv-0.0/2022-06-26_172638/'
+	# model_metrics_all['db3D_csphk16_separable4x4x256_opt_grayfour_tv0'] = {}
+	# model_metrics_all['db3D_csphk16_separable4x4x256_opt_grayfour_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/temporal_down_ablation/DDFN_C64B10_CSPH/k16_down4_Mt4_HybridGrayFourier-opt-True_separable/loss-kldiv_tv-0.0/2022-06-29_190259/'
+	# model_metrics_all['db3D_csphk8_separable4x4x128_opt_grayfour_tv0'] = {}
+	# model_metrics_all['db3D_csphk8_separable4x4x128_opt_grayfour_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/temporal_down_ablation/DDFN_C64B10_CSPH/k8_down4_Mt8_HybridGrayFourier-opt-True_separable/loss-kldiv_tv-0.0/2022-07-02_023357/'
+	# model_metrics_all['db3D_csphk64_separable2x2x1024_opt_grayfour_tv0'] = {}
+	# model_metrics_all['db3D_csphk64_separable2x2x1024_opt_grayfour_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph/DDFN_C64B10_CSPH/k64_down2_Mt1_HybridGrayFourier-opt-True_separable/loss-kldiv_tv-0.0/2022-06-18_183013/'
+	# model_metrics_all['db3D_csphk512_separable4x4x1024_opt_grayfour_tv0'] = {}
+	# model_metrics_all['db3D_csphk512_separable4x4x1024_opt_grayfour_tv0']['dirpath'] = 'outputs_fmu/nyuv2_64x64x1024_80ps/compression_vs_perf/DDFN_C64B10_CSPH/k512_down4_Mt1_HybridGrayFourier-opt-True_separable/loss-kldiv_tv-0.0/2022-07-16_113012/'
+	# model_metrics_all['db3D_csphk512_separable4x4x1024_opt_grayfour_tv0'] = {}
+	# model_metrics_all['db3D_csphk512_separable4x4x1024_opt_grayfour_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/compression_vs_perf/DDFN_C64B10_CSPH/k512_down4_Mt1_HybridGrayFourier-opt-True_separable/loss-kldiv_tv-0.0/2022-07-16_113012/'
+	# model_metrics_all['db3D_csphk256_separable4x4x1024_opt_truncfour_tv0'] = {}
+	# model_metrics_all['db3D_csphk256_separable4x4x1024_opt_truncfour_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph/DDFN_C64B10_CSPH/k256_down4_Mt1_TruncFourier-opt-True_separable/loss-kldiv_tv-0.0/2022-06-22_130057/'
+	# model_metrics_all['db3D_csphk128_separable4x4x1024_opt_truncfour_tv0'] = {}
+	# model_metrics_all['db3D_csphk128_separable4x4x1024_opt_truncfour_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph/DDFN_C64B10_CSPH/k128_down4_Mt1_TruncFourier-opt-True_separable/loss-kldiv_tv-0.0/2022-06-18_203447/'
+	# model_metrics_all['db3D_csphk64_separable4x4x512_opt_truncfour_tv0'] = {}
+	# model_metrics_all['db3D_csphk64_separable4x4x512_opt_truncfour_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph/DDFN_C64B10_CSPH/k64_down4_Mt2_TruncFourier-opt-True_separable/loss-kldiv_tv-0.0/2022-06-20_111348/'
+	# model_metrics_all['db3D_csphk32_separable2x2x1024_opt_grayfour_tv0'] = {}
+	# model_metrics_all['db3D_csphk32_separable2x2x1024_opt_grayfour_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph/DDFN_C64B10_CSPH/k32_down2_Mt1_HybridGrayFourier-opt-True_separable/loss-kldiv_tv-0.0/2022-06-21_230853/'
 
 	# ## OLD CSPH models with ZNCC + Bilinear ups
 	# model_metrics_all['db3D_csph1DGlobal2DLocal4xDown_k128_truncfour_tv0'] = {}
@@ -377,7 +396,7 @@ if __name__=='__main__':
 		compression_vs_perf['mae']['db3D'] = [calc_mean_mae(model_metrics_all['db3D'])]*len(compression_rates)
 		compression_vs_perf['db3D_d2d'] = 'Argmax Compression (Large Memory)'
 		compression_vs_perf['mae']['db3D_d2d'] = [calc_mean_mae(model_metrics_all['db3D_d2d'])]*len(compression_rates)
-		compression_vs_perf['db3D_csph3D_full4x4x1024_opt_rand_tv0'] = 'CSPH3D + Full4x4x1024 + Backproj Up'
+		compression_vs_perf['db3D_csph3D_full4x4x1024_opt_rand_tv0'] = 'CSPH3D + Full4x4x1024 + Backproj Up + Rand Init'
 		compression_vs_perf['mae']['db3D_csph3D_full4x4x1024_opt_rand_tv0'] = [ \
 			np.nan
 			, calc_mean_mae(model_metrics_all['db3D_csph3Dk512_full4x4x1024_opt_rand_tv0'])
@@ -385,22 +404,38 @@ if __name__=='__main__':
 			, calc_mean_mae(model_metrics_all['db3D_csph3Dk128_full4x4x1024_opt_rand_tv0'])
 			, calc_mean_mae(model_metrics_all['db3D_csph3Dk64_full4x4x1024_opt_rand_tv0'])
 			]
-		compression_vs_perf['db3D_csph3D_full4x4x128_opt_rand_tv0'] = 'CSPH3D + Full4x4x128 + Backproj Up'
-		compression_vs_perf['mae']['db3D_csph3D_full4x4x128_opt_rand_tv0'] = [ \
+		compression_vs_perf['db3D_csph3D_separable4x4x1024_opt_rand_tv0'] = 'CSPH3D + Separable4x4x1024 + Backproj Up + Rand Init'
+		compression_vs_perf['mae']['db3D_csph3D_separable4x4x1024_opt_rand_tv0'] = [ \
 			np.nan
-			, calc_mean_mae(model_metrics_all['db3D_csph3Dk32_full4x4x64_opt_rand_tv0'])
-			, calc_mean_mae(model_metrics_all['db3D_csph3Dk16_full4x4x64_opt_rand_tv0'])
-			, calc_mean_mae(model_metrics_all['db3D_csph3Dk16_full4x4x128_opt_rand_tv0'])
-			, calc_mean_mae(model_metrics_all['db3D_csph3Dk8_full4x4x128_opt_rand_tv0'])
+			, calc_mean_mae(model_metrics_all['db3D_csph3Dk512_separable4x4x1024_opt_rand_tv0'])
+			, calc_mean_mae(model_metrics_all['db3D_csph3Dk256_separable4x4x1024_opt_rand_tv0'])
+			, calc_mean_mae(model_metrics_all['db3D_csph3Dk128_separable4x4x1024_opt_rand_tv0'])
+			, calc_mean_mae(model_metrics_all['db3D_csph3Dk64_separable4x4x1024_opt_rand_tv0'])
 			]
-		compression_vs_perf['db3D_csph_separable4x4x1024_opt_four_tv0'] = 'CSPH3D + Separable4x4x1024 + Learned Up'
-		compression_vs_perf['mae']['db3D_csph_separable4x4x1024_opt_four_tv0'] = [ \
+		compression_vs_perf['db3D_csph3D_separable4x4x1024_opt_grayfour_tv0'] = 'CSPH3D + Separable4x4x1024 + Backproj Up + GrayFour init'
+		compression_vs_perf['mae']['db3D_csph3D_separable4x4x1024_opt_grayfour_tv0'] = [ \
 			np.nan
-			, calc_mean_mae(model_metrics_all['db3D_csphk512_separable4x4x1024_opt_grayfour_tv0'])
-			, calc_mean_mae(model_metrics_all['db3D_csphk256_separable4x4x1024_opt_truncfour_tv0'])
-			, calc_mean_mae(model_metrics_all['db3D_csphk128_separable4x4x1024_opt_truncfour_tv0'])
-			, calc_mean_mae(model_metrics_all['db3D_csphk64_separable4x4x1024_opt_grayfour_tv0'])
+			, calc_mean_mae(model_metrics_all['db3D_csph3Dk512_separable4x4x1024_opt_grayfour_tv0'])
+			, calc_mean_mae(model_metrics_all['db3D_csph3Dk256_separable4x4x1024_opt_grayfour_tv0'])
+			, calc_mean_mae(model_metrics_all['db3D_csph3Dk128_separable4x4x1024_opt_grayfour_tv0'])
+			, calc_mean_mae(model_metrics_all['db3D_csph3Dk64_separable4x4x1024_opt_grayfour_tv0'])
 			]
+		# compression_vs_perf['db3D_csph3D_full4x4x128_opt_rand_tv0'] = 'CSPH3D + Full4x4x128 + Backproj Up'
+		# compression_vs_perf['mae']['db3D_csph3D_full4x4x128_opt_rand_tv0'] = [ \
+		# 	np.nan
+		# 	, calc_mean_mae(model_metrics_all['db3D_csph3Dk32_full4x4x64_opt_rand_tv0'])
+		# 	, calc_mean_mae(model_metrics_all['db3D_csph3Dk16_full4x4x64_opt_rand_tv0'])
+		# 	, calc_mean_mae(model_metrics_all['db3D_csph3Dk16_full4x4x128_opt_rand_tv0'])
+		# 	, calc_mean_mae(model_metrics_all['db3D_csph3Dk8_full4x4x128_opt_rand_tv0'])
+		# 	]
+		# compression_vs_perf['db3D_csph_separable4x4x1024_opt_four_tv0'] = 'CSPH3D + Separable4x4x1024 + Learned Up'
+		# compression_vs_perf['mae']['db3D_csph_separable4x4x1024_opt_four_tv0'] = [ \
+		# 	np.nan
+		# 	, calc_mean_mae(model_metrics_all['db3D_csphk512_separable4x4x1024_opt_grayfour_tv0'])
+		# 	, calc_mean_mae(model_metrics_all['db3D_csphk256_separable4x4x1024_opt_truncfour_tv0'])
+		# 	, calc_mean_mae(model_metrics_all['db3D_csphk128_separable4x4x1024_opt_truncfour_tv0'])
+		# 	, calc_mean_mae(model_metrics_all['db3D_csphk64_separable4x4x1024_opt_grayfour_tv0'])
+		# 	]
 		compression_vs_perf['db3D_csph1D_grayfour_tv0'] = 'CSPH1D + GrayFour1x1x1024 + ZNCC Up'
 		compression_vs_perf['mae']['db3D_csph1D_grayfour_tv0'] = [ \
 			calc_mean_mae(model_metrics_all['db3D_csph1Dk64_grayfour_tv0'])
@@ -422,20 +457,34 @@ if __name__=='__main__':
 			, calc_mean_mse(model_metrics_all['db3D_csph3Dk128_full4x4x1024_opt_rand_tv0'])
 			, calc_mean_mse(model_metrics_all['db3D_csph3Dk64_full4x4x1024_opt_rand_tv0'])
 			]
-		compression_vs_perf['mse']['db3D_csph3D_full4x4x128_opt_rand_tv0'] = [ \
+		compression_vs_perf['mse']['db3D_csph3D_separable4x4x1024_opt_rand_tv0'] = [ \
 			np.nan
-			, calc_mean_mse(model_metrics_all['db3D_csph3Dk32_full4x4x64_opt_rand_tv0'])
-			, calc_mean_mse(model_metrics_all['db3D_csph3Dk16_full4x4x64_opt_rand_tv0'])
-			, calc_mean_mse(model_metrics_all['db3D_csph3Dk16_full4x4x128_opt_rand_tv0'])
-			, calc_mean_mse(model_metrics_all['db3D_csph3Dk8_full4x4x128_opt_rand_tv0'])
+			, calc_mean_mse(model_metrics_all['db3D_csph3Dk512_separable4x4x1024_opt_rand_tv0'])
+			, calc_mean_mse(model_metrics_all['db3D_csph3Dk256_separable4x4x1024_opt_rand_tv0'])
+			, calc_mean_mse(model_metrics_all['db3D_csph3Dk128_separable4x4x1024_opt_rand_tv0'])
+			, calc_mean_mse(model_metrics_all['db3D_csph3Dk64_separable4x4x1024_opt_rand_tv0'])
 			]
-		compression_vs_perf['mse']['db3D_csph_separable4x4x1024_opt_four_tv0'] = [ \
+		compression_vs_perf['mse']['db3D_csph3D_separable4x4x1024_opt_grayfour_tv0'] = [ \
 			np.nan
-			, calc_mean_mse(model_metrics_all['db3D_csphk512_separable4x4x1024_opt_grayfour_tv0'])
-			, calc_mean_mse(model_metrics_all['db3D_csphk256_separable4x4x1024_opt_truncfour_tv0'])
-			, calc_mean_mse(model_metrics_all['db3D_csphk128_separable4x4x1024_opt_truncfour_tv0'])
-			, calc_mean_mse(model_metrics_all['db3D_csphk64_separable4x4x1024_opt_grayfour_tv0'])
+			, calc_mean_mse(model_metrics_all['db3D_csph3Dk512_separable4x4x1024_opt_grayfour_tv0'])
+			, calc_mean_mse(model_metrics_all['db3D_csph3Dk256_separable4x4x1024_opt_grayfour_tv0'])
+			, calc_mean_mse(model_metrics_all['db3D_csph3Dk128_separable4x4x1024_opt_grayfour_tv0'])
+			, calc_mean_mse(model_metrics_all['db3D_csph3Dk64_separable4x4x1024_opt_grayfour_tv0'])
 			]
+		# compression_vs_perf['mse']['db3D_csph3D_full4x4x128_opt_rand_tv0'] = [ \
+		# 	np.nan
+		# 	, calc_mean_mse(model_metrics_all['db3D_csph3Dk32_full4x4x64_opt_rand_tv0'])
+		# 	, calc_mean_mse(model_metrics_all['db3D_csph3Dk16_full4x4x64_opt_rand_tv0'])
+		# 	, calc_mean_mse(model_metrics_all['db3D_csph3Dk16_full4x4x128_opt_rand_tv0'])
+		# 	, calc_mean_mse(model_metrics_all['db3D_csph3Dk8_full4x4x128_opt_rand_tv0'])
+		# 	]
+		# compression_vs_perf['mse']['db3D_csph_separable4x4x1024_opt_four_tv0'] = [ \
+		# 	np.nan
+		# 	, calc_mean_mse(model_metrics_all['db3D_csphk512_separable4x4x1024_opt_grayfour_tv0'])
+		# 	, calc_mean_mse(model_metrics_all['db3D_csphk256_separable4x4x1024_opt_truncfour_tv0'])
+		# 	, calc_mean_mse(model_metrics_all['db3D_csphk128_separable4x4x1024_opt_truncfour_tv0'])
+		# 	, calc_mean_mse(model_metrics_all['db3D_csphk64_separable4x4x1024_opt_grayfour_tv0'])
+		# 	]
 		compression_vs_perf['mse']['db3D_csph1D_grayfour_tv0'] = [ \
 			calc_mean_mse(model_metrics_all['db3D_csph1Dk64_grayfour_tv0'])
 			, calc_mean_mse(model_metrics_all['db3D_csph1Dk32_grayfour_tv0'])
