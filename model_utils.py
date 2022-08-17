@@ -282,7 +282,12 @@ def load_model_from_ckpt(model_name, ckpt_id, logger=None, model_dirpath=None):
 	elif('DDFN_C64B10_CSPH3D/' in model_name):
 		model = LITPlainDeepBoostingCSPH3D.load_from_checkpoint(ckpt_fpath)
 	elif('DDFN_C64B10_CSPH3Dv1/' in model_name):
-		model = LITPlainDeepBoostingCSPH3Dv1.load_from_checkpoint(ckpt_fpath)
+		# We use strict=False below because the original DDFN_C64B10_CSPH3Dv1 with which some model were trained with
+		# contained an unused variable called self.csph_coding_layer -- this layer is not used in the forward pass. 
+		# We use self.csph_layer inseat 
+		# See line 472-480 of csph_layers.py in previous commit: https://github.com/felipegb94/spatio-temporal-csph/blob/b2295e402fdf56fd3dcbd1be336e92327b781f0a/csph_layers.py#L474
+		# And compare those lines with out current csph_layers.py:CSPH3DLayerv1 
+		model = LITPlainDeepBoostingCSPH3Dv1.load_from_checkpoint(ckpt_fpath, strict=False)
 	elif('DDFN_C64B10_CSPH1D/' in model_name):
 		model = LITPlainDeepBoostingCSPH1D.load_from_checkpoint(ckpt_fpath)
 	elif('DDFN_C64B10_CSPH1D2D/' in model_name):
