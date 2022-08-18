@@ -41,7 +41,7 @@ if __name__=='__main__':
 
 
     ## Load scene
-    id = ids[3]
+    id = ids[0]
     data_fpath = os.path.join(data_dirpath, id+'.mat')
     data = scipy.io.loadmat(data_fpath)
 
@@ -105,3 +105,9 @@ if __name__=='__main__':
     plt.plot(3*spad_data_dn[:,nr//4,nc//4], linewidth=2, label='denoised hist ({},{})'.format(nr//4,nc//4))
     plt.title("Example Histograms")
     plt.legend()
+
+    ## Save the output image
+    # from research_utils import plot_utils
+    # out_dir = './results/week_2022-08-15/lindell_test_data'
+    # plot_utils.save_currfig_png(dirpath=out_dir,filename=id)
+
