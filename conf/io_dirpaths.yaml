@@ -6,5 +6,7 @@ io_dirpaths:
   nyuv2_processed_dataset_dirpath: ${hydra:runtime.cwd}/./data_gener/TrainData/processed
   nyuv2_spad_dataset_dirpath: ${hydra:runtime.cwd}/./data_gener/TrainData/SimSPADDataset_nr-64_nc-64_nt-1024_tres-80ps_dark-1_psf-1
   middlebury_spad_dataset_dirpath: ${hydra:runtime.cwd}/./data_gener/TestData/middlebury/processed/SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0
+  lindell_linospad_dataset_dirpath: ${hydra:runtime.cwd}/./2018SIGGRAPH_lindell_test_data/captured
+  lindell_middlebury_spad_dataset_dirpath: ${hydra:runtime.cwd}/./2018SIGGRAPH_lindell_test_data/simulated/LR
   results_data_dirpath: ${hydra:runtime.cwd}/./results/results_data
   results_weekly_dirpath: ${hydra:runtime.cwd}/./results/week_20220509

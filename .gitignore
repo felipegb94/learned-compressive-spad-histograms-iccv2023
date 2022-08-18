@@ -49,9 +49,11 @@ old_PENonLocal/training_debug/output
 train_intensity.txt
 val_intensity.txt
 
+2018SIGGRAPH_lindell_test_data/
 2018_lindell_code/
 2018_rapp_code/
 2016_shin_code/
+2022TCI_poisson_code/
 
 ### MATLAB
 *.asv

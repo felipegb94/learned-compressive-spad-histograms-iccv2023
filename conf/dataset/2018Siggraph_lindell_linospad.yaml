@@ -1,0 +1,10 @@
+
+
+tres_ps: 26 # in picosecs --> time bin resolution. Laser had a FWHM of around 440ps
+nr: 256 # num rows
+nc: 256 # num cols
+nt: 1536 # num tbins
+name: 2018Siggraph_lindell_linospad_${.nr}x${.nc}x${.nt}_${.tres_ps}ps
+train_datalist_fname: null
+val_datalist_fname: null
+test_datalist_fname: ${.name}.txt
