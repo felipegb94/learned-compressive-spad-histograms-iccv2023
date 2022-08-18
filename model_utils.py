@@ -100,6 +100,7 @@ def init_model_from_id(cfg, irf=None):
 						, optimize_tdim_codes = cfg.model.model_params.optimize_tdim_codes
 						, optimize_codes = cfg.model.model_params.optimize_codes
 						, encoding_type = cfg.model.model_params.encoding_type
+						, csph_out_norm = cfg.model.model_params.csph_out_norm
 						, num_bins = cfg.dataset.nt
 						, h_irf = irf
 						)
