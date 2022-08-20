@@ -9,7 +9,8 @@ hydra:
 defaults:
   - io_dirpaths
   - _self_
-  - dataset: middlebury
+  # - dataset: middlebury
+  - dataset: lindell2018_linospad
   # - dataset: nyuv2_min
   # - dataset: nyuv2
   # enable color logging
@@ -88,10 +89,10 @@ train_dataset: nyuv2_64x64x1024_80ps
 
 #### K = 64 (compression = 16x)
 
-# ## K=64 HybridGrayFourier 3D DB Plain CSPH1D Model (No TV) --> Full trained model with gradient decay
-# model_name: DDFN_C64B10_CSPH1D/k64_HybridGrayFourier/loss-kldiv_tv-0.0
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/debug/${.model_name}/2022-05-18_050753
-# ckpt_id: epoch=09-step=34629-avgvalrmse=0.0183 # 0.0179
+## K=64 HybridGrayFourier 3D DB Plain CSPH1D Model (No TV) --> Full trained model with gradient decay
+model_name: DDFN_C64B10_CSPH1D/k64_HybridGrayFourier/loss-kldiv_tv-0.0
+model_dirpath: outputs/nyuv2_64x64x1024_80ps/debug/${.model_name}/2022-05-18_050753
+ckpt_id: epoch=09-step=34629-avgvalrmse=0.0183 # 0.0179
 
 # ## K=64 TruncFourier 3D DB Plain CSPH1D Model (No TV) --> Full trained model with gradient decay
 # model_name: DDFN_C64B10_CSPH1D/k64_TruncFourier/loss-kldiv_tv-0.0
@@ -138,7 +139,7 @@ train_dataset: nyuv2_64x64x1024_80ps
 #### codes=(1024x4x4) tblock_init=Rand encoding_type=full
 
 # ## 32x compression (K=512 1024x4x4)
-# model_name: DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0
+# model_name: DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-none/loss-kldiv_tv-0.0
 # experiment_name: test_csph3d
 # model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/2022-08-10_162141
 # ckpt_id: epoch=28-step=98695-avgvalrmse=0.0171.ckpt # 0.0191 | 
@@ -217,7 +218,7 @@ train_dataset: nyuv2_64x64x1024_80ps
 params:
   gpu_num: 1
   batch_size: 1
-  num_workers: 8
+  num_workers: 0
   cuda: true
   noise_idx: null
   test_datalist_fpath: ${io_dirpaths.datalists_dirpath}/${dataset.test_datalist_fname}

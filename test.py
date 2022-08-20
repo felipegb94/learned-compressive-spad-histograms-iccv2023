@@ -11,7 +11,7 @@ from IPython.core import debugger
 breakpoint = debugger.set_trace
 
 #### Local imports
-from spad_dataset import SpadDataset
+from spad_dataset import Lindell2018LinoSpadDataset, SpadDataset
 from model_utils import count_parameters, load_model_from_ckpt
 from train import setup_tb_logger
 
@@ -37,8 +37,12 @@ def test(cfg):
 
 	logger.info("Loading test data...")
 	logger.info("Test Datalist: {}".format(cfg.params.test_datalist_fpath))
-	test_data = SpadDataset(cfg.params.test_datalist_fpath, cfg.params.noise_idx, 
-		output_size=None, disable_rand_crop=True)
+	if(cfg.dataset.name == 'lindell2018_linospad_captured'):
+		test_data = Lindell2018LinoSpadDataset(cfg.params.test_datalist_fpath, dims=(cfg.dataset.nt,cfg.dataset.nr,cfg.dataset.nc), tres_ps=cfg.dataset.tres_ps, disable_rand_crop=True)
+	else:
+		test_data = SpadDataset(cfg.params.test_datalist_fpath, cfg.params.noise_idx, output_size=None, disable_rand_crop=True)
+	
+	
 	test_loader = DataLoader(test_data, batch_size=cfg.params.batch_size, 
 		shuffle=False, num_workers=cfg.params.num_workers, pin_memory=cfg.params.cuda)
 	logger.info("Load test data complete - {} test samples!".format(len(test_data)))
@@ -66,6 +70,9 @@ def test(cfg):
 	logger.info("    torch.backends.cudnn.benchmark: {}".format(torch.backends.cudnn.benchmark))
 	logger.info("    torch.backends.cudnn.enabled: {}".format(torch.backends.cudnn.enabled))
 	logger.info("    torch.backends.cudnn.deterministic: {}".format(torch.backends.cudnn.deterministic))
+
+	if(('RTX 2070' in torch.cuda.get_device_name(torch.cuda.current_device())) and ('k64_down4_Mt1' in cfg.model_name)):
+		logger.info("WARNING k=256_down4_Mt1 runs very slow in RTX 2070 for some reason...")
 
 	if(cfg.params.cuda):
 		trainer = pl.Trainer(accelerator="gpu", devices=1, logger=tb_logger, callbacks=callbacks, benchmark=False) # 

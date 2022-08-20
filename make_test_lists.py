@@ -48,8 +48,8 @@ def make_test_lists(cfg):
 
 	## Set the dataset name
 	middlebury_spad_dataset_name = 'middlebury_' + os.path.basename(middlebury_spad_dataset_dirpath)
-	lindell_linospad_dataset_name = 'lindell_linospad_' + os.path.basename(lindell_linospad_dataset_dirpath)
-	lindell_middlebury_spad_dataset_name = 'lindell_middlebury_' + os.path.basename(lindell_middlebury_spad_dataset_dirpath)
+	lindell_linospad_dataset_name = 'lindell2018_linospad_' + os.path.basename(lindell_linospad_dataset_dirpath)
+	lindell_middlebury_spad_dataset_name = 'lindell2018_middlebury_' + os.path.basename(lindell_middlebury_spad_dataset_dirpath)
 
 	print('Writing test files')
 	write_fpaths(os.path.join(datalists_dirpath, 'test_'+middlebury_spad_dataset_name+'.txt'), middlebury_spad_dataset_fpaths)

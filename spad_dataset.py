@@ -104,7 +104,7 @@ class SpadDataset(torch.utils.data.Dataset):
             Load the first sample and look at some of the parameters of the simulation
         '''
         # load spad data
-        spad_data_fname = self.spad_data_fpaths[0]
+        spad_data_fname = self.spad_data_fpaths[idx]
         spad_data = scipy.io.loadmat(spad_data_fname)
         # SBR = spad_data['SBR'].squeeze()
         # mean_signal_photons = spad_data['mean_signal_photons'].squeeze()
@@ -206,18 +206,182 @@ class SpadDataset(torch.utils.data.Dataset):
         return sample
 
 
+class Lindell2018LinoSpadDataset(torch.utils.data.Dataset):
+    def __init__(self, datalist_fpath, dims=(1536,256,256), tres_ps=26, output_size=None, disable_rand_crop=True):
+        """__init__
+        :param datalist_fpath: path to text file with list of spad data files
+        :param output_size: the output size after random crop. If set to None it will output the full image
+        """
+
+        self.datalist_fpath = datalist_fpath
+        self.datalist_fname = os.path.splitext(os.path.basename(datalist_fpath))[0]
+
+        self.tres_ps = tres_ps # time resolution in picosecs (used at test time for computing depths)
+        (self.max_nt, self.max_nr, self.max_nc) = dims
+        self.crop_nt = 1024
+
+        ## Get all the filepaths
+        with open(datalist_fpath) as f: 
+            self.spad_data_fpaths_all = f.read().split()
+        self.spad_data_fpaths = self.spad_data_fpaths_all
+
+        ## Get the base dirpath of the whole dataset. Sometimes the dataset will have multiple folder levels
+        dataset_base_dirpath = os.path.dirname(os.path.commonprefix(self.spad_data_fpaths))
+
+        ## Try to load PSF vector --> We may use it in some models
+        ## If there is not PSF just generate a very narrow one
+        ## Find all files that start with PSF
+        pattern = os.path.join(dataset_base_dirpath, 'PSF_used_for_simulation*.mat')
+        psf_fpaths = glob(pattern)
+        if(len(psf_fpaths) >= 1):
+            # If file exists load it and use it
+            if(len(psf_fpaths) > 1):
+                print("Warning: More than one PSF/IRF avaiable. Choosing {}".format(psf_fpaths[0]))
+            psf_data = scipy.io.loadmat(psf_fpaths[0])
+            self.psf = psf_data['psf'].mean(axis=-1)
+        else:
+            # If file does not exist, just generate simple psf
+            print("No PSF/IRF available. Generating a simple narrow Gaussian")
+            from research_utils.signalproc_ops import gaussian_pulse
+            psf_len = 11
+            psf_mu = psf_len // 2
+            self.psf = gaussian_pulse(time_domain=np.arange(0,psf_len), mu=psf_mu, width=0.5)
+
+        if(isinstance(output_size, int)): self.output_size = (output_size, output_size)
+        else: self.output_size = output_size
+        self.disable_rand_crop = disable_rand_crop
+
+        print("SpadDataset with {} files".format(len(self.spad_data_fpaths)))
+
+    def __len__(self):
+        return len(self.spad_data_fpaths)
+
+    def get_spad_data_sample_id(self, idx):
+        # Create a unique identifier for this file so we can use it to save model outputs with a filename that contains this ID
+        spad_data_fname = self.spad_data_fpaths[idx]
+        spad_data_id = self.datalist_fname + '/' + os.path.splitext(os.path.basename(spad_data_fname))[0]
+        return spad_data_id
+
+    def tryitem(self, idx):
+        '''
+            Try to load the spad data sample.
+            * All normalization and data augmentation happens here.
+        '''
+        # load spad data
+        spad_data_fname = self.spad_data_fpaths[idx]
+        spad_data = scipy.io.loadmat(spad_data_fname)
+        frame_num = 0 # frame number to use (some data files have multiple frames in them)
+
+        ## load intensity img
+        intensity_imgs = np.asarray(spad_data['cam_processed_data'])[0]
+        intensity_img = np.asarray(intensity_imgs[frame_num]).astype(np.float32)
+
+        # spad measurements
+        spad_sparse_data = np.asarray(spad_data['spad_processed_data'])[0]
+        spad = np.asarray(scipy.sparse.csc_matrix.todense(spad_sparse_data[frame_num])).astype(np.float32)
+        spad = spad.reshape((self.max_nt, self.max_nr, self.max_nc)).swapaxes(-1,-2)
+        spad = spad[np.newaxis, :]
+
+        # crop time dimension
+        spad = spad[:,0:self.crop_nt,:,:]
+        # spad = spad[:,0:self.crop_nt,16:208,16:208]
+
+        # no gt available here so just use spad measurmeents
+        rates = np.array(spad)
+        rates = rates / (np.sum(rates, axis=-3, keepdims=True) + 1e-8)
+
+        # Estimated argmax depths from spad measurements
+        est_bins_argmax = np.argmax(spad, axis=-3)
+        # Generate hist from bin indeces
+        est_bins_argmax_hist = bins2hist(est_bins_argmax, num_bins=self.max_nt).astype(np.float32)
+        est_bins_argmax_hist = est_bins_argmax_hist[np.newaxis,:]
+        # Normalize the bin indeces
+        est_bins_argmax = est_bins_argmax.astype(np.float32) / spad.shape[-3]
+
+        # ground truth depths in units of bins
+        bins = np.array(est_bins_argmax).astype(np.float32)
+
+        # Compute random crop if neeeded
+        (h, w) = (self.max_nr, self.max_nc)
+        if(self.output_size is None):
+            new_h = h
+            new_w = w
+        else:
+            new_h = self.output_size[0]
+            new_w = self.output_size[1]
+
+        if(self.disable_rand_crop):
+            top = 0
+            left = 0        
+        else:
+            # add 1 because randint produces between low <= x < high 
+            top = np.random.randint(0, h - new_h + 1) 
+            left = np.random.randint(0, w - new_w + 1)
+
+        # crop and convert to tensor
+        rates = rates[..., top:top + new_h, left:left + new_w]
+        spad = spad[..., top:top + new_h, left: left + new_w]
+        bins = bins[..., top: top + new_h, left: left + new_w]
+        est_bins_argmax = est_bins_argmax[..., top: top + new_h, left: left + new_w]
+        est_bins_argmax_hist = est_bins_argmax_hist[..., top: top + new_h, left: left + new_w]
+        rates = torch.from_numpy(rates)
+        spad = torch.from_numpy(spad)
+        bins = torch.from_numpy(bins)
+        est_bins_argmax = torch.from_numpy(est_bins_argmax)
+        est_bins_argmax_hist = torch.from_numpy(est_bins_argmax_hist)
+
+        # set temp values for sbr, signal and bkg params 
+        sbr = 0.
+        mean_signal_photons = 0.
+        mean_background_photons = 0.
+
+        sample = {
+            'rates': rates 
+            , 'spad': spad 
+            , 'bins': bins 
+            , 'est_bins_argmax': est_bins_argmax 
+            , 'est_bins_argmax_hist': est_bins_argmax_hist 
+            , 'SBR': sbr
+            , 'mean_signal_photons': mean_signal_photons
+            , 'mean_background_photons': mean_background_photons
+            , 'idx': idx
+            }
+
+        return sample
+
+    def __getitem__(self, idx):
+        try:
+            sample = self.tryitem(idx)
+        except Exception as e:
+            print(idx, e)
+            idx = idx + 1
+            sample = self.tryitem(idx)
+        return sample
+
 if __name__=='__main__':
     import matplotlib.pyplot as plt
+    '''
+        Comment/Uncomment the dataset that you want to load a few samples from. Datasets implemented:
+        * middlebury test dataset
+        * nyuv2 val dataset
+        * Linospad test dataset from Lindell et al., 2018
+    '''
 
-    ## Try test dataset
-    datalist_fpath = './datalists/test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0.txt'
+
+    # ## Middlebury Test dataset
+    # datalist_fpath = './datalists/test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0.txt'
+    # noise_idx = None
+    # spad_dataset = SpadDataset(datalist_fpath, noise_idx=noise_idx, output_size=None)
+
+    # ## nyuv2 val dataset
+    # datalist_fpath = './datalists/nyuv2_val_SimSPADDataset_nr-64_nc-64_nt-1024_tres-80ps_dark-1_psf-1.txt'
+    # noise_idx = [1]
+    # spad_dataset = SpadDataset(datalist_fpath, noise_idx=noise_idx, output_size=None)
+
+    ## Lindell2018 LinoSpad test dataset
+    datalist_fpath = './datalists/test_lindell_linospad_captured.txt'
     noise_idx = None
-    spad_dataset = SpadDataset(datalist_fpath, noise_idx=noise_idx, output_size=None)
-
-    ## Load val dataset
-    datalist_fpath = './datalists/nyuv2_val_SimSPADDataset_nr-64_nc-64_nt-1024_tres-80ps_dark-1_psf-1.txt'
-    noise_idx = [1]
-    spad_dataset = SpadDataset(datalist_fpath, noise_idx=noise_idx, output_size=None)
+    spad_dataset = Lindell2018LinoSpadDataset(datalist_fpath)
 
     batch_size = 1
 
@@ -253,10 +417,9 @@ if __name__=='__main__':
         plt.imshow(est_bins_argmax, vmin=bins.min(), vmax=bins.max())
         plt.pause(0.2)
 
-
-
-    plt.clf()
-    plt.plot(spad_dataset.psf)
-    plt.title("PSF used to simulate thiis dataset")
-    plt.pause(0.1)
+    if(not ('lindell' in datalist_fpath)):
+        plt.clf()
+        plt.plot(spad_dataset.psf)
+        plt.title("PSF used to simulate thiis dataset")
+        plt.pause(0.1)
 
