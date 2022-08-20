@@ -282,7 +282,7 @@ class Lindell2018LinoSpadDataset(torch.utils.data.Dataset):
         spad = spad.reshape((self.max_nt, self.max_nr, self.max_nc)).swapaxes(-1,-2)
         spad = spad[np.newaxis, :]
 
-        # crop time dimension
+        # crop time dimension because current model with unfilt backprojection only works with tbins == 1024
         spad = spad[:,0:self.crop_nt,:,:]
         # spad = spad[:,0:self.crop_nt,16:208,16:208]
 
