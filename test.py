@@ -37,7 +37,7 @@ def test(cfg):
 
 	logger.info("Loading test data...")
 	logger.info("Test Datalist: {}".format(cfg.params.test_datalist_fpath))
-	if(cfg.dataset.name == 'lindell2018_linospad_captured'):
+	if('lindell2018_linospad_captured' in cfg.dataset.name):
 		test_data = Lindell2018LinoSpadDataset(cfg.params.test_datalist_fpath, dims=(cfg.dataset.nt,cfg.dataset.nr,cfg.dataset.nc), tres_ps=cfg.dataset.tres_ps, disable_rand_crop=True)
 	else:
 		test_data = SpadDataset(cfg.params.test_datalist_fpath, cfg.params.noise_idx, output_size=None, disable_rand_crop=True)

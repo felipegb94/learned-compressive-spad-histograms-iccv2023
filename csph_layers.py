@@ -550,7 +550,8 @@ class CSPH3DLayer(nn.Module):
 		self.optimize_tdim_codes=optimize_tdim_codes
 		self.optimize_codes=optimize_codes
 		self.nt_blocks=nt_blocks
-		self.tblock_len = int(self.num_bins / nt_blocks) 
+		# self.tblock_len = int(self.num_bins / nt_blocks) 
+		self.tblock_len = 1024 
 		self.spatial_down_factor=spatial_down_factor
 		# Pad IRF with zeros if needed
 		self.h_irf = pad_h_irf(h_irf, num_bins=self.tblock_len) # This is used to select the frequencies that will be used in HybridGrayFourier
@@ -711,19 +712,61 @@ class CSPH3DLayer(nn.Module):
 	def normalize_X_none(self, X):
 		return X
 
+	def pad_tdim(self, inputs):
+		'''
+			temporal dim padding:
+				- use circular pad if inputs are larger than kernels since it is a periodic signal
+					* We will crop things after recovery
+				- use zero pad if inputs are smaller
+					* We will crop things after recovery
+				- do nothing if inputs are correct size
+		'''
+		num_tbins = inputs.size(-3).item()
+		tdim_pad = num_tbins % self.encoding_kernel3d_dims[-3]
+		breakpoint()
+		if(tdim_pad.item() == 0):
+			# do nothing
+			return inputs
+		elif(num_tbins > self.encoding_kernel3d_dims[-3]):
+			# if inputs are larger in time dimension - circular pad
+			## uncomment the following to test that this is working
+			# tmp = F.pad(inputs, (0, 0, 0, 0, 0, tdim_pad), mode="circular")
+			# diff = torch.abs(tmp[..., -tdim_pad:, :, :] - inputs[..., 0:tdim_pad, :, :]).sum()		
+			# assert(diff == 0.), "circular tdmin pad not working"
+			return F.pad(inputs, (0, 0, 0, 0, 0, tdim_pad), mode="circular")
+		else:
+			breakpoint()			
+			# if inputs are smaller in time dimension - zero pad
+			return F.pad(inputs, (0, 0, 0, 0, 0, tdim_pad), mode="constant", value=0)
+
+	def pad_xydim(self, inputs):
+		'''
+			Use reflection padding on the spatial boundaries, and only pad on one side of the dimension since we will crop later the outputs to end up with a smaller input
+		'''
+		# assert(inputs.shape[-1] > self.encoding_kernel3d_dims[-1]), "num cols should be larger than kernel"
+		# assert(inputs.shape[-2] > self.encoding_kernel3d_dims[-2]), "num rows should be larger than kernel"
+		# num_cols = inputs.shape[-1].detach()
+		col_dim_pad = inputs.shape[-1] % self.encoding_kernel3d_dims[-1]
+		row_dim_pad = inputs.shape[-2] % self.encoding_kernel3d_dims[-2]
+		return F.pad(inputs, (0, col_dim_pad, 0, row_dim_pad, 0, 0), mode="reflect")
+
 	def forward(self, inputs):
 		'''
 			Expected input dims == (Batch, Nt, Nr, Nc)
 		'''
+		## Pad inputs if needed to make sure that the dimensions are divisible by the coding matrix dims in the csph_layer
+		padded_inputs = self.pad_xydim(self.pad_tdim(inputs)) 
 		## Compute compressive histogram
+		B = self.csph_layer(padded_inputs)
 		B = self.csph_layer(inputs)
 		# Get the weights from the first layer (if separable this is the outerproduct of two matrices)
 		W = self.get_unfilt_backproj_W3d()
 		## Upsample using unfiltered backprojection (similar to transposed convolution, but with fixed weights)
 		X = self.unfiltered_backproj_layer(y=B, W=W)
+		## Crop to have the same dimensions as input again -->  Since padding is only done on right we only crop the right-hand side
+		X = X[..., 0:inputs.shape[-3], 0:inputs.shape[-2], 0:inputs.shape[-1]]
 		## Normalize X with the specified normalization function
 		X = self.normalize_X(X)
-
 		return X
 
 if __name__=='__main__':
@@ -742,10 +785,11 @@ if __name__=='__main__':
 	nt_blocks = 1
 	spatial_down_factor = 4		
 	(nr, nc, nt) = (32, 32, 1024) 
-	inputs = torch.randn((batch_size, nt, nr, nc)).to(device)
+	# (nr, nc, nt) = (35, 39, 1536) 
+	inputs = torch.randn((batch_size, nt, nr, nc)).to(device) + 2
 	inputs[inputs<2] = 0
 
-	simple_hist_input = torch.zeros((2, nt, 32, 32)).to(device)
+	simple_hist_input = torch.zeros((2, nt, nr, nc)).to(device)
 	simple_hist_input[0, 100, 0, 0] = 3
 	# simple_hist_input[0, 200, 0, 0] = 1
 	# simple_hist_input[0, 50, 0, 0] = 1
