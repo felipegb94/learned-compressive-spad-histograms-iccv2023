@@ -55,8 +55,10 @@ def test(cfg):
 	model, ckpt_fpath = load_model_from_ckpt(cfg.model_name, ckpt_id, logger=logger)
 
 	encoding_kernel_dims = None
-	if(isinstance(model, LITPlainDeepBoostingCSPH3D) or isinstance(model, LITPlainDeepBoostingCSPH3Dv1)):
+	if(isinstance(model, LITPlainDeepBoostingCSPH3D)):
 		encoding_kernel_dims = model.csph3d_layer.encoding_kernel3d_dims
+	elif(isinstance(model, LITPlainDeepBoostingCSPH3Dv1)):
+		encoding_kernel_dims = model.csph3d_layer.encoding_kernel_dims
 
 	logger.info("Loading test data...")
 	logger.info("Test Datalist: {}".format(cfg.params.test_datalist_fpath))

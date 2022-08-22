@@ -9,9 +9,9 @@ hydra:
 defaults:
   - io_dirpaths
   - _self_
-  # - dataset: middlebury
+  - dataset: middlebury
   # - dataset: lindell2018_linospad
-  - dataset: lindell2018_linospad_min
+  # - dataset: lindell2018_linospad_min
   # - dataset: nyuv2_min
   # - dataset: nyuv2
   # enable color logging
@@ -31,7 +31,7 @@ train_dataset: nyuv2_64x64x1024_80ps
 # ## Peng et al., 2020 (Plain Deep Boosting w/out NL) --> Full trained model with gradient decay
 # model_name: DDFN_C64B10
 # model_dirpath: outputs/${.train_dataset}/debug/DDFN_C64B10/2022-04-25_192521
-# ckpt_id: epoch=05-step=19910-avgvalrmse=0.0287 # | 0.0177 | 0.0203
+# ckpt_id: epoch=05-step=19910-avgvalrmse=0.0287 # 0.0180 | 0.0177 | 0.0203
 
 # ## 3D DB Plain Depth2Depth Model --> Full trained model with gradient decay
 # model_name: DDFN_C64B10_Depth2Depth
@@ -219,7 +219,7 @@ ckpt_id: epoch=28-step=98695-avgvalrmse=0.0171.ckpt # 0.0191 |
 params:
   gpu_num: 1
   batch_size: 1
-  num_workers: 0
+  num_workers: 4
   cuda: true
   noise_idx: null
   test_datalist_fpath: ${io_dirpaths.datalists_dirpath}/${dataset.test_datalist_fname}
