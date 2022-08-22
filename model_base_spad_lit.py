@@ -10,6 +10,7 @@ import logging
 import numpy as np
 import matplotlib.pyplot as plt
 import torch
+from torch.autograd import Variable
 import pytorch_lightning as pl
 import torchvision
 from IPython.core import debugger
@@ -29,6 +30,13 @@ def normdepth2phasor(d):
 	cos = torch.cos(phase)
 	sin = torch.sin(phase)
 	return torch.cat((cos, sin), dim=1)
+
+def hist2rec_soft_argmax(hist_img):
+	smax = torch.nn.Softmax2d() 
+	weights = Variable(torch.linspace(0, 1, steps=hist_img.size()[1]).unsqueeze(1).unsqueeze(1)).to(hist_img.device)
+	weighted_smax = weights * smax(hist_img)
+	soft_argmax = weighted_smax.sum(1).unsqueeze(1)
+	return soft_argmax
 
 class LITBaseSPADModel(pl.LightningModule):
 	def __init__(self, 
@@ -206,11 +214,20 @@ class LITBaseSPADModel(pl.LightningModule):
 		
 		return {'dep': dep, 'dep_re': dep_re}
 
-
 	def test_step(self, sample, batch_idx):
 
 		# Forward pass
 		M_mea_re, rec = self.forward_wrapper(sample)
+
+		# crop the recovered histogram image and compute rec again
+		# we do this because if we test with inputs that are not divisible by the encoding kernel dimensions then they were padded and here we want to remove the padding so that dimensions will match the original input dimensions
+		# NOTE: right now this is not done during training and validation but eventually it should be done
+		M_gt = sample["rates"] # use M_gt to figure out the original input dimensions
+		M_mea_re = M_mea_re[...,0:M_gt.shape[-3],0:M_gt.shape[-2],0:M_gt.shape[-1]]
+		# recompute rec
+		rec = hist2rec_soft_argmax(M_mea_re)
+
+		# Compute depths
 		dep_re = self.rec2depth(rec)
 
 		# Compute Losses

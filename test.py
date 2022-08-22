@@ -14,6 +14,7 @@ breakpoint = debugger.set_trace
 from spad_dataset import Lindell2018LinoSpadDataset, SpadDataset
 from model_utils import count_parameters, load_model_from_ckpt
 from train import setup_tb_logger
+from model_ddfn_64_B10_CGNL_ori_CSPH3D import *
 
 # A logger for this file (not for the pytorch logger)
 logger = logging.getLogger(__name__)
@@ -35,19 +36,6 @@ def test(cfg):
 		device = torch.device("cpu")
 		cfg.params.cuda = False
 
-	logger.info("Loading test data...")
-	logger.info("Test Datalist: {}".format(cfg.params.test_datalist_fpath))
-	if('lindell2018_linospad_captured' in cfg.dataset.name):
-		test_data = Lindell2018LinoSpadDataset(cfg.params.test_datalist_fpath, dims=(cfg.dataset.nt,cfg.dataset.nr,cfg.dataset.nc), tres_ps=cfg.dataset.tres_ps, disable_rand_crop=True)
-	else:
-		test_data = SpadDataset(cfg.params.test_datalist_fpath, cfg.params.noise_idx, output_size=None, disable_rand_crop=True)
-	
-	
-	test_loader = DataLoader(test_data, batch_size=cfg.params.batch_size, 
-		shuffle=False, num_workers=cfg.params.num_workers, pin_memory=cfg.params.cuda)
-	logger.info("Load test data complete - {} test samples!".format(len(test_data)))
-	logger.info("+++++++++++++++++++++++++++++++++++++++++++")
-
 	tb_logger = setup_tb_logger() 
 
 	## Callbacks
@@ -65,6 +53,24 @@ def test(cfg):
 		ckpt_id = 'last.ckpt'
 
 	model, ckpt_fpath = load_model_from_ckpt(cfg.model_name, ckpt_id, logger=logger)
+
+	encoding_kernel_dims = None
+	if(isinstance(model, LITPlainDeepBoostingCSPH3D) or isinstance(model, LITPlainDeepBoostingCSPH3Dv1)):
+		encoding_kernel_dims = model.csph3d_layer.encoding_kernel3d_dims
+
+	logger.info("Loading test data...")
+	logger.info("Test Datalist: {}".format(cfg.params.test_datalist_fpath))
+	if('lindell2018_linospad_captured' in cfg.dataset.name):
+		## If model is a csph3d model, input the encoding kernel dimensions
+		test_data = Lindell2018LinoSpadDataset(cfg.params.test_datalist_fpath, dims=(cfg.dataset.nt,cfg.dataset.nr,cfg.dataset.nc), tres_ps=cfg.dataset.tres_ps, encoding_kernel_dims=encoding_kernel_dims)
+	else:
+		test_data = SpadDataset(cfg.params.test_datalist_fpath, cfg.params.noise_idx, output_size=None, disable_rand_crop=True)
+	
+	
+	test_loader = DataLoader(test_data, batch_size=cfg.params.batch_size, 
+		shuffle=False, num_workers=cfg.params.num_workers, pin_memory=cfg.params.cuda)
+	logger.info("Load test data complete - {} test samples!".format(len(test_data)))
+	logger.info("+++++++++++++++++++++++++++++++++++++++++++")
 
 	logger.info("cuda flags BEFORE Trainer object:")
 	logger.info("    torch.backends.cudnn.benchmark: {}".format(torch.backends.cudnn.benchmark))
