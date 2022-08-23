@@ -9,8 +9,10 @@ hydra:
 defaults:
   - io_dirpaths
   - _self_
-  # - dataset: middlebury
-  - dataset: lindell2018_linospad
+  - dataset: middlebury
+  # - dataset: lindell2018_linospad
+  # - dataset: lindell2018_linospad_patches
+  # - dataset: lindell2018_linospad_min
   # - dataset: nyuv2_min
   # - dataset: nyuv2
   # enable color logging
@@ -30,7 +32,7 @@ train_dataset: nyuv2_64x64x1024_80ps
 # ## Peng et al., 2020 (Plain Deep Boosting w/out NL) --> Full trained model with gradient decay
 # model_name: DDFN_C64B10
 # model_dirpath: outputs/${.train_dataset}/debug/DDFN_C64B10/2022-04-25_192521
-# ckpt_id: epoch=05-step=19910-avgvalrmse=0.0287 # | 0.0177 | 0.0203
+# ckpt_id: epoch=05-step=19910-avgvalrmse=0.0287 # 0.0180 | 0.0177 | 0.0203
 
 # ## 3D DB Plain Depth2Depth Model --> Full trained model with gradient decay
 # model_name: DDFN_C64B10_Depth2Depth
@@ -68,7 +70,7 @@ train_dataset: nyuv2_64x64x1024_80ps
 # ## K=16 TruncFourier 3D DB Plain CSPH1D Model (No TV | LR=1e-3) --> Full trained model with gradient decay
 # model_name: DDFN_C64B10_CSPH1D/k16_TruncFourier/loss-kldiv_tv-0.0
 # model_dirpath: outputs/nyuv2_64x64x1024_80ps/test_csph/${.model_name}/2022-05-19_142207
-# ckpt_id: epoch=19-step=69259-avgvalrmse=0.0170 # 0.0346
+# ckpt_id: epoch=19-step=69259-avgvalrmse=0.0170 # 0.0322
 
 # ## K=16 CoarseHist 3D DB Plain CSPH1D Model (No TV) --> Full trained model with gradient decay
 # model_name: DDFN_C64B10_CSPH1D/k16_CoarseHist/loss-kldiv_tv-0.0
@@ -218,7 +220,7 @@ ckpt_id: epoch=28-step=98695-avgvalrmse=0.0171.ckpt # 0.0191 |
 params:
   gpu_num: 1
   batch_size: 1
-  num_workers: 0
+  num_workers: 4
   cuda: true
   noise_idx: null
   test_datalist_fpath: ${io_dirpaths.datalists_dirpath}/${dataset.test_datalist_fname}

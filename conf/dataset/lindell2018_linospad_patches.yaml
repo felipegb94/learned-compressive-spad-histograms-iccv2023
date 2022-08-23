@@ -1,0 +1,12 @@
+
+
+tres_ps: 26 # in picosecs --> time bin resolution. Laser had a FWHM of around 440ps
+nt: 1536 # num tbins
+nr: 64 # number of rows in the patchs
+nc: 64 # number of rows in the patchs
+# nr: 128 # number of rows in the patchs
+# nc: 128 # number of rows in the patchs
+name: lindell2018_linospad_captured_patches-${.nr}-${.nc}
+train_datalist_fname: null
+val_datalist_fname: null
+test_datalist_fname: test_${.name}.txt

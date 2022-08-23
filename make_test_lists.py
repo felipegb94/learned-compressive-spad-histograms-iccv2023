@@ -36,26 +36,43 @@ def make_test_lists(cfg):
 	datalists_dirpath = cfg.io_dirpaths.datalists_dirpath
 	middlebury_spad_dataset_dirpath = cfg.io_dirpaths.middlebury_spad_dataset_dirpath
 	middlebury_spad_dataset_dirpath = os.path.abspath(middlebury_spad_dataset_dirpath)
-	lindell_linospad_dataset_dirpath = cfg.io_dirpaths.lindell_linospad_dataset_dirpath
-	lindell_linospad_dataset_dirpath = os.path.abspath(lindell_linospad_dataset_dirpath)
-	lindell_middlebury_spad_dataset_dirpath = cfg.io_dirpaths.lindell_middlebury_spad_dataset_dirpath
-	lindell_middlebury_spad_dataset_dirpath = os.path.abspath(lindell_middlebury_spad_dataset_dirpath)
-
 	## Input single dirpath to look into
 	middlebury_spad_dataset_fpaths = generate_spad_data_fpaths([middlebury_spad_dataset_dirpath])
-	lindell_linospad_dataset_fpaths = generate_matfile_data_fpaths([lindell_linospad_dataset_dirpath])
-	lindell_middlebury_spad_dataset_fpaths = generate_matfile_data_fpaths([lindell_middlebury_spad_dataset_dirpath])
-
 	## Set the dataset name
 	middlebury_spad_dataset_name = 'middlebury_' + os.path.basename(middlebury_spad_dataset_dirpath)
-	lindell_linospad_dataset_name = 'lindell2018_linospad_' + os.path.basename(lindell_linospad_dataset_dirpath)
-	lindell_middlebury_spad_dataset_name = 'lindell2018_middlebury_' + os.path.basename(lindell_middlebury_spad_dataset_dirpath)
-
 	print('Writing test files')
 	write_fpaths(os.path.join(datalists_dirpath, 'test_'+middlebury_spad_dataset_name+'.txt'), middlebury_spad_dataset_fpaths)
 	print('Wrote {} test file for {} dataset'.format(len(middlebury_spad_dataset_fpaths), middlebury_spad_dataset_name))
+
+	## Repeat for linospad dataset
+	lindell_linospad_dataset_dirpath = cfg.io_dirpaths.lindell_linospad_dataset_dirpath
+	lindell_linospad_dataset_dirpath = os.path.abspath(lindell_linospad_dataset_dirpath)
+	lindell_linospad_dataset_fpaths = generate_matfile_data_fpaths([lindell_linospad_dataset_dirpath])
+	lindell_linospad_dataset_name = 'lindell2018_linospad_' + os.path.basename(lindell_linospad_dataset_dirpath)
 	write_fpaths(os.path.join(datalists_dirpath, 'test_'+lindell_linospad_dataset_name+'.txt'), lindell_linospad_dataset_fpaths)
 	print('Wrote {} test file for {} dataset'.format(len(lindell_linospad_dataset_fpaths), lindell_linospad_dataset_name))
+	
+	## Repeat for linospad dataset that was divided into patches
+	lindell_linospad_patch_dataset_dirpath = cfg.io_dirpaths.lindell_linospad_patch_dataset_dirpath
+	lindell_linospad_patch_dataset_dirpath = os.path.abspath(lindell_linospad_patch_dataset_dirpath)
+	lindell_linospad_patch_dataset_fpaths = generate_matfile_data_fpaths([lindell_linospad_patch_dataset_dirpath])
+	lindell_linospad_patch_dataset_name = 'lindell2018_linospad_' + os.path.basename(lindell_linospad_patch_dataset_dirpath)
+	write_fpaths(os.path.join(datalists_dirpath, 'test_'+lindell_linospad_patch_dataset_name+'.txt'), lindell_linospad_patch_dataset_fpaths)
+	print('Wrote {} test file for {} dataset'.format(len(lindell_linospad_patch_dataset_fpaths), lindell_linospad_patch_dataset_name))
+
+	## Repeat for linospad small dataset
+	lindell_linospad_min_dataset_dirpath = cfg.io_dirpaths.lindell_linospad_min_dataset_dirpath
+	lindell_linospad_min_dataset_dirpath = os.path.abspath(lindell_linospad_min_dataset_dirpath)
+	lindell_linospad_min_dataset_fpaths = generate_matfile_data_fpaths([lindell_linospad_min_dataset_dirpath])
+	lindell_linospad_min_dataset_name = 'lindell2018_linospad_' + os.path.basename(lindell_linospad_min_dataset_dirpath)
+	write_fpaths(os.path.join(datalists_dirpath, 'test_'+lindell_linospad_min_dataset_name+'.txt'), lindell_linospad_min_dataset_fpaths)
+	print('Wrote {} test file for {} dataset'.format(len(lindell_linospad_min_dataset_fpaths), lindell_linospad_min_dataset_name))
+
+	## Repeat for Lindell et al., 2018 middlebury dataset 
+	lindell_middlebury_spad_dataset_dirpath = cfg.io_dirpaths.lindell_middlebury_spad_dataset_dirpath
+	lindell_middlebury_spad_dataset_dirpath = os.path.abspath(lindell_middlebury_spad_dataset_dirpath)
+	lindell_middlebury_spad_dataset_fpaths = generate_matfile_data_fpaths([lindell_middlebury_spad_dataset_dirpath])
+	lindell_middlebury_spad_dataset_name = 'lindell2018_middlebury_' + os.path.basename(lindell_middlebury_spad_dataset_dirpath)
 	write_fpaths(os.path.join(datalists_dirpath, 'test_'+lindell_middlebury_spad_dataset_name+'.txt'), lindell_middlebury_spad_dataset_fpaths)
 	print('Wrote {} test file for {} dataset'.format(len(lindell_middlebury_spad_dataset_fpaths), lindell_middlebury_spad_dataset_name))
 

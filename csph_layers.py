@@ -550,7 +550,8 @@ class CSPH3DLayer(nn.Module):
 		self.optimize_tdim_codes=optimize_tdim_codes
 		self.optimize_codes=optimize_codes
 		self.nt_blocks=nt_blocks
-		self.tblock_len = int(self.num_bins / nt_blocks) 
+		# self.tblock_len = int(self.num_bins / nt_blocks) 
+		self.tblock_len = 1024 
 		self.spatial_down_factor=spatial_down_factor
 		# Pad IRF with zeros if needed
 		self.h_irf = pad_h_irf(h_irf, num_bins=self.tblock_len) # This is used to select the frequencies that will be used in HybridGrayFourier
@@ -723,7 +724,6 @@ class CSPH3DLayer(nn.Module):
 		X = self.unfiltered_backproj_layer(y=B, W=W)
 		## Normalize X with the specified normalization function
 		X = self.normalize_X(X)
-
 		return X
 
 if __name__=='__main__':
@@ -742,10 +742,11 @@ if __name__=='__main__':
 	nt_blocks = 1
 	spatial_down_factor = 4		
 	(nr, nc, nt) = (32, 32, 1024) 
-	inputs = torch.randn((batch_size, nt, nr, nc)).to(device)
+	# (nr, nc, nt) = (35, 39, 1536) 
+	inputs = torch.randn((batch_size, nt, nr, nc)).to(device) + 2
 	inputs[inputs<2] = 0
 
-	simple_hist_input = torch.zeros((2, nt, 32, 32)).to(device)
+	simple_hist_input = torch.zeros((2, nt, nr, nc)).to(device)
 	simple_hist_input[0, 100, 0, 0] = 3
 	# simple_hist_input[0, 200, 0, 0] = 1
 	# simple_hist_input[0, 50, 0, 0] = 1

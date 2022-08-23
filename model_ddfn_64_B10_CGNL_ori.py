@@ -11,7 +11,7 @@ from IPython.core import debugger
 breakpoint = debugger.set_trace
 
 #### Local imports
-from model_base_spad_lit import LITBaseSPADModel
+from model_base_spad_lit import LITBaseSPADModel, hist2rec_soft_argmax
 from model_ddfn import Block3DGroup, MsFeat3D
 
 class NonLocal(torch.nn.Module):
@@ -236,9 +236,7 @@ class PlainDeepBoosting(torch.nn.Module):
 
 		denoise_out = torch.squeeze(convr, 1)
 
-		weights = Variable(torch.linspace(0, 1, steps=denoise_out.size()[1]).unsqueeze(1).unsqueeze(1)).to(denoise_out.device)
-		weighted_smax = weights * smax(denoise_out)
-		soft_argmax = weighted_smax.sum(1).unsqueeze(1)
+		soft_argmax = hist2rec_soft_argmax(denoise_out) # moved softargmax outside of this object so it can be used by other objects
 
 		return denoise_out, soft_argmax
 
