@@ -31,7 +31,7 @@ def reshape_mat_sparse_spad_data(spad_sparse_data, nr, nc, frame_num=0):
 if __name__=='__main__':
 
     ## Set patch dims we want to divide each image into
-    (patch_n_rows, patch_n_cols) = (64, 64)
+    (patch_n_rows, patch_n_cols) = (128, 128)
     num_patch_pixels = patch_n_rows*patch_n_cols
     frame_num = 0
 

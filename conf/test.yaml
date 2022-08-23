@@ -11,6 +11,7 @@ defaults:
   - _self_
   - dataset: middlebury
   # - dataset: lindell2018_linospad
+  # - dataset: lindell2018_linospad_patches
   # - dataset: lindell2018_linospad_min
   # - dataset: nyuv2_min
   # - dataset: nyuv2

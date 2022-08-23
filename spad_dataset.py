@@ -330,7 +330,9 @@ class Lindell2018LinoSpadDataset(torch.utils.data.Dataset):
 		spad = spad[np.newaxis, :]
 
 		# crop spatial dimension to avoid out of memory errors
-		spad = spad[:, :, 40:216, 40:216]
+		# only needed in the high-resolution dataset
+		if((self.max_nr == 256) or (self.max_nc == 256)):
+			spad = spad[:, :, 40:216, 40:216]
 
 		# no gt available here so just use spad measurmeents
 		rates = np.array(spad)

@@ -52,6 +52,14 @@ def make_test_lists(cfg):
 	write_fpaths(os.path.join(datalists_dirpath, 'test_'+lindell_linospad_dataset_name+'.txt'), lindell_linospad_dataset_fpaths)
 	print('Wrote {} test file for {} dataset'.format(len(lindell_linospad_dataset_fpaths), lindell_linospad_dataset_name))
 	
+	## Repeat for linospad dataset that was divided into patches
+	lindell_linospad_patch_dataset_dirpath = cfg.io_dirpaths.lindell_linospad_patch_dataset_dirpath
+	lindell_linospad_patch_dataset_dirpath = os.path.abspath(lindell_linospad_patch_dataset_dirpath)
+	lindell_linospad_patch_dataset_fpaths = generate_matfile_data_fpaths([lindell_linospad_patch_dataset_dirpath])
+	lindell_linospad_patch_dataset_name = 'lindell2018_linospad_' + os.path.basename(lindell_linospad_patch_dataset_dirpath)
+	write_fpaths(os.path.join(datalists_dirpath, 'test_'+lindell_linospad_patch_dataset_name+'.txt'), lindell_linospad_patch_dataset_fpaths)
+	print('Wrote {} test file for {} dataset'.format(len(lindell_linospad_patch_dataset_fpaths), lindell_linospad_patch_dataset_name))
+
 	## Repeat for linospad small dataset
 	lindell_linospad_min_dataset_dirpath = cfg.io_dirpaths.lindell_linospad_min_dataset_dirpath
 	lindell_linospad_min_dataset_dirpath = os.path.abspath(lindell_linospad_min_dataset_dirpath)
@@ -60,7 +68,7 @@ def make_test_lists(cfg):
 	write_fpaths(os.path.join(datalists_dirpath, 'test_'+lindell_linospad_min_dataset_name+'.txt'), lindell_linospad_min_dataset_fpaths)
 	print('Wrote {} test file for {} dataset'.format(len(lindell_linospad_min_dataset_fpaths), lindell_linospad_min_dataset_name))
 
-	## Repead for Lindell et al., 2018 middlebury dataset 
+	## Repeat for Lindell et al., 2018 middlebury dataset 
 	lindell_middlebury_spad_dataset_dirpath = cfg.io_dirpaths.lindell_middlebury_spad_dataset_dirpath
 	lindell_middlebury_spad_dataset_dirpath = os.path.abspath(lindell_middlebury_spad_dataset_dirpath)
 	lindell_middlebury_spad_dataset_fpaths = generate_matfile_data_fpaths([lindell_middlebury_spad_dataset_dirpath])
