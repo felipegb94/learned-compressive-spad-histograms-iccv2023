@@ -69,7 +69,7 @@ train_dataset: nyuv2_64x64x1024_80ps
 # ## K=16 TruncFourier 3D DB Plain CSPH1D Model (No TV | LR=1e-3) --> Full trained model with gradient decay
 # model_name: DDFN_C64B10_CSPH1D/k16_TruncFourier/loss-kldiv_tv-0.0
 # model_dirpath: outputs/nyuv2_64x64x1024_80ps/test_csph/${.model_name}/2022-05-19_142207
-# ckpt_id: epoch=19-step=69259-avgvalrmse=0.0170 # 0.0346
+# ckpt_id: epoch=19-step=69259-avgvalrmse=0.0170 # 0.0322
 
 # ## K=16 CoarseHist 3D DB Plain CSPH1D Model (No TV) --> Full trained model with gradient decay
 # model_name: DDFN_C64B10_CSPH1D/k16_CoarseHist/loss-kldiv_tv-0.0
