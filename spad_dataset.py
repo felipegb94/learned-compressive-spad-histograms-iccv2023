@@ -266,10 +266,11 @@ class Lindell2018LinoSpadDataset(torch.utils.data.Dataset):
 		self.encoding_kernel_dims = encoding_kernel_dims
 		self.pad_inputs = True
 		if(self.encoding_kernel_dims is None): self.pad_inputs = False
-		else: assert(len(encoding_kernel_dims) == 3), "Encoding kernel dims should have 3 elements"
-		# only pad if input dims are not divisible encoding kernel dims
-		if(((self.max_nc % self.encoding_kernel_dims[-1]) == 0) and ((self.max_nr % self.encoding_kernel_dims[-2]) == 0) and ((self.max_nt % self.encoding_kernel_dims[-3]) == 0)):
-			self.pad_inputs = False
+		else: 
+			assert(len(encoding_kernel_dims) == 3), "Encoding kernel dims should have 3 elements"
+			# only pad if input dims are not divisible encoding kernel dims
+			if(((self.max_nc % self.encoding_kernel_dims[-1]) == 0) and ((self.max_nr % self.encoding_kernel_dims[-2]) == 0) and ((self.max_nt % self.encoding_kernel_dims[-3]) == 0)):
+				self.pad_inputs = False
 
 		## Get all the filepaths
 		with open(datalist_fpath) as f: 
@@ -332,7 +333,8 @@ class Lindell2018LinoSpadDataset(torch.utils.data.Dataset):
 		# crop spatial dimension to avoid out of memory errors
 		# only needed in the high-resolution dataset
 		if((self.max_nr == 256) or (self.max_nc == 256)):
-			spad = spad[:, :, 40:216, 40:216]
+			# spad = spad[:, :, 40:216, 40:216]
+			spad = spad[:, :, 32:224, 32:224]
 
 		# no gt available here so just use spad measurmeents
 		rates = np.array(spad)

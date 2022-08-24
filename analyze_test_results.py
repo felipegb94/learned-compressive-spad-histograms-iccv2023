@@ -100,27 +100,36 @@ if __name__=='__main__':
 	experiment_name = 'temporal_down_ablation'
 	experiment_name = 'csph3D_results'
 	experiment_name = 'csph3D_full_vs_separable'
+	experiment_name = 'csph3D_good_norm'
 
 	out_dirpath = os.path.join('./results/week_2022-08-15/test_results', experiment_name)
 	os.makedirs(out_dirpath, exist_ok=True)
 
 	plot_results = False
-	plot_compression_vs_perf = True
+	plot_compression_vs_perf = False
+	save_depth_images = True
 
 	## Scene ID and Params
 	scene_ids = ['spad_Art', 'spad_Reindeer', 'spad_Books', 'spad_Moebius', 'spad_Bowling1', 'spad_Dolls', 'spad_Laundry', 'spad_Plastic']
 	sbr_params = ['2_2','2_10','2_50','5_2','5_10','5_50','10_2','10_10','10_50']
 
-	# scene_ids = ['spad_Art']
+	scene_ids = ['spad_Art']
 	# # # scene_ids = ['spad_Books']
 	# # scene_ids = ['spad_Books']
-	# scene_ids = ['spad_Reindeer']
+	scene_ids = ['spad_Reindeer']
 	# scene_ids = ['spad_Plastic']
-	sbr_params = ['2_10']
+	# sbr_params = ['2_10']
+	# sbr_params = ['10_1000']
+	sbr_params = ['10_200']
 
 	compression_lvl = '32x' 
 
 	test_set_id = 'test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
+
+
+	if(save_depth_images and ((len(scene_ids) > 1) or (len(sbr_params) > 1))):
+		print("WARNING: save_depth_images with many scene ids and sbr params will generate a lot of images. type continue to keep going or exit and edit parameters")
+		breakpoint()
 
 	model_metrics_all = {}
 	# metrics_all = {}
@@ -137,73 +146,84 @@ if __name__=='__main__':
 	## Non-CSPH Baseline
 	model_metrics_all['db3D'] = {}
 	model_metrics_all['db3D']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10/2022-04-25_192521/'
-	model_metrics_all['db3D_nl'] = {}
-	model_metrics_all['db3D_nl']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_NL_original/debug/2022-04-20_185832/'
-	model_metrics_all['db3D_nl_d2d'] = {}
-	model_metrics_all['db3D_nl_d2d']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_NL_Depth2Depth/debug/2022-04-22_134732/'
-	model_metrics_all['db3D_d2d'] = {}
-	model_metrics_all['db3D_d2d']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_Depth2Depth/loss-kldiv_tv-1e-5/2022-05-02_085659/'
-	model_metrics_all['db3D_d2d_tv0'] = {}
-	model_metrics_all['db3D_d2d_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_Depth2Depth/loss-kldiv_tv-0.0/2022-05-07_171658/'
+	# model_metrics_all['db3D_nl'] = {}
+	# model_metrics_all['db3D_nl']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_NL_original/debug/2022-04-20_185832/'
+	# model_metrics_all['db3D_nl_d2d'] = {}
+	# model_metrics_all['db3D_nl_d2d']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_NL_Depth2Depth/debug/2022-04-22_134732/'
+	# model_metrics_all['db3D_d2d'] = {}
+	# model_metrics_all['db3D_d2d']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_Depth2Depth/loss-kldiv_tv-1e-5/2022-05-02_085659/'
+	# model_metrics_all['db3D_d2d_tv0'] = {}
+	# model_metrics_all['db3D_d2d_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_Depth2Depth/loss-kldiv_tv-0.0/2022-05-07_171658/'
 
-	## CSPH1D Baseline Models
-	model_metrics_all['db3D_csph1Dk8_gray_tv0'] = {}
-	model_metrics_all['db3D_csph1Dk8_gray_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph/DDFN_C64B10_CSPH1D/k8_HybridFourierGray/loss-kldiv_tv-0.0/2022-05-26_084337/'
-	model_metrics_all['db3D_csph1Dk8_grayfour_tv0'] = {}
-	model_metrics_all['db3D_csph1Dk8_grayfour_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph/DDFN_C64B10_CSPH1D/k8_HybridGrayFourier/loss-kldiv_tv-0.0/2022-05-27_181604/'
-	model_metrics_all['db3D_csph1Dk16_grayfour_tv0'] = {}
-	model_metrics_all['db3D_csph1Dk16_grayfour_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph/DDFN_C64B10_CSPH1D/k16_HybridGrayFourier/loss-kldiv_tv-0.0/2022-05-20_194518/'
-	model_metrics_all['db3D_csph1Dk16_truncfour_tv0'] = {}
-	model_metrics_all['db3D_csph1Dk16_truncfour_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph/DDFN_C64B10_CSPH1D/k16_TruncFourier/loss-kldiv_tv-0.0/2022-05-19_142207'
-	model_metrics_all['db3D_csph1Dk16_coarsehist_tv0'] = {}
-	model_metrics_all['db3D_csph1Dk16_coarsehist_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_CSPH1D/k16_CoarseHist/loss-kldiv_tv-0.0/2022-05-15_103103/'
-	model_metrics_all['db3D_csph1Dk32_grayfour_tv0'] = {}
-	model_metrics_all['db3D_csph1Dk32_grayfour_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph/DDFN_C64B10_CSPH1D/k32_HybridGrayFourier/loss-kldiv_tv-0.0/2022-05-20_194601/'
-	model_metrics_all['db3D_csph1Dk32_truncfour_tv0'] = {}
-	model_metrics_all['db3D_csph1Dk32_truncfour_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph/DDFN_C64B10_CSPH1D/k32_TruncFourier/loss-kldiv_tv-0.0/2022-05-26_075946/'
-	model_metrics_all['db3D_csph1Dk64_grayfour_tv0'] = {}
-	model_metrics_all['db3D_csph1Dk64_grayfour_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_CSPH1D/k64_HybridGrayFourier/loss-kldiv_tv-0.0/2022-05-18_050753/'
-	model_metrics_all['db3D_csph1Dk64_truncfour_tv0'] = {}
-	model_metrics_all['db3D_csph1Dk64_truncfour_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_CSPH1D/k64_TruncFourier/loss-kldiv_tv-0.0/2022-05-17_121426/'
-	model_metrics_all['db3D_csph1Dk64_coarsehist_tv0'] = {}
-	model_metrics_all['db3D_csph1Dk64_coarsehist_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_CSPH1D/k64_CoarseHist/loss-kldiv_tv-0.0/2022-05-17_224020/'
+	# ## CSPH1D Baseline Models
+	# model_metrics_all['db3D_csph1Dk8_gray_tv0'] = {}
+	# model_metrics_all['db3D_csph1Dk8_gray_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph/DDFN_C64B10_CSPH1D/k8_HybridFourierGray/loss-kldiv_tv-0.0/2022-05-26_084337/'
+	# model_metrics_all['db3D_csph1Dk8_grayfour_tv0'] = {}
+	# model_metrics_all['db3D_csph1Dk8_grayfour_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph/DDFN_C64B10_CSPH1D/k8_HybridGrayFourier/loss-kldiv_tv-0.0/2022-05-27_181604/'
+	# model_metrics_all['db3D_csph1Dk16_grayfour_tv0'] = {}
+	# model_metrics_all['db3D_csph1Dk16_grayfour_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph/DDFN_C64B10_CSPH1D/k16_HybridGrayFourier/loss-kldiv_tv-0.0/2022-05-20_194518/'
+	# model_metrics_all['db3D_csph1Dk16_truncfour_tv0'] = {}
+	# model_metrics_all['db3D_csph1Dk16_truncfour_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph/DDFN_C64B10_CSPH1D/k16_TruncFourier/loss-kldiv_tv-0.0/2022-05-19_142207'
+	# model_metrics_all['db3D_csph1Dk16_coarsehist_tv0'] = {}
+	# model_metrics_all['db3D_csph1Dk16_coarsehist_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_CSPH1D/k16_CoarseHist/loss-kldiv_tv-0.0/2022-05-15_103103/'
+	# model_metrics_all['db3D_csph1Dk32_grayfour_tv0'] = {}
+	# model_metrics_all['db3D_csph1Dk32_grayfour_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph/DDFN_C64B10_CSPH1D/k32_HybridGrayFourier/loss-kldiv_tv-0.0/2022-05-20_194601/'
+	# model_metrics_all['db3D_csph1Dk32_truncfour_tv0'] = {}
+	# model_metrics_all['db3D_csph1Dk32_truncfour_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph/DDFN_C64B10_CSPH1D/k32_TruncFourier/loss-kldiv_tv-0.0/2022-05-26_075946/'
+	# model_metrics_all['db3D_csph1Dk64_grayfour_tv0'] = {}
+	# model_metrics_all['db3D_csph1Dk64_grayfour_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_CSPH1D/k64_HybridGrayFourier/loss-kldiv_tv-0.0/2022-05-18_050753/'
+	# model_metrics_all['db3D_csph1Dk64_truncfour_tv0'] = {}
+	# model_metrics_all['db3D_csph1Dk64_truncfour_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_CSPH1D/k64_TruncFourier/loss-kldiv_tv-0.0/2022-05-17_121426/'
+	# model_metrics_all['db3D_csph1Dk64_coarsehist_tv0'] = {}
+	# model_metrics_all['db3D_csph1Dk64_coarsehist_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/debug/DDFN_C64B10_CSPH1D/k64_CoarseHist/loss-kldiv_tv-0.0/2022-05-17_224020/'
 
-	## CSPH3D Models with Unfiltered Backprojection Ups 
-	model_metrics_all['db3D_csph3Dk512_separable4x4x1024_opt_grayfour_tv0'] = {}
-	model_metrics_all['db3D_csph3Dk512_separable4x4x1024_opt_grayfour_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k512_down4_Mt1_HybridGrayFourier-optCt=True-optC=True_separable/loss-kldiv_tv-0.0/2022-08-10_013956/'
-	model_metrics_all['db3D_csph3Dk256_separable4x4x1024_opt_grayfour_tv0'] = {}
-	model_metrics_all['db3D_csph3Dk256_separable4x4x1024_opt_grayfour_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k256_down4_Mt1_HybridGrayFourier-optCt=True-optC=True_separable/loss-kldiv_tv-0.0/2022-08-10_014005/'
-	model_metrics_all['db3D_csph3Dk128_separable4x4x1024_opt_grayfour_tv0'] = {}
-	model_metrics_all['db3D_csph3Dk128_separable4x4x1024_opt_grayfour_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k128_down4_Mt1_HybridGrayFourier-optCt=True-optC=True_separable/loss-kldiv_tv-0.0/2022-08-10_014115/'
-	model_metrics_all['db3D_csph3Dk64_separable4x4x1024_opt_grayfour_tv0'] = {}
-	model_metrics_all['db3D_csph3Dk64_separable4x4x1024_opt_grayfour_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k64_down4_Mt1_HybridGrayFourier-optCt=True-optC=True_separable/loss-kldiv_tv-0.0/2022-08-10_014223/'
+	# ## CSPH3D Models with Unfiltered Backprojection Ups 
+	# model_metrics_all['db3D_csph3Dk512_separable4x4x1024_opt_grayfour_tv0'] = {}
+	# model_metrics_all['db3D_csph3Dk512_separable4x4x1024_opt_grayfour_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k512_down4_Mt1_HybridGrayFourier-optCt=True-optC=True_separable/loss-kldiv_tv-0.0/2022-08-10_013956/'
+	# model_metrics_all['db3D_csph3Dk256_separable4x4x1024_opt_grayfour_tv0'] = {}
+	# model_metrics_all['db3D_csph3Dk256_separable4x4x1024_opt_grayfour_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k256_down4_Mt1_HybridGrayFourier-optCt=True-optC=True_separable/loss-kldiv_tv-0.0/2022-08-10_014005/'
+	# model_metrics_all['db3D_csph3Dk128_separable4x4x1024_opt_grayfour_tv0'] = {}
+	# model_metrics_all['db3D_csph3Dk128_separable4x4x1024_opt_grayfour_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k128_down4_Mt1_HybridGrayFourier-optCt=True-optC=True_separable/loss-kldiv_tv-0.0/2022-08-10_014115/'
+	# model_metrics_all['db3D_csph3Dk64_separable4x4x1024_opt_grayfour_tv0'] = {}
+	# model_metrics_all['db3D_csph3Dk64_separable4x4x1024_opt_grayfour_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k64_down4_Mt1_HybridGrayFourier-optCt=True-optC=True_separable/loss-kldiv_tv-0.0/2022-08-10_014223/'
 
-	model_metrics_all['db3D_csph3Dk512_separable4x4x1024_opt_rand_tv0'] = {}
-	model_metrics_all['db3D_csph3Dk512_separable4x4x1024_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k512_down4_Mt1_Rand-optCt=True-optC=True_separable/loss-kldiv_tv-0.0/2022-08-11_145814/'
-	model_metrics_all['db3D_csph3Dk256_separable4x4x1024_opt_rand_tv0'] = {}
-	model_metrics_all['db3D_csph3Dk256_separable4x4x1024_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k256_down4_Mt1_Rand-optCt=True-optC=True_separable/loss-kldiv_tv-0.0/2022-08-11_145814/'
-	model_metrics_all['db3D_csph3Dk128_separable4x4x1024_opt_rand_tv0'] = {}
-	model_metrics_all['db3D_csph3Dk128_separable4x4x1024_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k128_down4_Mt1_Rand-optCt=True-optC=True_separable/loss-kldiv_tv-0.0/2022-08-11_145813/'
-	model_metrics_all['db3D_csph3Dk64_separable4x4x1024_opt_rand_tv0'] = {}
-	model_metrics_all['db3D_csph3Dk64_separable4x4x1024_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k64_down4_Mt1_Rand-optCt=True-optC=True_separable/loss-kldiv_tv-0.0/2022-08-11_145814/'
+	# model_metrics_all['db3D_csph3Dk512_separable4x4x1024_opt_rand_tv0'] = {}
+	# model_metrics_all['db3D_csph3Dk512_separable4x4x1024_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k512_down4_Mt1_Rand-optCt=True-optC=True_separable/loss-kldiv_tv-0.0/2022-08-11_145814/'
+	# model_metrics_all['db3D_csph3Dk256_separable4x4x1024_opt_rand_tv0'] = {}
+	# model_metrics_all['db3D_csph3Dk256_separable4x4x1024_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k256_down4_Mt1_Rand-optCt=True-optC=True_separable/loss-kldiv_tv-0.0/2022-08-11_145814/'
+	# model_metrics_all['db3D_csph3Dk128_separable4x4x1024_opt_rand_tv0'] = {}
+	# model_metrics_all['db3D_csph3Dk128_separable4x4x1024_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k128_down4_Mt1_Rand-optCt=True-optC=True_separable/loss-kldiv_tv-0.0/2022-08-11_145813/'
+	# model_metrics_all['db3D_csph3Dk64_separable4x4x1024_opt_rand_tv0'] = {}
+	# model_metrics_all['db3D_csph3Dk64_separable4x4x1024_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k64_down4_Mt1_Rand-optCt=True-optC=True_separable/loss-kldiv_tv-0.0/2022-08-11_145814/'
 
-	model_metrics_all['db3D_csph3Dk512_full4x4x1024_opt_rand_tv0'] = {}
-	model_metrics_all['db3D_csph3Dk512_full4x4x1024_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-08-10_162141/'
-	# model_metrics_all['db3D_csph3Dk512_full4x4x1024_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k512_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-08-05_155940/'
-	model_metrics_all['db3D_csph3Dk256_full4x4x1024_opt_rand_tv0'] = {}
-	model_metrics_all['db3D_csph3Dk256_full4x4x1024_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k256_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-08-05_141013/'
+	# # model_metrics_all['db3D_csph3Dk512_full4x4x1024_opt_rand_tv0'] = {}
+	# # model_metrics_all['db3D_csph3Dk512_full4x4x1024_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k512_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-08-05_155940/'
+	# model_metrics_all['db3D_csph3Dk256_full4x4x1024_opt_rand_tv0'] = {}
+	# model_metrics_all['db3D_csph3Dk256_full4x4x1024_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k256_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-08-05_141013/'
 	model_metrics_all['db3D_csph3Dk128_full4x4x1024_opt_rand_tv0'] = {}
 	model_metrics_all['db3D_csph3Dk128_full4x4x1024_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k128_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-07-31_145411/'
-	model_metrics_all['db3D_csph3Dk64_full4x4x1024_opt_rand_tv0'] = {}
-	model_metrics_all['db3D_csph3Dk64_full4x4x1024_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k64_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-07-25_212205/'
-	model_metrics_all['db3D_csph3Dk8_full4x4x128_opt_rand_tv0'] = {}
-	model_metrics_all['db3D_csph3Dk8_full4x4x128_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k8_down4_Mt8_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-07-13_171326/'
-	model_metrics_all['db3D_csph3Dk16_full4x4x128_opt_rand_tv0'] = {}
-	model_metrics_all['db3D_csph3Dk16_full4x4x128_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k16_down4_Mt8_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-07-13_193650/'
-	model_metrics_all['db3D_csph3Dk16_full4x4x64_opt_rand_tv0'] = {}
-	model_metrics_all['db3D_csph3Dk16_full4x4x64_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k16_down4_Mt16_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-07-16_142109/'
-	model_metrics_all['db3D_csph3Dk32_full4x4x64_opt_rand_tv0'] = {}
-	model_metrics_all['db3D_csph3Dk32_full4x4x64_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k32_down4_Mt16_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-07-16_122403/'
+	# model_metrics_all['db3D_csph3Dk64_full4x4x1024_opt_rand_tv0'] = {}
+	# model_metrics_all['db3D_csph3Dk64_full4x4x1024_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k64_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-07-25_212205/'
+	# model_metrics_all['db3D_csph3Dk8_full4x4x128_opt_rand_tv0'] = {}
+	# model_metrics_all['db3D_csph3Dk8_full4x4x128_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k8_down4_Mt8_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-07-13_171326/'
+	# model_metrics_all['db3D_csph3Dk16_full4x4x128_opt_rand_tv0'] = {}
+	# model_metrics_all['db3D_csph3Dk16_full4x4x128_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k16_down4_Mt8_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-07-13_193650/'
+	# model_metrics_all['db3D_csph3Dk16_full4x4x64_opt_rand_tv0'] = {}
+	# model_metrics_all['db3D_csph3Dk16_full4x4x64_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k16_down4_Mt16_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-07-16_142109/'
+	# model_metrics_all['db3D_csph3Dk32_full4x4x64_opt_rand_tv0'] = {}
+	# model_metrics_all['db3D_csph3Dk32_full4x4x64_opt_rand_tv0']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k32_down4_Mt16_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-07-16_122403/'
+
+	## CSPH3D models with unfilt. backproj && normalization
+	model_metrics_all['db3D_csph3Dk128_full4x4x1024_opt_rand_tv0_norm-L2'] = {}
+	model_metrics_all['db3D_csph3Dk128_full4x4x1024_opt_rand_tv0_norm-L2']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/csph3d_good_norm/DDFN_C64B10_CSPH3D/k128_down4_Mt1_Rand-optCt=True-optC=True_full_norm-L2/loss-kldiv_tv-0.0/run-latest_2022-08-18_013924/'
+	model_metrics_all['db3D_csph3Dk128_full4x4x1024_opt_rand_tv0_norm-Linf'] = {}
+	model_metrics_all['db3D_csph3Dk128_full4x4x1024_opt_rand_tv0_norm-Linf']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/csph3d_good_norm/DDFN_C64B10_CSPH3D/k128_down4_Mt1_Rand-optCt=True-optC=True_full_norm-Linf/loss-kldiv_tv-0.0/run-complete_2022-08-18_011947/'
+	model_metrics_all['db3D_csph3Dk512_full4x4x1024_opt_rand_tv0_norm-none'] = {}
+	model_metrics_all['db3D_csph3Dk512_full4x4x1024_opt_rand_tv0_norm-none']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-none/loss-kldiv_tv-0.0/run-complete_2022-08-10_162141/'
+	model_metrics_all['db3D_csph3Dk512_full4x4x1024_opt_rand_tv0_norm-L2'] = {}
+	model_metrics_all['db3D_csph3Dk512_full4x4x1024_opt_rand_tv0_norm-L2']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/csph3d_good_norm/DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-L2/loss-kldiv_tv-0.0/run-latest_2022-08-18_013924/'
+	model_metrics_all['db3D_csph3Dk512_full4x4x1024_opt_rand_tv0_norm-Linf'] = {}
+	model_metrics_all['db3D_csph3Dk512_full4x4x1024_opt_rand_tv0_norm-Linf']['dirpath'] = 'outputs/nyuv2_64x64x1024_80ps/csph3d_good_norm/DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-Linf/loss-kldiv_tv-0.0/run-latest_2022-08-18_011732/'
 
 	# ## [OLD] CSPH models with learned ups
 	# model_metrics_all['db3D_csphk64_separable4x4x1024_opt_grayfour_tv0'] = {}
@@ -298,6 +318,12 @@ if __name__=='__main__':
 			(lmf_metrics, lmf_depths, lmf_scene_metrics) = append_model_metrics(model_metrics_all['lmf'], test_set_id, scene_fname, gt_depths, num_bins, tau, model_depths=lmf_depths)
 			(argmax_metrics, argmax_depths, argmax_scene_metrics) = append_model_metrics(model_metrics_all['argmax'], test_set_id, scene_fname, gt_depths, num_bins, tau, model_depths=argmax_depths)
 
+			## For visualization purposes
+			min_depth = gt_depths.flatten().min() - 0.5*gt_depths.flatten().std() 
+			max_depth = gt_depths.flatten().max() + 0.5*gt_depths.flatten().std()
+			min_err = 0
+			max_err = 0.15
+
 			## Compute and store metrics for all models
 			rec_depths = {}
 			for model_id in model_metrics_all.keys():
@@ -311,10 +337,13 @@ if __name__=='__main__':
 					rec_depths[model_id]['depths'] = model_depths
 					rec_depths[model_id]['metrics'] = scene_metrics
 
-			min_depth = gt_depths.flatten().min()
-			max_depth = gt_depths.flatten().max()
-			min_err = 0
-			max_err = 0.15
+				if(save_depth_images):
+					plt.clf()
+					plt.imshow(model_depths, vmin=min_depth, vmax=max_depth)
+					plt.title(model_id)
+					plot_utils.remove_ticks()
+					plot_utils.save_currfig_png(dirpath=os.path.join(out_dirpath, scene_fname), filename=model_id)
+					plt.pause(0.1)
 
 			if(plot_results):
 				plt.clf()

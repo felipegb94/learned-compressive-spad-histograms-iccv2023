@@ -9,10 +9,10 @@ hydra:
 defaults:
   - io_dirpaths
   - _self_
-  - dataset: middlebury
+  # - dataset: middlebury
   # - dataset: lindell2018_linospad
   # - dataset: lindell2018_linospad_patches
-  # - dataset: lindell2018_linospad_min
+  - dataset: lindell2018_linospad_min
   # - dataset: nyuv2_min
   # - dataset: nyuv2
   # enable color logging
@@ -32,7 +32,7 @@ train_dataset: nyuv2_64x64x1024_80ps
 # ## Peng et al., 2020 (Plain Deep Boosting w/out NL) --> Full trained model with gradient decay
 # model_name: DDFN_C64B10
 # model_dirpath: outputs/${.train_dataset}/debug/DDFN_C64B10/2022-04-25_192521
-# ckpt_id: epoch=05-step=19910-avgvalrmse=0.0287 # 0.0180 | 0.0177 | 0.0203
+# ckpt_id: epoch=05-step=19910-avgvalrmse=0.0287 # 0.0180 | 0.0177 | 0.0203 | 128 images == 0.0314
 
 # ## 3D DB Plain Depth2Depth Model --> Full trained model with gradient decay
 # model_name: DDFN_C64B10_Depth2Depth
@@ -138,13 +138,39 @@ train_dataset: nyuv2_64x64x1024_80ps
 # model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/2022-07-13_171326
 # ckpt_id: epoch=27-step=96963-avgvalrmse=0.0220.ckpt # 0.0319 | 
 
+#### codes=(1024x4x4) tblock_init=Rand norm=[L2, Linf] encoding_type=full
+
+# ## 32x compression (K=512 L2 norm 1024x4x4)
+# model_name: DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-L2/loss-kldiv_tv-0.0
+# experiment_name: csph3d_good_norm
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/run-latest_2022-08-18_013924
+# ckpt_id: epoch=22-step=77917-avgvalrmse=0.0174.ckpt # 0.0190 | 120 images==0.05288 | 128 images==0.0508
+
+# ## 32x compression (K=512 Linf norm 1024x4x4)
+# model_name: DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-Linf/loss-kldiv_tv-0.0
+# experiment_name: csph3d_good_norm
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/run-latest_2022-08-18_011732
+# ckpt_id: epoch=23-step=81380-avgvalrmse=0.0179.ckpt # 0.0206 | 120 images==0.0748 | 128 images==0.07122
+
+# ## 128x compression (K=128 L2 norm 1024x4x4)
+# model_name: DDFN_C64B10_CSPH3D/k128_down4_Mt1_Rand-optCt=True-optC=True_full_norm-L2/loss-kldiv_tv-0.0
+# experiment_name: csph3d_good_norm
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/run-latest_2022-08-18_013924
+# ckpt_id: epoch=24-step=84843-avgvalrmse=0.0185.ckpt # 0.0215 | 120 images==0.0489 | 128 images==0.0471
+
+# ## 128x compression (K=128 Linf norm 1024x4x4)
+# model_name: DDFN_C64B10_CSPH3D/k128_down4_Mt1_Rand-optCt=True-optC=True_full_norm-Linf/loss-kldiv_tv-0.0
+# experiment_name: csph3d_good_norm
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/run-complete_2022-08-18_011947
+# ckpt_id: epoch=29-step=102158-avgvalrmse=0.0186.ckpt # 0.0219 | 120imgs==0.135 | 128 images==0.1285
+
 #### codes=(1024x4x4) tblock_init=Rand encoding_type=full
 
-## 32x compression (K=512 1024x4x4)
-model_name: DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-none/loss-kldiv_tv-0.0
-experiment_name: test_csph3d
-model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/2022-08-10_162141
-ckpt_id: epoch=28-step=98695-avgvalrmse=0.0171.ckpt # 0.0191 | 
+# ## 32x compression (K=512 1024x4x4)
+# model_name: DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-none/loss-kldiv_tv-0.0
+# experiment_name: test_csph3d
+# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/run-complete_2022-08-10_162141
+# ckpt_id: epoch=28-step=98695-avgvalrmse=0.0171.ckpt # 0.0191 | 120 images==0.3567 | 128 images==0.395
 
 # ## 64x compression (K=256 1024x4x4)
 # model_name: DDFN_C64B10_CSPH3Dv1/k256_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0
@@ -156,7 +182,7 @@ ckpt_id: epoch=28-step=98695-avgvalrmse=0.0171.ckpt # 0.0191 |
 # model_name: DDFN_C64B10_CSPH3Dv1/k128_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0
 # experiment_name: test_csph3d
 # model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/2022-07-31_145411
-# ckpt_id: epoch=26-step=91769-avgvalrmse=0.0180.ckpt # 0.0240 |
+# ckpt_id: epoch=26-step=91769-avgvalrmse=0.0180.ckpt # 0.0240 | 120 images==0.177 | 128 images==0.169
 
 # ## 256x compression (K=64 1024x4x4)
 # model_name: DDFN_C64B10_CSPH3Dv1/k64_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0
