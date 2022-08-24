@@ -657,6 +657,7 @@ class CSPH3DLayer(nn.Module):
 		if(csph_out_norm == 'none'): self.normalize_X = self.normalize_X_none
 		elif(csph_out_norm == 'Cmatsize'): self.normalize_X = self.normalize_X_Cmatsize
 		elif(csph_out_norm == 'Linf'): self.normalize_X = self.normalize_X_Linf
+		elif(csph_out_norm == 'LinfGlobal'): self.normalize_X = self.normalize_X_LinfGlobal
 		elif(csph_out_norm == 'L2'): self.normalize_X = self.normalize_X_L2
 		else: assert(False), "Invalid csph_out_norm parameter for CSPH3DLayer"
 
@@ -702,6 +703,9 @@ class CSPH3DLayer(nn.Module):
 
 	def normalize_X_Linf(self, X):
 		return X / (torch.norm(X, p=float('inf'), dim=-3, keepdim=True) + 1e-5)
+
+	def normalize_X_LinfGlobal(self, X):
+		return X / (torch.norm(X, p=float('inf'), dim=(-1,-2,-3), keepdim=True) + 1e-5)
 
 	def normalize_X_L2(self, X):
 		return X / (torch.norm(X, p=2, dim=-3, keepdim=True) + 1e-5)	
