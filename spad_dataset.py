@@ -42,7 +42,8 @@ def pad_tdim(inputs, tblock_len):
 			- do nothing if inputs are correct size
 	'''
 	num_tbins = inputs.shape[-3]
-	tdim_pad = tblock_len - (num_tbins % tblock_len)
+	if((num_tbins % tblock_len) == 0): tdim_pad = 0
+	else: tdim_pad =  tblock_len - (num_tbins % tblock_len)
 	## set padding mode
 	# if inputs are larger in time dimension - circular pad, otherwise pad with 0's
 	pad_mode = "constant" #
@@ -68,9 +69,10 @@ def pad_xydim(inputs, num_kernel_rows, num_kernel_cols):
 	assert(inputs.shape[-1] > num_kernel_cols), "num cols should be larger than kernel"
 	assert(inputs.shape[-2] > num_kernel_rows), "num rows should be larger than kernel"
 	assert(len(inputs.shape) >= 4), "to pad rows and cols inputs should be a 4D tensor"
-	# num_cols = inputs.shape[-1].detach()
-	col_dim_pad =  num_kernel_cols - (inputs.shape[-1] % num_kernel_cols)
-	row_dim_pad =  num_kernel_rows - (inputs.shape[-2] % num_kernel_rows)
+	if((inputs.shape[-1] % num_kernel_cols) == 0): col_dim_pad = 0
+	else: col_dim_pad =  num_kernel_cols - (inputs.shape[-1] % num_kernel_cols)
+	if((inputs.shape[-2] % num_kernel_rows) == 0): row_dim_pad = 0
+	else: row_dim_pad =  num_kernel_rows - (inputs.shape[-2] % num_kernel_rows)
 	return F.pad(inputs, (0, col_dim_pad, 0, row_dim_pad), mode="reflect")
 
 
@@ -334,8 +336,8 @@ class Lindell2018LinoSpadDataset(torch.utils.data.Dataset):
 		# only needed in the high-resolution dataset
 		if((self.max_nr == 256) or (self.max_nc == 256)):
 			# spad = spad[:, :, 40:216, 40:216]
-			spad = spad[:, :, 32:224, 32:224]
-
+			# spad = spad[:, :, 32:224, 32:224]
+			spad = spad[:, :, 0::2, 0::2]
 		# no gt available here so just use spad measurmeents
 		rates = np.array(spad)
 		rates = rates / (np.sum(rates, axis=-3, keepdims=True) + 1e-8)

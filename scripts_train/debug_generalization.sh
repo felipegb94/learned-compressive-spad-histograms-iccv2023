@@ -1,0 +1,7 @@
+## [PENDING] Train in Euler (1D Temporal CSPH - tblock_init=BinaryRand)
+python train.py ++experiment=csph3D_debug_generalization model=DDFN_C64B10_CSPH3D ++model.model_params.tblock_init=BinaryRand ++model.model_params.k=32 ++model.model_params.spatial_down_factor=1 ++model.model_params.nt_blocks=1 ++model.model_params.optimize_codes=false ++model.model_params.optimize_tdim_codes=false ++model.model_params.encoding_type=csph1d ++model.model_params.csph_out_norm=LinfGlobal ++train_params.p_tv=0.0 ++train_params.epoch=30 ++train_params.lri=1e-3 ++random_seed=1235 ++train_params.batch_size=4 ++resume_train=true
+
+#### Models at K=64 (16x compression)
+
+## [PENDING] Train in Euler (1D Temporal CSPH - tblock_init=TruncFourier)
+python train.py ++experiment=csph3D_debug_generalization model=DDFN_C64B10_CSPH3D ++model.model_params.tblock_init=TruncFourier ++model.model_params.k=64 ++model.model_params.spatial_down_factor=1 ++model.model_params.nt_blocks=1 ++model.model_params.optimize_codes=false ++model.model_params.optimize_tdim_codes=false ++model.model_params.encoding_type=csph1d ++model.model_params.csph_out_norm=LinfGlobal ++train_params.p_tv=0.0 ++train_params.epoch=30 ++train_params.lri=1e-3 ++random_seed=1235 ++train_params.batch_size=4 ++resume_train=true
