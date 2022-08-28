@@ -1433,7 +1433,7 @@ class PSeriesGrayBasedFourierCoding(FourierCoding):
 		print(n_remaining_freqs)
 		for i in range(n_remaining_freqs):
 			curr_idx = n_freqs - n_remaining_freqs + i
-			print(curr_idx)
+			# print(curr_idx)
 			freq_idx[curr_idx] = self.low_confidence_freq_idx[i]
 
 		super().__init__(n_maxres, freq_idx=freq_idx, n_codes=n_codes, h_irf=h_irf, account_irf=account_irf)
@@ -1490,7 +1490,7 @@ class HybridGrayBasedFourierCoding(FourierCoding):
 		# print(n_remaining_freqs)
 		for i in range(n_remaining_freqs):
 			curr_idx = n_freqs - n_remaining_freqs + i
-			print(curr_idx)
+			# print(curr_idx)
 			freq_idx[curr_idx] = self.low_confidence_freq_idx[i]
 		
 		super().__init__(n_maxres, freq_idx=freq_idx, n_codes=n_codes, h_irf=h_irf, account_irf=account_irf)
