@@ -4,6 +4,7 @@
 #### Standard Library Imports
 
 #### Library imports
+from random import gauss
 import numpy as np
 import torch
 import torch.nn as nn
@@ -13,6 +14,8 @@ from IPython.core import debugger
 breakpoint = debugger.set_trace
 
 #### Local imports
+from research_utils.signalproc_ops import gaussian_pulse
+
 
 class Gaussian1DLayer(nn.Module):
 	'''
@@ -58,9 +61,15 @@ class IRF1DLayer(nn.Module):
 			- If conv_dim == 1, then convolution is done on D1 dimension
 			- If conv_dim == 2, then convolution is done on D2 dimension
 	'''
-	def __init__(self, irf, conv_dim=0):
+	def __init__(self, irf=None, conv_dim=0):
 		super(IRF1DLayer, self).__init__()
 
+		# create a narrow gaussian IRF
+		if(irf is None):
+			n = 11
+			irf = gaussian_pulse(np.arange(n), mu=(n//2), width=1, circ_shifted=True)
+			print("gaussian irf")
+			
 		assert(irf.ndim==1), "Input IRF should have only 1 dimension"
 
 		self.n = irf.size # Number of bins in irf
