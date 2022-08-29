@@ -68,6 +68,7 @@ if __name__=='__main__':
     (nt, nr, nc) = spad_data.shape
     # denoise data a little bit
     spad_data_dn = scipy.ndimage.gaussian_filter(spad_data, sigma=2, mode='wrap', truncate=10.0)
+    spad_data_block_dn = (spad_data[:,0::2,0::2] + spad_data[:,1::2,0::2] + spad_data[:,0::2,1::2] + spad_data[:,1::2,1::2]) / 4.
 
     # compute depths
     tau = nt*tres
@@ -84,11 +85,11 @@ if __name__=='__main__':
     plt.imshow(intensity_img)
     plt.title("Intensity Image")
     plt.subplot(3,2,2)
-    plt.imshow(spad_data_dn.sum(axis=0))
-    plt.title("Gauss Denoised Photon Counts")
+    plt.imshow((spad_data).sum(axis=0))
+    plt.title("Per-pixel Photon Counts")
     plt.subplot(3,3,4)
-    plt.imshow(spad_data_dn.max(axis=0))
-    plt.title("Gauss denoised Maximum")
+    plt.imshow(spad_data.max(axis=0))
+    plt.title("Per-pixel Maximum")
     plt.subplot(3,3,5)
     plt.imshow(argmax_bin)
     plt.colorbar()

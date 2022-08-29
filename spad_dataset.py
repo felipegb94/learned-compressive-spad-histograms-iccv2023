@@ -337,7 +337,8 @@ class Lindell2018LinoSpadDataset(torch.utils.data.Dataset):
 		if((self.max_nr == 256) or (self.max_nc == 256)):
 			# spad = spad[:, :, 40:216, 40:216]
 			# spad = spad[:, :, 32:224, 32:224]
-			spad = spad[:, :, 0::2, 0::2]
+			# spad = spad[:, :, 0::2, 0::2]
+			spad = spad[:, :, 0::4, 0::4]
 		# no gt available here so just use spad measurmeents
 		rates = np.array(spad)
 		rates = rates / (np.sum(rates, axis=-3, keepdims=True) + 1e-8)
