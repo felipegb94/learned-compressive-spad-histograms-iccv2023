@@ -57,6 +57,8 @@ def test(cfg):
 	encoding_kernel_dims = None
 	if(isinstance(model, LITPlainDeepBoostingCSPH3D)):
 		encoding_kernel_dims = model.csph3d_layer.encoding_kernel3d_dims
+	elif(isinstance(model, LITPlainDeepBoostingCSPH3Dv2)):
+		encoding_kernel_dims = model.csph3d_layer.encoding_kernel3d_dims
 	elif(isinstance(model, LITPlainDeepBoostingCSPH3Dv1)):
 		encoding_kernel_dims = model.csph3d_layer.encoding_kernel_dims
 

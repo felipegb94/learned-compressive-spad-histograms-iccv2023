@@ -22,7 +22,7 @@ breakpoint = debugger.set_trace
 from toflib.coding import TruncatedFourierCoding, HybridGrayBasedFourierCoding, GatedCoding, HybridFourierBasedGrayCoding
 from model_unet import UpBlock
 from unfilt_backproj_3D import UnfiltBackproj3DTransposeConv
-
+from layers_parametric1D import IRF1DLayer
 
 def pad_h_irf(h_irf, num_bins):
 	if(not (h_irf is None)):
@@ -531,8 +531,323 @@ class CSPHDecodingLayer(nn.Module):
 
 		return decoded_out.unsqueeze(1)
 
-
 class CSPH3DLayer(nn.Module):
+	def __init__(self, k=2, num_bins=1024, 
+					tblock_init='Rand', h_irf=None, optimize_tdim_codes=False, optimize_codes=True, 
+					nt_blocks=1, spatial_down_factor=1, 
+					encoding_type='full',
+					csph_out_norm='none',
+					account_irf=False,
+					smooth_tdim_codes=False,
+					apply_zncc_norm=False,
+					zero_mean_tdim_codes=False
+				):
+		# Init parent class
+		super(CSPH3DLayer, self).__init__()
+		# Validate some input params
+		assert((num_bins % nt_blocks) == 0), "Number of bins should be divisible by number of time blocks"
+
+		self.num_bins = num_bins
+		self.k = k
+		self.tblock_init=tblock_init
+		self.optimize_tdim_codes=optimize_tdim_codes
+		self.optimize_codes=optimize_codes
+		self.nt_blocks=nt_blocks
+		# self.tblock_len = int(self.num_bins / nt_blocks) 
+		self.tblock_len = 1024 
+		self.spatial_down_factor=spatial_down_factor
+		# Create IRF layer if we want to account for h irf when doing the unfiltered backprojections
+		self.irf_layer = IRF1DLayer(irf=h_irf, conv_dim=0) 
+		self.account_irf = account_irf
+		# Zero mean codes --> If true make time dimension code zero-mean at every iteration. This can help remove effect of ambient
+		self.zero_mean_tdim_codes = zero_mean_tdim_codes
+		# Smooth tdim codes --> If true it will smooth the tdim codes before encoding
+		self.smooth_tdim_codes = smooth_tdim_codes
+		# apply_zncc_norm --> If true it will apply the normalization used in zero-mean normalized cross-corr
+		self.apply_zncc_norm = apply_zncc_norm
+		if(self.apply_zncc_norm): self.zncc_norm = self.zero_norm
+		else: self.zncc_norm = self.no_zero_norm
+		# Pad IRF with zeros if needed. This is only used to select frequencies in the tblock initialization.
+		self.h_irf = pad_h_irf(h_irf, num_bins=self.tblock_len) 
+		# Get initialization matrix for the temporal dimension block
+		self.Cmat_tdim_init = get_temporal_cmat_init(k=k, num_bins=self.tblock_len, init_id=tblock_init, h_irf=self.h_irf)
+		# reshape matrix to have the shape of a convolutional kernel in 3D
+		W1d = torch.from_numpy(self.Cmat_tdim_init.transpose()[:,np.newaxis,:,np.newaxis,np.newaxis])
+		
+		# Initialize the encoding layer
+		self.encoding_type = encoding_type
+		self.encoding_kernel3d_dims = (self.tblock_len, self.spatial_down_factor, self.spatial_down_factor)
+		self.encoding_kernel3d_txy = self.encoding_kernel3d_dims
+		self.encoding_kernel3d_t = (self.encoding_kernel3d_dims[0], 1, 1)
+		self.encoding_kernel3d_xy = (1, self.encoding_kernel3d_dims[1], self.encoding_kernel3d_dims[2])
+
+		print("Initialization a CSPH Encoding Layer:")
+		print("    - Encoding Type: {}".format(self.encoding_type))
+		print("    - csph_out_norm: {}".format(csph_out_norm))
+		print("    - zero_mean_tdim_codes: {}".format(zero_mean_tdim_codes))
+		print("    - smooth_tdim_codes: {}".format(smooth_tdim_codes))
+		print("    - apply_zncc_norm: {}".format(apply_zncc_norm))
+		print("    - account_irf: {}".format(account_irf))
+		print("    - tblock_init: {}".format(self.tblock_init))
+		print("    - Optimized tdim codes: {}".format(self.optimize_tdim_codes and self.optimize_codes))
+		print("    - Optimized spatial codes: {}".format(self.optimize_codes))
+		print("    - Optimized codes: {}".format(self.optimize_codes))
+		print("    - Encoding Kernel Dims: {}".format(self.encoding_kernel3d_dims))
+		print("    - Number of Filters/Codes: {}".format(self.k))
+
+		self.unfiltered_backproj_layer = UnfiltBackproj3DTransposeConv()
+		if(self.encoding_type == 'full'):
+			# initalize a random conv3d layer
+			self.Cmat_txydim = get_rand_torch_conv3d_W(k, self.encoding_kernel3d_dims, separable=False)
+			# If tblock init was not rand, initialize with the Cmat_tdim_init
+			if(not (self.tblock_init == 'Rand')):
+				## Initialize the weights
+				# change the type  for W1d
+				W1d = W1d.type(self.Cmat_txydim.data.dtype)
+				# get a random W2d initialized with pytorch conv layer
+				W2d = get_rand_torch_conv3d_W(k, self.encoding_kernel3d_xy, separable=True)
+				## re-init the parameter tensor
+				self.Cmat_txydim = nn.Parameter(W1d*(W2d.data), requires_grad=True)
+			## store the initial matrix
+			self.Cmat_txydim_init = torch.clone(self.Cmat_txydim.data).cpu().numpy()
+			# optimize codes only if this flag is set
+			# sometimes we may want to compare against codes that are not optimized or with random codes
+			self.Cmat_txydim.requires_grad = self.optimize_codes
+			## Set the function to compute the compressive histogram
+			self.csph_layer = self.csph_layer_full
+			## Select how the coding matrix weights are constrained (zero mean and/or smooth)
+			if(self.zero_mean_tdim_codes and self.smooth_tdim_codes):
+				self.get_Cmat = self.get_smooth_zero_mean_full_Cmat
+			elif(self.smooth_tdim_codes):
+				self.get_Cmat = self.get_smooth_full_Cmat
+			elif(self.zero_mean_tdim_codes):
+				self.get_Cmat = self.get_zero_mean_full_Cmat
+			else:
+				self.get_Cmat = self.get_full_Cmat
+			## Set the method to obtain the weights for unfiltered backprojection
+			if(self.account_irf): 
+				self.get_unfilt_backproj_W3d = self.get_unfilt_backproj_W3d_with_irf_full
+			else:
+				self.get_unfilt_backproj_W3d = self.get_unfilt_backproj_W3d_full
+			## Compute the expected number of parameters
+			expected_num_params = self.k*self.encoding_kernel3d_dims[0]*self.encoding_kernel3d_dims[1]*self.encoding_kernel3d_dims[2]
+		elif(self.encoding_type == 'separable'):
+			## Separable convolution encoding
+			## Initialize time domain coding layer
+			# initalize a random conv3d layer but with last 2 dims as 1 (note first layer is not init as separable)
+			self.Cmat_tdim = get_rand_torch_conv3d_W(k, self.encoding_kernel3d_t, separable=False)
+			# If we use rand init, leave the matrix as is, but store a copy of the weights
+			if(self.tblock_init == 'Rand'):
+				self.Cmat_tdim_init = torch.clone(self.Cmat_tdim.data).cpu().numpy() 
+			else:
+				# init weights for tdim layer
+				self.Cmat_tdim.data = torch.from_numpy(self.Cmat_tdim_init.transpose()[:,np.newaxis,:,np.newaxis,np.newaxis]).type(self.Cmat_tdim.dtype)
+			# Only optimize the codes if neeeded
+			self.Cmat_tdim.requires_grad = self.optimize_tdim_codes and self.optimize_codes
+			## Initialize spatial domain encoding layer
+			# get a random W2d initialized with pytorch conv layer
+			self.Cmat_xydim = get_rand_torch_conv3d_W( k, self.encoding_kernel3d_xy, separable=True)
+			self.Cmat_xydim_init = torch.clone(self.Cmat_xydim.data).cpu().numpy()
+			# Only optimize code if needed
+			self.Cmat_xydim.requires_grad = self.optimize_codes
+			## Set the function to compute the compressive histogram
+			self.csph_layer = self.csph_layer_separable
+			## Select how the coding matrix weights are constrained (zero mean and/or smooth)
+			if(self.zero_mean_tdim_codes and self.smooth_tdim_codes):
+				self.get_Cmat = self.get_smooth_zero_mean_tdim_Cmat
+			elif(self.smooth_tdim_codes):
+				self.get_Cmat = self.get_smooth_tdim_Cmat
+			elif(self.zero_mean_tdim_codes):
+				self.get_Cmat = self.get_zero_mean_tdim_Cmat
+			else:
+				self.get_Cmat = self.get_tdim_Cmat
+			## Set the method to obtain the weights for unfiltered backprojection
+			if(self.account_irf): 
+				self.get_unfilt_backproj_W3d = self.get_unfilt_backproj_W3d_with_irf_separable
+			else:
+				self.get_unfilt_backproj_W3d = self.get_unfilt_backproj_W3d_separable
+			## Compute the expected number of parameters
+			expected_num_params = (self.k*self.tblock_len) + (self.k*self.spatial_down_factor*self.spatial_down_factor)
+		elif(self.encoding_type == 'csph1d'):
+			assert(self.spatial_down_factor == 1), 'CSPH1D encoding only works for kernels of dimes (tblock_sizex1x1)'
+			## Initialize time domain coding layer
+			# initalize a random conv3d layer but with last 2 dims as 1 (note first layer is not init as separable)
+			self.Cmat_tdim = get_rand_torch_conv3d_W(k, self.encoding_kernel3d_t, separable=False)
+			# If we use rand init, leave the matrix as is, but store a copy of the weights
+			if(self.tblock_init == 'Rand'):
+				self.Cmat_tdim_init = torch.clone(self.Cmat_tdim.data).cpu().numpy() 
+			else:
+				# init weights for tdim layer
+				self.Cmat_tdim.data = torch.from_numpy(self.Cmat_tdim_init.transpose()[:,np.newaxis,:,np.newaxis,np.newaxis]).type(self.Cmat_tdim.dtype)
+			# Only optimize the codes if neeeded
+			self.Cmat_tdim.requires_grad = self.optimize_tdim_codes and self.optimize_codes
+			## Set the function to compute the compressive histogram
+			self.csph_layer = self.csph_layer_csph1d
+			## Select how the coding matrix weights are constrained (zero mean and/or smooth)
+			if(self.zero_mean_tdim_codes and self.smooth_tdim_codes):
+				self.get_Cmat = self.get_smooth_zero_mean_tdim_Cmat
+			elif(self.smooth_tdim_codes):
+				self.get_Cmat = self.get_smooth_tdim_Cmat
+			elif(self.zero_mean_tdim_codes):
+				self.get_Cmat = self.get_zero_mean_tdim_Cmat
+			else:
+				self.get_Cmat = self.get_tdim_Cmat
+			## Set the method to obtain the weights for unfiltered backprojection
+			if(self.account_irf): 
+				self.get_unfilt_backproj_W3d = self.get_unfilt_backproj_W3d_with_irf_csph1d
+			else:
+				self.get_unfilt_backproj_W3d = self.get_unfilt_backproj_W3d_csph1d
+			## Compute the expected number of parameters
+			expected_num_params = (self.k*self.tblock_len)	
+		else:
+			raise ValueError('Invalid encoding_type ({}) given as input.'.format(self.encoding_type))
+		## Verify that the number of parameters we estimated above matches what we get
+		expected_num_params += self.irf_layer.n
+		num_params = sum(p.numel() for p in self.parameters())
+		print("    - Num CSPH Params: {}".format(num_params))
+		assert(expected_num_params == num_params), "Expected number of params does not match the coding layer params"
+		self.Cmat_size = num_params
+
+		self.csph_out_norm = csph_out_norm
+		if(csph_out_norm == 'none'): self.normalize_X = self.normalize_X_none
+		elif(csph_out_norm == 'Cmatsize'): self.normalize_X = self.normalize_X_Cmatsize
+		elif(csph_out_norm == 'Linf'): self.normalize_X = self.normalize_X_Linf
+		elif(csph_out_norm == 'LinfGlobal'): self.normalize_X = self.normalize_X_LinfGlobal
+		elif(csph_out_norm == 'L2'): self.normalize_X = self.normalize_X_L2
+		else: assert(False), "Invalid csph_out_norm parameter for CSPH3DLayer"
+
+	def csph_layer_full(self, inputs):
+		'''
+			Assume a full coding matrix representation
+		'''
+		B = F.conv3d(inputs, self.get_Cmat(), bias=None, stride=self.encoding_kernel3d_txy, padding=0, dilation = 1, groups = 1)
+		return B
+
+	def csph_layer_separable(self, inputs):
+		'''
+			Assume a separable coding matrix representation where the 1st dim is independent from 2nd and 3rd
+		'''
+		B1 = F.conv3d(inputs, self.get_Cmat(), bias=None, stride=self.encoding_kernel3d_t, padding=0, dilation = 1, groups = 1)
+		B = F.conv3d(B1, self.Cmat_xydim, bias=None, stride=self.encoding_kernel3d_xy, padding=0, dilation = 1, groups = self.k)
+		return B
+
+	def csph_layer_csph1d(self, inputs):
+		'''
+			Assume a separable coding matrix representation where the 1st dim is independent from 2nd and 3rd
+		'''
+		B = F.conv3d(inputs, self.get_Cmat(), bias=None, stride=self.encoding_kernel3d_t, padding=0, dilation = 1, groups = 1)
+		return B
+
+	def apply_irf_on_W(self, W):
+		return self.irf_layer(W).unsqueeze(1)
+
+	def get_full_Cmat(self): 
+		return self.Cmat_txydim
+	
+	def get_zero_mean_full_Cmat(self): 
+		return self.Cmat_txydim - self.Cmat_txydim.mean(dim=-3, keepdim=True)
+
+	def get_smooth_full_Cmat(self): 
+		smooth_Cmat_txydim = self.apply_irf_on_W(self.Cmat_txydim)
+		return smooth_Cmat_txydim
+
+	def get_smooth_zero_mean_full_Cmat(self): 
+		smooth_Cmat_txydim = self.apply_irf_on_W(self.Cmat_txydim)
+		return smooth_Cmat_txydim - smooth_Cmat_txydim.mean(dim=-3, keepdim=True)
+
+	def get_tdim_Cmat(self): 
+		return self.Cmat_tdim
+	
+	def get_zero_mean_tdim_Cmat(self): 
+		return self.Cmat_tdim - self.Cmat_tdim.mean(dim=-3, keepdim=True)
+
+	def get_smooth_tdim_Cmat(self): 
+		smooth_Cmat_tdim = self.apply_irf_on_W(self.Cmat_tdim)
+		return smooth_Cmat_tdim
+
+	def get_smooth_zero_mean_tdim_Cmat(self): 
+		smooth_Cmat_tdim = self.apply_irf_on_W(self.Cmat_tdim)
+		return smooth_Cmat_tdim - smooth_Cmat_tdim.mean(dim=-3, keepdim=True)
+
+	def get_unfilt_backproj_W3d_full(self):
+		'''
+			If we use the full coding matrix, we use these weights for unfiltered backjprojection
+		'''
+		return self.get_Cmat() # self.Cmat_txydim = nn.Conv3d
+
+	def get_unfilt_backproj_W3d_with_irf_full(self):
+		'''
+			If we use the full coding matrix, we use these weights for unfiltered backjprojection
+		'''
+		return self.apply_irf_on_W(self.get_Cmat()) # self.Cmat_txydim = nn.Conv3d
+
+	def get_unfilt_backproj_W3d_separable(self):
+		'''
+			If we use a separable coding matrix, we use the outer product of the time and spatial domain for the unfiltered backprojection
+		'''
+		return self.get_Cmat()*self.Cmat_xydim
+
+	def get_unfilt_backproj_W3d_with_irf_separable(self):
+		'''
+			If we use a separable coding matrix, we use the outer product of the time and spatial domain for the unfiltered backprojection
+		'''
+		return self.apply_irf_on_W(self.get_Cmat())*self.Cmat_xydim
+
+	def get_unfilt_backproj_W3d_csph1d(self):
+		'''
+			If we use a separable coding matrix, we use the outer product of the time and spatial domain for the unfiltered backprojection
+		'''
+		return self.get_Cmat()
+
+	def get_unfilt_backproj_W3d_with_irf_csph1d(self):
+		'''
+			If we use a separable coding matrix, we use the outer product of the time and spatial domain for the unfiltered backprojection
+		'''
+		return self.apply_irf_on_W(self.get_Cmat())
+
+	def normalize_X_Linf(self, X):
+		return X / (torch.norm(X, p=float('inf'), dim=-3, keepdim=True) + 1e-5)
+
+	def normalize_X_LinfGlobal(self, X):
+		return X / (torch.norm(X, p=float('inf'), dim=(-1,-2,-3), keepdim=True) + 1e-5)
+
+	def normalize_X_L2(self, X):
+		return X / (torch.norm(X, p=2, dim=-3, keepdim=True) + 1e-5)	
+
+	def normalize_X_Cmatsize(self, X):
+		return X / self.Cmat_size
+
+	def normalize_X_none(self, X):
+		return X
+
+	def zero_norm(self, X, dims):
+		'''
+			Apply Zero-Normalization as it is done in Zero-normalization Cross-Corrlation
+		'''
+		X_zero_mean = X - X.mean(dim=dims, keepdim=True)
+		return (X_zero_mean) / (torch.norm(X_zero_mean, p=2, dim=dims, keepdim=True) + 1e-5)	
+
+	def no_zero_norm(self, X, dims): 
+		return X
+
+	def forward(self, inputs):
+		'''
+			Expected input dims == (Batch, Nt, Nr, Nc)
+		'''
+		## Compute compressive histogram
+		B = self.csph_layer(inputs)
+		# Get the weights from the first layer (if separable this is the outerproduct of two matrices)
+		W = self.get_unfilt_backproj_W3d()
+		## Normalize across the channel dimension like in ZNCC if the apply_zncc_norm is enables
+		B_norm = self.zncc_norm(B, dims=-4) # for 3D signals the channel dimension is -4 dimension 
+		W_norm = self.zncc_norm(W, dims=0) # for weights the channel dimension is the first channel
+		## Upsample using unfiltered backprojection (similar to transposed convolution, but with fixed weights)
+		X = self.unfiltered_backproj_layer(y=B_norm, W=W_norm)
+		## Normalize X with the specified normalization function
+		X = self.normalize_X(X)
+		return X
+
+class CSPH3DLayerv2(nn.Module):
 	def __init__(self, k=2, num_bins=1024, 
 					tblock_init='Rand', h_irf=None, optimize_tdim_codes=False, optimize_codes=True, 
 					nt_blocks=1, spatial_down_factor=1, 
@@ -540,7 +855,7 @@ class CSPH3DLayer(nn.Module):
 					csph_out_norm='none'
 				):
 		# Init parent class
-		super(CSPH3DLayer, self).__init__()
+		super(CSPH3DLayerv2, self).__init__()
 		# Validate some input params
 		assert((num_bins % nt_blocks) == 0), "Number of bins should be divisible by number of time blocks"
 
