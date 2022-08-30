@@ -102,6 +102,9 @@ def init_model_from_id(cfg, irf=None):
 						, encoding_type = cfg.model.model_params.encoding_type
 						, csph_out_norm = cfg.model.model_params.csph_out_norm
 						, account_irf = cfg.model.model_params.account_irf
+						, smooth_tdim_codes=cfg.model.model_params.smooth_tdim_codes
+						, apply_zncc_norm=cfg.model.model_params.apply_zncc_norm
+						, zero_mean_tdim_codes=cfg.model.model_params.zero_mean_tdim_codes
 						, num_bins = cfg.dataset.nt
 						, h_irf = irf
 						)

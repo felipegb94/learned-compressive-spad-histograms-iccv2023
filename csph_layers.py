@@ -537,7 +537,10 @@ class CSPH3DLayer(nn.Module):
 					nt_blocks=1, spatial_down_factor=1, 
 					encoding_type='full',
 					csph_out_norm='none',
-					account_irf=False
+					account_irf=False,
+					smooth_tdim_codes=False,
+					apply_zncc_norm=False,
+					zero_mean_tdim_codes=False
 				):
 		# Init parent class
 		super(CSPH3DLayer, self).__init__()
@@ -556,6 +559,14 @@ class CSPH3DLayer(nn.Module):
 		# Create IRF layer if we want to account for h irf when doing the unfiltered backprojections
 		self.irf_layer = IRF1DLayer(irf=h_irf, conv_dim=0) 
 		self.account_irf = account_irf
+		# Zero mean codes --> If true make time dimension code zero-mean at every iteration. This can help remove effect of ambient
+		self.zero_mean_tdim_codes = zero_mean_tdim_codes
+		# Smooth tdim codes --> If true it will smooth the tdim codes before encoding
+		self.smooth_tdim_codes = smooth_tdim_codes
+		# apply_zncc_norm --> If true it will apply the normalization used in zero-mean normalized cross-corr
+		self.apply_zncc_norm = apply_zncc_norm
+		if(self.apply_zncc_norm): self.zncc_norm = self.zero_norm
+		else: self.zncc_norm = self.no_zero_norm
 		# Pad IRF with zeros if needed. This is only used to select frequencies in the tblock initialization.
 		self.h_irf = pad_h_irf(h_irf, num_bins=self.tblock_len) 
 		# Get initialization matrix for the temporal dimension block
@@ -573,6 +584,10 @@ class CSPH3DLayer(nn.Module):
 		print("Initialization a CSPH Encoding Layer:")
 		print("    - Encoding Type: {}".format(self.encoding_type))
 		print("    - csph_out_norm: {}".format(csph_out_norm))
+		print("    - zero_mean_tdim_codes: {}".format(zero_mean_tdim_codes))
+		print("    - smooth_tdim_codes: {}".format(smooth_tdim_codes))
+		print("    - apply_zncc_norm: {}".format(apply_zncc_norm))
+		print("    - account_irf: {}".format(account_irf))
 		print("    - tblock_init: {}".format(self.tblock_init))
 		print("    - Optimized tdim codes: {}".format(self.optimize_tdim_codes and self.optimize_codes))
 		print("    - Optimized spatial codes: {}".format(self.optimize_codes))
@@ -600,6 +615,15 @@ class CSPH3DLayer(nn.Module):
 			self.Cmat_txydim.requires_grad = self.optimize_codes
 			## Set the function to compute the compressive histogram
 			self.csph_layer = self.csph_layer_full
+			## Select how the coding matrix weights are constrained (zero mean and/or smooth)
+			if(self.zero_mean_tdim_codes and self.smooth_tdim_codes):
+				self.get_Cmat = self.get_smooth_zero_mean_full_Cmat
+			elif(self.smooth_tdim_codes):
+				self.get_Cmat = self.get_smooth_full_Cmat
+			elif(self.zero_mean_tdim_codes):
+				self.get_Cmat = self.get_zero_mean_full_Cmat
+			else:
+				self.get_Cmat = self.get_full_Cmat
 			## Set the method to obtain the weights for unfiltered backprojection
 			if(self.account_irf): 
 				self.get_unfilt_backproj_W3d = self.get_unfilt_backproj_W3d_with_irf_full
@@ -628,6 +652,15 @@ class CSPH3DLayer(nn.Module):
 			self.Cmat_xydim.requires_grad = self.optimize_codes
 			## Set the function to compute the compressive histogram
 			self.csph_layer = self.csph_layer_separable
+			## Select how the coding matrix weights are constrained (zero mean and/or smooth)
+			if(self.zero_mean_tdim_codes and self.smooth_tdim_codes):
+				self.get_Cmat = self.get_smooth_zero_mean_tdim_Cmat
+			elif(self.smooth_tdim_codes):
+				self.get_Cmat = self.get_smooth_tdim_Cmat
+			elif(self.zero_mean_tdim_codes):
+				self.get_Cmat = self.get_zero_mean_tdim_Cmat
+			else:
+				self.get_Cmat = self.get_tdim_Cmat
 			## Set the method to obtain the weights for unfiltered backprojection
 			if(self.account_irf): 
 				self.get_unfilt_backproj_W3d = self.get_unfilt_backproj_W3d_with_irf_separable
@@ -650,6 +683,15 @@ class CSPH3DLayer(nn.Module):
 			self.Cmat_tdim.requires_grad = self.optimize_tdim_codes and self.optimize_codes
 			## Set the function to compute the compressive histogram
 			self.csph_layer = self.csph_layer_csph1d
+			## Select how the coding matrix weights are constrained (zero mean and/or smooth)
+			if(self.zero_mean_tdim_codes and self.smooth_tdim_codes):
+				self.get_Cmat = self.get_smooth_zero_mean_tdim_Cmat
+			elif(self.smooth_tdim_codes):
+				self.get_Cmat = self.get_smooth_tdim_Cmat
+			elif(self.zero_mean_tdim_codes):
+				self.get_Cmat = self.get_zero_mean_tdim_Cmat
+			else:
+				self.get_Cmat = self.get_tdim_Cmat
 			## Set the method to obtain the weights for unfiltered backprojection
 			if(self.account_irf): 
 				self.get_unfilt_backproj_W3d = self.get_unfilt_backproj_W3d_with_irf_csph1d
@@ -678,14 +720,14 @@ class CSPH3DLayer(nn.Module):
 		'''
 			Assume a full coding matrix representation
 		'''
-		B = F.conv3d(inputs, self.Cmat_txydim, bias=None, stride=self.encoding_kernel3d_txy, padding=0, dilation = 1, groups = 1)
+		B = F.conv3d(inputs, self.get_Cmat(), bias=None, stride=self.encoding_kernel3d_txy, padding=0, dilation = 1, groups = 1)
 		return B
 
 	def csph_layer_separable(self, inputs):
 		'''
 			Assume a separable coding matrix representation where the 1st dim is independent from 2nd and 3rd
 		'''
-		B1 = F.conv3d(inputs, self.Cmat_tdim, bias=None, stride=self.encoding_kernel3d_t, padding=0, dilation = 1, groups = 1)
+		B1 = F.conv3d(inputs, self.get_Cmat(), bias=None, stride=self.encoding_kernel3d_t, padding=0, dilation = 1, groups = 1)
 		B = F.conv3d(B1, self.Cmat_xydim, bias=None, stride=self.encoding_kernel3d_xy, padding=0, dilation = 1, groups = self.k)
 		return B
 
@@ -693,47 +735,75 @@ class CSPH3DLayer(nn.Module):
 		'''
 			Assume a separable coding matrix representation where the 1st dim is independent from 2nd and 3rd
 		'''
-		B = F.conv3d(inputs, self.Cmat_tdim, bias=None, stride=self.encoding_kernel3d_t, padding=0, dilation = 1, groups = 1)
+		B = F.conv3d(inputs, self.get_Cmat(), bias=None, stride=self.encoding_kernel3d_t, padding=0, dilation = 1, groups = 1)
 		return B
 
 	def apply_irf_on_W(self, W):
 		return self.irf_layer(W).unsqueeze(1)
 
+	def get_full_Cmat(self): 
+		return self.Cmat_txydim
+	
+	def get_zero_mean_full_Cmat(self): 
+		return self.Cmat_txydim - self.Cmat_txydim.mean(dim=-3, keepdim=True)
+
+	def get_smooth_full_Cmat(self): 
+		smooth_Cmat_txydim = self.apply_irf_on_W(self.Cmat_txydim)
+		return smooth_Cmat_txydim
+
+	def get_smooth_zero_mean_full_Cmat(self): 
+		smooth_Cmat_txydim = self.apply_irf_on_W(self.Cmat_txydim)
+		return smooth_Cmat_txydim - smooth_Cmat_txydim.mean(dim=-3, keepdim=True)
+
+	def get_tdim_Cmat(self): 
+		return self.Cmat_tdim
+	
+	def get_zero_mean_tdim_Cmat(self): 
+		return self.Cmat_tdim - self.Cmat_tdim.mean(dim=-3, keepdim=True)
+
+	def get_smooth_tdim_Cmat(self): 
+		smooth_Cmat_tdim = self.apply_irf_on_W(self.Cmat_tdim)
+		return smooth_Cmat_tdim
+
+	def get_smooth_zero_mean_tdim_Cmat(self): 
+		smooth_Cmat_tdim = self.apply_irf_on_W(self.Cmat_tdim)
+		return smooth_Cmat_tdim - smooth_Cmat_tdim.mean(dim=-3, keepdim=True)
+
 	def get_unfilt_backproj_W3d_full(self):
 		'''
 			If we use the full coding matrix, we use these weights for unfiltered backjprojection
 		'''
-		return self.Cmat_txydim # self.Cmat_txydim = nn.Conv3d
+		return self.get_Cmat() # self.Cmat_txydim = nn.Conv3d
 
 	def get_unfilt_backproj_W3d_with_irf_full(self):
 		'''
 			If we use the full coding matrix, we use these weights for unfiltered backjprojection
 		'''
-		return self.apply_irf_on_W(self.Cmat_txydim) # self.Cmat_txydim = nn.Conv3d
+		return self.apply_irf_on_W(self.get_Cmat()) # self.Cmat_txydim = nn.Conv3d
 
 	def get_unfilt_backproj_W3d_separable(self):
 		'''
 			If we use a separable coding matrix, we use the outer product of the time and spatial domain for the unfiltered backprojection
 		'''
-		return self.Cmat_tdim*self.Cmat_xydim
+		return self.get_Cmat()*self.Cmat_xydim
 
 	def get_unfilt_backproj_W3d_with_irf_separable(self):
 		'''
 			If we use a separable coding matrix, we use the outer product of the time and spatial domain for the unfiltered backprojection
 		'''
-		return self.apply_irf_on_W(self.Cmat_tdim)*self.Cmat_xydim
+		return self.apply_irf_on_W(self.get_Cmat())*self.Cmat_xydim
 
 	def get_unfilt_backproj_W3d_csph1d(self):
 		'''
 			If we use a separable coding matrix, we use the outer product of the time and spatial domain for the unfiltered backprojection
 		'''
-		return self.Cmat_tdim
+		return self.get_Cmat()
 
 	def get_unfilt_backproj_W3d_with_irf_csph1d(self):
 		'''
 			If we use a separable coding matrix, we use the outer product of the time and spatial domain for the unfiltered backprojection
 		'''
-		return self.apply_irf_on_W(self.Cmat_tdim)
+		return self.apply_irf_on_W(self.get_Cmat())
 
 	def normalize_X_Linf(self, X):
 		return X / (torch.norm(X, p=float('inf'), dim=-3, keepdim=True) + 1e-5)
@@ -750,6 +820,16 @@ class CSPH3DLayer(nn.Module):
 	def normalize_X_none(self, X):
 		return X
 
+	def zero_norm(self, X, dims):
+		'''
+			Apply Zero-Normalization as it is done in Zero-normalization Cross-Corrlation
+		'''
+		X_zero_mean = X - X.mean(dim=dims, keepdim=True)
+		return (X_zero_mean) / (torch.norm(X_zero_mean, p=2, dim=dims, keepdim=True) + 1e-5)	
+
+	def no_zero_norm(self, X, dims): 
+		return X
+
 	def forward(self, inputs):
 		'''
 			Expected input dims == (Batch, Nt, Nr, Nc)
@@ -758,8 +838,11 @@ class CSPH3DLayer(nn.Module):
 		B = self.csph_layer(inputs)
 		# Get the weights from the first layer (if separable this is the outerproduct of two matrices)
 		W = self.get_unfilt_backproj_W3d()
+		## Normalize across the channel dimension like in ZNCC if the apply_zncc_norm is enables
+		B_norm = self.zncc_norm(B, dims=-4) # for 3D signals the channel dimension is -4 dimension 
+		W_norm = self.zncc_norm(W, dims=0) # for weights the channel dimension is the first channel
 		## Upsample using unfiltered backprojection (similar to transposed convolution, but with fixed weights)
-		X = self.unfiltered_backproj_layer(y=B, W=W)
+		X = self.unfiltered_backproj_layer(y=B_norm, W=W_norm)
 		## Normalize X with the specified normalization function
 		X = self.normalize_X(X)
 		return X

@@ -26,6 +26,9 @@ class LITPlainDeepBoostingCSPH3D(LITPlainDeepBoosting):
 		, encoding_type = 'separable'
 		, csph_out_norm = 'none'
 		, account_irf = False
+		, smooth_tdim_codes=False
+		, apply_zncc_norm=False
+		, zero_mean_tdim_codes=False
 		):
 		# Init parent class
 		super(LITPlainDeepBoostingCSPH3D, self).__init__(init_lr=init_lr,p_tv=p_tv,lr_decay_gamma=lr_decay_gamma,in_channels=in_channels)
@@ -35,6 +38,9 @@ class LITPlainDeepBoostingCSPH3D(LITPlainDeepBoosting):
 					encoding_type=encoding_type,
 					csph_out_norm=csph_out_norm,
 					account_irf=account_irf
+					, smooth_tdim_codes=smooth_tdim_codes
+					, apply_zncc_norm=apply_zncc_norm
+					, zero_mean_tdim_codes=zero_mean_tdim_codes
 					)
 					
 	def forward(self, x):

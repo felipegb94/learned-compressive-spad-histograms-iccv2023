@@ -9,6 +9,9 @@ model_params:
   optimize_tdim_codes: true
   optimize_codes: true
   account_irf: true
+  apply_zncc_norm: false
+  smooth_tdim_codes: false
+  zero_mean_tdim_codes: false
   nt_blocks: 1
   tblock_init: Rand
   # tblock_init: TruncFourier
@@ -17,6 +20,6 @@ model_params:
   csph_out_norm: none
 
 # Model name is used for saving results
-model_name: ${.model_id}/k${.model_params.k}_down${.model_params.spatial_down_factor}_Mt${.model_params.nt_blocks}_${.model_params.tblock_init}-optCt=${.model_params.optimize_tdim_codes}-optC=${.model_params.optimize_codes}_${.model_params.encoding_type}_norm-${.model_params.csph_out_norm}_irf-${.model_params.account_irf}
+model_name: ${.model_id}/k${.model_params.k}_down${.model_params.spatial_down_factor}_Mt${.model_params.nt_blocks}_${.model_params.tblock_init}-optCt=${.model_params.optimize_tdim_codes}-optC=${.model_params.optimize_codes}_${.model_params.encoding_type}_norm-${.model_params.csph_out_norm}_irf-${.model_params.account_irf}_zn-${.model_params.apply_zncc_norm}_zeromu-${.model_params.zero_mean_tdim_codes}_smoothtdimC-${.model_params.smooth_tdim_codes}
 
 data_loss_id: kldiv
