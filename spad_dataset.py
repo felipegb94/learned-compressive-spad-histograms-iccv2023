@@ -8,6 +8,7 @@ from glob import glob
 import numpy as np
 import scipy
 import scipy.io
+from scipy.signal import resample
 import torch
 import torch.utils.data
 import torch.nn.functional as F
@@ -34,6 +35,7 @@ def bins2hist(range_bins, num_bins):
 
 def pad_tdim(inputs, tblock_len):
 	'''
+	NOTE: Adding significant padding can impact the generalization of the model. Therefore instead of padding the inputs, it is better to resample the time domain to a number that is divisible by the CSPH kernel size. This problem should be fixed in future iterations if we let the CSPH kernels overlap
 		temporal dim padding:
 			- use circular pad if inputs are larger than kernels since it is a periodic signal
 				* We will crop things after recovery
@@ -47,7 +49,6 @@ def pad_tdim(inputs, tblock_len):
 	## set padding mode
 	# if inputs are larger in time dimension - circular pad, otherwise pad with 0's
 	pad_mode = "constant" #
-	if(num_tbins > tblock_len): pad_mode = "circular"
 	## set padding mode
 	if(tdim_pad == 0):
 		# do nothing
@@ -332,13 +333,17 @@ class Lindell2018LinoSpadDataset(torch.utils.data.Dataset):
 		spad = spad.reshape((self.max_nt, self.max_nr, self.max_nc)).swapaxes(-1,-2)
 		spad = spad[np.newaxis, :]
 
-		# crop spatial dimension to avoid out of memory errors
-		# only needed in the high-resolution dataset
+		## reshape and resample the linospad signal (1536x256x256 histogram image)
+		# NOTE: resample tdim. CSPH with a kernel of tdim size 1024 require a lot of padding to process a 1536 sized input which changes the data distribution significantly (i.e., we need to pad 512 bins). So to avoid this we simply resample the tdim to 1024 which was what we trained on.
+		# although this resampling changes the time bin size and the signal waveform used during training, all models seem to be robust to this small model mismatch
+		# The resampling below is not required for CSPH with tdim kernels that can divide 1536, or for the non-CSPH models. A future implementation could consider over-lapping CSPH kernels which should also fix this issue.
+		spad = resample(spad, 1024, axis=-3) # resample 1536->1024
+ 		# downsample spatial dimension to avoid out of memory errors
 		if((self.max_nr == 256) or (self.max_nc == 256)):
-			# spad = spad[:, :, 40:216, 40:216]
-			# spad = spad[:, :, 32:224, 32:224]
-			# spad = spad[:, :, 0::2, 0::2]
-			spad = spad[:, :, 0::4, 0::4]
+			spad = spad[:, :, 0::2, 0::2]
+
+		print("spad shape: {}".format(spad.shape))
+
 		# no gt available here so just use spad measurmeents
 		rates = np.array(spad)
 		rates = rates / (np.sum(rates, axis=-3, keepdims=True) + 1e-8)
