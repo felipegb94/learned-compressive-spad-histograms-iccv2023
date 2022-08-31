@@ -93,6 +93,11 @@ def test(cfg):
 
 	trainer.test(model, dataloaders=test_loader)
 
+	print("Results for:")
+	print("     Model Name: {}".format(cfg.model_name))
+	print("     Model Dirpath: {}".format(cfg.model_dirpath))
+	print("     ckpt: {}".format(cfg.ckpt_id))
+
 	# # Testing validation loop
 	# trainer.validate(model, dataloaders=test_loader)
 
