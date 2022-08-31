@@ -342,8 +342,6 @@ class Lindell2018LinoSpadDataset(torch.utils.data.Dataset):
 		if((self.max_nr == 256) or (self.max_nc == 256)):
 			spad = spad[:, :, 0::2, 0::2]
 
-		print("spad shape: {}".format(spad.shape))
-
 		# no gt available here so just use spad measurmeents
 		rates = np.array(spad)
 		rates = rates / (np.sum(rates, axis=-3, keepdims=True) + 1e-8)
@@ -351,7 +349,7 @@ class Lindell2018LinoSpadDataset(torch.utils.data.Dataset):
 		# Estimated argmax depths from spad measurements
 		est_bins_argmax = np.argmax(spad, axis=-3)
 		# Generate hist from bin indeces
-		est_bins_argmax_hist = bins2hist(est_bins_argmax, num_bins=self.max_nt).astype(np.float32)
+		est_bins_argmax_hist = bins2hist(est_bins_argmax, num_bins=spad.shape[-3]).astype(np.float32)
 		est_bins_argmax_hist = est_bins_argmax_hist[np.newaxis,:]
 		# Normalize the bin indeces
 		est_bins_argmax = est_bins_argmax.astype(np.float32) / spad.shape[-3]
