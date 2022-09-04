@@ -13,7 +13,7 @@ from IPython.core import debugger
 breakpoint = debugger.set_trace
 
 #### Local imports
-from losses import criterion_RMSE, criterion_KL, criterion_TV, criterion_L1
+from losses import criterion_RMSE, criterion_KL, criterion_TV, criterion_L1, criterion_L2
 import tof_utils
 from research_utils.np_utils import calc_mean_percentile_errors
 
@@ -374,6 +374,7 @@ class LITDeepBoostingOriginal(pl.LightningModule):
 		# the following two lines give the same result
 		# depths_rmse = torch.sqrt(torch.mean((rec_depths - gt_depths)**2))
 		# depths_L2 = criterion_RMSE(rec_depths, gt_depths)
+		depths_mse = criterion_L2(rec_depths, gt_depths)
 		depths_rmse = criterion_RMSE(rec_depths, gt_depths)
 		depths_mae = criterion_L1(rec_depths, gt_depths)
 
@@ -388,12 +389,12 @@ class LITDeepBoostingOriginal(pl.LightningModule):
 				, "rmse/avg_test": test_rmse
 				, "depths/test_rmse": depths_rmse
 				, "depths/test_mae": depths_mae
+				, "depths/test_mse": depths_mse
 				, "depths/test_mean_abs_perc{:.2f}".format(percentiles[0]): mean_percentile_errs[0]
 				, "depths/test_mean_abs_perc{:.2f}".format(percentiles[1]): mean_percentile_errs[1]
 				, "depths/test_mean_abs_perc{:.2f}".format(percentiles[2]): mean_percentile_errs[2]
 				, "depths/test_mean_abs_perc{:.2f}".format(percentiles[3]): mean_percentile_errs[3]
 			}
-			, on_step=True
 		)
 		return {'dep': dep, 'dep_re': dep_re}
 
