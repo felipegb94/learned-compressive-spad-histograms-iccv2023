@@ -295,9 +295,9 @@ def load_model_from_ckpt(model_name, ckpt_id, logger=None, model_dirpath=None):
 		print("Loading {} model".format(model_name))
 	else:
 		logger.info("Loading {} model".format(model_name))
-	if(model_name == 'DDFN_C64B10_NL_Depth2Depth'):
+	if('DDFN_C64B10_NL_Depth2Depth/' in model_name):
 		model = LITDeepBoostingDepth2Depth.load_from_checkpoint(ckpt_fpath)
-	elif(model_name == 'DDFN_C64B10_Depth2Depth'):
+	elif('DDFN_C64B10_Depth2Depth/' in model_name):
 		model = LITPlainDeepBoostingDepth2Depth.load_from_checkpoint(ckpt_fpath)
 	elif('DDFN_C64B10_CSPH/' in model_name):
 		model = LITPlainDeepBoostingCSPH.load_from_checkpoint(ckpt_fpath)
@@ -322,9 +322,9 @@ def load_model_from_ckpt(model_name, ckpt_id, logger=None, model_dirpath=None):
 		model = LITDeepBoostingCompressive.load_from_checkpoint(ckpt_fpath)
 	elif(model_name == 'DDFN_C64B10_NL_CompressiveWithBias'):
 		model = LITDeepBoostingCompressiveWithBias.load_from_checkpoint(ckpt_fpath)
-	elif(model_name == 'DDFN_C64B10_NL_original'):
+	elif('DDFN_C64B10_NL_original/' in model_name):
 		model = LITDeepBoostingOriginal.load_from_checkpoint(ckpt_fpath)
-	elif(model_name == 'DDFN_C64B10'):
+	elif('DDFN_C64B10/' in model_name):
 		model = LITPlainDeepBoosting.load_from_checkpoint(ckpt_fpath)
 	elif('DDFN2D_Depth2Depth_01Inputs' in model_name):
 		model = LITPlainDeepBoosting2DDepth2Depth01Inputs.load_from_checkpoint(ckpt_fpath, strict=False)

@@ -1,12 +1,15 @@
 #### Standard Library Imports
 import logging
+import os
 
 #### Library imports
+import numpy as np
 import torch
 from torch.utils.data import DataLoader
 import pytorch_lightning as pl
 from omegaconf import DictConfig, OmegaConf
 import hydra
+from hydra.utils import get_original_cwd
 from IPython.core import debugger
 breakpoint = debugger.set_trace
 
@@ -15,6 +18,7 @@ from spad_dataset import Lindell2018LinoSpadDataset, SpadDataset
 from model_utils import count_parameters, load_model_from_ckpt
 from train import setup_tb_logger
 from model_ddfn_64_B10_CGNL_ori_CSPH3D import *
+from research_utils.io_ops import load_json, write_json
 
 # A logger for this file (not for the pytorch logger)
 logger = logging.getLogger(__name__)
@@ -98,8 +102,24 @@ def test(cfg):
 	print("     Model Dirpath: {}".format(cfg.model_dirpath))
 	print("     ckpt: {}".format(cfg.ckpt_id))
 
-	# # Testing validation loop
-	# trainer.validate(model, dataloaders=test_loader)
+	## add model to pre-trained model list that we can query from other scripts
+	pretrained_models_db_fname = 'pretrained_models_rel_dirpaths.json'
+	pretrained_models_db_fpath = os.path.join(get_original_cwd(), pretrained_models_db_fname)
+	if(pretrained_models_db_fpath): pretrained_models_db = load_json(pretrained_models_db_fpath)
+	else: pretrained_models_db = {}
+	## add entry (only if it doesnt exist)
+	if(not (cfg.model_name in pretrained_models_db)):
+		pretrained_models_db[cfg.model_name] = {}
+	## over-write everything else about the entry
+	pretrained_models_db[cfg.model_name]['rel_dirpath'] = cfg.model_dirpath
+	pretrained_models_db[cfg.model_name]['ckpt_id'] = cfg.ckpt_id
+	## over-write test set results if needed
+	pretrained_models_db[cfg.model_name][cfg.dataset.name] = {}
+	pretrained_models_db[cfg.model_name][cfg.dataset.name]['depths/test_mae'] = float("{:.5}".format(float(np.around(trainer.logged_metrics['depths/test_mae'].cpu().numpy(), decimals=5))))
+	pretrained_models_db[cfg.model_name][cfg.dataset.name]['depths/test_mse'] = float("{:.5}".format(float(np.around(trainer.logged_metrics['depths/test_mse'].cpu().numpy(), decimals=5))))
+	pretrained_models_db[cfg.model_name][cfg.dataset.name]['depths/test_rmse'] = float("{:.5}".format(float(np.around(trainer.logged_metrics['depths/test_rmse'].cpu().numpy(), decimals=5))))
+
+	write_json(pretrained_models_db_fpath, pretrained_models_db)
 
 
 

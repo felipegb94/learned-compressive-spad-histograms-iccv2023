@@ -1,0 +1,157 @@
+{
+    "DDFN_C64B10_CSPH1D/k8_HybridFourierGray/loss-kldiv_tv-0.0": {
+        "rel_dirpath": "outputs/nyuv2_64x64x1024_80ps/baselines_csph1d/DDFN_C64B10_CSPH1D/k8_HybridFourierGray/loss-kldiv_tv-0.0/2022-05-26_084337",
+        "ckpt_id": "epoch=17-step=62333-avgvalrmse=0.0219",
+        "middlebury_72x88x1024_98ps": {
+            "depths/test_mae": 0.01976,
+            "depths/test_mse": 0.00537,
+            "depths/test_rmse": 0.04032
+        }
+    },
+    "DDFN_C64B10_CSPH1D/k8_HybridGrayFourier/loss-kldiv_tv-0.0": {
+        "rel_dirpath": "outputs/nyuv2_64x64x1024_80ps/baselines_csph1d/DDFN_C64B10_CSPH1D/k8_HybridGrayFourier/loss-kldiv_tv-0.0/2022-05-27_181604",
+        "ckpt_id": "epoch=19-step=67528-avgvalrmse=0.0201",
+        "middlebury_72x88x1024_98ps": {
+            "depths/test_mae": 0.02976,
+            "depths/test_mse": 0.00335,
+            "depths/test_rmse": 0.04429
+        }
+    },
+    "DDFN_C64B10_CSPH1D/k16_HybridGrayFourier/loss-kldiv_tv-0.0": {
+        "rel_dirpath": "outputs/nyuv2_64x64x1024_80ps/baselines_csph1d/DDFN_C64B10_CSPH1D/k16_HybridGrayFourier/loss-kldiv_tv-0.0/2022-05-20_194518",
+        "ckpt_id": "epoch=19-step=69259-avgvalrmse=0.0184",
+        "middlebury_72x88x1024_98ps": {
+            "depths/test_mae": 0.01358,
+            "depths/test_mse": 0.0016,
+            "depths/test_rmse": 0.02513
+        }
+    },
+    "DDFN_C64B10_CSPH1D/k16_TruncFourier/loss-kldiv_tv-0.0": {
+        "rel_dirpath": "outputs/nyuv2_64x64x1024_80ps/baselines_csph1d/DDFN_C64B10_CSPH1D/k16_TruncFourier/loss-kldiv_tv-0.0/2022-05-19_142207",
+        "ckpt_id": "epoch=19-step=69259-avgvalrmse=0.0170",
+        "middlebury_72x88x1024_98ps": {
+            "depths/test_mae": 0.02229,
+            "depths/test_mse": 0.00144,
+            "depths/test_rmse": 0.03225
+        }
+    },
+    "DDFN_C64B10_CSPH1D/k16_CoarseHist/loss-kldiv_tv-0.0": {
+        "rel_dirpath": "outputs/nyuv2_64x64x1024_80ps/baselines_csph1d/DDFN_C64B10_CSPH1D/k16_CoarseHist/loss-kldiv_tv-0.0/2022-05-15_103103",
+        "ckpt_id": "epoch=09-step=34629-avgvalrmse=0.0257",
+        "middlebury_72x88x1024_98ps": {
+            "depths/test_mae": 0.15555,
+            "depths/test_mse": 0.0404,
+            "depths/test_rmse": 0.19164
+        }
+    },
+    "DDFN_C64B10_CSPH1D/k32_HybridGrayFourier/loss-kldiv_tv-0.0": {
+        "rel_dirpath": "outputs/nyuv2_64x64x1024_80ps/baselines_csph1d/DDFN_C64B10_CSPH1D/k32_HybridGrayFourier/loss-kldiv_tv-0.0/2022-05-20_194601",
+        "ckpt_id": "epoch=19-step=69259-avgvalrmse=0.0152",
+        "middlebury_72x88x1024_98ps": {
+            "depths/test_mae": 0.01223,
+            "depths/test_mse": 0.00074,
+            "depths/test_rmse": 0.02089
+        }
+    },
+    "DDFN_C64B10_CSPH1D/k32_TruncFourier/loss-kldiv_tv-0.0": {
+        "rel_dirpath": "outputs/nyuv2_64x64x1024_80ps/baselines_csph1d/DDFN_C64B10_CSPH1D/k32_TruncFourier/loss-kldiv_tv-0.0/2022-05-26_075946",
+        "ckpt_id": "epoch=18-step=64065-avgvalrmse=0.0150",
+        "middlebury_72x88x1024_98ps": {
+            "depths/test_mae": 0.01317,
+            "depths/test_mse": 0.00054,
+            "depths/test_rmse": 0.01993
+        }
+    },
+    "DDFN_C64B10_CSPH1D/k64_HybridGrayFourier/loss-kldiv_tv-0.0": {
+        "rel_dirpath": "outputs/nyuv2_64x64x1024_80ps/baselines_csph1d/DDFN_C64B10_CSPH1D/k64_HybridGrayFourier/loss-kldiv_tv-0.0/2022-05-18_050753",
+        "ckpt_id": "epoch=09-step=34629-avgvalrmse=0.0183",
+        "middlebury_72x88x1024_98ps": {
+            "depths/test_mae": 0.01154,
+            "depths/test_mse": 0.00042,
+            "depths/test_rmse": 0.01793
+        }
+    },
+    "DDFN_C64B10_CSPH1D/k64_TruncFourier/loss-kldiv_tv-0.0": {
+        "rel_dirpath": "outputs/nyuv2_64x64x1024_80ps/baselines_csph1d/DDFN_C64B10_CSPH1D/k64_TruncFourier/loss-kldiv_tv-0.0/2022-05-17_121426",
+        "ckpt_id": "epoch=09-step=34629-avgvalrmse=0.0184",
+        "middlebury_72x88x1024_98ps": {
+            "depths/test_mae": 0.01158,
+            "depths/test_mse": 0.00041,
+            "depths/test_rmse": 0.01778
+        }
+    },
+    "DDFN_C64B10_CSPH1D/k64_CoarseHist/loss-kldiv_tv-0.0": {
+        "rel_dirpath": "outputs/nyuv2_64x64x1024_80ps/baselines_csph1d/DDFN_C64B10_CSPH1D/k64_CoarseHist/loss-kldiv_tv-0.0/2022-05-17_224020",
+        "ckpt_id": "epoch=09-step=32898-avgvalrmse=0.0198",
+        "middlebury_72x88x1024_98ps": {
+            "depths/test_mae": 0.03127,
+            "depths/test_mse": 0.00178,
+            "depths/test_rmse": 0.04139
+        }
+    },
+    "DDFN_C64B10_CSPH3Dv2/k128_down4_Mt1_HybridGrayFourier-optCt=False-optC=True_separable_norm-LinfGlobal/loss-kldiv_tv-0.0": {
+        "rel_dirpath": "outputs/nyuv2_64x64x1024_80ps/csph3d_debug_generalization/DDFN_C64B10_CSPH3Dv2/k128_down4_Mt1_HybridGrayFourier-optCt=False-optC=True_separable_norm-LinfGlobal/loss-kldiv_tv-0.0/run-complete_2022-08-29_195412",
+        "ckpt_id": "epoch=29-step=102158-avgvalrmse=0.0193.ckpt",
+        "middlebury_72x88x1024_98ps": {
+            "depths/test_mae": 0.01218,
+            "depths/test_mse": 0.0011,
+            "depths/test_rmse": 0.02292
+        }
+    },
+    "DDFN_C64B10/loss-kldiv_tv-1e-5": {
+        "rel_dirpath": "outputs/nyuv2_64x64x1024_80ps/baselines/DDFN_C64B10/loss-kldiv_tv-1e-5/2022-04-25_192521",
+        "ckpt_id": "epoch=05-step=19910-avgvalrmse=0.0287",
+        "lindell2018_linospad_captured_min": {
+            "depths/test_mae": 2.2689,
+            "depths/test_mse": 10.222,
+            "depths/test_rmse": 3.0568
+        },
+        "middlebury_72x88x1024_98ps": {
+            "depths/test_mae": 0.01027,
+            "depths/test_mse": 0.00041,
+            "depths/test_rmse": 0.01807
+        }
+    },
+    "DDFN_C64B10_Depth2Depth/loss-kldiv_tv-1e-5": {
+        "rel_dirpath": "outputs/nyuv2_64x64x1024_80ps/baselines/DDFN_C64B10_Depth2Depth/loss-kldiv_tv-1e-5/2022-05-02_085659",
+        "ckpt_id": "epoch=05-step=19910-avgvalrmse=0.0357",
+        "lindell2018_linospad_captured_min": {
+            "depths/test_mae": 2.2906,
+            "depths/test_mse": 10.141,
+            "depths/test_rmse": 3.0456
+        },
+        "middlebury_72x88x1024_98ps": {
+            "depths/test_mae": 0.01378,
+            "depths/test_mse": 0.00145,
+            "depths/test_rmse": 0.02711
+        }
+    },
+    "DDFN_C64B10_Depth2Depth/loss-kldiv_tv-0.0": {
+        "rel_dirpath": "outputs/nyuv2_64x64x1024_80ps/baselines/DDFN_C64B10_Depth2Depth/loss-kldiv_tv-0.0/2022-05-07_171658",
+        "ckpt_id": "epoch=08-step=28569-avgvalrmse=0.0263",
+        "lindell2018_linospad_captured_min": {
+            "depths/test_mae": 2.247,
+            "depths/test_mse": 10.147,
+            "depths/test_rmse": 3.0478
+        },
+        "middlebury_72x88x1024_98ps": {
+            "depths/test_mae": 0.01369,
+            "depths/test_mse": 0.00494,
+            "depths/test_rmse": 0.0355
+        }
+    },
+    "DDFN_C64B10_NL_original/loss-kldiv_tv-1e-5": {
+        "rel_dirpath": "outputs/nyuv2_64x64x1024_80ps/baselines/DDFN_C64B10_NL_original/loss-kldiv_tv-1e-5/2022-04-20_185832",
+        "ckpt_id": "epoch=05-step=19910-avgvalrmse=0.0281",
+        "lindell2018_linospad_captured_min": {
+            "depths/test_mae": 2.2661,
+            "depths/test_mse": 10.243,
+            "depths/test_rmse": 3.0597
+        },
+        "middlebury_72x88x1024_98ps": {
+            "depths/test_mae": 0.00983,
+            "depths/test_mse": 0.00043,
+            "depths/test_rmse": 0.01817
+        }
+    }
+}

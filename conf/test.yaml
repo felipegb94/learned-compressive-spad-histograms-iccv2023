@@ -27,8 +27,8 @@ train_dataset: nyuv2_64x64x1024_80ps
 ##########################################
 ## Peng et al., 2020 Baselines and Modified 
 # ## Peng et al., 2020 (Plain Deep Boosting w/out NL) --> Full trained model with gradient decay
-# model_name: DDFN_C64B10
-# experiment_name: debug
+# model_name: DDFN_C64B10/loss-kldiv_tv-1e-5
+# experiment_name: baselines
 # model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/2022-04-25_192521
 # ckpt_id: epoch=05-step=19910-avgvalrmse=0.0287 # 0.0180 | 0.0177 | 0.0203 | 128 images == 0.0314
 
@@ -37,19 +37,19 @@ train_dataset: nyuv2_64x64x1024_80ps
 #### K = 8 (compression = 128x)
 # ## K=8 HybridGrayFourier 3D DB Plain CSPH1D Model (No TV | LR=1e-3) --> Full trained model with gradient decay
 # model_name: DDFN_C64B10_CSPH1D/k8_HybridGrayFourier/loss-kldiv_tv-0.0
-# experiment_name: test_csph
+# experiment_name: baselines_csph1d
 # model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/2022-05-27_181604
 # ckpt_id: epoch=19-step=67528-avgvalrmse=0.0201 # 0.0442 | 0.0320 | 
 #### K = 32 (compression = 32x)
 # ## K=32 HybridGrayFourier 3D DB Plain CSPH1D Model (No TV | LR=1e-3) --> Full trained model with gradient decay
 # model_name: DDFN_C64B10_CSPH1D/k32_HybridGrayFourier/loss-kldiv_tv-0.0
-# experiment_name: test_csph
+# experiment_name: baselines_csph1d
 # model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/2022-05-20_194601
 # ckpt_id: epoch=19-step=69259-avgvalrmse=0.0152 # 0.0208 | 
 #### K = 64 (compression = 16x)
 # ## K=64 CoarseHist 3D DB Plain CSPH1D Model (No TV) --> Full trained model with gradient decay
 # model_name: DDFN_C64B10_CSPH1D/k64_CoarseHist/loss-kldiv_tv-0.0
-# experiment_name: debug
+# experiment_name: baselines_csph1d
 # model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/2022-05-17_224020
 # ckpt_id: epoch=09-step=32898-avgvalrmse=0.0198 # ~0.0413
 

@@ -2,8 +2,8 @@
 ## This script tests pre-trained models that used a 1D Compressive Histogram with ZNCC upsampling
 
 ## Dataset we are testing with
-# test_dataset=middlebury
-test_dataset=lindell2018_linospad_min
+test_dataset=middlebury
+# test_dataset=lindell2018_linospad_min
 
 ## Dataset we trained the models with
 train_dataset=nyuv2_64x64x1024_80ps
