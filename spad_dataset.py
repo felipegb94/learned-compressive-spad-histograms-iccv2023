@@ -313,6 +313,16 @@ class Lindell2018LinoSpadDataset(torch.utils.data.Dataset):
 		spad_data_id = self.datalist_fname + '/' + os.path.splitext(os.path.basename(spad_data_fname))[0]
 		return spad_data_id
 
+	def get_idx_from_scene_name(self, scene_name):
+		for idx in range(len(self.spad_data_fpaths)):
+			fname = os.path.basename(self.spad_data_fpaths[idx])
+			if(scene_name in fname):
+				return idx 
+
+	def get_item_by_scene_name(self, scene_name):
+		idx = self.get_idx_from_scene_name(scene_name)
+		return self.__getitem__(idx)
+
 	def tryitem(self, idx):
 		'''
 			Try to load the spad data sample.
@@ -323,9 +333,9 @@ class Lindell2018LinoSpadDataset(torch.utils.data.Dataset):
 		spad_data = scipy.io.loadmat(spad_data_fname)
 		frame_num = 0 # frame number to use (some data files have multiple frames in them)
 
-		# ## load intensity img
-		# intensity_imgs = np.asarray(spad_data['cam_processed_data'])[0]
-		# intensity_img = np.asarray(intensity_imgs[frame_num]).astype(np.float32)
+		## load intensity img
+		intensity_imgs = np.asarray(spad_data['cam_processed_data'])[0]
+		intensity_img = np.asarray(intensity_imgs[frame_num]).astype(np.float32)
 
 		# spad measurements
 		spad_sparse_data = np.asarray(spad_data['spad_processed_data'])[0]
@@ -363,6 +373,7 @@ class Lindell2018LinoSpadDataset(torch.utils.data.Dataset):
 		bins = torch.from_numpy(bins)
 		est_bins_argmax = torch.from_numpy(est_bins_argmax)
 		est_bins_argmax_hist = torch.from_numpy(est_bins_argmax_hist)
+		intensity_img = torch.from_numpy(intensity_img)
 
 		# # Only pad inputs. Do not pad outputs. The outputs shape is what will tell us later how to crop the inputs after the CSPH encoding and decoding steps
 		if(self.pad_inputs): 
@@ -382,6 +393,7 @@ class Lindell2018LinoSpadDataset(torch.utils.data.Dataset):
 			, 'SBR': sbr
 			, 'mean_signal_photons': mean_signal_photons
 			, 'mean_background_photons': mean_background_photons
+			, 'intensity_img': intensity_img
 			, 'idx': idx
 			}
 
