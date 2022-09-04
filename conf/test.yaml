@@ -5,6 +5,9 @@ hydra:
     # dir: outputs/${data.name}/${model.name}/${experiment}/${now:%Y-%m-%d_%H%M%S}
     # dir: outputs/${dataset.name}/${.model_name}/${experiment}/${experiment_id}
     dir: ${model_dirpath}
+  sweep:
+    dir: ${model_dirpath}
+    subdir: ./
 
 defaults:
   - io_dirpaths
@@ -26,22 +29,26 @@ train_dataset: nyuv2_64x64x1024_80ps
 
 # ## Peng et al., 2020 --> Full trained model with gradient decay
 # model_name: DDFN_C64B10_NL_original
-# model_dirpath: outputs/${.train_dataset}/debug/${.model_name}/debug/2022-04-20_185832
+# experiment_name: debug
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/debug/2022-04-20_185832
 # ckpt_id: epoch=05-step=19910-avgvalrmse=0.0281
 
 # ## Peng et al., 2020 (Plain Deep Boosting w/out NL) --> Full trained model with gradient decay
 # model_name: DDFN_C64B10
-# model_dirpath: outputs/${.train_dataset}/debug/DDFN_C64B10/2022-04-25_192521
+# experiment_name: debug
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/2022-04-25_192521
 # ckpt_id: epoch=05-step=19910-avgvalrmse=0.0287 # 0.0180 | 0.0177 | 0.0203 | 128 images == 0.0314
 
 # ## 3D DB Plain Depth2Depth Model --> Full trained model with gradient decay
 # model_name: DDFN_C64B10_Depth2Depth
-# model_dirpath: outputs/${.train_dataset}/debug/${.model_name}/loss-kldiv_tv-1e-5/2022-05-02_085659
+# experiment_name: debug
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/loss-kldiv_tv-1e-5/2022-05-02_085659
 # ckpt_id: epoch=05-step=19910-avgvalrmse=0.0357 # | 0.0239 | 0.0276
 
 # ## 3D DB Plain Depth2Depth Model (No TV) --> Full trained model with gradient decay
 # model_name: DDFN_C64B10_Depth2Depth
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/debug/${.model_name}/loss-kldiv_tv-0.0/2022-05-07_171658
+# experiment_name: debug
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/loss-kldiv_tv-0.0/2022-05-07_171658
 # ckpt_id: epoch=08-step=28569-avgvalrmse=0.0263 # | 0.0292
 
 
@@ -52,60 +59,69 @@ train_dataset: nyuv2_64x64x1024_80ps
 
 # ## K=8 FourierGray 3D DB Plain CSPH1D Model (No TV | LR=1e-3) --> Full trained model with gradient decay
 # model_name: DDFN_C64B10_CSPH1D/k8_HybridFourierGray/loss-kldiv_tv-0.0
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/test_csph/${.model_name}/2022-05-26_084337
+# experiment_name: test_csph
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/2022-05-26_084337
 # ckpt_id: epoch=17-step=62333-avgvalrmse=0.0219 # 0.0403 | 0.0356
 
 # ## K=8 HybridGrayFourier 3D DB Plain CSPH1D Model (No TV | LR=1e-3) --> Full trained model with gradient decay
 # model_name: DDFN_C64B10_CSPH1D/k8_HybridGrayFourier/loss-kldiv_tv-0.0
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/test_csph/${.model_name}/2022-05-27_181604
+# experiment_name: test_csph
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/2022-05-27_181604
 # ckpt_id: epoch=19-step=67528-avgvalrmse=0.0201 # 0.0442 | 0.0320 | 
 
-#### K = 16 (compression = 64x)
+# ### K = 16 (compression = 64x)
 
 # ## K=16 HybridGrayFourier 3D DB Plain CSPH1D Model (No TV, LR=1e-3) --> Full trained model with gradient decay
 # model_name: DDFN_C64B10_CSPH1D/k16_HybridGrayFourier/loss-kldiv_tv-0.0
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/test_csph/${.model_name}/2022-05-20_194518
+# experiment_name: test_csph
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/2022-05-20_194518
 # ckpt_id: epoch=19-step=69259-avgvalrmse=0.0184 # 0.029 | 0.0203
 
 # ## K=16 TruncFourier 3D DB Plain CSPH1D Model (No TV | LR=1e-3) --> Full trained model with gradient decay
 # model_name: DDFN_C64B10_CSPH1D/k16_TruncFourier/loss-kldiv_tv-0.0
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/test_csph/${.model_name}/2022-05-19_142207
+# experiment_name: test_csph
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/2022-05-19_142207
 # ckpt_id: epoch=19-step=69259-avgvalrmse=0.0170 # 0.0322
 
 # ## K=16 CoarseHist 3D DB Plain CSPH1D Model (No TV) --> Full trained model with gradient decay
 # model_name: DDFN_C64B10_CSPH1D/k16_CoarseHist/loss-kldiv_tv-0.0
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/debug/${.model_name}/2022-05-15_103103
+# experiment_name: debug
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/2022-05-15_103103
 # ckpt_id: epoch=09-step=34629-avgvalrmse=0.0257 #
 
 #### K = 32 (compression = 32x)
 
 # ## K=32 HybridGrayFourier 3D DB Plain CSPH1D Model (No TV | LR=1e-3) --> Full trained model with gradient decay
 # model_name: DDFN_C64B10_CSPH1D/k32_HybridGrayFourier/loss-kldiv_tv-0.0
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/test_csph/${.model_name}/2022-05-20_194601
+# experiment_name: test_csph
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/2022-05-20_194601
 # ckpt_id: epoch=19-step=69259-avgvalrmse=0.0152 # 0.0208 | 
 
 # ## K=32 TruncFourier 3D DB Plain CSPH1D Model (No TV | LR=1e-3) --> Full trained model with gradient decay
 # model_name: DDFN_C64B10_CSPH1D/k32_TruncFourier/loss-kldiv_tv-0.0
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/test_csph/${.model_name}/2022-05-26_075946
+# experiment_name: test_csph
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/2022-05-26_075946
 # ckpt_id: epoch=18-step=64065-avgvalrmse=0.0150 # 0.0199
 
 #### K = 64 (compression = 16x)
 
 # ## K=64 HybridGrayFourier 3D DB Plain CSPH1D Model (No TV) --> Full trained model with gradient decay
 # model_name: DDFN_C64B10_CSPH1D/k64_HybridGrayFourier/loss-kldiv_tv-0.0
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/debug/${.model_name}/2022-05-18_050753
+# experiment_name: debug
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/2022-05-18_050753
 # ckpt_id: epoch=09-step=34629-avgvalrmse=0.0183 # 0.0179
 
 # ## K=64 TruncFourier 3D DB Plain CSPH1D Model (No TV) --> Full trained model with gradient decay
 # model_name: DDFN_C64B10_CSPH1D/k64_TruncFourier/loss-kldiv_tv-0.0
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/debug/${.model_name}/2022-05-17_121426
+# experiment_name: debug
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/2022-05-17_121426
 # ckpt_id: epoch=09-step=34629-avgvalrmse=0.0184 # 0.0177
 
 # ## K=64 CoarseHist 3D DB Plain CSPH1D Model (No TV) --> Full trained model with gradient decay
 # model_name: DDFN_C64B10_CSPH1D/k64_CoarseHist/loss-kldiv_tv-0.0
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/debug/${.model_name}/2022-05-17_224020
+# experiment_name: debug
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/2022-05-17_224020
 # ckpt_id: epoch=09-step=32898-avgvalrmse=0.0198 # ~0.0413
-
 
 ##########################################
 ## 3D CSPH with Pseudo-inverse Upsampling
@@ -114,63 +130,63 @@ train_dataset: nyuv2_64x64x1024_80ps
 # ## 16x compression codes=(1024x1x1) tblock_init=TruncFourier K=64 norm=LinfGlobal
 # model_name: DDFN_C64B10_CSPH3Dv2/k64_down1_Mt1_TruncFourier-optCt=False-optC=False_csph1d_norm-LinfGlobal/loss-kldiv_tv-0.0
 # experiment_name: csph3d_debug_generalization
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/run-latest_2022-08-27_180922
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/run-latest_2022-08-27_180922
 # ckpt_id: epoch=09-step=32898-avgvalrmse=0.0170.ckpt # 0.0172 | 120 images== | 128 images==0.0164
 
 # ## 32x compression codes=(1024x1x1) tblock_init=TruncFourier K=32 norm=LinfGlobal
 # model_name: DDFN_C64B10_CSPH3Dv2/k32_down1_Mt1_TruncFourier-optCt=False-optC=False_csph1d_norm-LinfGlobal/loss-kldiv_tv-0.0
 # experiment_name: csph3d_debug_generalization
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/run-complete_2022-08-29_164722
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/run-complete_2022-08-29_164722
 # ckpt_id: epoch=26-step=93500-avgvalrmse=0.0151.ckpt # 0.0204 | 120 images== | 128 images==0.0218
 
 # ## 32x compression codes=(1024x1x1) tblock_init=BindaryRand K=32 norm=LinfGlobal
 # model_name: DDFN_C64B10_CSPH3Dv2/k32_down1_Mt1_BinaryRand-optCt=False-optC=False_csph1d_norm-LinfGlobal/loss-kldiv_tv-0.0
 # experiment_name: csph3d_debug_generalization
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/run-complete_2022-08-28_032306
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/run-complete_2022-08-28_032306
 # ckpt_id: epoch=29-step=102158-avgvalrmse=0.0274.ckpt # 0.292 | 120 images== | 128 images==01.05
 
 # ## 64x compression codes=(1024x1x1) tblock_init=HybridGrayFourier K=16 norm=LinfGlobal
 # model_name: DDFN_C64B10_CSPH3Dv2/k16_down1_Mt1_HybridGrayFourier-optCt=False-optC=False_csph1d_norm-LinfGlobal/loss-kldiv_tv-0.0
 # experiment_name: csph3d_debug_generalization
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/run-latest_2022-08-29_214704
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/run-latest_2022-08-29_214704
 # ckpt_id: epoch=09-step=32898-avgvalrmse=0.0205.ckpt # 0.0364 | 120 images== | 128 images==0.0378
 
 # ## 32x compression codes=(1024x4x4) tblock_init=TruncFourier K=512 norm=LinfGlobal
 # model_name: DDFN_C64B10_CSPH3Dv2/k512_down4_Mt1_TruncFourier-optCt=True-optC=True_full_norm-LinfGlobal/loss-kldiv_tv-0.0
 # experiment_name: csph3d_debug_generalization
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/run-complete_2022-08-29_164722
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/run-complete_2022-08-29_164722
 # ckpt_id: epoch=20-step=72722-avgvalrmse=0.0179.ckpt # 0.0230 | 120 images== | 128 images==0.0414
 
 # ## 32x compression separable codes=(1024x4x4) tblock_init=TruncFourier K=512 norm=LinfGlobal
 # model_name: DDFN_C64B10_CSPH3Dv2/k512_down4_Mt1_TruncFourier-optCt=True-optC=True_separable_norm-LinfGlobal/loss-kldiv_tv-0.0
 # experiment_name: csph3d_debug_generalization
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/run-complete_2022-08-29_164722
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/run-complete_2022-08-29_164722
 # ckpt_id: epoch=28-step=98695-avgvalrmse=0.0168.ckpt #  0.0198 | 120 images== | 128 images==0.0304
 
 # ## 32x compression separable codes=(1024x4x4) tblock_init=HybridGrayFourier K=512 norm=LinfGlobal
 # model_name: DDFN_C64B10_CSPH3Dv2/k512_down4_Mt1_HybridGrayFourier-optCt=False-optC=True_separable_norm-LinfGlobal/loss-kldiv_tv-0.0
 # experiment_name: csph3d_debug_generalization
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/run-complete_2022-08-29_195412
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/run-complete_2022-08-29_195412
 # ckpt_id: epoch=28-step=98695-avgvalrmse=0.0177.ckpt # 0.0214 | 120 images== | 128 images==0.0234
 
 ## 128x compression  codes=(1024x4x4) tblock_init=HybridGrayFourier K=128 norm=LinfGlobal
 model_name: DDFN_C64B10_CSPH3Dv2/k128_down4_Mt1_HybridGrayFourier-optCt=False-optC=True_separable_norm-LinfGlobal/loss-kldiv_tv-0.0
 experiment_name: csph3d_debug_generalization
-model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/run-complete_2022-08-29_195412
+model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/run-complete_2022-08-29_195412
 ckpt_id: epoch=29-step=102158-avgvalrmse=0.0193.ckpt #  0.0229 | 120 images== | 128 images==0.0225
 
 # ## 32x compression codes=(1024x4x4) tblock_init=Rand K=512 norm=LinfGlobal
 # ## IRF=True | Zero-Mean=False | ZNCC=False | SmoothtdimC=False 
 # model_name: DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-LinfGlobal_irf-True_zn-False_zeromu-False_smoothtdimC-False/loss-kldiv_tv-0.0
 # experiment_name: csph3d_debug_generalization
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/run-complete_2022-08-28_230806
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/run-complete_2022-08-28_230806
 # ckpt_id: epoch=29-step=102158-avgvalrmse=0.0182 # 0.0222 | 120 images== | 128 images==0.0223
 
 # ## 32x compression codes=(1024x4x4) tblock_init=Rand K=512 norm=LinfGlobal
 # ## IRF=False | Zero-Mean=True | ZNCC=True | SmoothtdimC=False 
 # model_name: DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-LinfGlobal_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0
 # experiment_name: csph3d_debug_generalization
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/run-complete_2022-08-30_232221
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/run-complete_2022-08-30_232221
 # # ckpt_id: epoch=10-step=36361-avgvalrmse=0.0190.ckpt # 0.0196 | 120 images== | 128 images==0.0191
 # ckpt_id: epoch=29-step=103889-avgvalrmse=0.0175.ckpt # 0.0167 | 120 images== | 128 images==0.01605
 
@@ -178,7 +194,7 @@ ckpt_id: epoch=29-step=102158-avgvalrmse=0.0193.ckpt #  0.0229 | 120 images== | 
 # ## IRF=False | Zero-Mean=True | ZNCC=False | SmoothtdimC=False 
 # model_name: DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-none_irf-False_zn-False_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0
 # experiment_name: csph3d_debug_generalization
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/run-complete_2022-08-30_125727
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/run-complete_2022-08-30_125727
 # # ckpt_id: epoch=11-step=39824-avgvalrmse=0.0196.ckpt # 0.0202 | 120 images== | 128 images==0.0451
 # ckpt_id: epoch=29-step=103889-avgvalrmse=0.0173.ckpt # 0.0183 | 120 images== | 128 images==0.0257
 
@@ -186,7 +202,7 @@ ckpt_id: epoch=29-step=102158-avgvalrmse=0.0193.ckpt #  0.0229 | 120 images== | 
 # ## IRF=False | Zero-Mean=True | ZNCC=True | SmoothtdimC=False 
 # model_name: DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0
 # experiment_name: csph3d_debug_generalization
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/run-complete_2022-08-30_125727
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/run-complete_2022-08-30_125727
 # # ckpt_id: epoch=10-step=38092-avgvalrmse=0.0190.ckpt # 0.0205 | 120 images== | 128 images==0.02079
 # ckpt_id: epoch=29-step=103889-avgvalrmse=0.0172 # 0.0178 | 120 images== | 128 images==0.0171
 
@@ -194,7 +210,7 @@ ckpt_id: epoch=29-step=102158-avgvalrmse=0.0193.ckpt #  0.0229 | 120 images== | 
 # ## IRF=True | Zero-Mean=True | ZNCC=True | SmoothtdimC=True 
 # model_name: DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-none_irf-True_zn-True_zeromu-True_smoothtdimC-True/loss-kldiv_tv-0.0
 # experiment_name: csph3d_debug_generalization
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/run-latest_2022-08-30_232221
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/run-latest_2022-08-30_232221
 # ckpt_id: epoch=23-step=81380-avgvalrmse=0.0156 # 0.0163 | 120 images== | 128 images==0.0156
 
 ##########################################
@@ -205,13 +221,13 @@ ckpt_id: epoch=29-step=102158-avgvalrmse=0.0193.ckpt #  0.0229 | 120 images== | 
 # ## 32x compression --> mt=16, mr,mc=8, k=32
 # model_name: DDFN_C64B10_CSPH3Dv1/k32_down4_Mt16_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0
 # experiment_name: test_csph3d
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/2022-07-16_122403
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/2022-07-16_122403
 # ckpt_id: epoch=29-step=102158-avgvalrmse=0.0146.ckpt #  0.01748 |  
 
 # ## 64x compression
 # model_name: DDFN_C64B10_CSPH3Dv1/k16_down4_Mt16_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0
 # experiment_name: test_csph3d
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/2022-07-16_142109
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/2022-07-16_142109
 # ckpt_id: epoch=24-step=84843-avgvalrmse=0.0169.ckpt # 0.02163 | 
 
 #### codes=(128x4x4) tblock_init=Rand encoding_type=full
@@ -219,13 +235,13 @@ ckpt_id: epoch=29-step=102158-avgvalrmse=0.0193.ckpt #  0.0229 | 120 images== | 
 # ## 128x compression
 # model_name: DDFN_C64B10_CSPH3Dv1/k16_down4_Mt8_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0
 # experiment_name: test_csph3d
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/2022-07-13_193650
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/2022-07-13_193650
 # ckpt_id: epoch=29-step=103889-avgvalrmse=0.0189.ckpt # 0.0248 | 
 
 # ## 256x compression
 # model_name: DDFN_C64B10_CSPH3Dv1/k8_down4_Mt8_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0
 # experiment_name: test_csph3d
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/2022-07-13_171326
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/2022-07-13_171326
 # ckpt_id: epoch=27-step=96963-avgvalrmse=0.0220.ckpt # 0.0319 | 
 
 #### codes=(1024x4x4) tblock_init=Rand norm=[L2, Linf] encoding_type=full
@@ -233,25 +249,25 @@ ckpt_id: epoch=29-step=102158-avgvalrmse=0.0193.ckpt #  0.0229 | 120 images== | 
 # ## 32x compression (K=512 L2 norm 1024x4x4)
 # model_name: DDFN_C64B10_CSPH3Dv2/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-L2/loss-kldiv_tv-0.0
 # experiment_name: csph3d_good_norm
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/run-latest_2022-08-18_013924
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/run-latest_2022-08-18_013924
 # ckpt_id: epoch=22-step=77917-avgvalrmse=0.0174.ckpt # 0.0190 | 120 images==0.05288 | 128 images==0.0508
 
 # ## 32x compression (K=512 Linf norm 1024x4x4)
 # model_name: DDFN_C64B10_CSPH3Dv2/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-Linf/loss-kldiv_tv-0.0
 # experiment_name: csph3d_good_norm
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/run-latest_2022-08-18_011732
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/run-latest_2022-08-18_011732
 # ckpt_id: epoch=23-step=81380-avgvalrmse=0.0179.ckpt # 0.0206 | 120 images==0.0748 | 128 images==0.07122
 
 # ## 128x compression (K=128 L2 norm 1024x4x4)
 # model_name: DDFN_C64B10_CSPH3Dv2/k128_down4_Mt1_Rand-optCt=True-optC=True_full_norm-L2/loss-kldiv_tv-0.0
 # experiment_name: csph3d_good_norm
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/run-latest_2022-08-18_013924
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/run-latest_2022-08-18_013924
 # ckpt_id: epoch=24-step=84843-avgvalrmse=0.0185.ckpt # 0.0215 | 120 images==0.0489 | 128 images==0.0471
 
 # ## 128x compression (K=128 Linf norm 1024x4x4)
 # model_name: DDFN_C64B10_CSPH3Dv2/k128_down4_Mt1_Rand-optCt=True-optC=True_full_norm-Linf/loss-kldiv_tv-0.0
 # experiment_name: csph3d_good_norm
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/run-complete_2022-08-18_011947
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/run-complete_2022-08-18_011947
 # ckpt_id: epoch=29-step=102158-avgvalrmse=0.0186.ckpt # 0.0219 | 120imgs==0.135 | 128 images==0.1285
 
 
@@ -260,37 +276,37 @@ ckpt_id: epoch=29-step=102158-avgvalrmse=0.0193.ckpt #  0.0229 | 120 images== | 
 # ## 32x compression (K=512 LinfGlobal norm + 0.0 TV  + 1e-3LR 1024x4x4)
 # model_name: DDFN_C64B10_CSPH3Dv2/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-LinfGlobal/loss-kldiv_tv-0.0
 # experiment_name: csph3d_good_norm
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/run-complete_2022-08-24_144556
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/run-complete_2022-08-24_144556
 # ckpt_id: epoch=24-step=84843-avgvalrmse=0.0177.ckpt # 0.0226 | 120 images== | 128 images==0.0337
 
 # ## 32x compression (K=512 LinfGlobal norm + 1e-5 TV  + 1e-3LR 1024x4x4)
 # model_name: DDFN_C64B10_CSPH3Dv2/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-LinfGlobal/loss-kldiv_tv-1e-05
 # experiment_name: csph3d_good_norm
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/run-complete_2022-08-23_231951
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/run-complete_2022-08-23_231951
 # ckpt_id: epoch=01-step=5194-avgvalrmse=0.0417 #  0.0321 | 120 images== | 128 images==0.174
 
 # ## 32x compression (K=512 LinfGlobal norm + 1e-5 TV  + 3e-4LR 1024x4x4)
 # model_name: DDFN_C64B10_CSPH3Dv2/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-LinfGlobal/loss-kldiv_tv-1e-05
 # experiment_name: csph3d_good_norm
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/run-complete_2022-08-26_040500
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/run-complete_2022-08-26_040500
 # ckpt_id: epoch=00-step=3462-avgvalrmse=0.0412.ckpt #  0.104 | 120 images== | 128 images==0.744
 
 # ## 32x compression (K=512 LinfGlobal norm + 1e-6 TV + 3e-4LR 1024x4x4)
 # model_name: DDFN_C64B10_CSPH3Dv2/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-LinfGlobal/loss-kldiv_tv-1e-06
 # experiment_name: csph3d_good_norm
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/run-latest_2022-08-24_145125
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/run-latest_2022-08-24_145125
 # ckpt_id: epoch=22-step=77917-avgvalrmse=0.0185 # 0.0203 | 120 images== | 128 images==0.0485
 
 # ## 32x compression (K=512 LinfGlobal norm + 3e-6 TV + 3e-4LR 1024x4x4)
 # model_name: DDFN_C64B10_CSPH3Dv2/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-LinfGlobal/loss-kldiv_tv-3e-06
 # experiment_name: csph3d_good_norm
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/run-complete_2022-08-26_040500
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/run-complete_2022-08-26_040500
 # ckpt_id: epoch=29-step=102158-avgvalrmse=0.0191 # 0.0196 | 120 images== | 128 images==0.0345
 
 # ## 128x compression (K=128 LinfGlobal norm 1024x4x4)
 # model_name: DDFN_C64B10_CSPH3Dv2/k128_down4_Mt1_Rand-optCt=True-optC=True_full_norm-LinfGlobal/loss-kldiv_tv-1e-05
 # experiment_name: csph3d_good_norm
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/run-latest_2022-08-23_212110
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/run-latest_2022-08-23_212110
 # ckpt_id: epoch=00-step=3462-avgvalrmse=0.0420.ckpt #  | 120imgs== | 128 images==0.334
 
 
@@ -299,25 +315,25 @@ ckpt_id: epoch=29-step=102158-avgvalrmse=0.0193.ckpt #  0.0229 | 120 images== | 
 # ## 32x compression (K=512 1024x4x4)
 # model_name: DDFN_C64B10_CSPH3Dv2/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-none/loss-kldiv_tv-0.0
 # experiment_name: csph3d_good_norm
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/run-complete_2022-08-10_162141
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/run-complete_2022-08-10_162141
 # ckpt_id: epoch=28-step=98695-avgvalrmse=0.0171.ckpt # 0.0191 | 120 images==0.3567 | 128 images==0.395
 
 # ## 64x compression (K=256 1024x4x4)
 # model_name: DDFN_C64B10_CSPH3Dv1/k256_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0
 # experiment_name: test_csph3d
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/2022-08-05_141013
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/2022-08-05_141013
 # ckpt_id: epoch=29-step=103889-avgvalrmse=0.0175 # 0.0206 |
 
 # ## 128x compression (K=128 1024x4x4)
 # model_name: DDFN_C64B10_CSPH3Dv1/k128_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0
 # experiment_name: test_csph3d
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/2022-07-31_145411
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/2022-07-31_145411
 # ckpt_id: epoch=26-step=91769-avgvalrmse=0.0180.ckpt # 0.0240 | 120 images==0.177 | 128 images==0.169
 
 # ## 256x compression (K=64 1024x4x4)
 # model_name: DDFN_C64B10_CSPH3Dv1/k64_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0
 # experiment_name: test_csph3d
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/2022-07-25_212205
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/2022-07-25_212205
 # ckpt_id: epoch=28-step=98695-avgvalrmse=0.0193.ckpt # 0.0254 |
 
 
@@ -326,25 +342,25 @@ ckpt_id: epoch=29-step=102158-avgvalrmse=0.0193.ckpt #  0.0229 | 120 images== | 
 # ## 32x compression (K=512 1024x4x4)
 # model_name: DDFN_C64B10_CSPH3Dv1/k512_down4_Mt1_Rand-optCt=True-optC=True_separable/loss-kldiv_tv-0.0
 # experiment_name: test_csph3d
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/2022-08-11_145814
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/2022-08-11_145814
 # ckpt_id: epoch=28-step=100426-avgvalrmse=0.0143.ckpt # 0.0206 | 120 images== | 128 images==0.156
 
 # ## 64x compression (K=256 1024x4x4)
 # model_name: DDFN_C64B10_CSPH3Dv1/k256_down4_Mt1_Rand-optCt=True-optC=True_separable/loss-kldiv_tv-0.0
 # experiment_name: test_csph3d
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/2022-08-11_145814
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/2022-08-11_145814
 # ckpt_id: epoch=29-step=103889-avgvalrmse=0.0150.ckpt # 0.0181 |
 
 # ## 128x compression (K=128 1024x4x4)
 # model_name: DDFN_C64B10_CSPH3Dv1/k128_down4_Mt1_Rand-optCt=True-optC=True_separable/loss-kldiv_tv-0.0
 # experiment_name: test_csph3d
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/2022-08-11_145813
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/2022-08-11_145813
 # ckpt_id: epoch=29-step=102158-avgvalrmse=0.0170.ckpt # 0.0335 | 120 images== | 128 images==
 
 # ## 256x compression (K=64 1024x4x4)
 # model_name: DDFN_C64B10_CSPH3Dv1/k64_down4_Mt1_Rand-optCt=True-optC=True_separable/loss-kldiv_tv-0.0
 # experiment_name: test_csph3d
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/2022-08-11_145814
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/2022-08-11_145814
 # ckpt_id: epoch=27-step=95232-avgvalrmse=0.0185.ckpt # 0.0313 |
 
 #### codes=(1024x4x4) tblock_init=HybridGrayFourier encoding_type=separable
@@ -352,25 +368,25 @@ ckpt_id: epoch=29-step=102158-avgvalrmse=0.0193.ckpt #  0.0229 | 120 images== | 
 # ## 32x compression (K=512 1024x4x4)
 # model_name: DDFN_C64B10_CSPH3Dv1/k512_down4_Mt1_HybridGrayFourier-optCt=True-optC=True_separable/loss-kldiv_tv-0.0
 # experiment_name: test_csph3d
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/2022-08-10_013956
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/2022-08-10_013956
 # ckpt_id: epoch=29-step=103889-avgvalrmse=0.0164.ckpt # 0.0163 | 120 images== | 128 images==0.0527
 
 # ## 64x compression (K=256 1024x4x4)
 # model_name: DDFN_C64B10_CSPH3Dv1/k256_down4_Mt1_HybridGrayFourier-optCt=True-optC=True_separable/loss-kldiv_tv-0.0
 # experiment_name: test_csph3d
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/2022-08-10_014005
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/2022-08-10_014005
 # ckpt_id: epoch=29-step=103889-avgvalrmse=0.0170.ckpt # 0.01849 |
 
 # ## 128x compression (K=128 1024x4x4)
 # model_name: DDFN_C64B10_CSPH3Dv1/k128_down4_Mt1_HybridGrayFourier-optCt=True-optC=True_separable/loss-kldiv_tv-0.0
 # experiment_name: test_csph3d
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/2022-08-10_014115
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/2022-08-10_014115
 # ckpt_id: epoch=26-step=91769-avgvalrmse=0.0176.ckpt # 0.0195 |
 
 # ## 256x compression (K=64 1024x4x4)
 # model_name: DDFN_C64B10_CSPH3Dv1/k64_down4_Mt1_HybridGrayFourier-optCt=True-optC=True_separable/loss-kldiv_tv-0.0
 # experiment_name: test_csph3d
-# model_dirpath: outputs/nyuv2_64x64x1024_80ps/${.experiment_name}/${.model_name}/2022-08-10_014223
+# model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/2022-08-10_014223
 # ckpt_id: epoch=25-step=90037-avgvalrmse=0.0187.ckpt # 0.0252 |
 
 params:
