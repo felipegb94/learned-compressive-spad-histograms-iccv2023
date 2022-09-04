@@ -347,8 +347,10 @@ class Lindell2018LinoSpadDataset(torch.utils.data.Dataset):
 		# NOTE: resample tdim. CSPH with a kernel of tdim size 1024 require a lot of padding to process a 1536 sized input which changes the data distribution significantly (i.e., we need to pad 512 bins). So to avoid this we simply resample the tdim to 1024 which was what we trained on.
 		# although this resampling changes the time bin size and the signal waveform used during training, all models seem to be robust to this small model mismatch
 		# The resampling below is not required for CSPH with tdim kernels that can divide 1536, or for the non-CSPH models. A future implementation could consider over-lapping CSPH kernels which should also fix this issue.
-		spad = resample(spad, 1024, axis=-3) # resample 1536->1024
- 		# downsample spatial dimension to avoid out of memory errors
+		nt = 1024
+		spad = resample(spad, nt, axis=-3) # resample 1536->1024
+		self.tres_ps = self.tres_ps * (self.max_nt/float(nt)) # update size of time bin
+		# downsample spatial dimension to avoid out of memory errors
 		if((self.max_nr == 256) or (self.max_nc == 256)):
 			spad = spad[:, :, 0::2, 0::2]
 
