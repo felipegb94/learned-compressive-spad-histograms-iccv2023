@@ -142,7 +142,8 @@ if __name__=='__main__':
 	# scene_ids = ['spad_Plastic']
 	# sbr_params = ['2_10']
 	# sbr_params = ['10_1000']
-	sbr_params = ['10_10']
+	sbr_params = ['50_50']
+	sbr_params = ['10_2']
 
 	compression_lvl = '32x' 
 
@@ -182,8 +183,8 @@ if __name__=='__main__':
 	## CSPH1D Baseline Models
 	# model_metrics_all['db3D_csph1Dk8_gray_tv0'] = {}
 	# model_metrics_all['db3D_csph1Dk8_gray_tv0']['dirpath'] = pretrained_models_all['DDFN_C64B10_CSPH1D/k8_HybridFourierGray/loss-kldiv_tv-0.0']['rel_dirpath']
-	model_metrics_all['db3D_csph1Dk8_grayfour_tv0'] = {}
-	model_metrics_all['db3D_csph1Dk8_grayfour_tv0']['dirpath'] = pretrained_models_all['DDFN_C64B10_CSPH1D/k8_HybridGrayFourier/loss-kldiv_tv-0.0']['rel_dirpath']
+	# model_metrics_all['db3D_csph1Dk8_grayfour_tv0'] = {}
+	# model_metrics_all['db3D_csph1Dk8_grayfour_tv0']['dirpath'] = pretrained_models_all['DDFN_C64B10_CSPH1D/k8_HybridGrayFourier/loss-kldiv_tv-0.0']['rel_dirpath']
 	# model_metrics_all['db3D_csph1Dk16_grayfour_tv0'] = {}
 	# model_metrics_all['db3D_csph1Dk16_grayfour_tv0']['dirpath'] = pretrained_models_all['DDFN_C64B10_CSPH1D/k16_HybridGrayFourier/loss-kldiv_tv-0.0']['rel_dirpath']
 	# model_metrics_all['db3D_csph1Dk16_truncfour_tv0'] = {}
@@ -222,8 +223,8 @@ if __name__=='__main__':
 
 	# model_metrics_all['db3D_csph3Dk256_full4x4x1024_opt_rand_tv0'] = {}
 	# model_metrics_all['db3D_csph3Dk256_full4x4x1024_opt_rand_tv0']['dirpath'] = pretrained_models_all['DDFN_C64B10_CSPH3Dv1/k256_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0']['rel_dirpath']
-	model_metrics_all['db3D_csph3Dk128_full4x4x1024_opt_rand_tv0'] = {}
-	model_metrics_all['db3D_csph3Dk128_full4x4x1024_opt_rand_tv0']['dirpath'] = pretrained_models_all['DDFN_C64B10_CSPH3Dv1/k128_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0']['rel_dirpath']
+	# model_metrics_all['db3D_csph3Dk128_full4x4x1024_opt_rand_tv0'] = {}
+	# model_metrics_all['db3D_csph3Dk128_full4x4x1024_opt_rand_tv0']['dirpath'] = pretrained_models_all['DDFN_C64B10_CSPH3Dv1/k128_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0']['rel_dirpath']
 	# model_metrics_all['db3D_csph3Dk64_full4x4x1024_opt_rand_tv0'] = {}
 	# model_metrics_all['db3D_csph3Dk64_full4x4x1024_opt_rand_tv0']['dirpath'] = pretrained_models_all['DDFN_C64B10_CSPH3Dv1/k64_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0']['rel_dirpath']
 	# model_metrics_all['db3D_csph3Dk8_full4x4x128_opt_rand_tv0'] = {}
@@ -318,20 +319,22 @@ if __name__=='__main__':
 			## get scene from spad_dataset
 			scene_data = spad_dataset.get_item_by_scene_name(scene_fname)
 
-			gt_data_fpath = os.path.join(gt_data_dirpath, scene_fname+'.mat')
-			gt_data = io.loadmat(gt_data_fpath)
-			gt_bins = gt_data['range_bins']-1 # Subtract 1 because of matlab index notation
-			lmf_bins = gt_data['est_range_bins_lmf']-1 # Subtract 1 because of matlab index notation
-			argmax_bins = gt_data['est_range_bins_argmax']-1 # Subtract 1 because of matlab index notation
-	
 			## Load params
-			(nr, nc, num_bins) = gt_data['rates'].shape
-			tres = gt_data['bin_size']
-			intensity = gt_data['intensity']
-			SBR = gt_data['SBR']
-			mean_background_photons = gt_data['mean_background_photons']
-			mean_signal_photons = gt_data['mean_signal_photons']
+			(num_bins, nr, nc) = scene_data['rates'].squeeze().shape
+			tres = spad_dataset.tres_ps*1e-12
+			intensity = scene_data['intensity'].squeeze().cpu().numpy()
+			SBR = scene_data['SBR']
+			mean_background_photons = scene_data['mean_background_photons']
+			mean_signal_photons = scene_data['mean_signal_photons']
 			tau = num_bins*tres
+
+			## load depths
+			gt_norm_bins = scene_data['bins'].squeeze().cpu().numpy()
+			lmf_norm_bins = scene_data['est_bins_lmf'].squeeze().cpu().numpy() 
+			argmax_norm_bins = scene_data['est_bins_argmax'].squeeze().cpu().numpy() 
+			gt_bins = gt_norm_bins*num_bins
+			lmf_bins = lmf_norm_bins*num_bins
+			argmax_bins = argmax_norm_bins*num_bins
 
 			## Get depths for MATLAB data
 			gt_depths = bin2depth(gt_bins, num_bins=num_bins, tau=tau)
@@ -349,234 +352,234 @@ if __name__=='__main__':
 			min_err = 0
 			max_err = 0.15
 
-	# 		## Compute and store metrics for all models
-	# 		rec_depths = {}
-	# 		for model_id in model_metrics_all.keys():
-	# 			curr_model_metrics = model_metrics_all[model_id]
-	# 			# skip if there is no dirpath
-	# 			if(curr_model_metrics['dirpath'] is None): continue
-	# 			(curr_model_metrics, model_depths, scene_metrics) = append_model_metrics(curr_model_metrics, test_set_id, scene_fname, gt_depths, num_bins, tau)
-	# 			# if we want to plot the depths for the current scene keep track of the recovered depths
-	# 			if(plot_results):
-	# 				rec_depths[model_id] = {}
-	# 				rec_depths[model_id]['depths'] = model_depths
-	# 				rec_depths[model_id]['metrics'] = scene_metrics
+			## Compute and store metrics for all models
+			rec_depths = {}
+			for model_id in model_metrics_all.keys():
+				curr_model_metrics = model_metrics_all[model_id]
+				# skip if there is no dirpath
+				if(curr_model_metrics['dirpath'] is None): continue
+				(curr_model_metrics, model_depths, scene_metrics) = append_model_metrics(curr_model_metrics, test_set_id, scene_fname, gt_depths, num_bins, tau)
+				# if we want to plot the depths for the current scene keep track of the recovered depths
+				if(plot_results):
+					rec_depths[model_id] = {}
+					rec_depths[model_id]['depths'] = model_depths
+					rec_depths[model_id]['metrics'] = scene_metrics
 
-	# 			if(save_depth_images):
-	# 				plt.clf()
-	# 				plt.imshow(model_depths, vmin=min_depth, vmax=max_depth)
-	# 				plt.title(model_id)
-	# 				plot_utils.remove_ticks()
-	# 				plot_utils.save_currfig_png(dirpath=os.path.join(out_dirpath, scene_fname), filename=model_id)
-	# 				plt.pause(0.1)
+				if(save_depth_images):
+					plt.clf()
+					plt.imshow(model_depths, vmin=min_depth, vmax=max_depth)
+					plt.title(model_id)
+					plot_utils.remove_ticks()
+					plot_utils.save_currfig_png(dirpath=os.path.join(out_dirpath, scene_fname), filename=model_id)
+					plt.pause(0.1)
 
-	# 		if(plot_results):
-	# 			plt.clf()
-	# 			plt.suptitle("{} - SBR: {}, Signal: {} photons, Bkg: {} photons".format(scene_fname, SBR, mean_signal_photons, mean_background_photons), fontsize=20)
-	# 			plt.subplot(2,3,1)
-	# 			plt.imshow(rec_depths['db3D']['depths'], vmin=min_depth, vmax=max_depth); 
-	# 			plt.title('db3D \n mse: {:.3f}m | mae: {:.2f}cm'.format(rec_depths['db3D']['metrics']['mse'], rec_depths['db3D']['metrics']['mae']*100),fontsize=14)
-	# 			plt.colorbar()
-	# 			plt.subplot(2,3,2)
-	# 			plt.imshow(rec_depths['db3D_d2d']['depths'], vmin=min_depth, vmax=max_depth); 
-	# 			plt.title('db3D_d2d \n mse: {:.3f}m | mae: {:.2f}cm'.format(rec_depths['db3D_d2d']['metrics']['mse'], rec_depths['db3D_d2d']['metrics']['mae']*100),fontsize=14)
-	# 			plt.colorbar()
-	# 			plt.subplot(2,3,3)
-	# 			plt.imshow(rec_depths['db3D_csph1Dk64_coarsehist_tv0']['depths'], vmin=min_depth, vmax=max_depth); 
-	# 			plt.title('db3D_csph1Dk64_coarsehist \n mse: {:.3f}m | mae: {:.2f}cm'.format(rec_depths['db3D_csph1Dk64_coarsehist_tv0']['metrics']['mse'], rec_depths['db3D_csph1Dk64_coarsehist_tv0']['metrics']['mae']*100),fontsize=14)
-	# 			plt.colorbar()
-	# 			plt.subplot(2,3,4)
-	# 			if(compression_lvl == '32x'):
-	# 				plt.imshow(rec_depths['db3D_csph1Dk32_grayfour_tv0']['depths'], vmin=min_depth, vmax=max_depth); 
-	# 				plt.title('db3D_csph1Dk32_grayfour \n mse: {:.3f}m | mae: {:.2f}cm'.format(rec_depths['db3D_csph1Dk32_grayfour_tv0']['metrics']['mse'], rec_depths['db3D_csph1Dk32_grayfour_tv0']['metrics']['mae']*100),fontsize=14)
-	# 			elif(compression_lvl == '64x'):
-	# 				plt.imshow(rec_depths['db3D_csph1Dk16_grayfour_tv0']['depths'], vmin=min_depth, vmax=max_depth); 
-	# 				plt.title('db3D_csph1Dk16_grayfour \n mse: {:.3f}m | mae: {:.2f}cm'.format(rec_depths['db3D_csph1Dk16_grayfour_tv0']['metrics']['mse'], rec_depths['db3D_csph1Dk16_grayfour_tv0']['metrics']['mae']*100),fontsize=14)
-	# 			elif(compression_lvl == '128x'):
-	# 				plt.imshow(rec_depths['db3D_csph1Dk8_grayfour_tv0']['depths'], vmin=min_depth, vmax=max_depth); 
-	# 				plt.title('db3D_csph1Dk8_grayfour \n mse: {:.3f}m | mae: {:.2f}cm'.format(rec_depths['db3D_csph1Dk8_grayfour_tv0']['metrics']['mse'], rec_depths['db3D_csph1Dk8_grayfour_tv0']['metrics']['mae']*100),fontsize=14)
-	# 			# plt.imshow(db3D_csph3Dk32_full4x4x64_opt_rand_tv0_depths, vmin=min_depth, vmax=max_depth); 
-	# 			# plt.title('db3D_csph3Dk32_full4x4x64_opt_rand \n mse: {:.3f}m | mae: {:.2f}cm'.format(db3D_csph3Dk32_full4x4x64_opt_rand_tv0_mse, db3D_csph3Dk32_full4x4x64_opt_rand_tv0_mae*100),fontsize=14)
-	# 			plt.colorbar()
-	# 			plt.subplot(2,3,5)
-	# 			if(compression_lvl == '32x'):
-	# 				plt.imshow(rec_depths['db3D_csph3Dk32_full4x4x64_opt_rand_tv0']['depths'], vmin=min_depth, vmax=max_depth); 
-	# 				plt.title('db3D_csph3Dk32_full4x4x64_opt_rand \n mse: {:.3f}m | mae: {:.2f}cm'.format(rec_depths['db3D_csph3Dk32_full4x4x64_opt_rand_tv0']['metrics']['mse'], rec_depths['db3D_csph3Dk32_full4x4x64_opt_rand_tv0']['metrics']['mae']*100),fontsize=14)					
-	# 			elif(compression_lvl == '64x'):
-	# 				plt.imshow(rec_depths['db3D_csph3Dk16_full4x4x64_opt_rand_tv0']['depths'], vmin=min_depth, vmax=max_depth); 
-	# 				plt.title('db3D_csph3Dk16_full4x4x64_opt_rand \n mse: {:.3f}m | mae: {:.2f}cm'.format(rec_depths['db3D_csph3Dk16_full4x4x64_opt_rand_tv0']['metrics']['mse'], rec_depths['db3D_csph3Dk16_full4x4x64_opt_rand_tv0']['metrics']['mae']*100),fontsize=14)
-	# 			elif(compression_lvl == '128x'):
-	# 				plt.imshow(rec_depths['db3D_csph3Dk16_full4x4x128_opt_rand_tv0']['depths'], vmin=min_depth, vmax=max_depth); 
-	# 				plt.title('db3D_csph3Dk16_full4x4x128_opt_rand \n mse: {:.3f}m | mae: {:.2f}cm'.format(rec_depths['db3D_csph3Dk16_full4x4x128_opt_rand_tv0']['metrics']['mse'], rec_depths['db3D_csph3Dk16_full4x4x128_opt_rand_tv0']['metrics']['mae']*100),fontsize=14)
-	# 			elif(compression_lvl == '256x'):
-	# 				plt.imshow(rec_depths['db3D_csph3Dk8_full4x4x128_opt_rand_tv0']['depths'], vmin=min_depth, vmax=max_depth); 
-	# 				plt.title('db3D_csph3Dk8_full4x4x128_opt_rand \n mse: {:.3f}m | mae: {:.2f}cm'.format(rec_depths['db3D_csph3Dk8_full4x4x128_opt_rand_tv0']['metrics']['mse'], rec_depths['db3D_csph3Dk8_full4x4x128_opt_rand_tv0']['metrics']['mae']*100),fontsize=14)
-	# 			plt.colorbar()
-	# 			plt.subplot(2,3,6)
-	# 			if(compression_lvl == '32x'):
-	# 				plt.imshow(rec_depths['db3D_csphk512_separable4x4x1024_opt_grayfour_tv0']['depths'], vmin=min_depth, vmax=max_depth); 
-	# 				plt.title('db3D_csphk512_separable4x4x1024_opt_grayfour \n mse: {:.3f}m | mae: {:.2f}cm'.format(rec_depths['db3D_csphk512_separable4x4x1024_opt_grayfour_tv0']['metrics']['mse'], rec_depths['db3D_csphk512_separable4x4x1024_opt_grayfour_tv0']['metrics']['mae']*100),fontsize=14)
-	# 			elif(compression_lvl == '64x'):
-	# 				plt.imshow(rec_depths['db3D_csphk256_separable4x4x1024_opt_truncfour_tv0']['depths'], vmin=min_depth, vmax=max_depth); 
-	# 				plt.title('db3D_csphk256_separable4x4x1024_opt_truncfour \n mse: {:.3f}m | mae: {:.2f}cm'.format(rec_depths['db3D_csphk256_separable4x4x1024_opt_truncfour_tv0']['metrics']['mse'], rec_depths['db3D_csphk256_separable4x4x1024_opt_truncfour_tv0']['metrics']['mae']*100),fontsize=14)
-	# 			elif(compression_lvl == '128x'):
-	# 				plt.imshow(rec_depths['db3D_csphk128_separable4x4x1024_opt_truncfour_tv0']['depths'], vmin=min_depth, vmax=max_depth); 
-	# 				plt.title('db3D_csphk128_separable4x4x1024_opt_truncfour \n mse: {:.3f}m | mae: {:.2f}cm'.format(rec_depths['db3D_csphk128_separable4x4x1024_opt_truncfour_tv0']['metrics']['mse'], rec_depths['db3D_csphk128_separable4x4x1024_opt_truncfour_tv0']['metrics']['mae']*100),fontsize=14)
-	# 			elif(compression_lvl == '256x'):
-	# 				plt.imshow(rec_depths['db3D_csphk64_separable4x4x1024_opt_grayfour_tv0']['depths'], vmin=min_depth, vmax=max_depth); 
-	# 				plt.title('db3D_csphk64_separable4x4x1024_opt_grayfour \n mse: {:.3f}m | mae: {:.2f}cm'.format(rec_depths['db3D_csphk64_separable4x4x1024_opt_grayfour_tv0']['metrics']['mse'], rec_depths['db3D_csphk64_separable4x4x1024_opt_grayfour_tv0']['metrics']['mae']*100),fontsize=14)
-	# 			plt.colorbar()
-	# 			if(compression_lvl is None):
-	# 				out_fname = 'depths_' + scene_fname
-	# 			else:
-	# 				out_fname = 'depths_' + scene_fname + '_' + compression_lvl
-	# 			plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname)
+			if(plot_results):
+				plt.clf()
+				plt.suptitle("{} - SBR: {}, Signal: {} photons, Bkg: {} photons".format(scene_fname, SBR, mean_signal_photons, mean_background_photons), fontsize=20)
+				plt.subplot(2,3,1)
+				plt.imshow(rec_depths['db3D']['depths'], vmin=min_depth, vmax=max_depth); 
+				plt.title('db3D \n mse: {:.3f}m | mae: {:.2f}cm'.format(rec_depths['db3D']['metrics']['mse'], rec_depths['db3D']['metrics']['mae']*100),fontsize=14)
+				plt.colorbar()
+				plt.subplot(2,3,2)
+				plt.imshow(rec_depths['db3D_d2d']['depths'], vmin=min_depth, vmax=max_depth); 
+				plt.title('db3D_d2d \n mse: {:.3f}m | mae: {:.2f}cm'.format(rec_depths['db3D_d2d']['metrics']['mse'], rec_depths['db3D_d2d']['metrics']['mae']*100),fontsize=14)
+				plt.colorbar()
+				plt.subplot(2,3,3)
+				plt.imshow(rec_depths['db3D_csph1Dk64_coarsehist_tv0']['depths'], vmin=min_depth, vmax=max_depth); 
+				plt.title('db3D_csph1Dk64_coarsehist \n mse: {:.3f}m | mae: {:.2f}cm'.format(rec_depths['db3D_csph1Dk64_coarsehist_tv0']['metrics']['mse'], rec_depths['db3D_csph1Dk64_coarsehist_tv0']['metrics']['mae']*100),fontsize=14)
+				plt.colorbar()
+				plt.subplot(2,3,4)
+				if(compression_lvl == '32x'):
+					plt.imshow(rec_depths['db3D_csph1Dk32_grayfour_tv0']['depths'], vmin=min_depth, vmax=max_depth); 
+					plt.title('db3D_csph1Dk32_grayfour \n mse: {:.3f}m | mae: {:.2f}cm'.format(rec_depths['db3D_csph1Dk32_grayfour_tv0']['metrics']['mse'], rec_depths['db3D_csph1Dk32_grayfour_tv0']['metrics']['mae']*100),fontsize=14)
+				elif(compression_lvl == '64x'):
+					plt.imshow(rec_depths['db3D_csph1Dk16_grayfour_tv0']['depths'], vmin=min_depth, vmax=max_depth); 
+					plt.title('db3D_csph1Dk16_grayfour \n mse: {:.3f}m | mae: {:.2f}cm'.format(rec_depths['db3D_csph1Dk16_grayfour_tv0']['metrics']['mse'], rec_depths['db3D_csph1Dk16_grayfour_tv0']['metrics']['mae']*100),fontsize=14)
+				elif(compression_lvl == '128x'):
+					plt.imshow(rec_depths['db3D_csph1Dk8_grayfour_tv0']['depths'], vmin=min_depth, vmax=max_depth); 
+					plt.title('db3D_csph1Dk8_grayfour \n mse: {:.3f}m | mae: {:.2f}cm'.format(rec_depths['db3D_csph1Dk8_grayfour_tv0']['metrics']['mse'], rec_depths['db3D_csph1Dk8_grayfour_tv0']['metrics']['mae']*100),fontsize=14)
+				# plt.imshow(db3D_csph3Dk32_full4x4x64_opt_rand_tv0_depths, vmin=min_depth, vmax=max_depth); 
+				# plt.title('db3D_csph3Dk32_full4x4x64_opt_rand \n mse: {:.3f}m | mae: {:.2f}cm'.format(db3D_csph3Dk32_full4x4x64_opt_rand_tv0_mse, db3D_csph3Dk32_full4x4x64_opt_rand_tv0_mae*100),fontsize=14)
+				plt.colorbar()
+				plt.subplot(2,3,5)
+				if(compression_lvl == '32x'):
+					plt.imshow(rec_depths['db3D_csph3Dk32_full4x4x64_opt_rand_tv0']['depths'], vmin=min_depth, vmax=max_depth); 
+					plt.title('db3D_csph3Dk32_full4x4x64_opt_rand \n mse: {:.3f}m | mae: {:.2f}cm'.format(rec_depths['db3D_csph3Dk32_full4x4x64_opt_rand_tv0']['metrics']['mse'], rec_depths['db3D_csph3Dk32_full4x4x64_opt_rand_tv0']['metrics']['mae']*100),fontsize=14)					
+				elif(compression_lvl == '64x'):
+					plt.imshow(rec_depths['db3D_csph3Dk16_full4x4x64_opt_rand_tv0']['depths'], vmin=min_depth, vmax=max_depth); 
+					plt.title('db3D_csph3Dk16_full4x4x64_opt_rand \n mse: {:.3f}m | mae: {:.2f}cm'.format(rec_depths['db3D_csph3Dk16_full4x4x64_opt_rand_tv0']['metrics']['mse'], rec_depths['db3D_csph3Dk16_full4x4x64_opt_rand_tv0']['metrics']['mae']*100),fontsize=14)
+				elif(compression_lvl == '128x'):
+					plt.imshow(rec_depths['db3D_csph3Dk16_full4x4x128_opt_rand_tv0']['depths'], vmin=min_depth, vmax=max_depth); 
+					plt.title('db3D_csph3Dk16_full4x4x128_opt_rand \n mse: {:.3f}m | mae: {:.2f}cm'.format(rec_depths['db3D_csph3Dk16_full4x4x128_opt_rand_tv0']['metrics']['mse'], rec_depths['db3D_csph3Dk16_full4x4x128_opt_rand_tv0']['metrics']['mae']*100),fontsize=14)
+				elif(compression_lvl == '256x'):
+					plt.imshow(rec_depths['db3D_csph3Dk8_full4x4x128_opt_rand_tv0']['depths'], vmin=min_depth, vmax=max_depth); 
+					plt.title('db3D_csph3Dk8_full4x4x128_opt_rand \n mse: {:.3f}m | mae: {:.2f}cm'.format(rec_depths['db3D_csph3Dk8_full4x4x128_opt_rand_tv0']['metrics']['mse'], rec_depths['db3D_csph3Dk8_full4x4x128_opt_rand_tv0']['metrics']['mae']*100),fontsize=14)
+				plt.colorbar()
+				plt.subplot(2,3,6)
+				if(compression_lvl == '32x'):
+					plt.imshow(rec_depths['db3D_csphk512_separable4x4x1024_opt_grayfour_tv0']['depths'], vmin=min_depth, vmax=max_depth); 
+					plt.title('db3D_csphk512_separable4x4x1024_opt_grayfour \n mse: {:.3f}m | mae: {:.2f}cm'.format(rec_depths['db3D_csphk512_separable4x4x1024_opt_grayfour_tv0']['metrics']['mse'], rec_depths['db3D_csphk512_separable4x4x1024_opt_grayfour_tv0']['metrics']['mae']*100),fontsize=14)
+				elif(compression_lvl == '64x'):
+					plt.imshow(rec_depths['db3D_csphk256_separable4x4x1024_opt_truncfour_tv0']['depths'], vmin=min_depth, vmax=max_depth); 
+					plt.title('db3D_csphk256_separable4x4x1024_opt_truncfour \n mse: {:.3f}m | mae: {:.2f}cm'.format(rec_depths['db3D_csphk256_separable4x4x1024_opt_truncfour_tv0']['metrics']['mse'], rec_depths['db3D_csphk256_separable4x4x1024_opt_truncfour_tv0']['metrics']['mae']*100),fontsize=14)
+				elif(compression_lvl == '128x'):
+					plt.imshow(rec_depths['db3D_csphk128_separable4x4x1024_opt_truncfour_tv0']['depths'], vmin=min_depth, vmax=max_depth); 
+					plt.title('db3D_csphk128_separable4x4x1024_opt_truncfour \n mse: {:.3f}m | mae: {:.2f}cm'.format(rec_depths['db3D_csphk128_separable4x4x1024_opt_truncfour_tv0']['metrics']['mse'], rec_depths['db3D_csphk128_separable4x4x1024_opt_truncfour_tv0']['metrics']['mae']*100),fontsize=14)
+				elif(compression_lvl == '256x'):
+					plt.imshow(rec_depths['db3D_csphk64_separable4x4x1024_opt_grayfour_tv0']['depths'], vmin=min_depth, vmax=max_depth); 
+					plt.title('db3D_csphk64_separable4x4x1024_opt_grayfour \n mse: {:.3f}m | mae: {:.2f}cm'.format(rec_depths['db3D_csphk64_separable4x4x1024_opt_grayfour_tv0']['metrics']['mse'], rec_depths['db3D_csphk64_separable4x4x1024_opt_grayfour_tv0']['metrics']['mae']*100),fontsize=14)
+				plt.colorbar()
+				if(compression_lvl is None):
+					out_fname = 'depths_' + scene_fname
+				else:
+					out_fname = 'depths_' + scene_fname + '_' + compression_lvl
+				plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname)
 
 
-	# print("Test Set RMSE | MAE (cm) | MSE (cm):")
-	# ## Compute and store metrics for all models
-	# for model_id in model_metrics_all.keys():
-	# 	curr_model_metrics = model_metrics_all[model_id]
-	# 	mean_rmse = calc_mean_rmse(model_metrics_all[model_id])
-	# 	mean_mse = calc_mean_mse(model_metrics_all[model_id])
-	# 	mean_mae = calc_mean_mae(model_metrics_all[model_id])
-	# 	print("    {}: {:.3f} | {:.2f}cm | {:.2f}".format(model_id, mean_rmse, mean_mae, mean_mse))
+	print("Test Set RMSE | MAE (cm) | MSE (cm):")
+	## Compute and store metrics for all models
+	for model_id in model_metrics_all.keys():
+		curr_model_metrics = model_metrics_all[model_id]
+		mean_rmse = calc_mean_rmse(model_metrics_all[model_id])
+		mean_mse = calc_mean_mse(model_metrics_all[model_id])
+		mean_mae = calc_mean_mae(model_metrics_all[model_id])
+		print("    {}: {:.3f} | {:.2f}cm | {:.2f}".format(model_id, mean_rmse, mean_mae, mean_mse))
 
-	# if(plot_compression_vs_perf):
-	# 	compression_vs_perf = {}
-	# 	compression_vs_perf['mae'] = {}
-	# 	compression_rates = [16, 32, 64, 128, 256]
-	# 	compression_vs_perf['db3D'] = 'No Compression'
-	# 	compression_vs_perf['mae']['db3D'] = [calc_mean_mae(model_metrics_all['db3D'])]*len(compression_rates)
-	# 	compression_vs_perf['db3D_d2d'] = 'Argmax Compression (Large Memory)'
-	# 	compression_vs_perf['mae']['db3D_d2d'] = [calc_mean_mae(model_metrics_all['db3D_d2d'])]*len(compression_rates)
-	# 	compression_vs_perf['db3D_csph3D_full4x4x1024_opt_rand_tv0'] = 'CSPH3D + Full4x4x1024 + Backproj Up + Rand Init'
-	# 	compression_vs_perf['mae']['db3D_csph3D_full4x4x1024_opt_rand_tv0'] = [ \
-	# 		np.nan
-	# 		, calc_mean_mae(model_metrics_all['db3D_csph3Dk512_full4x4x1024_opt_rand_tv0'])
-	# 		, calc_mean_mae(model_metrics_all['db3D_csph3Dk256_full4x4x1024_opt_rand_tv0'])
-	# 		, calc_mean_mae(model_metrics_all['db3D_csph3Dk128_full4x4x1024_opt_rand_tv0'])
-	# 		, calc_mean_mae(model_metrics_all['db3D_csph3Dk64_full4x4x1024_opt_rand_tv0'])
-	# 		]
-	# 	compression_vs_perf['db3D_csph3D_separable4x4x1024_opt_rand_tv0'] = 'CSPH3D + Separable4x4x1024 + Backproj Up + Rand Init'
-	# 	compression_vs_perf['mae']['db3D_csph3D_separable4x4x1024_opt_rand_tv0'] = [ \
-	# 		np.nan
-	# 		, calc_mean_mae(model_metrics_all['db3D_csph3Dk512_separable4x4x1024_opt_rand_tv0'])
-	# 		, calc_mean_mae(model_metrics_all['db3D_csph3Dk256_separable4x4x1024_opt_rand_tv0'])
-	# 		, calc_mean_mae(model_metrics_all['db3D_csph3Dk128_separable4x4x1024_opt_rand_tv0'])
-	# 		, calc_mean_mae(model_metrics_all['db3D_csph3Dk64_separable4x4x1024_opt_rand_tv0'])
-	# 		]
-	# 	compression_vs_perf['db3D_csph3D_separable4x4x1024_opt_grayfour_tv0'] = 'CSPH3D + Separable4x4x1024 + Backproj Up + GrayFour init'
-	# 	compression_vs_perf['mae']['db3D_csph3D_separable4x4x1024_opt_grayfour_tv0'] = [ \
-	# 		np.nan
-	# 		, calc_mean_mae(model_metrics_all['db3D_csph3Dk512_separable4x4x1024_opt_grayfour_tv0'])
-	# 		, calc_mean_mae(model_metrics_all['db3D_csph3Dk256_separable4x4x1024_opt_grayfour_tv0'])
-	# 		, calc_mean_mae(model_metrics_all['db3D_csph3Dk128_separable4x4x1024_opt_grayfour_tv0'])
-	# 		, calc_mean_mae(model_metrics_all['db3D_csph3Dk64_separable4x4x1024_opt_grayfour_tv0'])
-	# 		]
-	# 	# compression_vs_perf['db3D_csph3D_full4x4x128_opt_rand_tv0'] = 'CSPH3D + Full4x4x128 + Backproj Up'
-	# 	# compression_vs_perf['mae']['db3D_csph3D_full4x4x128_opt_rand_tv0'] = [ \
-	# 	# 	np.nan
-	# 	# 	, calc_mean_mae(model_metrics_all['db3D_csph3Dk32_full4x4x64_opt_rand_tv0'])
-	# 	# 	, calc_mean_mae(model_metrics_all['db3D_csph3Dk16_full4x4x64_opt_rand_tv0'])
-	# 	# 	, calc_mean_mae(model_metrics_all['db3D_csph3Dk16_full4x4x128_opt_rand_tv0'])
-	# 	# 	, calc_mean_mae(model_metrics_all['db3D_csph3Dk8_full4x4x128_opt_rand_tv0'])
-	# 	# 	]
-	# 	# compression_vs_perf['db3D_csph_separable4x4x1024_opt_four_tv0'] = 'CSPH3D + Separable4x4x1024 + Learned Up'
-	# 	# compression_vs_perf['mae']['db3D_csph_separable4x4x1024_opt_four_tv0'] = [ \
-	# 	# 	np.nan
-	# 	# 	, calc_mean_mae(model_metrics_all['db3D_csphk512_separable4x4x1024_opt_grayfour_tv0'])
-	# 	# 	, calc_mean_mae(model_metrics_all['db3D_csphk256_separable4x4x1024_opt_truncfour_tv0'])
-	# 	# 	, calc_mean_mae(model_metrics_all['db3D_csphk128_separable4x4x1024_opt_truncfour_tv0'])
-	# 	# 	, calc_mean_mae(model_metrics_all['db3D_csphk64_separable4x4x1024_opt_grayfour_tv0'])
-	# 	# 	]
-	# 	compression_vs_perf['db3D_csph1D_grayfour_tv0'] = 'CSPH1D + GrayFour1x1x1024 + ZNCC Up'
-	# 	compression_vs_perf['mae']['db3D_csph1D_grayfour_tv0'] = [ \
-	# 		calc_mean_mae(model_metrics_all['db3D_csph1Dk64_grayfour_tv0'])
-	# 		, calc_mean_mae(model_metrics_all['db3D_csph1Dk32_grayfour_tv0'])
-	# 		, calc_mean_mae(model_metrics_all['db3D_csph1Dk16_grayfour_tv0'])
-	# 		, calc_mean_mae(model_metrics_all['db3D_csph1Dk8_grayfour_tv0'])
-	# 		, np.nan
-	# 		]
-	# 	compression_vs_perf['db3D_csph1Dk64_coarsehist_tv0'] = 'Coarse Hist with 64 bins (16x compression)'
-	# 	compression_vs_perf['mae']['db3D_csph1Dk64_coarsehist_tv0'] = [ calc_mean_mae(model_metrics_all['db3D_csph1Dk64_coarsehist_tv0'])]*len(compression_rates)
+	if(plot_compression_vs_perf):
+		compression_vs_perf = {}
+		compression_vs_perf['mae'] = {}
+		compression_rates = [16, 32, 64, 128, 256]
+		compression_vs_perf['db3D'] = 'No Compression'
+		compression_vs_perf['mae']['db3D'] = [calc_mean_mae(model_metrics_all['db3D'])]*len(compression_rates)
+		compression_vs_perf['db3D_d2d'] = 'Argmax Compression (Large Memory)'
+		compression_vs_perf['mae']['db3D_d2d'] = [calc_mean_mae(model_metrics_all['db3D_d2d'])]*len(compression_rates)
+		compression_vs_perf['db3D_csph3D_full4x4x1024_opt_rand_tv0'] = 'CSPH3D + Full4x4x1024 + Backproj Up + Rand Init'
+		compression_vs_perf['mae']['db3D_csph3D_full4x4x1024_opt_rand_tv0'] = [ \
+			np.nan
+			, calc_mean_mae(model_metrics_all['db3D_csph3Dk512_full4x4x1024_opt_rand_tv0'])
+			, calc_mean_mae(model_metrics_all['db3D_csph3Dk256_full4x4x1024_opt_rand_tv0'])
+			, calc_mean_mae(model_metrics_all['db3D_csph3Dk128_full4x4x1024_opt_rand_tv0'])
+			, calc_mean_mae(model_metrics_all['db3D_csph3Dk64_full4x4x1024_opt_rand_tv0'])
+			]
+		compression_vs_perf['db3D_csph3D_separable4x4x1024_opt_rand_tv0'] = 'CSPH3D + Separable4x4x1024 + Backproj Up + Rand Init'
+		compression_vs_perf['mae']['db3D_csph3D_separable4x4x1024_opt_rand_tv0'] = [ \
+			np.nan
+			, calc_mean_mae(model_metrics_all['db3D_csph3Dk512_separable4x4x1024_opt_rand_tv0'])
+			, calc_mean_mae(model_metrics_all['db3D_csph3Dk256_separable4x4x1024_opt_rand_tv0'])
+			, calc_mean_mae(model_metrics_all['db3D_csph3Dk128_separable4x4x1024_opt_rand_tv0'])
+			, calc_mean_mae(model_metrics_all['db3D_csph3Dk64_separable4x4x1024_opt_rand_tv0'])
+			]
+		compression_vs_perf['db3D_csph3D_separable4x4x1024_opt_grayfour_tv0'] = 'CSPH3D + Separable4x4x1024 + Backproj Up + GrayFour init'
+		compression_vs_perf['mae']['db3D_csph3D_separable4x4x1024_opt_grayfour_tv0'] = [ \
+			np.nan
+			, calc_mean_mae(model_metrics_all['db3D_csph3Dk512_separable4x4x1024_opt_grayfour_tv0'])
+			, calc_mean_mae(model_metrics_all['db3D_csph3Dk256_separable4x4x1024_opt_grayfour_tv0'])
+			, calc_mean_mae(model_metrics_all['db3D_csph3Dk128_separable4x4x1024_opt_grayfour_tv0'])
+			, calc_mean_mae(model_metrics_all['db3D_csph3Dk64_separable4x4x1024_opt_grayfour_tv0'])
+			]
+		# compression_vs_perf['db3D_csph3D_full4x4x128_opt_rand_tv0'] = 'CSPH3D + Full4x4x128 + Backproj Up'
+		# compression_vs_perf['mae']['db3D_csph3D_full4x4x128_opt_rand_tv0'] = [ \
+		# 	np.nan
+		# 	, calc_mean_mae(model_metrics_all['db3D_csph3Dk32_full4x4x64_opt_rand_tv0'])
+		# 	, calc_mean_mae(model_metrics_all['db3D_csph3Dk16_full4x4x64_opt_rand_tv0'])
+		# 	, calc_mean_mae(model_metrics_all['db3D_csph3Dk16_full4x4x128_opt_rand_tv0'])
+		# 	, calc_mean_mae(model_metrics_all['db3D_csph3Dk8_full4x4x128_opt_rand_tv0'])
+		# 	]
+		# compression_vs_perf['db3D_csph_separable4x4x1024_opt_four_tv0'] = 'CSPH3D + Separable4x4x1024 + Learned Up'
+		# compression_vs_perf['mae']['db3D_csph_separable4x4x1024_opt_four_tv0'] = [ \
+		# 	np.nan
+		# 	, calc_mean_mae(model_metrics_all['db3D_csphk512_separable4x4x1024_opt_grayfour_tv0'])
+		# 	, calc_mean_mae(model_metrics_all['db3D_csphk256_separable4x4x1024_opt_truncfour_tv0'])
+		# 	, calc_mean_mae(model_metrics_all['db3D_csphk128_separable4x4x1024_opt_truncfour_tv0'])
+		# 	, calc_mean_mae(model_metrics_all['db3D_csphk64_separable4x4x1024_opt_grayfour_tv0'])
+		# 	]
+		compression_vs_perf['db3D_csph1D_grayfour_tv0'] = 'CSPH1D + GrayFour1x1x1024 + ZNCC Up'
+		compression_vs_perf['mae']['db3D_csph1D_grayfour_tv0'] = [ \
+			calc_mean_mae(model_metrics_all['db3D_csph1Dk64_grayfour_tv0'])
+			, calc_mean_mae(model_metrics_all['db3D_csph1Dk32_grayfour_tv0'])
+			, calc_mean_mae(model_metrics_all['db3D_csph1Dk16_grayfour_tv0'])
+			, calc_mean_mae(model_metrics_all['db3D_csph1Dk8_grayfour_tv0'])
+			, np.nan
+			]
+		compression_vs_perf['db3D_csph1Dk64_coarsehist_tv0'] = 'Coarse Hist with 64 bins (16x compression)'
+		compression_vs_perf['mae']['db3D_csph1Dk64_coarsehist_tv0'] = [ calc_mean_mae(model_metrics_all['db3D_csph1Dk64_coarsehist_tv0'])]*len(compression_rates)
 		
-	# 	compression_vs_perf['mse'] = {}
-	# 	compression_vs_perf['mse']['db3D'] = [calc_mean_mse(model_metrics_all['db3D'])]*len(compression_rates)
-	# 	compression_vs_perf['mse']['db3D_d2d'] = [calc_mean_mse(model_metrics_all['db3D_d2d'])]*len(compression_rates)
-	# 	compression_vs_perf['mse']['db3D_csph3D_full4x4x1024_opt_rand_tv0'] = [ \
-	# 		np.nan
-	# 		, calc_mean_mse(model_metrics_all['db3D_csph3Dk512_full4x4x1024_opt_rand_tv0'])
-	# 		, calc_mean_mse(model_metrics_all['db3D_csph3Dk256_full4x4x1024_opt_rand_tv0'])
-	# 		, calc_mean_mse(model_metrics_all['db3D_csph3Dk128_full4x4x1024_opt_rand_tv0'])
-	# 		, calc_mean_mse(model_metrics_all['db3D_csph3Dk64_full4x4x1024_opt_rand_tv0'])
-	# 		]
-	# 	compression_vs_perf['mse']['db3D_csph3D_separable4x4x1024_opt_rand_tv0'] = [ \
-	# 		np.nan
-	# 		, calc_mean_mse(model_metrics_all['db3D_csph3Dk512_separable4x4x1024_opt_rand_tv0'])
-	# 		, calc_mean_mse(model_metrics_all['db3D_csph3Dk256_separable4x4x1024_opt_rand_tv0'])
-	# 		, calc_mean_mse(model_metrics_all['db3D_csph3Dk128_separable4x4x1024_opt_rand_tv0'])
-	# 		, calc_mean_mse(model_metrics_all['db3D_csph3Dk64_separable4x4x1024_opt_rand_tv0'])
-	# 		]
-	# 	compression_vs_perf['mse']['db3D_csph3D_separable4x4x1024_opt_grayfour_tv0'] = [ \
-	# 		np.nan
-	# 		, calc_mean_mse(model_metrics_all['db3D_csph3Dk512_separable4x4x1024_opt_grayfour_tv0'])
-	# 		, calc_mean_mse(model_metrics_all['db3D_csph3Dk256_separable4x4x1024_opt_grayfour_tv0'])
-	# 		, calc_mean_mse(model_metrics_all['db3D_csph3Dk128_separable4x4x1024_opt_grayfour_tv0'])
-	# 		, calc_mean_mse(model_metrics_all['db3D_csph3Dk64_separable4x4x1024_opt_grayfour_tv0'])
-	# 		]
-	# 	# compression_vs_perf['mse']['db3D_csph3D_full4x4x128_opt_rand_tv0'] = [ \
-	# 	# 	np.nan
-	# 	# 	, calc_mean_mse(model_metrics_all['db3D_csph3Dk32_full4x4x64_opt_rand_tv0'])
-	# 	# 	, calc_mean_mse(model_metrics_all['db3D_csph3Dk16_full4x4x64_opt_rand_tv0'])
-	# 	# 	, calc_mean_mse(model_metrics_all['db3D_csph3Dk16_full4x4x128_opt_rand_tv0'])
-	# 	# 	, calc_mean_mse(model_metrics_all['db3D_csph3Dk8_full4x4x128_opt_rand_tv0'])
-	# 	# 	]
-	# 	# compression_vs_perf['mse']['db3D_csph_separable4x4x1024_opt_four_tv0'] = [ \
-	# 	# 	np.nan
-	# 	# 	, calc_mean_mse(model_metrics_all['db3D_csphk512_separable4x4x1024_opt_grayfour_tv0'])
-	# 	# 	, calc_mean_mse(model_metrics_all['db3D_csphk256_separable4x4x1024_opt_truncfour_tv0'])
-	# 	# 	, calc_mean_mse(model_metrics_all['db3D_csphk128_separable4x4x1024_opt_truncfour_tv0'])
-	# 	# 	, calc_mean_mse(model_metrics_all['db3D_csphk64_separable4x4x1024_opt_grayfour_tv0'])
-	# 	# 	]
-	# 	compression_vs_perf['mse']['db3D_csph1D_grayfour_tv0'] = [ \
-	# 		calc_mean_mse(model_metrics_all['db3D_csph1Dk64_grayfour_tv0'])
-	# 		, calc_mean_mse(model_metrics_all['db3D_csph1Dk32_grayfour_tv0'])
-	# 		, calc_mean_mse(model_metrics_all['db3D_csph1Dk16_grayfour_tv0'])
-	# 		, calc_mean_mse(model_metrics_all['db3D_csph1Dk8_grayfour_tv0'])
-	# 		, np.nan
-	# 		]
-	# 	compression_vs_perf['mse']['db3D_csph1Dk64_coarsehist_tv0'] = [ calc_mean_mse(model_metrics_all['db3D_csph1Dk64_coarsehist_tv0'])]*len(compression_rates)
+		compression_vs_perf['mse'] = {}
+		compression_vs_perf['mse']['db3D'] = [calc_mean_mse(model_metrics_all['db3D'])]*len(compression_rates)
+		compression_vs_perf['mse']['db3D_d2d'] = [calc_mean_mse(model_metrics_all['db3D_d2d'])]*len(compression_rates)
+		compression_vs_perf['mse']['db3D_csph3D_full4x4x1024_opt_rand_tv0'] = [ \
+			np.nan
+			, calc_mean_mse(model_metrics_all['db3D_csph3Dk512_full4x4x1024_opt_rand_tv0'])
+			, calc_mean_mse(model_metrics_all['db3D_csph3Dk256_full4x4x1024_opt_rand_tv0'])
+			, calc_mean_mse(model_metrics_all['db3D_csph3Dk128_full4x4x1024_opt_rand_tv0'])
+			, calc_mean_mse(model_metrics_all['db3D_csph3Dk64_full4x4x1024_opt_rand_tv0'])
+			]
+		compression_vs_perf['mse']['db3D_csph3D_separable4x4x1024_opt_rand_tv0'] = [ \
+			np.nan
+			, calc_mean_mse(model_metrics_all['db3D_csph3Dk512_separable4x4x1024_opt_rand_tv0'])
+			, calc_mean_mse(model_metrics_all['db3D_csph3Dk256_separable4x4x1024_opt_rand_tv0'])
+			, calc_mean_mse(model_metrics_all['db3D_csph3Dk128_separable4x4x1024_opt_rand_tv0'])
+			, calc_mean_mse(model_metrics_all['db3D_csph3Dk64_separable4x4x1024_opt_rand_tv0'])
+			]
+		compression_vs_perf['mse']['db3D_csph3D_separable4x4x1024_opt_grayfour_tv0'] = [ \
+			np.nan
+			, calc_mean_mse(model_metrics_all['db3D_csph3Dk512_separable4x4x1024_opt_grayfour_tv0'])
+			, calc_mean_mse(model_metrics_all['db3D_csph3Dk256_separable4x4x1024_opt_grayfour_tv0'])
+			, calc_mean_mse(model_metrics_all['db3D_csph3Dk128_separable4x4x1024_opt_grayfour_tv0'])
+			, calc_mean_mse(model_metrics_all['db3D_csph3Dk64_separable4x4x1024_opt_grayfour_tv0'])
+			]
+		# compression_vs_perf['mse']['db3D_csph3D_full4x4x128_opt_rand_tv0'] = [ \
+		# 	np.nan
+		# 	, calc_mean_mse(model_metrics_all['db3D_csph3Dk32_full4x4x64_opt_rand_tv0'])
+		# 	, calc_mean_mse(model_metrics_all['db3D_csph3Dk16_full4x4x64_opt_rand_tv0'])
+		# 	, calc_mean_mse(model_metrics_all['db3D_csph3Dk16_full4x4x128_opt_rand_tv0'])
+		# 	, calc_mean_mse(model_metrics_all['db3D_csph3Dk8_full4x4x128_opt_rand_tv0'])
+		# 	]
+		# compression_vs_perf['mse']['db3D_csph_separable4x4x1024_opt_four_tv0'] = [ \
+		# 	np.nan
+		# 	, calc_mean_mse(model_metrics_all['db3D_csphk512_separable4x4x1024_opt_grayfour_tv0'])
+		# 	, calc_mean_mse(model_metrics_all['db3D_csphk256_separable4x4x1024_opt_truncfour_tv0'])
+		# 	, calc_mean_mse(model_metrics_all['db3D_csphk128_separable4x4x1024_opt_truncfour_tv0'])
+		# 	, calc_mean_mse(model_metrics_all['db3D_csphk64_separable4x4x1024_opt_grayfour_tv0'])
+		# 	]
+		compression_vs_perf['mse']['db3D_csph1D_grayfour_tv0'] = [ \
+			calc_mean_mse(model_metrics_all['db3D_csph1Dk64_grayfour_tv0'])
+			, calc_mean_mse(model_metrics_all['db3D_csph1Dk32_grayfour_tv0'])
+			, calc_mean_mse(model_metrics_all['db3D_csph1Dk16_grayfour_tv0'])
+			, calc_mean_mse(model_metrics_all['db3D_csph1Dk8_grayfour_tv0'])
+			, np.nan
+			]
+		compression_vs_perf['mse']['db3D_csph1Dk64_coarsehist_tv0'] = [ calc_mean_mse(model_metrics_all['db3D_csph1Dk64_coarsehist_tv0'])]*len(compression_rates)
 		  
 		
-	# 	plt.clf()
-	# 	metric_name = 'mae'
-	# 	fname = 'compression_vs_'+metric_name
-	# 	if(len(sbr_params) == 1): fname = fname + '_' + sbr_params[0]
-	# 	for model_key in compression_vs_perf[metric_name]:
-	# 		model_perf = compression_vs_perf[metric_name][model_key]
-	# 		if((model_key == 'db3D') or  (model_key == 'db3D_d2d') or (model_key == 'db3D_csph1Dk64_coarsehist_tv0')):
-	# 			plt.plot(compression_rates, model_perf, '--', linewidth=2, label=compression_vs_perf[model_key])
-	# 		else:
-	# 			plt.plot(compression_rates, model_perf, '-o', linewidth=2, label=compression_vs_perf[model_key])
-	# 	plt.legend(loc='upper right')
-	# 	plt.title(fname, fontsize=14)
-	# 	plt.xlabel("Compression Level", fontsize=14)
-	# 	plt.ylabel(metric_name, fontsize=14)
-	# 	plot_utils.save_currfig_png(dirpath=out_dirpath, filename=fname)
+		plt.clf()
+		metric_name = 'mae'
+		fname = 'compression_vs_'+metric_name
+		if(len(sbr_params) == 1): fname = fname + '_' + sbr_params[0]
+		for model_key in compression_vs_perf[metric_name]:
+			model_perf = compression_vs_perf[metric_name][model_key]
+			if((model_key == 'db3D') or  (model_key == 'db3D_d2d') or (model_key == 'db3D_csph1Dk64_coarsehist_tv0')):
+				plt.plot(compression_rates, model_perf, '--', linewidth=2, label=compression_vs_perf[model_key])
+			else:
+				plt.plot(compression_rates, model_perf, '-o', linewidth=2, label=compression_vs_perf[model_key])
+		plt.legend(loc='upper right')
+		plt.title(fname, fontsize=14)
+		plt.xlabel("Compression Level", fontsize=14)
+		plt.ylabel(metric_name, fontsize=14)
+		plot_utils.save_currfig_png(dirpath=out_dirpath, filename=fname)
 
-	# 	plt.clf()
-	# 	metric_name = 'mse'
-	# 	fname = 'compression_vs_'+metric_name
-	# 	if(len(sbr_params) == 1): fname = fname + '_' + sbr_params[0]
-	# 	for model_key in compression_vs_perf[metric_name]:
-	# 		model_perf = compression_vs_perf[metric_name][model_key]
-	# 		if((model_key == 'db3D') or  (model_key == 'db3D_d2d') or (model_key == 'db3D_csph1Dk64_coarsehist_tv0')):
-	# 			plt.plot(compression_rates, model_perf, '--', linewidth=2, label=compression_vs_perf[model_key])
-	# 		else:
-	# 			plt.plot(compression_rates, model_perf, '-o', linewidth=2, label=compression_vs_perf[model_key])
-	# 	plt.legend(loc='upper right')
-	# 	plt.title(fname, fontsize=14)
-	# 	plt.xlabel("Compression Level", fontsize=14)
-	# 	plt.ylabel(metric_name, fontsize=14)
-	# 	plot_utils.save_currfig_png(dirpath=out_dirpath, filename=fname)
+		plt.clf()
+		metric_name = 'mse'
+		fname = 'compression_vs_'+metric_name
+		if(len(sbr_params) == 1): fname = fname + '_' + sbr_params[0]
+		for model_key in compression_vs_perf[metric_name]:
+			model_perf = compression_vs_perf[metric_name][model_key]
+			if((model_key == 'db3D') or  (model_key == 'db3D_d2d') or (model_key == 'db3D_csph1Dk64_coarsehist_tv0')):
+				plt.plot(compression_rates, model_perf, '--', linewidth=2, label=compression_vs_perf[model_key])
+			else:
+				plt.plot(compression_rates, model_perf, '-o', linewidth=2, label=compression_vs_perf[model_key])
+		plt.legend(loc='upper right')
+		plt.title(fname, fontsize=14)
+		plt.xlabel("Compression Level", fontsize=14)
+		plt.ylabel(metric_name, fontsize=14)
+		plot_utils.save_currfig_png(dirpath=out_dirpath, filename=fname)
