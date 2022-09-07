@@ -103,6 +103,97 @@ def get_io_dirpaths(job_name='tmp'):
 	OmegaConf.resolve(cfg)
 	return cfg.io_dirpaths
 
+def init_model_metrics_dict(model_names, model_dirpaths):
+	##
+	model_metrics_all = {}
+	## initialize for gt and raw data baselines
+	model_metrics_all['gt'] = {}
+	model_metrics_all['gt']['dirpath'] = None
+	model_metrics_all['lmf'] = {}
+	model_metrics_all['lmf']['dirpath'] = None
+	model_metrics_all['argmax'] = {}
+	model_metrics_all['argmax']['dirpath'] = None
+
+	## for each model name create one entry 
+	for i, model_name in enumerate(model_names):
+		model_metrics_all[model_name] = {}
+		model_metrics_all[model_name]['dirpath'] = model_dirpaths[i]
+	
+	return model_metrics_all
+
+def process_middlebury_test_results(scene_ids, sbr_params, model_metrics_all, spad_dataset, out_dirpath=None, save_depth_images=False, return_rec_depths=False):
+	## For each scene id and sbr param, load model rec_depths and compute error metrics. If save_depth images is true, save them, and if return_rec_depths is True store the rec depths and return them
+	for i in range(len(scene_ids)):
+		for j in range(len(sbr_params)):
+			curr_scene_id = scene_ids[i] 
+			curr_sbr_params = sbr_params[j] 
+			scene_fname = '{}_{}'.format(curr_scene_id, curr_sbr_params)
+			# print("Processing: {}".format(scene_fname))
+
+			## get scene from spad_dataset
+			scene_data = spad_dataset.get_item_by_scene_name(scene_fname)
+
+			## Load params
+			(num_bins, nr, nc) = scene_data['rates'].squeeze().shape
+			tres = spad_dataset.tres_ps*1e-12
+			intensity = scene_data['intensity'].squeeze().cpu().numpy()
+			SBR = scene_data['SBR']
+			mean_background_photons = scene_data['mean_background_photons']
+			mean_signal_photons = scene_data['mean_signal_photons']
+			tau = num_bins*tres
+
+			## load gt and baseline depths
+			gt_norm_bins = scene_data['bins'].squeeze().cpu().numpy()
+			lmf_norm_bins = scene_data['est_bins_lmf'].squeeze().cpu().numpy() 
+			argmax_norm_bins = scene_data['est_bins_argmax'].squeeze().cpu().numpy() 
+			gt_bins = gt_norm_bins*num_bins
+			lmf_bins = lmf_norm_bins*num_bins
+			argmax_bins = argmax_norm_bins*num_bins
+
+			## Get depths for MATLAB data
+			gt_depths = bin2depth(gt_bins, num_bins=num_bins, tau=tau)
+			lmf_depths = bin2depth(lmf_bins, num_bins=num_bins, tau=tau)
+			argmax_depths = bin2depth(argmax_bins, num_bins=num_bins, tau=tau)
+
+			## Compute and store metrics for gt and basic baselines that are stored in .mat file instead of .npz files
+			(gt_metrics, gt_depths, gt_scene_metrics) = append_model_metrics(model_metrics_all['gt'], spad_dataset.test_set_id, scene_fname, gt_depths, num_bins, tau, model_depths=gt_depths)
+			(lmf_metrics, lmf_depths, lmf_scene_metrics) = append_model_metrics(model_metrics_all['lmf'], spad_dataset.test_set_id, scene_fname, gt_depths, num_bins, tau, model_depths=lmf_depths)
+			(argmax_metrics, argmax_depths, argmax_scene_metrics) = append_model_metrics(model_metrics_all['argmax'], spad_dataset.test_set_id, scene_fname, gt_depths, num_bins, tau, model_depths=argmax_depths)
+
+			## For visualization purposes
+			min_depth = gt_depths.flatten().min() - 0.5*gt_depths.flatten().std() 
+			max_depth = gt_depths.flatten().max() + 0.5*gt_depths.flatten().std()
+			min_err = 0
+			max_err = 0.15
+
+			## Compute and store metrics for all models
+			rec_depths = {}
+			for model_id in model_metrics_all.keys():
+				curr_model_metrics = model_metrics_all[model_id]
+				# skip if there is no dirpath --> i.e., gt, lmf, and argmax
+				if(curr_model_metrics['dirpath'] is None): continue
+				(curr_model_metrics, model_depths, scene_metrics) = append_model_metrics(curr_model_metrics, spad_dataset.test_set_id, scene_fname, gt_depths, num_bins, tau)
+				# if we want to plot the depths for the current scene keep track of the recovered depths
+				if(return_rec_depths):
+					rec_depths[model_id] = {}
+					rec_depths[model_id]['depths'] = model_depths
+					rec_depths[model_id]['metrics'] = scene_metrics
+				# save depth images
+				if(save_depth_images):
+					if(out_dirpath is None):
+						print("WARNING: Can't save depth images if no out_dirpath is given")
+					else:
+						if(os.path.exists(out_dirpath)):
+							plt.clf()
+							plt.imshow(model_depths, vmin=min_depth, vmax=max_depth)
+							plt.title(model_id)
+							plot_utils.remove_ticks()
+							plot_utils.save_currfig_png(dirpath=os.path.join(out_dirpath, scene_fname), filename=model_id)
+							plt.pause(0.05)
+						else:
+							print("WARNING: Can't save depth images if the out_dirpath does not exist")
+	return (model_metrics_all, rec_depths)
+
 if __name__=='__main__':
 
 	## get io dirpaths from hydra 
@@ -312,7 +403,6 @@ if __name__=='__main__':
 		for j in range(len(sbr_params)):
 			curr_scene_id = scene_ids[i] 
 			curr_sbr_params = sbr_params[j] 
-
 			scene_fname = '{}_{}'.format(curr_scene_id, curr_sbr_params)
 			print("Processing: {}".format(scene_fname))
 
@@ -328,7 +418,7 @@ if __name__=='__main__':
 			mean_signal_photons = scene_data['mean_signal_photons']
 			tau = num_bins*tres
 
-			## load depths
+			## load gt and baseline depths
 			gt_norm_bins = scene_data['bins'].squeeze().cpu().numpy()
 			lmf_norm_bins = scene_data['est_bins_lmf'].squeeze().cpu().numpy() 
 			argmax_norm_bins = scene_data['est_bins_argmax'].squeeze().cpu().numpy() 

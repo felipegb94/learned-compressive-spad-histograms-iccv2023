@@ -19,8 +19,9 @@ breakpoint = debugger.set_trace
 #### Local imports
 
 def normalize_matlab_depth_bins(range_bins, num_bins):
-	# make range 0-n_bins-1 instead of 1-n_bins
-	norm_range_bins = (range_bins - 1) / (num_bins - 1) 
+	# make range 0 to n_bins-1 instead of 1 to n_bins
+	# norm_range_bins = (range_bins - 1) / (num_bins - 1) # this was used previously, but I think it is wrong. we should still divide by num_bins 
+	norm_range_bins = (range_bins - 1) / (num_bins)
 	return norm_range_bins
 
 def bins2hist(range_bins, num_bins):
@@ -90,6 +91,7 @@ class SpadDataset(torch.utils.data.Dataset):
 
 		self.datalist_fpath = datalist_fpath
 		self.datalist_fname = os.path.splitext(os.path.basename(datalist_fpath))[0]
+		self.test_set_id = self.datalist_fname.split('.txt')[0]
 
 		self.noise_idx = noise_idx
 		self.spad_data_fpaths = []
@@ -159,6 +161,20 @@ class SpadDataset(torch.utils.data.Dataset):
 		tres_ps = spad_data['bin_size'].squeeze()*1e12
 		return (nr, nc, nt, tres_ps)
 
+	def get_idx_from_scene_name(self, scene_name):
+		if(not ('.mat' in scene_name)): scene_fname = scene_name + '.mat' # add .mat extension
+		else: scene_fname = scene_name 
+		for idx in range(len(self.spad_data_fpaths)):
+			fname = os.path.basename(self.spad_data_fpaths[idx])
+			if(scene_fname == fname):
+				return idx
+		print("NOT FOUND - scene: {}".format(scene_fname))
+		return -1
+
+	def get_item_by_scene_name(self, scene_name):
+		idx = self.get_idx_from_scene_name(scene_name)
+		return self.__getitem__(idx)
+
 	def tryitem(self, idx):
 		'''
 			Try to load the spad data sample.
@@ -167,7 +183,12 @@ class SpadDataset(torch.utils.data.Dataset):
 		# load spad data
 		spad_data_fname = self.spad_data_fpaths[idx]
 		spad_data = scipy.io.loadmat(spad_data_fname)
-		
+
+		print("Loading: {}".format(spad_data_fname))
+
+		# load intensity image
+		intensity = spad_data['intensity'].astype(np.float32)
+
 		# normalized pulse as GT histogram
 		rates = np.asarray(spad_data['rates']).astype(np.float32)
 		(nr, nc, n_bins) = rates.shape
@@ -186,6 +207,12 @@ class SpadDataset(torch.utils.data.Dataset):
 		bins = np.asarray(spad_data['bin']).astype(np.float32)
 		bins = bins[np.newaxis, :]
 		bins = normalize_matlab_depth_bins(bins, n_bins)
+
+		# # Estimated lmf depths from spad measurements
+		est_bins_lmf = np.asarray(spad_data['est_range_bins_lmf'])
+		# Normalize the bin indeces
+		est_bins_lmf = est_bins_lmf[np.newaxis,:].astype(np.float32)
+		est_bins_lmf = normalize_matlab_depth_bins(est_bins_lmf, n_bins)
 
 		# # Estimated argmax depths from spad measurements
 		est_bins_argmax = np.asarray(spad_data['est_range_bins_argmax'])
@@ -216,11 +243,15 @@ class SpadDataset(torch.utils.data.Dataset):
 		rates = rates[..., top:top + new_h, left:left + new_w]
 		spad = spad[..., top:top + new_h, left: left + new_w]
 		bins = bins[..., top: top + new_h, left: left + new_w]
+		intensity = intensity[..., top: top + new_h, left: left + new_w]
+		est_bins_lmf = est_bins_lmf[..., top: top + new_h, left: left + new_w]
 		est_bins_argmax = est_bins_argmax[..., top: top + new_h, left: left + new_w]
 		est_bins_argmax_hist = est_bins_argmax_hist[..., top: top + new_h, left: left + new_w]
 		rates = torch.from_numpy(rates)
 		spad = torch.from_numpy(spad)
 		bins = torch.from_numpy(bins)
+		intensity = torch.from_numpy(intensity)
+		est_bins_lmf = torch.from_numpy(est_bins_lmf)
 		est_bins_argmax = torch.from_numpy(est_bins_argmax)
 		est_bins_argmax_hist = torch.from_numpy(est_bins_argmax_hist)
 		# make sure these parameters have a supported data type by dataloader (uint16 is not supported)
@@ -232,6 +263,8 @@ class SpadDataset(torch.utils.data.Dataset):
 			'rates': rates 
 			, 'spad': spad 
 			, 'bins': bins 
+			, 'intensity': intensity 
+			, 'est_bins_lmf': est_bins_lmf 
 			, 'est_bins_argmax': est_bins_argmax 
 			, 'est_bins_argmax_hist': est_bins_argmax_hist 
 			, 'SBR': spad_data['SBR'][0,0]

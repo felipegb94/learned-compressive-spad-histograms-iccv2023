@@ -158,9 +158,9 @@
         "rel_dirpath": "outputs/nyuv2_64x64x1024_80ps/csph3d_good_norm/DDFN_C64B10_CSPH3Dv2/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-L2/loss-kldiv_tv-0.0/run-latest_2022-08-18_013924",
         "ckpt_id": "epoch=22-step=77917-avgvalrmse=0.0174",
         "middlebury_72x88x1024_98ps": {
-            "depths/test_mae": 0.01084,
-            "depths/test_mse": 0.00048,
-            "depths/test_rmse": 0.01901
+            "depths/test_mae": 0.02121,
+            "depths/test_mse": 0.01687,
+            "depths/test_rmse": 0.05083
         },
         "lindell2018_linospad_captured_min": {
             "depths/test_mae": 2.2457,
@@ -172,9 +172,9 @@
         "rel_dirpath": "outputs/nyuv2_64x64x1024_80ps/csph3d_good_norm/DDFN_C64B10_CSPH3Dv2/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-Linf/loss-kldiv_tv-0.0/run-latest_2022-08-18_011732",
         "ckpt_id": "epoch=23-step=81380-avgvalrmse=0.0179",
         "middlebury_72x88x1024_98ps": {
-            "depths/test_mae": 0.01133,
-            "depths/test_mse": 0.00065,
-            "depths/test_rmse": 0.02066
+            "depths/test_mae": 0.03452,
+            "depths/test_mse": 0.0502,
+            "depths/test_rmse": 0.07122
         },
         "lindell2018_linospad_captured_min": {
             "depths/test_mae": 2.2469,
@@ -186,9 +186,9 @@
         "rel_dirpath": "outputs/nyuv2_64x64x1024_80ps/csph3d_good_norm/DDFN_C64B10_CSPH3Dv2/k128_down4_Mt1_Rand-optCt=True-optC=True_full_norm-L2/loss-kldiv_tv-0.0/run-latest_2022-08-18_013924",
         "ckpt_id": "epoch=24-step=84843-avgvalrmse=0.0185",
         "middlebury_72x88x1024_98ps": {
-            "depths/test_mae": 0.01276,
-            "depths/test_mse": 0.00059,
-            "depths/test_rmse": 0.02154
+            "depths/test_mae": 0.02162,
+            "depths/test_mse": 0.01597,
+            "depths/test_rmse": 0.04715
         },
         "lindell2018_linospad_captured_min": {
             "depths/test_mae": 2.2481,
@@ -200,9 +200,9 @@
         "rel_dirpath": "outputs/nyuv2_64x64x1024_80ps/csph3d_good_norm/DDFN_C64B10_CSPH3Dv2/k128_down4_Mt1_Rand-optCt=True-optC=True_full_norm-Linf/loss-kldiv_tv-0.0/run-complete_2022-08-18_011947",
         "ckpt_id": "epoch=29-step=102158-avgvalrmse=0.0186",
         "middlebury_72x88x1024_98ps": {
-            "depths/test_mae": 0.01246,
-            "depths/test_mse": 0.00063,
-            "depths/test_rmse": 0.02191
+            "depths/test_mae": 0.05412,
+            "depths/test_mse": 0.14021,
+            "depths/test_rmse": 0.12854
         },
         "lindell2018_linospad_captured_min": {
             "depths/test_mae": 2.2505,
@@ -217,6 +217,11 @@
             "depths/test_mae": 2.2579,
             "depths/test_mse": 10.3,
             "depths/test_rmse": 3.0675
+        },
+        "middlebury_72x88x1024_98ps": {
+            "depths/test_mae": 0.24877,
+            "depths/test_mse": 0.88496,
+            "depths/test_rmse": 0.39502
         }
     },
     "DDFN_C64B10_CSPH3Dv2/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-LinfGlobal/loss-kldiv_tv-0.0": {
@@ -226,6 +231,11 @@
             "depths/test_mae": 2.2548,
             "depths/test_mse": 10.288,
             "depths/test_rmse": 3.0646
+        },
+        "middlebury_72x88x1024_98ps": {
+            "depths/test_mae": 0.01503,
+            "depths/test_mse": 0.01198,
+            "depths/test_rmse": 0.03378
         }
     },
     "DDFN_C64B10_CSPH3Dv1/k128_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0": {
@@ -235,6 +245,11 @@
             "depths/test_mae": 2.256,
             "depths/test_mse": 10.279,
             "depths/test_rmse": 3.0627
+        },
+        "middlebury_72x88x1024_98ps": {
+            "depths/test_mae": 0.11006,
+            "depths/test_mse": 0.25998,
+            "depths/test_rmse": 0.16908
         }
     },
     "DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-none_irf-True_zn-True_zeromu-True_smoothtdimC-True/loss-kldiv_tv-0.0": {
@@ -263,6 +278,60 @@
             "depths/test_mae": 0.01018,
             "depths/test_mse": 0.00042,
             "depths/test_rmse": 0.01738
+        }
+    },
+    "DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-none_irf-False_zn-False_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0": {
+        "rel_dirpath": "outputs/nyuv2_64x64x1024_80ps/csph3d_debug_generalization/DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-none_irf-False_zn-False_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0/run-complete_2022-08-30_125727",
+        "ckpt_id": "epoch=29-step=103889-avgvalrmse=0.0173.ckpt",
+        "middlebury_72x88x1024_98ps": {
+            "depths/test_mae": 0.01173,
+            "depths/test_mse": 0.00264,
+            "depths/test_rmse": 0.02574
+        }
+    },
+    "DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0": {
+        "rel_dirpath": "outputs/nyuv2_64x64x1024_80ps/csph3d_debug_generalization/DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0/run-complete_2022-08-30_125727",
+        "ckpt_id": "epoch=29-step=103889-avgvalrmse=0.0172",
+        "middlebury_72x88x1024_98ps": {
+            "depths/test_mae": 0.01034,
+            "depths/test_mse": 0.00039,
+            "depths/test_rmse": 0.0171
+        }
+    },
+    "DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-LinfGlobal_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0": {
+        "rel_dirpath": "outputs/nyuv2_64x64x1024_80ps/csph3d_debug_generalization/DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-LinfGlobal_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0/run-complete_2022-08-30_232221",
+        "ckpt_id": "epoch=29-step=103889-avgvalrmse=0.0175.ckpt",
+        "middlebury_72x88x1024_98ps": {
+            "depths/test_mae": 0.0095,
+            "depths/test_mse": 0.00036,
+            "depths/test_rmse": 0.01605
+        }
+    },
+    "DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-LinfGlobal_irf-True_zn-False_zeromu-False_smoothtdimC-False/loss-kldiv_tv-0.0": {
+        "rel_dirpath": "outputs/nyuv2_64x64x1024_80ps/csph3d_debug_generalization/DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-LinfGlobal_irf-True_zn-False_zeromu-False_smoothtdimC-False/loss-kldiv_tv-0.0/run-complete_2022-08-28_230806",
+        "ckpt_id": "epoch=29-step=102158-avgvalrmse=0.0182",
+        "middlebury_72x88x1024_98ps": {
+            "depths/test_mae": 0.01314,
+            "depths/test_mse": 0.00071,
+            "depths/test_rmse": 0.02236
+        }
+    },
+    "DDFN_C64B10_NL_Depth2Depth/loss-kldiv_tv-1e-5": {
+        "rel_dirpath": "outputs/nyuv2_64x64x1024_80ps/baselines/DDFN_C64B10_NL_Depth2Depth/loss-kldiv_tv-1e-5/2022-04-22_134732",
+        "ckpt_id": "epoch=05-step=19045-avgvalrmse=0.0363",
+        "middlebury_72x88x1024_98ps": {
+            "depths/test_mae": 0.01537,
+            "depths/test_mse": 0.00508,
+            "depths/test_rmse": 0.03391
+        }
+    },
+    "DDFN_C64B10_CSPH3Dv1/k256_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0": {
+        "rel_dirpath": "outputs/nyuv2_64x64x1024_80ps/test_csph3d/DDFN_C64B10_CSPH3Dv1/k256_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0/2022-08-05_141013",
+        "ckpt_id": "epoch=29-step=103889-avgvalrmse=0.0175",
+        "middlebury_72x88x1024_98ps": {
+            "depths/test_mae": 0.14662,
+            "depths/test_mse": 0.79313,
+            "depths/test_rmse": 0.25064
         }
     }
 }
