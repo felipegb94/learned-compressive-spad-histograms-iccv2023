@@ -8,7 +8,6 @@ from scipy import io
 import hydra
 from omegaconf import OmegaConf
 from IPython.core import debugger
-from test import test
 breakpoint = debugger.set_trace
 
 #### Local imports
@@ -89,16 +88,26 @@ def append_model_metrics(model_metrics, test_set_id, scene_fname, gt_depths, num
 	scene_metrics['mae'] = scene_mae
 	return model_metrics, model_depths, scene_metrics
 
-
-if __name__=='__main__':
-
+def get_io_dirpaths(job_name='tmp'):
+	'''
+		Loads the io_dirpaths.conf without using hydra.main
+		It is quite a round about way to load .conf and use the variable interpolation. Quite annoying. It could be one reason to not use hydra in the future and just use OmegaConf
+		Solution from here: https://github.com/facebookresearch/hydra/issues/1786#issuecomment-913110496
+	'''
 	## load all dirpaths without creating a job 
 	## Initialize hydra and resolve variables
 	hydra.core.global_hydra.GlobalHydra.instance().clear() ## needed when running and re-runnig on ipython or jupyer
-	hydra.initialize(config_path="./conf", job_name="analyze_test_results")
+	hydra.initialize(config_path="./conf", job_name=job_name)
 	cfg = hydra.compose(config_name="io_dirpaths",return_hydra_config=True)
+	hydra.core.hydra_config.HydraConfig().cfg = cfg ## This line is required to allow omegaconf to interpolate
 	OmegaConf.resolve(cfg)
-	io_dirpaths = cfg.io_dirpaths
+	return cfg.io_dirpaths
+
+if __name__=='__main__':
+
+	## get io dirpaths from hydra 
+	## Initialize hydra and resolve variables
+	io_dirpaths = get_io_dirpaths(job_name='analyze_test_results')
 
 	# experiment_name = ''
 	experiment_name = 'test_results/d2d2D_B12_tv_comparisson'
@@ -306,6 +315,7 @@ if __name__=='__main__':
 			scene_fname = '{}_{}'.format(curr_scene_id, curr_sbr_params)
 			print("Processing: {}".format(scene_fname))
 
+			## get scene from spad_dataset
 			scene_data = spad_dataset.get_item_by_scene_name(scene_fname)
 
 			gt_data_fpath = os.path.join(gt_data_dirpath, scene_fname+'.mat')
