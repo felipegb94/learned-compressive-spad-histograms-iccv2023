@@ -19,17 +19,12 @@ breakpoint = debugger.set_trace
 from tof_utils import *
 from research_utils import plot_utils, np_utils, io_ops
 from spad_dataset import SpadDataset
-from analyze_test_results_utils import init_model_metrics_dict, process_middlebury_test_results
+from analyze_test_results_utils import init_model_metrics_dict, process_middlebury_test_results, get_hydra_io_dirpaths
 
 if __name__=='__main__':
 
 	## load all dirpaths without creating a job 
-	## Initialize hydra and resolve variables
-	hydra.core.global_hydra.GlobalHydra.instance().clear() ## needed when running and re-runnig on ipython or jupyer
-	hydra.initialize(config_path="../conf", job_name="plot_norm_ablation_results")
-	cfg = hydra.compose(config_name="io_dirpaths",return_hydra_config=True)
-	OmegaConf.resolve(cfg)
-	io_dirpaths = cfg.io_dirpaths
+	io_dirpaths = get_hydra_io_dirpaths(job_name='plot_norm_ablation_results')
 
 	## output dirpaths
 	experiment_name = 'middlebury/norm_ablation'
@@ -40,6 +35,7 @@ if __name__=='__main__':
 	test_set_id = 'test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
 	scene_ids = ['spad_Art', 'spad_Reindeer', 'spad_Books', 'spad_Moebius', 'spad_Bowling1', 'spad_Dolls', 'spad_Laundry', 'spad_Plastic']
 	sbr_params = ['2_2','2_10','2_50','5_2','5_10','5_50','10_2','10_10','10_50']
+	sbr_params_high_flux = ['10_200', '10_500', '10_1000', '50_50', '50_200', '50_500', '50_1000'] ## more than 100 photons per pixel on average
 
 	## Create spad dataloader object to get ground truth data for each scene
 	spad_dataset = SpadDataset(datalist_fpath=os.path.join(io_dirpaths.datalists_dirpath, test_set_id+'.txt'), disable_rand_crop=True)

@@ -88,7 +88,7 @@ def append_model_metrics(model_metrics, test_set_id, scene_fname, gt_depths, num
 	scene_metrics['mae'] = scene_mae
 	return model_metrics, model_depths, scene_metrics
 
-def get_io_dirpaths(job_name='tmp'):
+def get_hydra_io_dirpaths(job_name='tmp'):
 	'''
 		Loads the io_dirpaths.conf without using hydra.main
 		It is quite a round about way to load .conf and use the variable interpolation. Quite annoying. It could be one reason to not use hydra in the future and just use OmegaConf
@@ -198,7 +198,7 @@ if __name__=='__main__':
 
 	## get io dirpaths from hydra 
 	## Initialize hydra and resolve variables
-	io_dirpaths = get_io_dirpaths(job_name='analyze_test_results')
+	io_dirpaths = get_hydra_io_dirpaths(job_name='analyze_test_results')
 
 	# experiment_name = ''
 	experiment_name = 'test_results/d2d2D_B12_tv_comparisson'
