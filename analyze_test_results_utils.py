@@ -121,14 +121,41 @@ def init_model_metrics_dict(model_names, model_dirpaths):
 	
 	return model_metrics_all
 
+def parse_sbr_params(sbr_params):
+	mean_signal_photons = int(sbr_params.split('_')[0])
+	mean_bkg_photons = int(sbr_params.split('_')[1])
+	mean_sbr = float(mean_signal_photons) / float(mean_bkg_photons)
+	return (mean_sbr, mean_signal_photons, mean_bkg_photons)
+
+def parse_sbr_params_list(sbr_params_all):
+	mean_signal_photons_all = []
+	mean_bkg_photons_all = []
+	mean_sbr_all = []
+	for sbr_params in sbr_params_all:
+		(mean_sbr, mean_signal_photons, mean_bkg_photons) = parse_sbr_params(sbr_params)
+		mean_signal_photons_all.append(mean_signal_photons)
+		mean_bkg_photons_all.append(mean_bkg_photons)
+		mean_sbr_all.append(mean_sbr)
+	return (mean_sbr_all, mean_signal_photons_all, mean_bkg_photons_all)
+
 def process_middlebury_test_results(scene_ids, sbr_params, model_metrics_all, spad_dataset, out_dirpath=None, save_depth_images=False, return_rec_depths=False):
 	## For each scene id and sbr param, load model rec_depths and compute error metrics. If save_depth images is true, save them, and if return_rec_depths is True store the rec depths and return them
+	if(not ('sbr_params' in model_metrics_all.keys())): 
+		model_metrics_all['sbr_params'] = {}
+		model_metrics_all['sbr_params']['mean_sbr'] = []
+		model_metrics_all['sbr_params']['mean_signal_photons'] = []
+		model_metrics_all['sbr_params']['mean_bkg_photons'] = []
 	for i in range(len(scene_ids)):
 		for j in range(len(sbr_params)):
 			curr_scene_id = scene_ids[i] 
 			curr_sbr_params = sbr_params[j] 
 			scene_fname = '{}_{}'.format(curr_scene_id, curr_sbr_params)
 			# print("Processing: {}".format(scene_fname))
+
+			(mean_sbr, mean_signal_photons, mean_bkg_photons) = parse_sbr_params(curr_sbr_params)
+			model_metrics_all['sbr_params']['mean_sbr'].append(mean_sbr)
+			model_metrics_all['sbr_params']['mean_signal_photons'].append(mean_signal_photons)
+			model_metrics_all['sbr_params']['mean_bkg_photons'].append(mean_bkg_photons)
 
 			## get scene from spad_dataset
 			scene_data = spad_dataset.get_item_by_scene_name(scene_fname)
@@ -171,6 +198,7 @@ def process_middlebury_test_results(scene_ids, sbr_params, model_metrics_all, sp
 			for model_id in model_metrics_all.keys():
 				curr_model_metrics = model_metrics_all[model_id]
 				# skip if there is no dirpath --> i.e., gt, lmf, and argmax
+				if(model_id == 'sbr_params'): continue
 				if(curr_model_metrics['dirpath'] is None): continue
 				(curr_model_metrics, model_depths, scene_metrics) = append_model_metrics(curr_model_metrics, spad_dataset.test_set_id, scene_fname, gt_depths, num_bins, tau)
 				# if we want to plot the depths for the current scene keep track of the recovered depths
@@ -192,6 +220,12 @@ def process_middlebury_test_results(scene_ids, sbr_params, model_metrics_all, sp
 							plt.pause(0.05)
 						else:
 							print("WARNING: Can't save depth images if the out_dirpath does not exist")
+	# ## Convert all lists into numpy arrray
+	# for model_name in model_metrics_all.keys():
+	# 	for metric_name in model_metrics_all[model_name].keys():
+	# 		if(metric_name == 'dirpath'): continue
+	# 		else: model_metrics_all[model_name][metric_name] = np.array(model_metrics_all[model_name][metric_name])
+
 	return (model_metrics_all, rec_depths)
 
 if __name__=='__main__':
