@@ -24,22 +24,25 @@ ckpt_id=epoch=28-step=98695-avgvalrmse=0.0171 # 0.0191 | 120 images==0.3567 | 12
 python test.py dataset='"'$test_dataset'"' ++model_name='"'$model_name'"' ++experiment_name=$experiment_name ++model_dirpath='"'$model_dirpath'"' ++ckpt_id='"'$ckpt_id'"' ++train_dataset='"'$train_dataset'"'
 
 ## Zero-Mean=True | ZNCC=False | norm=none
-model_name: DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-none_irf-False_zn-False_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0
-experiment_name: csph3d_debug_generalization
-model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/run-complete_2022-08-30_125727
-ckpt_id: epoch=29-step=103889-avgvalrmse=0.0173.ckpt # 0.0183 | 120 images== | 128 images==0.0257
+model_name=DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-none_irf-False_zn-False_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0
+experiment_name=csph3d_debug_generalization
+model_dirpath=outputs/${train_dataset}/${experiment_name}/${model_name}/run-complete_2022-08-30_125727
+ckpt_id=epoch=29-step=103889-avgvalrmse=0.0173.ckpt # 0.0183 | 120 images== | 128 images==0.0257
+python test.py dataset='"'$test_dataset'"' ++model_name='"'$model_name'"' ++experiment_name=$experiment_name ++model_dirpath='"'$model_dirpath'"' ++ckpt_id='"'$ckpt_id'"' ++train_dataset='"'$train_dataset'"'
 
 ## Zero-Mean=True | ZNCC=True | norm=none
-model_name: DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0
-experiment_name: csph3d_debug_generalization
-model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/run-complete_2022-08-30_125727
-ckpt_id: epoch=29-step=103889-avgvalrmse=0.0172 # 0.0178 | 120 images== | 128 images==0.0171
+model_name=DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0
+experiment_name=csph3d_debug_generalization
+model_dirpath=outputs/${train_dataset}/${experiment_name}/${model_name}/run-complete_2022-08-30_125727
+ckpt_id=epoch=29-step=103889-avgvalrmse=0.0172 # 0.0178 | 120 images== | 128 images==0.0171
+python test.py dataset='"'$test_dataset'"' ++model_name='"'$model_name'"' ++experiment_name=$experiment_name ++model_dirpath='"'$model_dirpath'"' ++ckpt_id='"'$ckpt_id'"' ++train_dataset='"'$train_dataset'"'
 
 ## Zero-Mean=True | ZNCC=True | norm=LinfGlobal
-model_name: DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-LinfGlobal_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0
-experiment_name: csph3d_debug_generalization
-model_dirpath: outputs/${.train_dataset}/${.experiment_name}/${.model_name}/run-complete_2022-08-30_232221
-ckpt_id: epoch=29-step=103889-avgvalrmse=0.0175.ckpt # 0.0167 | 120 images== | 128 images==0.01605
+model_name=DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-LinfGlobal_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0
+experiment_name=csph3d_debug_generalization
+model_dirpath=outputs/${train_dataset}/${experiment_name}/${model_name}/run-complete_2022-08-30_232221
+ckpt_id=epoch=29-step=103889-avgvalrmse=0.0175.ckpt # 0.0167 | 120 images== | 128 images==0.01605
+python test.py dataset='"'$test_dataset'"' ++model_name='"'$model_name'"' ++experiment_name=$experiment_name ++model_dirpath='"'$model_dirpath'"' ++ckpt_id='"'$ckpt_id'"' ++train_dataset='"'$train_dataset'"'
 
 ## LinfGlobal (Per-image) Normalization (CSPH3Dv2)
 model_name=DDFN_C64B10_CSPH3Dv2/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-LinfGlobal/loss-kldiv_tv-0.0
