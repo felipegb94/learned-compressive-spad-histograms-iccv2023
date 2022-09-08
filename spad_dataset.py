@@ -184,7 +184,7 @@ class SpadDataset(torch.utils.data.Dataset):
 		spad_data_fname = self.spad_data_fpaths[idx]
 		spad_data = scipy.io.loadmat(spad_data_fname)
 
-		print("Loading: {}".format(spad_data_fname))
+		# print("Loading: {}".format(spad_data_fname))
 
 		# load intensity image
 		intensity = spad_data['intensity'].astype(np.float32)
