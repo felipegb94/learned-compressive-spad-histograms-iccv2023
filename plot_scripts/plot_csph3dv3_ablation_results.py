@@ -38,7 +38,7 @@ if __name__=='__main__':
 	io_dirpaths = get_hydra_io_dirpaths(job_name='plot_norm_ablation_results')
 
 	## Add high flux test results
-	plot_high_flux = True
+	plot_high_flux = False
 
 	## output dirpaths
 	experiment_name = 'middlebury/csph3dv3_ablation'
@@ -63,7 +63,7 @@ if __name__=='__main__':
 
 	## Model IDs of the models we want to plot
 	model_names = []
-	model_names.append('DDFN_C64B10_CSPH3Dv2/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-none/loss-kldiv_tv-0.0')
+	# model_names.append('DDFN_C64B10_CSPH3Dv2/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-none/loss-kldiv_tv-0.0')
 	model_names.append('DDFN_C64B10_CSPH3Dv2/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-LinfGlobal/loss-kldiv_tv-0.0')
 	model_names.append('DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-LinfGlobal_irf-True_zn-False_zeromu-False_smoothtdimC-False/loss-kldiv_tv-0.0')
 	model_names.append('DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-LinfGlobal_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0')
@@ -99,19 +99,29 @@ if __name__=='__main__':
 		model_metrics_df_curr['is_high_flux'] = (model_metrics_df_curr['mean_signal_photons'] + model_metrics_df_curr['mean_bkg_photons']) > 100
 		model_metrics_df = pd.concat((model_metrics_df, model_metrics_df_curr), axis=0)
 
+	# model_metrics_df_filtered = model_metrics_df[model_metrics_df['model_name'].str.contains('zeromu-1')]
+	model_metrics_df_filtered = model_metrics_df
+
 	plt.clf()
-	plot_utils.update_fig_size(height=8, width=14)
+	plot_utils.update_fig_size(height=8, width=16)
+	ax = plt.gca()
 	# cmap = sns.cubehelix_palette(rot=-.2, as_cmap=True, reverse=True, light=0.8, dark=0.3)
 	# cmap = sns.cubehelix_palette(start=2, rot=0, dark=0, light=.95, reverse=True, as_cmap=True)
 	cmap = sns.color_palette("mako", n_colors=len(model_metrics_df['mean_sbr'].unique()))
 	## legend="full" is needed to display the full name of the hue variable
 	## set zorder to 0 to make sur eit appears below boxplot
-	ax = sns.swarmplot(data=model_metrics_df[model_metrics_df['model_name'].str.contains('zeromu-1')], x='model_name', y='mae', orient="v", hue="mean_sbr", dodge=True, legend="full", palette=cmap)
-	ax.legend(title='Mean SBR', fontsize=14, title_fontsize=14)
+	ax = sns.swarmplot(data=model_metrics_df, x='model_name', y='mae', orient="v", hue="mean_sbr", dodge=True, legend="full", palette=cmap)
 	boxprops = {'facecolor':'black', 'linewidth': 1, 'alpha': 0.3}
 	# medianprops = {'linewidth': 4, 'color': '#ff5252'}
 	# medianprops = {'linewidth': 4, 'color': '#4ba173'}
-	medianprops = {'linewidth': 4, 'color': '#424242', "solid_capstyle": "butt"}
-	ax = sns.boxplot(data=model_metrics_df[model_metrics_df['model_name'].str.contains('zeromu-1')], x='model_name', y='mae', ax=ax, orient="v", boxprops=boxprops, medianprops=medianprops)
+	medianprops = {'linewidth': 3, 'color': '#424242', "solid_capstyle": "butt"}
+	# meanprops={"linestyle":"--","linewidth": 3, "color":"white"}
+	meanprops={"marker":"o",
+                       "markerfacecolor":"white", 
+                       "markeredgecolor":"black",
+                      "markersize":"14"}
+	ax = sns.boxplot(data=model_metrics_df, x='model_name', y='mae', ax=ax, orient="v", showfliers = False, boxprops=boxprops, medianprops=medianprops, meanprops=meanprops, showmeans=True)
+	ax.legend(title='Mean SBR', fontsize=14, title_fontsize=14)
 	plt.xticks(rotation=10)
+	plt.ylim((0.0025,0.05))
 	plot_utils.save_currfig_png(dirpath=out_dirpath, filename=base_fname + '_sbr-hue')
