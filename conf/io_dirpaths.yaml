@@ -11,4 +11,4 @@ io_dirpaths:
   lindell_linospad_patch_dataset_dirpath: ${hydra:runtime.cwd}/./2018SIGGRAPH_lindell_test_data/captured_patches-64-64
   lindell_middlebury_spad_dataset_dirpath: ${hydra:runtime.cwd}/./2018SIGGRAPH_lindell_test_data/simulated/LR
   results_data_dirpath: ${hydra:runtime.cwd}/./results/results_data
-  results_weekly_dirpath: ${hydra:runtime.cwd}/./results/week_2022-09-05
+  results_weekly_dirpath: ${hydra:runtime.cwd}/./results/week_2022-09-12

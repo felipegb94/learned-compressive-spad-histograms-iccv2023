@@ -18,10 +18,6 @@ from spad_dataset import SpadDataset
 def denorm_bins(bins, num_bins):
 	return bins*(num_bins)
 
-def compute_rmse(gt, est):
-	rmse = np.sqrt(np.mean((gt - est)**2))
-	return rmse
-
 def compute_mse(gt, est):
 	mse = np.mean((gt - est)**2)
 	return mse
@@ -30,10 +26,33 @@ def compute_mae(gt, est):
 	mae = np.mean(np.abs(gt - est))
 	return mae
 
-def compute_error_metrics(gt, est):
+def compute_rmse(gt, est):
+	rmse = np.sqrt(compute_mse(gt,est))
+	return rmse
+
+def compute_eps_tol_err(gt, est, eps_tol_thresh):
+	'''
+		Compute epsilon tolerance error. Percentage of points with errors lower than a threshold
+	'''
 	abs_errs = np.abs(gt-est)
-	perc_errs = np_utils.calc_mean_percentile_errors(abs_errs)
-	return (compute_rmse(gt,est), compute_mse(gt,est), compute_mae(gt,est), abs_errs, np.round(perc_errs[0], decimals=2))
+	n = abs_errs.size
+	eps_tolerance = float(np.sum(abs_errs < eps_tol_thresh)) / n
+	assert(np.all(eps_tolerance <= 1.)), "eps tolerance should be <= 1"
+	return eps_tolerance
+
+def compute_error_metrics(gt, est, eps_tol_thresh=0.01):
+	metrics = {}
+	metrics['abs_errs'] = np.abs(gt-est)
+	metrics['perc_errs'] = np.round(np_utils.calc_mean_percentile_errors(metrics['abs_errs'])[0], decimals=2)
+	metrics['mae'] =  compute_mae(gt,est)
+	metrics['mse'] =  compute_mse(gt,est)
+	metrics['rmse'] =  compute_rmse(gt,est)
+	metrics['1mm_tol_err'] =  compute_eps_tol_err(gt,est,eps_tol_thresh=1./1000.)
+	metrics['5mm_tol_err'] =  compute_eps_tol_err(gt,est,eps_tol_thresh=5./1000.)
+	metrics['10mm_tol_err'] =  compute_eps_tol_err(gt,est,eps_tol_thresh=10./1000.)
+	metrics['20mm_tol_err'] =  compute_eps_tol_err(gt,est,eps_tol_thresh=20./1000.)
+	return metrics
+	# return (compute_rmse(gt,est), compute_mse(gt,est), compute_mae(gt,est), abs_errs, np.round(perc_errs[0], decimals=2))
 
 def get_model_depths(model_result_dirpath, scene_fname, num_bins, tau):
 	model_result_fpath = os.path.join(model_result_dirpath, scene_fname+'.npz')
@@ -77,15 +96,24 @@ def append_model_metrics(model_metrics, test_set_id, scene_fname, gt_depths, num
 	if(not ('rmse' in model_metrics.keys())): model_metrics['rmse'] = []
 	if(not ('mae' in model_metrics.keys())): model_metrics['mae'] = []
 	if(not ('mse' in model_metrics.keys())): model_metrics['mse'] = []
+	if(not ('1mm_tol_err' in model_metrics.keys())): model_metrics['1mm_tol_err'] = []
+	if(not ('5mm_tol_err' in model_metrics.keys())): model_metrics['5mm_tol_err'] = []
+	if(not ('10mm_tol_err' in model_metrics.keys())): model_metrics['10mm_tol_err'] = []
+	if(not ('20mm_tol_err' in model_metrics.keys())): model_metrics['20mm_tol_err'] = []
 	## Compute error metrics with respect to ground truth
-	(scene_rmse, scene_mse, scene_mae, scene_abs_errs, scene_perc_errs) = compute_error_metrics(gt_depths, model_depths)
-	model_metrics['rmse'].append(scene_rmse)
-	model_metrics['mse'].append(scene_mse)
-	model_metrics['mae'].append(scene_mae)
-	scene_metrics = {}
-	scene_metrics['rmse'] = scene_rmse
-	scene_metrics['mse'] = scene_mse
-	scene_metrics['mae'] = scene_mae
+	scene_metrics = compute_error_metrics(gt_depths, model_depths)
+	# (scene_rmse, scene_mse, scene_mae, scene_abs_errs, scene_perc_errs) = compute_error_metrics(gt_depths, model_depths)
+	model_metrics['rmse'].append(scene_metrics['rmse'])
+	model_metrics['mse'].append(scene_metrics['mse'])
+	model_metrics['mae'].append(scene_metrics['mae'])
+	model_metrics['1mm_tol_err'].append(scene_metrics['1mm_tol_err'])
+	model_metrics['5mm_tol_err'].append(scene_metrics['5mm_tol_err'])
+	model_metrics['10mm_tol_err'].append(scene_metrics['10mm_tol_err'])
+	model_metrics['20mm_tol_err'].append(scene_metrics['20mm_tol_err'])
+	# scene_metrics = {}
+	# scene_metrics['rmse'] = scene_metrics['rmse']
+	# scene_metrics['mse'] = scene_metrics['mse']
+	# scene_metrics['mae'] = scene_metrics['mae']
 	return model_metrics, model_depths, scene_metrics
 
 def get_hydra_io_dirpaths(job_name='tmp'):

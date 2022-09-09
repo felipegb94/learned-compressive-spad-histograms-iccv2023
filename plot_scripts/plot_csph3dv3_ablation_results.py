@@ -32,13 +32,38 @@ def simplify_model_name(model_name):
 
 	return model_name_min
 
+def plot_test_dataset_metrics(model_metrics, metric_id='mae'):
+	plt.clf()
+	plot_utils.update_fig_size(height=8, width=16)
+	ax = plt.gca()
+	# cmap = sns.cubehelix_palette(rot=-.2, as_cmap=True, reverse=True, light=0.8, dark=0.3)
+	# cmap = sns.cubehelix_palette(start=2, rot=0, dark=0, light=.95, reverse=True, as_cmap=True)
+	cmap = sns.color_palette("mako", n_colors=len(model_metrics_df['mean_sbr'].unique()))
+	## legend="full" is needed to display the full name of the hue variable
+	## set zorder to 0 to make sur eit appears below boxplot
+	ax = sns.swarmplot(data=model_metrics, x='model_name', y=metric_id, orient="v", hue="mean_sbr", dodge=True, legend="full", palette=cmap)
+	boxprops = {'facecolor':'black', 'linewidth': 1, 'alpha': 0.3}
+	# medianprops = {'linewidth': 4, 'color': '#ff5252'}
+	# medianprops = {'linewidth': 4, 'color': '#4ba173'}
+	medianprops = {'linewidth': 3, 'color': '#424242', "solid_capstyle": "butt"}
+	# meanprops={"linestyle":"--","linewidth": 3, "color":"white"}
+	meanprops={"marker":"o",
+					"markerfacecolor":"white", 
+					"markeredgecolor":"black",
+					"markersize":"14"}
+	ax = sns.boxplot(data=model_metrics, x='model_name', y=metric_id, ax=ax, orient="v", showfliers = False, boxprops=boxprops, medianprops=medianprops, meanprops=meanprops, showmeans=True)
+	ax.legend(title='Mean SBR', fontsize=14, title_fontsize=14)
+	plt.xticks(rotation=10)
+	# plt.ylim((0.0025,0.05))
+	plot_utils.save_currfig_png(dirpath=out_dirpath, filename=base_fname + '{}_sbr-hue'.format(metric_id))
+
 if __name__=='__main__':
 
 	## load all dirpaths without creating a job 
 	io_dirpaths = get_hydra_io_dirpaths(job_name='plot_norm_ablation_results')
 
 	## Add high flux test results
-	plot_high_flux = False
+	plot_high_flux = True
 
 	## output dirpaths
 	experiment_name = 'middlebury/csph3dv3_ablation'
@@ -92,6 +117,10 @@ if __name__=='__main__':
 	for model_name in model_names_min:
 		model_metrics_df_curr = pd.DataFrame()
 		model_metrics_df_curr['mae'] = model_metrics_all[model_name]['mae']
+		model_metrics_df_curr['mse'] = model_metrics_all[model_name]['mse']
+		model_metrics_df_curr['1mm_tol_err'] = model_metrics_all[model_name]['5mm_tol_err']
+		model_metrics_df_curr['5mm_tol_err'] = model_metrics_all[model_name]['5mm_tol_err']
+		model_metrics_df_curr['10mm_tol_err'] = model_metrics_all[model_name]['10mm_tol_err']
 		model_metrics_df_curr['model_name'] = [model_name]*len(model_metrics_all[model_name]['mae'])
 		model_metrics_df_curr['mean_sbr'] = model_metrics_all['sbr_params']['mean_sbr']
 		model_metrics_df_curr['mean_signal_photons'] = model_metrics_all['sbr_params']['mean_signal_photons']
@@ -102,26 +131,17 @@ if __name__=='__main__':
 	# model_metrics_df_filtered = model_metrics_df[model_metrics_df['model_name'].str.contains('zeromu-1')]
 	model_metrics_df_filtered = model_metrics_df
 
-	plt.clf()
-	plot_utils.update_fig_size(height=8, width=16)
-	ax = plt.gca()
-	# cmap = sns.cubehelix_palette(rot=-.2, as_cmap=True, reverse=True, light=0.8, dark=0.3)
-	# cmap = sns.cubehelix_palette(start=2, rot=0, dark=0, light=.95, reverse=True, as_cmap=True)
-	cmap = sns.color_palette("mako", n_colors=len(model_metrics_df['mean_sbr'].unique()))
-	## legend="full" is needed to display the full name of the hue variable
-	## set zorder to 0 to make sur eit appears below boxplot
-	ax = sns.swarmplot(data=model_metrics_df, x='model_name', y='mae', orient="v", hue="mean_sbr", dodge=True, legend="full", palette=cmap)
-	boxprops = {'facecolor':'black', 'linewidth': 1, 'alpha': 0.3}
-	# medianprops = {'linewidth': 4, 'color': '#ff5252'}
-	# medianprops = {'linewidth': 4, 'color': '#4ba173'}
-	medianprops = {'linewidth': 3, 'color': '#424242', "solid_capstyle": "butt"}
-	# meanprops={"linestyle":"--","linewidth": 3, "color":"white"}
-	meanprops={"marker":"o",
-                       "markerfacecolor":"white", 
-                       "markeredgecolor":"black",
-                      "markersize":"14"}
-	ax = sns.boxplot(data=model_metrics_df, x='model_name', y='mae', ax=ax, orient="v", showfliers = False, boxprops=boxprops, medianprops=medianprops, meanprops=meanprops, showmeans=True)
-	ax.legend(title='Mean SBR', fontsize=14, title_fontsize=14)
-	plt.xticks(rotation=10)
-	plt.ylim((0.0025,0.05))
-	plot_utils.save_currfig_png(dirpath=out_dirpath, filename=base_fname + '_sbr-hue')
+
+	plot_test_dataset_metrics(model_metrics_df_filtered, metric_id='mae')
+
+	plt.figure()
+	plot_test_dataset_metrics(model_metrics_df_filtered, metric_id='mse')
+
+	plt.figure()
+	plot_test_dataset_metrics(model_metrics_df_filtered, metric_id='10mm_tol_err')
+
+	plt.figure()
+	plot_test_dataset_metrics(model_metrics_df_filtered, metric_id='5mm_tol_err')
+
+	plt.figure()
+	plot_test_dataset_metrics(model_metrics_df_filtered, metric_id='1mm_tol_err')
