@@ -1,6 +1,6 @@
 '''
-    This script plots the test set results for models that were trained with different normalization strategies
-    The test commands for these models appear under `scripts_test/test_csph3d_norm_strategies.sh`
+	This script plots the test set results for models that were trained with different settings introduced in CSPH3Dv3 model (currently the latest version)
+	The test commands for these models appear under `scripts_test/test_csph3dv3_ablation.sh`
 '''
 #### Standard Library Imports
 import os
@@ -21,31 +21,14 @@ from spad_dataset import SpadDataset
 from analyze_test_results_utils import init_model_metrics_dict, process_middlebury_test_results, get_hydra_io_dirpaths
 
 
-def parse_csph3d_params(model_name):
-	if('CSPH3D' in model_name):
-		down_factor = int(model_name.split('_down')[-1].split('_')[0])
-		k = int(model_name.split('/k')[-1].split('_')[0])
-		nt_blocks = int(model_name.split('_Mt')[-1].split('_')[0])
-	else:
-		down_factor = None
-		k = None
-		nt_blocks = None
-	return (down_factor, nt_blocks, k)
-
 def simplify_model_name(model_name):
-	## parset params
-	(down_factor, nt_blocks, k) = parse_csph3d_params(model_name)
-	## simplify
-	# model_name_min = model_name.replace('DDFN_C64B10', 'db3D')
-	# model_name_min = model_name.replace('loss-kldiv_', '')
-	# model_name_min = model_name_min.replace('_down{}_Mt{}'.format(down_factor, nt_blocks), '_{}x{}x{}'.format(1024//nt_blocks, down_factor, down_factor))
-
+	## only keep model params
 	model_name_min = model_name.split('/')[1]
 	model_name_min = 'norm' + model_name_min.split('_norm')[-1]
 	model_name_min = model_name_min.replace('False', '0')
 	model_name_min = model_name_min.replace('True', '1')
-	model_name_min = model_name_min.replace('_smoothtdimC-0', '')
-	model_name_min = model_name_min.replace('_irf-0', '')
+	# model_name_min = model_name_min.replace('_smoothtdimC-0', '')
+	# model_name_min = model_name_min.replace('_irf-0', '')
 
 	return model_name_min
 
@@ -58,7 +41,7 @@ if __name__=='__main__':
 	plot_high_flux = True
 
 	## output dirpaths
-	experiment_name = 'middlebury/norm_ablation'
+	experiment_name = 'middlebury/csph3dv3_ablation'
 	out_dirpath = os.path.join(io_dirpaths.results_weekly_dirpath, experiment_name)
 	os.makedirs(out_dirpath, exist_ok=True)
 
@@ -81,15 +64,13 @@ if __name__=='__main__':
 	## Model IDs of the models we want to plot
 	model_names = []
 	model_names.append('DDFN_C64B10_CSPH3Dv2/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-none/loss-kldiv_tv-0.0')
+	model_names.append('DDFN_C64B10_CSPH3Dv2/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-LinfGlobal/loss-kldiv_tv-0.0')
+	model_names.append('DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-LinfGlobal_irf-True_zn-False_zeromu-False_smoothtdimC-False/loss-kldiv_tv-0.0')
+	model_names.append('DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-LinfGlobal_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0')
 	model_names.append('DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-none_irf-False_zn-False_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0')
 	model_names.append('DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0')
-	model_names.append('DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-LinfGlobal_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0')
-	model_names.append('DDFN_C64B10_CSPH3Dv2/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-LinfGlobal/loss-kldiv_tv-0.0')
-	model_names.append('DDFN_C64B10_CSPH3Dv2/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-L2/loss-kldiv_tv-0.0')
-	model_names.append('DDFN_C64B10_CSPH3Dv2/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-Linf/loss-kldiv_tv-0.0')
-	# model_names.append('DDFN_C64B10_CSPH3Dv1/k128_down4_Mt1_Rand-optCt=True-optC=True_full/loss-kldiv_tv-0.0')
-	# model_names.append('DDFN_C64B10_CSPH3Dv2/k128_down4_Mt1_Rand-optCt=True-optC=True_full_norm-L2/loss-kldiv_tv-0.0')
-	# model_names.append('DDFN_C64B10_CSPH3Dv2/k128_down4_Mt1_Rand-optCt=True-optC=True_full_norm-Linf/loss-kldiv_tv-0.0')
+	model_names.append('DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-none_irf-True_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0')
+	model_names.append('DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-none_irf-True_zn-True_zeromu-True_smoothtdimC-True/loss-kldiv_tv-0.0')
 
 	## Get pretrained models dirpaths
 	pretrained_models_all = io_ops.load_json('pretrained_models_rel_dirpaths.json')
@@ -118,62 +99,19 @@ if __name__=='__main__':
 		model_metrics_df_curr['is_high_flux'] = (model_metrics_df_curr['mean_signal_photons'] + model_metrics_df_curr['mean_bkg_photons']) > 100
 		model_metrics_df = pd.concat((model_metrics_df, model_metrics_df_curr), axis=0)
 
-
 	plt.clf()
 	plot_utils.update_fig_size(height=8, width=14)
 	# cmap = sns.cubehelix_palette(rot=-.2, as_cmap=True, reverse=True, light=0.8, dark=0.3)
 	# cmap = sns.cubehelix_palette(start=2, rot=0, dark=0, light=.95, reverse=True, as_cmap=True)
 	cmap = sns.color_palette("mako", n_colors=len(model_metrics_df['mean_sbr'].unique()))
 	## legend="full" is needed to display the full name of the hue variable
-	ax = sns.swarmplot(data=model_metrics_df, x='model_name', y='mae', orient="v", hue="mean_sbr", dodge=True, legend="full", palette=cmap)
-	ax.legend(title='Mean SBR', fontsize=14, title_fontsize=14)
-	plt.xticks(rotation=15)
-	plot_utils.save_currfig_png(dirpath=out_dirpath, filename=base_fname + '_sbr-hue')
-
-
-	plt.clf()
-	plot_utils.update_fig_size(height=8, width=14)
-	# cmap = sns.cubehelix_palette(rot=-.2, as_cmap=True, reverse=True, light=0.8, dark=0.3)
-	# cmap = sns.cubehelix_palette(start=2, rot=0, dark=0, light=.95, reverse=True, as_cmap=True)
-	cmap = sns.color_palette("mako_r", n_colors=2)
-	## legend="full" is needed to display the full name of the hue variable
-	ax = sns.swarmplot(data=model_metrics_df, x='model_name', y='mae', orient="v", hue="is_high_flux", dodge=False, legend="full", palette=cmap)
-	ax.legend(title='Flux > 100 photons', fontsize=14, title_fontsize=14)
-	plt.xticks(rotation=15)
-	plot_utils.save_currfig_png(dirpath=out_dirpath, filename=base_fname + '_highflux-hue')
-	
-	## plot only the zero mean codes models
-	plt.clf()
-	plot_utils.update_fig_size(height=8, width=14)
-	# cmap = sns.cubehelix_palette(rot=-.2, as_cmap=True, reverse=True, light=0.8, dark=0.3)
-	# cmap = sns.cubehelix_palette(start=2, rot=0, dark=0, light=.95, reverse=True, as_cmap=True)
-	cmap = sns.color_palette("mako", n_colors=len(model_metrics_df['mean_sbr'].unique()))
-	## legend="full" is needed to display the full name of the hue variable
+	## set zorder to 0 to make sur eit appears below boxplot
 	ax = sns.swarmplot(data=model_metrics_df[model_metrics_df['model_name'].str.contains('zeromu-1')], x='model_name', y='mae', orient="v", hue="mean_sbr", dodge=True, legend="full", palette=cmap)
 	ax.legend(title='Mean SBR', fontsize=14, title_fontsize=14)
-	plt.xticks(rotation=15)
-	plot_utils.save_currfig_png(dirpath=out_dirpath, filename=base_fname + '_sbr-hue_zeromu-1')
-
-	
-	plt.clf()
-	plot_utils.update_fig_size(height=8, width=14)
-	# cmap = sns.cubehelix_palette(rot=-.2, as_cmap=True, reverse=True, light=0.8, dark=0.3)
-	# cmap = sns.cubehelix_palette(start=2, rot=0, dark=0, light=.95, reverse=True, as_cmap=True)
-	cmap = sns.color_palette("mako_r", n_colors=2)
-	## legend="full" is needed to display the full name of the hue variable
-	ax = sns.swarmplot(data=model_metrics_df[model_metrics_df['model_name'].str.contains('zeromu-1')], x='model_name', y='mae', orient="v", hue="is_high_flux", dodge=False, legend="full", palette=cmap)
-	ax.legend(title='Flux > 100 photons', fontsize=14, title_fontsize=14)
-	plt.xticks(rotation=15)
-	plot_utils.save_currfig_png(dirpath=out_dirpath, filename=base_fname + '_highflux-hue_zeromu-1')
-	
-	# plt.ylim(0,0.5)
-
-
-	# sns.swarmplot(data=model_metrics_all['DDFN_C64B10_CSPH3Dv2/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-none/loss-kldiv_tv-0.0']['mae'],orient='v')
-	# sns.swarmplot(data=model_metrics_all['argmax']['mae'],orient='v')
-
-
-
-
-
-
+	boxprops = {'facecolor':'black', 'linewidth': 1, 'alpha': 0.3}
+	# medianprops = {'linewidth': 4, 'color': '#ff5252'}
+	# medianprops = {'linewidth': 4, 'color': '#4ba173'}
+	medianprops = {'linewidth': 4, 'color': '#424242', "solid_capstyle": "butt"}
+	ax = sns.boxplot(data=model_metrics_df[model_metrics_df['model_name'].str.contains('zeromu-1')], x='model_name', y='mae', ax=ax, orient="v", boxprops=boxprops, medianprops=medianprops)
+	plt.xticks(rotation=10)
+	plot_utils.save_currfig_png(dirpath=out_dirpath, filename=base_fname + '_sbr-hue')

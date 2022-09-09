@@ -85,8 +85,9 @@ def test(cfg):
 	logger.info("    torch.backends.cudnn.enabled: {}".format(torch.backends.cudnn.enabled))
 	logger.info("    torch.backends.cudnn.deterministic: {}".format(torch.backends.cudnn.deterministic))
 
-	if(('RTX 2070' in torch.cuda.get_device_name(torch.cuda.current_device())) and ('k64_down4_Mt1' in cfg.model_name)):
+	if(('RTX 2070' in torch.cuda.get_device_name(torch.cuda.current_device())) and ('k64_down4_Mt1' in cfg.model_name or ('k256_down4_Mt1' in cfg.model_name))):
 		logger.info("WARNING k=256_down4_Mt1 runs very slow in RTX 2070 for some reason...")
+		logger.info("WARNING k=64_down4_Mt1 runs very slow in RTX 2070 for some reason...")
 
 	if(cfg.params.cuda):
 		trainer = pl.Trainer(accelerator="gpu", devices=1, logger=tb_logger, callbacks=callbacks, benchmark=False) # 
