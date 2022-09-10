@@ -838,7 +838,7 @@ class CSPH3DLayer(nn.Module):
 		B = self.csph_layer(inputs)
 		# Get the weights from the first layer (if separable this is the outerproduct of two matrices)
 		W = self.get_unfilt_backproj_W3d()
-		## Normalize across the channel dimension like in ZNCC if the apply_zncc_norm is enables
+		## Normalize across the channel dimension like in ZNCC if the apply_zncc_norm is enabled
 		B_norm = self.zncc_norm(B, dims=-4) # for 3D signals the channel dimension is -4 dimension 
 		W_norm = self.zncc_norm(W, dims=0) # for weights the channel dimension is the first channel
 		## Upsample using unfiltered backprojection (similar to transposed convolution, but with fixed weights)
