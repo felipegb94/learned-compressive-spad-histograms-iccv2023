@@ -32,7 +32,7 @@ def simplify_model_name(model_name):
 
 	return model_name_min
 
-def plot_test_dataset_metrics(model_metrics, metric_id='mae'):
+def plot_test_dataset_metrics(model_metrics, metric_id='mae', ylim=None):
 	plt.clf()
 	plot_utils.update_fig_size(height=8, width=16)
 	ax = plt.gca()
@@ -54,7 +54,8 @@ def plot_test_dataset_metrics(model_metrics, metric_id='mae'):
 	ax = sns.boxplot(data=model_metrics, x='model_name', y=metric_id, ax=ax, orient="v", showfliers = False, boxprops=boxprops, medianprops=medianprops, meanprops=meanprops, showmeans=True)
 	ax.legend(title='Mean SBR', fontsize=14, title_fontsize=14)
 	plt.xticks(rotation=10)
-	# plt.ylim((0.0025,0.05))
+	if(not (ylim is None)):
+		plt.ylim(ylim)
 	plot_utils.save_currfig_png(dirpath=out_dirpath, filename=base_fname + '{}_sbr-hue'.format(metric_id))
 
 if __name__=='__main__':
@@ -82,6 +83,8 @@ if __name__=='__main__':
 	else:
 		sbr_params = sbr_params
 		base_fname = 'test_results'
+
+	# base_fname = 'test_set_irf_' + base_fname
 
 	## Create spad dataloader object to get ground truth data for each scene
 	spad_dataset = SpadDataset(datalist_fpath=os.path.join(io_dirpaths.datalists_dirpath, test_set_id+'.txt'), disable_rand_crop=True)
@@ -118,7 +121,7 @@ if __name__=='__main__':
 		model_metrics_df_curr = pd.DataFrame()
 		model_metrics_df_curr['mae'] = model_metrics_all[model_name]['mae']
 		model_metrics_df_curr['mse'] = model_metrics_all[model_name]['mse']
-		model_metrics_df_curr['1mm_tol_err'] = model_metrics_all[model_name]['5mm_tol_err']
+		model_metrics_df_curr['1mm_tol_err'] = model_metrics_all[model_name]['1mm_tol_err']
 		model_metrics_df_curr['5mm_tol_err'] = model_metrics_all[model_name]['5mm_tol_err']
 		model_metrics_df_curr['10mm_tol_err'] = model_metrics_all[model_name]['10mm_tol_err']
 		model_metrics_df_curr['model_name'] = [model_name]*len(model_metrics_all[model_name]['mae'])
@@ -132,16 +135,16 @@ if __name__=='__main__':
 	model_metrics_df_filtered = model_metrics_df
 
 
-	plot_test_dataset_metrics(model_metrics_df_filtered, metric_id='mae')
+	plot_test_dataset_metrics(model_metrics_df_filtered, metric_id='mae', ylim=(0.0025,0.05) )
 
-	plt.figure()
-	plot_test_dataset_metrics(model_metrics_df_filtered, metric_id='mse')
+	# plt.figure()
+	# plot_test_dataset_metrics(model_metrics_df_filtered, metric_id='mse')
 
-	plt.figure()
-	plot_test_dataset_metrics(model_metrics_df_filtered, metric_id='10mm_tol_err')
+	# plt.figure()
+	# plot_test_dataset_metrics(model_metrics_df_filtered, metric_id='10mm_tol_err')
 
-	plt.figure()
-	plot_test_dataset_metrics(model_metrics_df_filtered, metric_id='5mm_tol_err')
+	# plt.figure()
+	# plot_test_dataset_metrics(model_metrics_df_filtered, metric_id='5mm_tol_err')
 
-	plt.figure()
-	plot_test_dataset_metrics(model_metrics_df_filtered, metric_id='1mm_tol_err')
+	# plt.figure()
+	# plot_test_dataset_metrics(model_metrics_df_filtered, metric_id='1mm_tol_err')
