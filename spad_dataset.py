@@ -120,7 +120,12 @@ class SpadDataset(torch.utils.data.Dataset):
 			if(len(psf_fpaths) > 1):
 				print("Warning: More than one PSF/IRF avaiable. Choosing {}".format(psf_fpaths[0]))
 			psf_data = scipy.io.loadmat(psf_fpaths[0])
-			self.psf = psf_data['psf'].mean(axis=-1)
+			## If there is only a single psf then assign that, otherwise take the mean and save that
+			psf_raw = psf_data['psf'].squeeze()
+			if(psf_raw.ndim == 1):
+				self.psf = psf_raw
+			else:
+				self.psf = psf_data['psf'].mean(axis=-1)
 		else:
 			# If file does not exist, just generate simple psf
 			print("No PSF/IRF available. Generating a simple narrow Gaussian")
