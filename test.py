@@ -96,6 +96,12 @@ def test(cfg):
 
 	logger.info("Number of Model Params: {}".format(count_parameters(model)))
 
+	# ## get new IRf and overwrite model IRF
+	# from layers_parametric1D import IRF1DLayer
+	# h_irf = test_loader.dataset.psf 
+	# irf_layer_new = IRF1DLayer(irf=h_irf, conv_dim=0) 
+	# model.csph3d_layer.irf_layer = irf_layer_new
+
 	trainer.test(model, dataloaders=test_loader)
 
 	print("Results for:")
