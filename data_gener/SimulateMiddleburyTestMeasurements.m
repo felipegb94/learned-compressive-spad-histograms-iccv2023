@@ -1,6 +1,6 @@
 clear; close all;
 
-visualize_data = false;
+visualize_data = true;
 % Add paths
 addpath('./TestData/middlebury/nyu_utils');
 
@@ -17,11 +17,16 @@ bin_size = 100e-9/num_bins; %approximately the bin size (in secs)
 c = 3e8; 
 % Dark and Bright image parameter idx
 dark_img_param_idx = 0; % For dark count image
-psf_img_param_idx = 0; % For bright image from which the PSF/pulse wavefor is extracted
+psf_img_param_idx = 2; % For bright image from which the PSF/pulse wavefor is extracted (see LoadAndPreprocessBightPSFImg.m for options)
 % Noise params to use during simulation
 param_idx = 'all';
 % 
 LOW_RES = 1;  % use 0 or 1
+% additional identifier for dataset
+dataset_name_prefix = 'SimSPADDataset';
+% dataset_name_prefix = 'LowSBRSimSPADDataset';
+% dataset_name_prefix = 'HighSignalSimSPADDataset';
+
 
 % IMPORTANT NOTE: NOT ALL SCENES HAVE THE DIMENSIONS BELOW, IN THE INNER
 % LOOP WE MODIFY THE nr and nc VARIABLES. We just create them here, to
@@ -36,7 +41,7 @@ nr = nr * lres_factor; nc = nc * lres_factor;
 
 % Create output directory
 sim_param_str = ComposeSimParamString(nr, nc, num_bins, bin_size, dark_img_param_idx, psf_img_param_idx);
-outdir = fullfile(out_base_dirpath, sprintf('SimSPADDataset_%s', sim_param_str));
+outdir = fullfile(out_base_dirpath, sprintf('%s_%s', dataset_name_prefix,sim_param_str));
 if ~exist(outdir, 'dir')
     mkdir(outdir)
 end
@@ -44,47 +49,62 @@ end
 % Get all scene names
 scenes = GetFolderNamesInDir(dataset_dir);
 
-% this is the 9 typical noise levels
-simulation_params_T = [10 2;
-                     5 2;                     
-                     2 2;
-                     10 10;
-                     5 10;
-                     2 10;
-                     10 50;
-                     5 50;
-                     2 50];
+
+if(strcmp(dataset_name_prefix, 'LowSBRSimSPADDataset'))
+    simulation_params_lowSBR = [3 100;
+                                2 100;
+                                1 100;
+                                2 50;
+                                10, 500;
+                                10, 1000;
+                                50, 5000;
+                                100, 5000;
+                                100, 10000;
+                                100, 20000
+    ];
+    simulation_params = simulation_params_lowSBR;
+elseif(strcmp(dataset_name_prefix, 'HighSignalSimSPADDataset'))
+    simulation_params_lowSBR = [
+                                200, 500;
+                                200, 2000;
+                                200, 5000;
+                                200, 10000;
+                                200, 20000
+    ];
+    simulation_params = simulation_params_lowSBR;
+else
+    % this is the 9 typical noise levels
+    simulation_params_T = [10 2;
+                         5 2;                     
+                         2 2;
+                         10 10;
+                         5 10;
+                         2 10;
+                         10 50;
+                         5 50;
+                         2 50];
+            
+%     % this is the extra 3 low SBR noise levels
+%     simulation_params_E = [3 100;
+%                          2 100;
+%                          1 100];
         
-% this is the extra 3 low SBR noise levels
-simulation_params_E = [3 100;
-                     2 100;
-                     1 100];
+    simulation_params_highFlux = [10, 200;
+                                  10, 500;
+                                  10, 1000
+    ];
+    
+    
+    simulation_params_highFlux_medSNR = [50, 50; 
+                                  50, 200;
+                                  50, 500;
+                                  50, 1000
+    ];
 
-% % Extra high SNR noise levels
-% simulation_params_highSNR = [50, 2;
-%                             50, 5;
-%                             50, 10       
-% ]
-
-simulation_params_highFlux = [10, 200;
-                              10, 500;
-                              10, 1000
-]
-
-
-simulation_params_highFlux_medSNR = [50, 50; 
-                              50, 200;
-                              50, 500;
-                              50, 1000
-]
-
-% Select the simulation params to use
-% for test, use 9typical or 3 extra low SBR noise levels
-simulation_params = simulation_params_T;
-% simulation_params = simulation_params_highSNR;
-simulation_params = simulation_params_highFlux;
-simulation_params = simulation_params_highFlux_medSNR;
-
+    simulation_params = [simulation_params_T; simulation_params_highFlux; simulation_params_highFlux_medSNR];
+    
+end
+% 
 
 t_s = tic;
 for ss = 1:length(scenes)

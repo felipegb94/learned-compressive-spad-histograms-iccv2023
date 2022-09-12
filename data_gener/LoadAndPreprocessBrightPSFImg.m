@@ -52,6 +52,26 @@ function [PSF_img, psf, pulse_len] = LoadAndPreprocessBrightPSFImg(psf_img_param
         pulse = repmat(psf,[1,1,nc]);       
         pulse = permute(pulse,[2,3,1]);
         PSF_img = pulse;
+    elseif(psf_img_param_idx == 2)
+        % This is a narrow IRF that we use to see if the model generalized
+        % to other IRF
+        disp("Generating PSF Image from Narrow Gaussian Pulse of 100ps width")
+        bin_size = 100e-9 / nbins; % the temporal res
+        pulse_len = (100e-12) / bin_size;
+        pulse = normpdf(1:8*pulse_len,(8*pulse_len-1)/2,pulse_len/2);
+        pulse = pulse ./ sum(pulse(:),1);
+        PSF_img = repmat(reshape(pulse, [1, 1, numel(pulse)]),[nr,nc,1]);
+        psf = pulse;
+    elseif(psf_img_param_idx == 3)
+        % This is a wide IRF that we use to see if the model generalized
+        % to other IRF
+        disp("Generating PSF Image from Wide Gaussian Pulse of 1000ps width")
+        bin_size = 100e-9 / nbins; % the temporal res
+        pulse_len = (1000e-12) / bin_size;
+        pulse = normpdf(1:8*pulse_len,(8*pulse_len-1)/2,pulse_len/2);
+        pulse = pulse ./ sum(pulse(:),1);
+        PSF_img = repmat(reshape(pulse, [1, 1, numel(pulse)]),[nr,nc,1]);
+        psf = pulse;
     else
         error('Bad psf_img_param_idx value');
     end

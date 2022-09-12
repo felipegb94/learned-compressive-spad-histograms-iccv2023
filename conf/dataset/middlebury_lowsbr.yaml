@@ -1,0 +1,12 @@
+
+
+tres_ps: 98 # in picosecs
+nr: 72 # num rows
+nc: 88 # num cols
+nt: 1024 # num tbins
+dark_param_id: 0 # dark image parameter used when simulating the data
+psf_param_id: 0 # PSF image parameter used when simulating the data
+name: middlebury_lowsbr_${.nr}x${.nc}x${.nt}_${.tres_ps}ps
+train_datalist_fname: null
+val_datalist_fname: null
+test_datalist_fname: test_middlebury_lowsbr_LowSBRSimSPADDataset_nr-${.nr}_nc-${.nc}_nt-${.nt}_tres-${.tres_ps}ps_dark-${.dark_param_id}_psf-${.psf_param_id}.txt

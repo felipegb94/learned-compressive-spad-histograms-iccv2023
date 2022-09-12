@@ -2,6 +2,9 @@
 	This script makes the datalists for all the test datasets used in the paper. Before running the script make sure to download and/or simulate the datasets
 	The datasets include:
 		- Our own simulated middlebury test dataset
+		- Our own simulated middlebury test dataset with low SBR levels
+		- Our own simulated middlebury test dataset with high Signal levels
+		- Our own simulated middlebury test dataset with different pulse widths
 		- Lindell et al., 2018 SIGGRAPH real dataset captured with a Linospad
 		- Lindell et al., 2018 SIGGRAPH simulated middlebury test dataset. This is the same as our middlebury dataset but the noise levels may differ since they are different runs.
 '''
@@ -43,6 +46,46 @@ def make_test_lists(cfg):
 	print('Writing test files')
 	write_fpaths(os.path.join(datalists_dirpath, 'test_'+middlebury_spad_dataset_name+'.txt'), middlebury_spad_dataset_fpaths)
 	print('Wrote {} test file for {} dataset'.format(len(middlebury_spad_dataset_fpaths), middlebury_spad_dataset_name))
+
+	## Repeat for Middlebury low SBR dataset
+	middlebury_lowsbr_spad_dataset_dirpath = cfg.io_dirpaths.middlebury_lowsbr_spad_dataset_dirpath
+	middlebury_lowsbr_spad_dataset_dirpath = os.path.abspath(middlebury_lowsbr_spad_dataset_dirpath)
+	## Input single dirpath to look into
+	middlebury_lowsbr_spad_dataset_fpaths = generate_spad_data_fpaths([middlebury_lowsbr_spad_dataset_dirpath])
+	## Set the dataset name
+	middlebury_lowsbr_spad_dataset_name = 'middlebury_lowsbr_' + os.path.basename(middlebury_lowsbr_spad_dataset_dirpath)
+	write_fpaths(os.path.join(datalists_dirpath, 'test_'+middlebury_lowsbr_spad_dataset_name+'.txt'), middlebury_lowsbr_spad_dataset_fpaths)
+	print('Wrote {} test file for {} dataset'.format(len(middlebury_lowsbr_spad_dataset_fpaths), middlebury_lowsbr_spad_dataset_name))
+
+	## Repeat for Middlebury low SBR dataset
+	middlebury_highsignal_spad_dataset_dirpath = cfg.io_dirpaths.middlebury_highsignal_spad_dataset_dirpath
+	middlebury_highsignal_spad_dataset_dirpath = os.path.abspath(middlebury_highsignal_spad_dataset_dirpath)
+	## Input single dirpath to look into
+	middlebury_highsignal_spad_dataset_fpaths = generate_spad_data_fpaths([middlebury_highsignal_spad_dataset_dirpath])
+	## Set the dataset name
+	middlebury_highsignal_spad_dataset_name = 'middlebury_highsignal_' + os.path.basename(middlebury_highsignal_spad_dataset_dirpath)
+	write_fpaths(os.path.join(datalists_dirpath, 'test_'+middlebury_highsignal_spad_dataset_name+'.txt'), middlebury_highsignal_spad_dataset_fpaths)
+	print('Wrote {} test file for {} dataset'.format(len(middlebury_highsignal_spad_dataset_fpaths), middlebury_highsignal_spad_dataset_name))
+
+	## Repeat for Middlebury narrow pulse dataset
+	middlebury_narrowpulse_spad_dataset_dirpath = cfg.io_dirpaths.middlebury_narrowpulse_spad_dataset_dirpath
+	middlebury_narrowpulse_spad_dataset_dirpath = os.path.abspath(middlebury_narrowpulse_spad_dataset_dirpath)
+	## Input single dirpath to look into
+	middlebury_narrowpulse_spad_dataset_fpaths = generate_spad_data_fpaths([middlebury_narrowpulse_spad_dataset_dirpath])
+	## Set the dataset name
+	middlebury_narrowpulse_spad_dataset_name = 'middlebury_narrowpulse_' + os.path.basename(middlebury_narrowpulse_spad_dataset_dirpath)
+	write_fpaths(os.path.join(datalists_dirpath, 'test_'+middlebury_narrowpulse_spad_dataset_name+'.txt'), middlebury_narrowpulse_spad_dataset_fpaths)
+	print('Wrote {} test file for {} dataset'.format(len(middlebury_narrowpulse_spad_dataset_fpaths), middlebury_narrowpulse_spad_dataset_name))
+
+	## Repeat for Middlebury wide pulse dataset
+	middlebury_widepulse_spad_dataset_dirpath = cfg.io_dirpaths.middlebury_widepulse_spad_dataset_dirpath
+	middlebury_widepulse_spad_dataset_dirpath = os.path.abspath(middlebury_widepulse_spad_dataset_dirpath)
+	## Input single dirpath to look into
+	middlebury_widepulse_spad_dataset_fpaths = generate_spad_data_fpaths([middlebury_widepulse_spad_dataset_dirpath])
+	## Set the dataset name
+	middlebury_widepulse_spad_dataset_name = 'middlebury_widepulse_' + os.path.basename(middlebury_widepulse_spad_dataset_dirpath)
+	write_fpaths(os.path.join(datalists_dirpath, 'test_'+middlebury_widepulse_spad_dataset_name+'.txt'), middlebury_widepulse_spad_dataset_fpaths)
+	print('Wrote {} test file for {} dataset'.format(len(middlebury_widepulse_spad_dataset_fpaths), middlebury_widepulse_spad_dataset_name))
 
 	## Repeat for linospad dataset
 	lindell_linospad_dataset_dirpath = cfg.io_dirpaths.lindell_linospad_dataset_dirpath
