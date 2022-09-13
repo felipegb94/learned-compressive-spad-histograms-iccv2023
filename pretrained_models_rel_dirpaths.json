@@ -107,9 +107,29 @@
             "depths/test_rmse": 3.0568
         },
         "middlebury_72x88x1024_98ps": {
-            "depths/test_mae": 0.01027,
-            "depths/test_mse": 0.00041,
-            "depths/test_rmse": 0.01807
+            "depths/test_mae": 0.01313,
+            "depths/test_mse": 0.00415,
+            "depths/test_rmse": 0.03096
+        },
+        "middlebury_widepulse_72x88x1024_98ps": {
+            "depths/test_mae": 0.02805,
+            "depths/test_mse": 0.00448,
+            "depths/test_rmse": 0.0436
+        },
+        "middlebury_narrowpulse_72x88x1024_98ps": {
+            "depths/test_mae": 0.01409,
+            "depths/test_mse": 0.00566,
+            "depths/test_rmse": 0.03796
+        },
+        "middlebury_highsignal_72x88x1024_98ps": {
+            "depths/test_mae": 0.13728,
+            "depths/test_mse": 0.31472,
+            "depths/test_rmse": 0.38142
+        },
+        "middlebury_lowsbr_72x88x1024_98ps": {
+            "depths/test_mae": 0.13341,
+            "depths/test_mse": 0.41585,
+            "depths/test_rmse": 0.35214
         }
     },
     "DDFN_C64B10_Depth2Depth/loss-kldiv_tv-1e-5": {
@@ -121,9 +141,29 @@
             "depths/test_rmse": 3.0456
         },
         "middlebury_72x88x1024_98ps": {
-            "depths/test_mae": 0.01378,
-            "depths/test_mse": 0.00145,
-            "depths/test_rmse": 0.02711
+            "depths/test_mae": 0.01427,
+            "depths/test_mse": 0.0019,
+            "depths/test_rmse": 0.02721
+        },
+        "middlebury_highsignal_72x88x1024_98ps": {
+            "depths/test_mae": 0.01104,
+            "depths/test_mse": 0.00026,
+            "depths/test_rmse": 0.01545
+        },
+        "middlebury_lowsbr_72x88x1024_98ps": {
+            "depths/test_mae": 0.16769,
+            "depths/test_mse": 0.45588,
+            "depths/test_rmse": 0.2624
+        },
+        "middlebury_narrowpulse_72x88x1024_98ps": {
+            "depths/test_mae": 0.01416,
+            "depths/test_mse": 0.00074,
+            "depths/test_rmse": 0.02237
+        },
+        "middlebury_widepulse_72x88x1024_98ps": {
+            "depths/test_mae": 0.06088,
+            "depths/test_mse": 0.07132,
+            "depths/test_rmse": 0.11904
         }
     },
     "DDFN_C64B10_Depth2Depth/loss-kldiv_tv-0.0": {
@@ -135,9 +175,29 @@
             "depths/test_rmse": 3.0478
         },
         "middlebury_72x88x1024_98ps": {
-            "depths/test_mae": 0.01369,
-            "depths/test_mse": 0.00494,
-            "depths/test_rmse": 0.0355
+            "depths/test_mae": 0.01429,
+            "depths/test_mse": 0.00847,
+            "depths/test_rmse": 0.03961
+        },
+        "middlebury_highsignal_72x88x1024_98ps": {
+            "depths/test_mae": 0.00846,
+            "depths/test_mse": 0.00016,
+            "depths/test_rmse": 0.01208
+        },
+        "middlebury_lowsbr_72x88x1024_98ps": {
+            "depths/test_mae": 0.17735,
+            "depths/test_mse": 0.67727,
+            "depths/test_rmse": 0.33993
+        },
+        "middlebury_narrowpulse_72x88x1024_98ps": {
+            "depths/test_mae": 0.01211,
+            "depths/test_mse": 0.00198,
+            "depths/test_rmse": 0.02452
+        },
+        "middlebury_widepulse_72x88x1024_98ps": {
+            "depths/test_mae": 0.06471,
+            "depths/test_mse": 0.11842,
+            "depths/test_rmse": 0.1539
         }
     },
     "DDFN_C64B10_NL_original/loss-kldiv_tv-1e-5": {

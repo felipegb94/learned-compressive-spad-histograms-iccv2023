@@ -32,7 +32,7 @@ def simplify_model_name(model_name):
 
 	return model_name_min
 
-def plot_test_dataset_metrics(model_metrics, metric_id='mae', ylim=None):
+def plot_test_dataset_metrics(model_metrics, metric_id='mae', ylim=None, title='Dataset Metrics'):
 	plt.clf()
 	plot_utils.update_fig_size(height=8, width=16)
 	ax = plt.gca()
@@ -56,6 +56,7 @@ def plot_test_dataset_metrics(model_metrics, metric_id='mae', ylim=None):
 	plt.xticks(rotation=10)
 	if(not (ylim is None)):
 		plt.ylim(ylim)
+	plt.title(title)
 	plot_utils.save_currfig_png(dirpath=out_dirpath, filename=base_fname + '{}_sbr-hue'.format(metric_id))
 
 if __name__=='__main__':
@@ -64,25 +65,40 @@ if __name__=='__main__':
 	io_dirpaths = get_hydra_io_dirpaths(job_name='plot_norm_ablation_results')
 
 	## Add high flux test results
-	plot_high_flux = True
+	plot_high_flux = False
+
+	## Scene ID and Params
+	middlebury_test_set_id = 'test_middlebury_SimSPADDataset'
+	# middlebury_test_set_id = 'test_middlebury_highsignal_HighSignalSimSPADDataset'
+	# middlebury_test_set_id = 'test_middlebury_lowsbr_LowSBRSimSPADDataset'
+	middlebury_test_set_id = 'test_middlebury_widepulse_SimSPADDataset'
+	# middlebury_test_set_id = 'test_middlebury_narrowpulse_SimSPADDataset'
+	irf_id = 0
+	if('widepulse' in  middlebury_test_set_id): irf_id = 3
+	elif('narrowpulse' in  middlebury_test_set_id): irf_id = 2
+	test_set_id = '{}_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-{}'.format(middlebury_test_set_id, irf_id)
+	scene_ids = ['spad_Art', 'spad_Reindeer', 'spad_Books', 'spad_Moebius', 'spad_Bowling1', 'spad_Dolls', 'spad_Laundry', 'spad_Plastic']
+	base_fname = 'test_results'
+	mae_ylim = (0,0.05) 
+	if('highsignal' in middlebury_test_set_id):
+		mae_ylim = (0,0.02) 
+		sbr_params = ['200_500','200_2000','200_5000','200_10000','200_20000']
+	elif('lowsbr' in middlebury_test_set_id):
+		mae_ylim = (0,0.06) 
+		sbr_params = ['1_100','2_100','3_100','2_50','10_500','10_1000','50_5000','100_5000','100_10000','100_20000']
+	else:
+		sbr_params = ['2_2','2_10','2_50','5_2','5_10','5_50','10_2','10_10','10_50']
+		sbr_params_high_flux = ['10_200', '10_500', '10_1000', '50_50', '50_200', '50_500', '50_1000'] ## more than 100 photons per pixel on average
+		if(plot_high_flux):
+			sbr_params = sbr_params + sbr_params_high_flux
+			base_fname = 'high_flux_{}'.format(base_fname)
 
 	## output dirpaths
-	experiment_name = 'middlebury/csph3dv3_ablation'
+	experiment_name = 'csph3dv3_ablation/{}'.format(middlebury_test_set_id)
 	out_dirpath = os.path.join(io_dirpaths.results_weekly_dirpath, experiment_name)
 	os.makedirs(out_dirpath, exist_ok=True)
 
-	## Scene ID and Params
-	test_set_id = 'test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
-	scene_ids = ['spad_Art', 'spad_Reindeer', 'spad_Books', 'spad_Moebius', 'spad_Bowling1', 'spad_Dolls', 'spad_Laundry', 'spad_Plastic']
-	sbr_params = ['2_2','2_10','2_50','5_2','5_10','5_50','10_2','10_10','10_50']
-	sbr_params_high_flux = ['10_200', '10_500', '10_1000', '50_50', '50_200', '50_500', '50_1000'] ## more than 100 photons per pixel on average
 	
-	if(plot_high_flux):
-		sbr_params = sbr_params + sbr_params_high_flux
-		base_fname = 'high_flux_test_results'
-	else:
-		sbr_params = sbr_params
-		base_fname = 'test_results'
 
 	# base_fname = 'test_set_irf_' + base_fname
 
@@ -91,6 +107,8 @@ if __name__=='__main__':
 
 	## Model IDs of the models we want to plot
 	model_names = []
+	model_names.append('DDFN_C64B10/loss-kldiv_tv-1e-5')
+	model_names.append('DDFN_C64B10_Depth2Depth/loss-kldiv_tv-1e-5')
 	# model_names.append('DDFN_C64B10_CSPH3Dv2/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-none/loss-kldiv_tv-0.0')
 	model_names.append('DDFN_C64B10_CSPH3Dv2/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-LinfGlobal/loss-kldiv_tv-0.0')
 	model_names.append('DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-LinfGlobal_irf-True_zn-False_zeromu-False_smoothtdimC-False/loss-kldiv_tv-0.0')
@@ -107,8 +125,8 @@ if __name__=='__main__':
 	model_names_min = []
 	for model_name in model_names:
 		model_dirpaths.append(pretrained_models_all[model_name]['rel_dirpath'])
-		model_names_min.append(simplify_model_name(model_name))
-
+		if(('DDFN_C64B10/' in model_name) or ('DDFN_C64B10_Depth2Depth/' in model_name)): model_names_min.append(model_name)
+		else: model_names_min.append(simplify_model_name(model_name))
 	## init model metrics dict
 	# model_metrics_all = init_model_metrics_dict(model_names, model_dirpaths)
 	model_metrics_all = init_model_metrics_dict(model_names_min, model_dirpaths)
@@ -133,20 +151,24 @@ if __name__=='__main__':
 		model_metrics_df_curr['is_high_flux'] = (model_metrics_df_curr['mean_signal_photons'] + model_metrics_df_curr['mean_bkg_photons']) > 100
 		model_metrics_df = pd.concat((model_metrics_df, model_metrics_df_curr), axis=0)
 
+	model_metrics_df_baselines1 = model_metrics_df[model_metrics_df['model_name'].str.contains('DDFN_C64B10/')]
+	model_metrics_df_baselines2 = model_metrics_df[model_metrics_df['model_name'].str.contains('DDFN_C64B10_Depth2Depth/')]
 	model_metrics_df_filtered = model_metrics_df[model_metrics_df['model_name'].str.contains('zeromu-1')]
 	# model_metrics_df_filtered = model_metrics_df
-
-
-	plot_test_dataset_metrics(model_metrics_df_filtered, metric_id='mae', ylim=(0.0025,0.05) )
+	
+	model_metrics_df_filtered = pd.concat((model_metrics_df_filtered, model_metrics_df_baselines1, model_metrics_df_baselines2), axis=0)
 
 	plt.figure()
-	plot_test_dataset_metrics(model_metrics_df_filtered, metric_id='rmse')
+	plot_test_dataset_metrics(model_metrics_df_filtered, metric_id='mae', ylim=mae_ylim, title=test_set_id )
+
+	# plt.figure()
+	# plot_test_dataset_metrics(model_metrics_df_filtered, metric_id='rmse')
 
 	# plt.figure()
 	# plot_test_dataset_metrics(model_metrics_df_filtered, metric_id='mse')
 
-	# plt.figure()
-	# plot_test_dataset_metrics(model_metrics_df_filtered, metric_id='10mm_tol_err')
+	plt.figure()
+	plot_test_dataset_metrics(model_metrics_df_filtered, metric_id='10mm_tol_err')
 
 	# plt.figure()
 	# plot_test_dataset_metrics(model_metrics_df_filtered, metric_id='5mm_tol_err')
