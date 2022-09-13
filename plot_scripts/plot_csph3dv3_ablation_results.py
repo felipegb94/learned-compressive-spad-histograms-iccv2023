@@ -98,6 +98,7 @@ if __name__=='__main__':
 	model_names.append('DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-none_irf-False_zn-False_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0')
 	model_names.append('DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0')
 	model_names.append('DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-none_irf-True_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0')
+	model_names.append('DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-True/loss-kldiv_tv-0.0')
 	model_names.append('DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-none_irf-True_zn-True_zeromu-True_smoothtdimC-True/loss-kldiv_tv-0.0')
 
 	## Get pretrained models dirpaths
@@ -121,6 +122,7 @@ if __name__=='__main__':
 		model_metrics_df_curr = pd.DataFrame()
 		model_metrics_df_curr['mae'] = model_metrics_all[model_name]['mae']
 		model_metrics_df_curr['mse'] = model_metrics_all[model_name]['mse']
+		model_metrics_df_curr['rmse'] = model_metrics_all[model_name]['rmse']
 		model_metrics_df_curr['1mm_tol_err'] = model_metrics_all[model_name]['1mm_tol_err']
 		model_metrics_df_curr['5mm_tol_err'] = model_metrics_all[model_name]['5mm_tol_err']
 		model_metrics_df_curr['10mm_tol_err'] = model_metrics_all[model_name]['10mm_tol_err']
@@ -131,11 +133,14 @@ if __name__=='__main__':
 		model_metrics_df_curr['is_high_flux'] = (model_metrics_df_curr['mean_signal_photons'] + model_metrics_df_curr['mean_bkg_photons']) > 100
 		model_metrics_df = pd.concat((model_metrics_df, model_metrics_df_curr), axis=0)
 
-	# model_metrics_df_filtered = model_metrics_df[model_metrics_df['model_name'].str.contains('zeromu-1')]
-	model_metrics_df_filtered = model_metrics_df
+	model_metrics_df_filtered = model_metrics_df[model_metrics_df['model_name'].str.contains('zeromu-1')]
+	# model_metrics_df_filtered = model_metrics_df
 
 
 	plot_test_dataset_metrics(model_metrics_df_filtered, metric_id='mae', ylim=(0.0025,0.05) )
+
+	plt.figure()
+	plot_test_dataset_metrics(model_metrics_df_filtered, metric_id='rmse')
 
 	# plt.figure()
 	# plot_test_dataset_metrics(model_metrics_df_filtered, metric_id='mse')

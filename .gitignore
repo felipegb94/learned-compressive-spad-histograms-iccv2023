@@ -4,6 +4,7 @@ results
 outputs
 outputs_old
 outputs_bkp
+outputs_unused
 outputs_fmu
 outputs_fmu_bkp0524
 pytorch_prototyping
