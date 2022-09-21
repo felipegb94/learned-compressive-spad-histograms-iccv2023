@@ -32,16 +32,16 @@ def simplify_model_name(model_name):
 
 	return model_name_min
 
-def plot_test_dataset_metrics(model_metrics, metric_id='mae', ylim=None, title='Dataset Metrics'):
+def plot_test_dataset_metrics(model_metrics, metric_id='mae', point_hue_id='mean_sbr', ylim=None, title='Dataset Metrics'):
 	plt.clf()
 	plot_utils.update_fig_size(height=8, width=16)
 	ax = plt.gca()
 	# cmap = sns.cubehelix_palette(rot=-.2, as_cmap=True, reverse=True, light=0.8, dark=0.3)
 	# cmap = sns.cubehelix_palette(start=2, rot=0, dark=0, light=.95, reverse=True, as_cmap=True)
-	cmap = sns.color_palette("mako", n_colors=len(model_metrics_df['mean_sbr'].unique()))
+	cmap = sns.color_palette("mako", n_colors=len(model_metrics_df[point_hue_id].unique()))
 	## legend="full" is needed to display the full name of the hue variable
 	## set zorder to 0 to make sur eit appears below boxplot
-	ax = sns.swarmplot(data=model_metrics, x='model_name', y=metric_id, orient="v", hue="mean_sbr", dodge=True, legend="full", palette=cmap)
+	ax = sns.swarmplot(data=model_metrics, x='model_name', y=metric_id, orient="v", hue=point_hue_id, dodge=True, legend="full", palette=cmap)
 	boxprops = {'facecolor':'black', 'linewidth': 1, 'alpha': 0.3}
 	# medianprops = {'linewidth': 4, 'color': '#ff5252'}
 	# medianprops = {'linewidth': 4, 'color': '#4ba173'}
@@ -52,53 +52,65 @@ def plot_test_dataset_metrics(model_metrics, metric_id='mae', ylim=None, title='
 					"markeredgecolor":"black",
 					"markersize":"14"}
 	ax = sns.boxplot(data=model_metrics, x='model_name', y=metric_id, ax=ax, orient="v", showfliers = False, boxprops=boxprops, medianprops=medianprops, meanprops=meanprops, showmeans=True)
-	ax.legend(title='Mean SBR', fontsize=14, title_fontsize=14)
+	ax.legend(title=point_hue_id, fontsize=14, title_fontsize=14)
 	plt.xticks(rotation=10)
 	if(not (ylim is None)):
 		plt.ylim(ylim)
 	plt.title(title)
-	plot_utils.save_currfig_png(dirpath=out_dirpath, filename=base_fname + '{}_sbr-hue'.format(metric_id))
 
 if __name__=='__main__':
 
 	## load all dirpaths without creating a job 
 	io_dirpaths = get_hydra_io_dirpaths(job_name='plot_norm_ablation_results')
 
-	## Add high flux test results
+	## Set plotting flags
 	plot_high_flux = False
+	plot_dataset_results = False
+	plot_rec_depths = True
 
 	## Scene ID and Params
 	middlebury_test_set_id = 'test_middlebury_SimSPADDataset'
 	# middlebury_test_set_id = 'test_middlebury_highsignal_HighSignalSimSPADDataset'
 	# middlebury_test_set_id = 'test_middlebury_lowsbr_LowSBRSimSPADDataset'
-	middlebury_test_set_id = 'test_middlebury_widepulse_SimSPADDataset'
+	# middlebury_test_set_id = 'test_middlebury_widepulse_SimSPADDataset'
 	# middlebury_test_set_id = 'test_middlebury_narrowpulse_SimSPADDataset'
 	irf_id = 0
 	if('widepulse' in  middlebury_test_set_id): irf_id = 3
 	elif('narrowpulse' in  middlebury_test_set_id): irf_id = 2
 	test_set_id = '{}_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-{}'.format(middlebury_test_set_id, irf_id)
 	scene_ids = ['spad_Art', 'spad_Reindeer', 'spad_Books', 'spad_Moebius', 'spad_Bowling1', 'spad_Dolls', 'spad_Laundry', 'spad_Plastic']
+	scene_ids = ['spad_Art']
+	# scene_ids = ['spad_Reindeer']
+	# scene_ids = ['spad_Books']
+	# scene_ids = ['spad_Laundry']
+	# scene_ids = ['spad_Moebius']
 	base_fname = 'test_results'
 	mae_ylim = (0,0.05) 
-	if('highsignal' in middlebury_test_set_id):
-		mae_ylim = (0,0.02) 
-		sbr_params = ['200_500','200_2000','200_5000','200_10000','200_20000']
-	elif('lowsbr' in middlebury_test_set_id):
-		mae_ylim = (0,0.06) 
-		sbr_params = ['1_100','2_100','3_100','2_50','10_500','10_1000','50_5000','100_5000','100_10000','100_20000']
+	if(plot_dataset_results):
+		if('highsignal' in middlebury_test_set_id):
+			mae_ylim = (0,0.02) 
+			sbr_params = ['200_500','200_2000','200_5000','200_10000','200_20000']
+		elif('lowsbr' in middlebury_test_set_id):
+			mae_ylim = (0,0.06) 
+			sbr_params = ['1_100','2_100','3_100','2_50','10_500','10_1000','50_5000','100_5000','100_10000','100_20000']
+		else:
+			sbr_params = ['2_2','2_10','2_50','5_2','5_10','5_50','10_2','10_10','10_50']
+			sbr_params_high_flux = ['10_200', '10_500', '10_1000', '50_50', '50_200', '50_500', '50_1000'] ## more than 100 photons per pixel on average
+			if(plot_high_flux):
+				sbr_params = sbr_params + sbr_params_high_flux
+				base_fname = 'high_flux_{}'.format(base_fname)
 	else:
-		sbr_params = ['2_2','2_10','2_50','5_2','5_10','5_50','10_2','10_10','10_50']
-		sbr_params_high_flux = ['10_200', '10_500', '10_1000', '50_50', '50_200', '50_500', '50_1000'] ## more than 100 photons per pixel on average
-		if(plot_high_flux):
-			sbr_params = sbr_params + sbr_params_high_flux
-			base_fname = 'high_flux_{}'.format(base_fname)
+		sbr_params = ['2_10']
+
+
+	if(plot_rec_depths):
+		assert(len(sbr_params)==1), "Current code can only plot rec depths for a single set of sbr_params at a time"
+		assert(len(scene_ids)==1), "Current code can only plot rec depths for a single scene at a time"
 
 	## output dirpaths
 	experiment_name = 'csph3dv3_ablation/{}'.format(middlebury_test_set_id)
 	out_dirpath = os.path.join(io_dirpaths.results_weekly_dirpath, experiment_name)
 	os.makedirs(out_dirpath, exist_ok=True)
-
-	
 
 	# base_fname = 'test_set_irf_' + base_fname
 
@@ -132,7 +144,7 @@ if __name__=='__main__':
 	model_metrics_all = init_model_metrics_dict(model_names_min, model_dirpaths)
 
 	## process results and append metrics
-	model_metrics_all, rec_depths_all = process_middlebury_test_results(scene_ids, sbr_params, model_metrics_all, spad_dataset, out_dirpath=None, save_depth_images=False, return_rec_depths=False)
+	model_metrics_all, rec_depths_all = process_middlebury_test_results(scene_ids, sbr_params, model_metrics_all, spad_dataset, out_dirpath=None, save_depth_images=False, return_rec_depths=plot_rec_depths)
 
 	## Make into data frame
 	model_metrics_df = pd.DataFrame()	
@@ -158,20 +170,61 @@ if __name__=='__main__':
 	
 	model_metrics_df_filtered = pd.concat((model_metrics_df_filtered, model_metrics_df_baselines1, model_metrics_df_baselines2), axis=0)
 
-	plt.figure()
-	plot_test_dataset_metrics(model_metrics_df_filtered, metric_id='mae', ylim=mae_ylim, title=test_set_id )
+	if(plot_dataset_results):
+		plt.figure()
+		metric_id = 'mae'
+		plot_test_dataset_metrics(model_metrics_df_filtered, metric_id=metric_id, ylim=mae_ylim, title=test_set_id )
+		plot_utils.save_currfig_png(dirpath=out_dirpath, filename=base_fname + '{}_sbr-hue'.format(metric_id))
 
-	# plt.figure()
-	# plot_test_dataset_metrics(model_metrics_df_filtered, metric_id='rmse')
+		plt.figure()
+		metric_id = 'mae'
+		plot_test_dataset_metrics(model_metrics_df_filtered, metric_id=metric_id, ylim=(0.0,0.25),title=test_set_id )
+		plot_utils.save_currfig_png(dirpath=out_dirpath, filename=base_fname + '{}_sbr-hue_no-ylim'.format(metric_id))
 
-	# plt.figure()
-	# plot_test_dataset_metrics(model_metrics_df_filtered, metric_id='mse')
+		plt.figure()
+		metric_id = 'mae'
+		plot_test_dataset_metrics(model_metrics_df_filtered, metric_id=metric_id, point_hue_id = "mean_signal_photons", ylim = (0.0,0.25), title=test_set_id )
+		plot_utils.save_currfig_png(dirpath=out_dirpath, filename=base_fname + '{}_signal-hue_no-ylim'.format(metric_id))
 
-	plt.figure()
-	plot_test_dataset_metrics(model_metrics_df_filtered, metric_id='10mm_tol_err')
+		plt.figure()
+		metric_id = 'mae'
+		plot_test_dataset_metrics(model_metrics_df_filtered, metric_id=metric_id, point_hue_id = "mean_bkg_photons", ylim=(0.0,0.25), title=test_set_id )
+		plot_utils.save_currfig_png(dirpath=out_dirpath, filename=base_fname + '{}_bkg-hue_no-ylim'.format(metric_id))
 
-	# plt.figure()
-	# plot_test_dataset_metrics(model_metrics_df_filtered, metric_id='5mm_tol_err')
+		# plt.figure()
+		# metric_id = 'rmse'
+		# plot_test_dataset_metrics(model_metrics_df_filtered, metric_id=metric_id)
+		# plot_utils.save_currfig_png(dirpath=out_dirpath, filename=base_fname + '{}_sbr-hue'.format(metric_id))
 
-	# plt.figure()
-	# plot_test_dataset_metrics(model_metrics_df_filtered, metric_id='1mm_tol_err')
+		# plt.figure()
+		# metric_id = 'mse'
+		# plot_test_dataset_metrics(model_metrics_df_filtered, metric_id=metric_id)
+		# plot_utils.save_currfig_png(dirpath=out_dirpath, filename=base_fname + '{}_sbr-hue'.format(metric_id))
+
+		# plt.figure()
+		# metric_id = '10mm_tol_err'
+		# plot_test_dataset_metrics(model_metrics_df_filtered, metric_id=metric_id)
+		# plot_utils.save_currfig_png(dirpath=out_dirpath, filename=base_fname + '{}_sbr-hue'.format(metric_id))
+
+		# plt.figure()
+		# metric_id = '5mm_tol_err'
+		# plot_test_dataset_metrics(model_metrics_df_filtered, metric_id=metric_id)
+		# plot_utils.save_currfig_png(dirpath=out_dirpath, filename=base_fname + '{}_sbr-hue'.format(metric_id))
+
+		# plt.figure()
+		# metric_id = '1mm_tol_err'
+		# plot_test_dataset_metrics(model_metrics_df_filtered, metric_id=metric_id)
+		# plot_utils.save_currfig_png(dirpath=out_dirpath, filename=base_fname + '{}_sbr-hue'.format(metric_id))
+
+	if(plot_rec_depths):
+		plt.figure()
+		gt_depths = rec_depths_all['gt']['depths']
+		min_depth = gt_depths.flatten().min() - 0.5*gt_depths.flatten().std() 
+		max_depth = gt_depths.flatten().max() + 0.5*gt_depths.flatten().std()
+		depths_out_dirpath = os.path.join(out_dirpath, '{}_{}'.format(scene_ids[0], sbr_params[0]))
+		for model_id in rec_depths_all.keys():
+			model_depths = rec_depths_all[model_id]['depths']
+			plt.clf()
+			plt.imshow(model_depths, vmin=min_depth, vmax=max_depth)
+			plt.title(model_id)
+			plot_utils.save_currfig_png(dirpath=depths_out_dirpath, filename=model_id.replace('/','_'))

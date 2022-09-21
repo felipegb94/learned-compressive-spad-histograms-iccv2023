@@ -223,6 +223,17 @@ def process_middlebury_test_results(scene_ids, sbr_params, model_metrics_all, sp
 
 			## Compute and store metrics for all models
 			rec_depths = {}
+			if(return_rec_depths):
+				rec_depths['gt'] = {}
+				rec_depths['gt']['depths'] = gt_depths
+				rec_depths['gt']['metrics'] = gt_scene_metrics				
+				rec_depths['lmf'] = {}
+				rec_depths['lmf']['depths'] = lmf_depths
+				rec_depths['lmf']['metrics'] = lmf_scene_metrics				
+				rec_depths['argmax'] = {}
+				rec_depths['argmax']['depths'] = argmax_depths
+				rec_depths['argmax']['metrics'] = argmax_scene_metrics				
+
 			for model_id in model_metrics_all.keys():
 				curr_model_metrics = model_metrics_all[model_id]
 				# skip if there is no dirpath --> i.e., gt, lmf, and argmax
