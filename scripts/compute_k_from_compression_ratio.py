@@ -26,7 +26,7 @@ if __name__=='__main__':
     compression_levels = [32, 64, 128]
 
     ## Set encoding kernel dimensions we will use
-    encoding_kernel_dims = [(1024,1,1), (1024,2,2), (1024,4,4), (256,4,4)]
+    encoding_kernel_dims = [(1024,1,1), (1024,2,2), (1024,4,4), (256,4,4), (64,4,4), (16,4,4)]
 
     for encoding_kernel_dim in encoding_kernel_dims:
         print("----------------------------")
