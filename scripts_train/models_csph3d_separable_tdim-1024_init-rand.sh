@@ -1,5 +1,5 @@
-#### What is the best 1D CSPH Baseline
-# The following commands train CSPH3D models with coding matrices that have spatio-temporal encoding kernels with dimensions 1024x2x2, and 1024x4x4
+#### Separable CSPH3D models
+# The following commands train CSPH3D models with coding matrices that have spatio-temporal encoding kernels with dimensions 1024x2x2, and 1024x4x4 whose time and spatial dimensions are separable
 # Experimental configs:
 #   - Encoding Kernels (Block Dims) = [1024x4x4, 1024x2x2]
 #   - Compression Levels = [32x, 64x, 128x]
@@ -8,7 +8,7 @@
 #   - tblock_init = [Rand]
 
 # Question we want to answer:
-#      - Can spatio-temporal compressive histograms beat temporal only ones?
+#      - Can separable encoding kernels perform the same as full?
 
 
 ## Models with 1024x4x4 Encoding Kernel
