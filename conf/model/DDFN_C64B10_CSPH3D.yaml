@@ -8,10 +8,10 @@ model_params:
   spatial_down_factor: 4
   optimize_tdim_codes: true
   optimize_codes: true
-  account_irf: true
-  apply_zncc_norm: false
+  account_irf: false
   smooth_tdim_codes: false
-  zero_mean_tdim_codes: false
+  apply_zncc_norm: true
+  zero_mean_tdim_codes: true
   nt_blocks: 1
   tblock_init: Rand
   # tblock_init: TruncFourier
