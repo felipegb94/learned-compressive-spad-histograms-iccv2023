@@ -553,8 +553,8 @@ class CSPH3DLayer(nn.Module):
 		self.optimize_tdim_codes=optimize_tdim_codes
 		self.optimize_codes=optimize_codes
 		self.nt_blocks=nt_blocks
-		# self.tblock_len = int(self.num_bins / nt_blocks) 
-		self.tblock_len = 1024 
+		self.tblock_len = int(self.num_bins / nt_blocks) 
+		# self.tblock_len = 1024 
 		self.spatial_down_factor=spatial_down_factor
 		# Create IRF layer if we want to account for h irf when doing the unfiltered backprojections
 		self.irf_layer = IRF1DLayer(irf=h_irf, conv_dim=0) 
