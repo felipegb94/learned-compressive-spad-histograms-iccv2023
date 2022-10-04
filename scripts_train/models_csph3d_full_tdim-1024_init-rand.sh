@@ -1,4 +1,4 @@
-#### What is the best 1D CSPH Baseline
+#### Spatio-temporal CSPH with full kernel encodings
 # The following commands train CSPH3D models with coding matrices that have spatio-temporal encoding kernels with dimensions 1024x2x2, and 1024x4x4
 # Experimental configs:
 #   - Encoding Kernels (Block Dims) = [1024x4x4, 1024x2x2]
