@@ -690,5 +690,14 @@
             "depths/test_mse": 0.13334,
             "depths/test_rmse": 0.18717
         }
+    },
+    "DDFN_C64B10_CSPH3D/k128_down4_Mt4_Rand-optCt=True-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0": {
+        "rel_dirpath": "outputs/nyuv2_64x64x1024_80ps/csph3d_models/DDFN_C64B10_CSPH3D/k128_down4_Mt4_Rand-optCt=True-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0/run-complete_2022-09-25_174558",
+        "ckpt_id": "epoch=29-step=103889-avgvalrmse=0.0169.ckpt",
+        "middlebury_72x88x1024_98ps": {
+            "depths/test_mae": 0.00917,
+            "depths/test_mse": 0.0004,
+            "depths/test_rmse": 0.01628
+        }
     }
 }
