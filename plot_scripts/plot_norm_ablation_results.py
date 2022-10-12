@@ -15,6 +15,7 @@ from IPython.core import debugger
 breakpoint = debugger.set_trace
 
 #### Local imports
+from plot_scripts import plot_scripts_utils
 from tof_utils import *
 from research_utils import plot_utils, np_utils, io_ops
 from spad_dataset import SpadDataset
@@ -64,15 +65,16 @@ if __name__=='__main__':
 
 	## Scene ID and Params
 	test_set_id = 'test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
-	scene_ids = ['spad_Art', 'spad_Reindeer', 'spad_Books', 'spad_Moebius', 'spad_Bowling1', 'spad_Dolls', 'spad_Laundry', 'spad_Plastic']
-	sbr_params = ['2_2','2_10','2_50','5_2','5_10','5_50','10_2','10_10','10_50']
-	sbr_params_high_flux = ['10_200', '10_500', '10_1000', '50_50', '50_200', '50_500', '50_1000'] ## more than 100 photons per pixel on average
+	middlebury_test_set_info = plot_scripts_utils.middlebury_test_set_info 
+	scene_ids = middlebury_test_set_info['scene_ids']
+	sbr_params_low_flux = middlebury_test_set_info['sbr_params_low_flux']
+	sbr_params_high_flux = middlebury_test_set_info['sbr_params_high_flux']
 	
 	if(plot_high_flux):
-		sbr_params = sbr_params + sbr_params_high_flux
+		sbr_params = sbr_params_low_flux + sbr_params_high_flux
 		base_fname = 'high_flux_test_results'
 	else:
-		sbr_params = sbr_params
+		sbr_params = sbr_params_low_flux
 		base_fname = 'test_results'
 
 	## Create spad dataloader object to get ground truth data for each scene

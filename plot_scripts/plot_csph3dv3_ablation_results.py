@@ -15,6 +15,7 @@ from IPython.core import debugger
 breakpoint = debugger.set_trace
 
 #### Local imports
+from plot_scripts import plot_scripts_utils
 from tof_utils import *
 from research_utils import plot_utils, np_utils, io_ops
 from spad_dataset import SpadDataset
@@ -78,7 +79,8 @@ if __name__=='__main__':
 	if('widepulse' in  middlebury_test_set_id): irf_id = 3
 	elif('narrowpulse' in  middlebury_test_set_id): irf_id = 2
 	test_set_id = '{}_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-{}'.format(middlebury_test_set_id, irf_id)
-	scene_ids = ['spad_Art', 'spad_Reindeer', 'spad_Books', 'spad_Moebius', 'spad_Bowling1', 'spad_Dolls', 'spad_Laundry', 'spad_Plastic']
+	middlebury_test_set_info = plot_scripts_utils.middlebury_test_set_info 
+	scene_ids = middlebury_test_set_info['scene_ids']
 	scene_ids = ['spad_Art']
 	# scene_ids = ['spad_Reindeer']
 	# scene_ids = ['spad_Books']
@@ -89,16 +91,18 @@ if __name__=='__main__':
 	if(plot_dataset_results):
 		if('highsignal' in middlebury_test_set_id):
 			mae_ylim = (0,0.02) 
-			sbr_params = ['200_500','200_2000','200_5000','200_10000','200_20000']
+			sbr_params = middlebury_test_set_info['sbr_params_high_signal']
 		elif('lowsbr' in middlebury_test_set_id):
 			mae_ylim = (0,0.06) 
-			sbr_params = ['1_100','2_100','3_100','2_50','10_500','10_1000','50_5000','100_5000','100_10000','100_20000']
+			sbr_params = middlebury_test_set_info['sbr_params_low_sbr']
 		else:
-			sbr_params = ['2_2','2_10','2_50','5_2','5_10','5_50','10_2','10_10','10_50']
-			sbr_params_high_flux = ['10_200', '10_500', '10_1000', '50_50', '50_200', '50_500', '50_1000'] ## more than 100 photons per pixel on average
+			sbr_params_low_flux = middlebury_test_set_info['sbr_params_low_flux']
+			sbr_params_high_flux = middlebury_test_set_info['sbr_params_high_flux']
 			if(plot_high_flux):
-				sbr_params = sbr_params + sbr_params_high_flux
+				sbr_params = sbr_params_low_flux + sbr_params_high_flux
 				base_fname = 'high_flux_{}'.format(base_fname)
+			else: 
+				sbr_params = sbr_params_low_flux
 	else:
 		sbr_params = ['2_10']
 
