@@ -15,10 +15,10 @@ from IPython.core import debugger
 breakpoint = debugger.set_trace
 
 #### Local imports
-from plot_scripts import plot_scripts_utils
 from tof_utils import *
 from research_utils import plot_utils, np_utils, io_ops
 from spad_dataset import SpadDataset
+import analyze_test_results_utils
 from analyze_test_results_utils import init_model_metrics_dict, process_middlebury_test_results, get_hydra_io_dirpaths
 
 
@@ -79,7 +79,7 @@ if __name__=='__main__':
 	if('widepulse' in  middlebury_test_set_id): irf_id = 3
 	elif('narrowpulse' in  middlebury_test_set_id): irf_id = 2
 	test_set_id = '{}_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-{}'.format(middlebury_test_set_id, irf_id)
-	middlebury_test_set_info = plot_scripts_utils.middlebury_test_set_info 
+	middlebury_test_set_info = analyze_test_results_utils.middlebury_test_set_info 
 	scene_ids = middlebury_test_set_info['scene_ids']
 	scene_ids = ['spad_Art']
 	# scene_ids = ['spad_Reindeer']
@@ -136,13 +136,12 @@ if __name__=='__main__':
 	model_names.append('DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_full_norm-none_irf-True_zn-True_zeromu-True_smoothtdimC-True/loss-kldiv_tv-0.0')
 
 	## Get pretrained models dirpaths
-	pretrained_models_all = io_ops.load_json('pretrained_models_rel_dirpaths.json')
-	model_dirpaths = []
+	model_dirpaths = analyze_test_results_utils.get_model_dirpaths(model_names)
 	model_names_min = []
 	for model_name in model_names:
-		model_dirpaths.append(pretrained_models_all[model_name]['rel_dirpath'])
 		if(('DDFN_C64B10/' in model_name) or ('DDFN_C64B10_Depth2Depth/' in model_name)): model_names_min.append(model_name)
 		else: model_names_min.append(simplify_model_name(model_name))
+
 	## init model metrics dict
 	# model_metrics_all = init_model_metrics_dict(model_names, model_dirpaths)
 	model_metrics_all = init_model_metrics_dict(model_names_min, model_dirpaths)

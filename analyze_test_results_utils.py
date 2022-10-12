@@ -15,6 +15,14 @@ from tof_utils import *
 from research_utils import io_ops, plot_utils, np_utils
 from spad_dataset import SpadDataset
 
+middlebury_test_set_info = {
+	'scene_ids': ['spad_Art', 'spad_Reindeer', 'spad_Books', 'spad_Moebius', 'spad_Bowling1', 'spad_Dolls', 'spad_Laundry', 'spad_Plastic']
+	, 'sbr_params_low_flux': ['2_2','2_10','2_50','5_2','5_10','5_50','10_2','10_10','10_50']
+	, 'sbr_params_high_flux': ['10_200', '10_500', '10_1000', '50_50', '50_200', '50_500', '50_1000']    
+	, 'sbr_params_high_signal': ['200_500','200_2000','200_5000','200_10000','200_20000']
+    , 'sbr_params_low_sbr': ['1_100','2_100','3_100','2_50','10_500','10_1000','50_5000','100_5000','100_10000','100_20000']    
+}
+
 def denorm_bins(bins, num_bins):
 	return bins*(num_bins)
 
@@ -82,6 +90,28 @@ def calc_compression_from_ID(id, nt=1024):
 	bt = block_dims[2]
 	compression_ratio = (br*bc*bt) / k
 	return compression_ratio
+
+def csph3d_compression2k(compression_ratio, block_nr, block_nc, block_nt):
+	block_size = int(block_nr*block_nc*block_nt)
+	assert((block_size % compression_ratio) == 0), "block_size should be divisible by compression_ratio"
+	k = int(block_size / compression_ratio)
+	return k
+
+def csph3d_k2compression(k, block_nr, block_nc, block_nt):
+	block_size = int(block_nr*block_nc*block_nt)
+	assert((block_size % compression_ratio) == 0), "block_size should be divisible by compression_ratio"
+	compression_ratio = int(block_size / k)
+	return compression_ratio
+
+def get_model_dirpaths(model_names):
+	'''
+		Given the model name get the dirpath containing all the results for that model. Usually, each model that was trained has a unique ID that is appended to the model_name to generate the dirpath, so in order to not have to keep track of these IDs we simply store them inside a dict whenever we test that model.
+	'''
+	## Get pretrained models dirpaths
+	pretrained_models_all = io_ops.load_json('pretrained_models_rel_dirpaths.json')
+	model_dirpaths = []
+	for model_name in model_names:
+		model_dirpaths.append(pretrained_models_all[model_name]['rel_dirpath'])
 
 def append_model_metrics(model_metrics, test_set_id, scene_fname, gt_depths, num_bins, tau, model_depths=None):
 	# get model depths if they are not provided
@@ -296,8 +326,8 @@ if __name__=='__main__':
 
 	## Scene ID and Params
 	test_set_id = 'test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
-	scene_ids = ['spad_Art', 'spad_Reindeer', 'spad_Books', 'spad_Moebius', 'spad_Bowling1', 'spad_Dolls', 'spad_Laundry', 'spad_Plastic']
-	sbr_params = ['2_2','2_10','2_50','5_2','5_10','5_50','10_2','10_10','10_50']
+	scene_ids = middlebury_test_set_info['scene_ids']
+	sbr_params = middlebury_test_set_info['sbr_params_low_flux']
 
 	scene_ids = ['spad_Art']
 	# # # scene_ids = ['spad_Books']
