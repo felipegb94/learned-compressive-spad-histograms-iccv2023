@@ -184,7 +184,7 @@ class DeepBoosting(torch.nn.Module):
 		return denoise_out, soft_argmax
 
 class PlainDeepBoosting(torch.nn.Module):
-	def __init__(self, in_channels=1):
+	def __init__(self, in_channels=1, input_norm='none'):
 		super(PlainDeepBoosting, self).__init__()
 		self.msfeat = MsFeat3D(in_channels)
 		self.C1 = nn.Sequential(nn.Conv3d(8,2,kernel_size=1, stride=(1,1,1),bias=True),nn.ReLU(inplace=True))
@@ -219,9 +219,33 @@ class PlainDeepBoosting(torch.nn.Module):
 		self.C2 = nn.Sequential(nn.Conv3d(7,1,kernel_size=1, stride=(1,1,1),bias=True),nn.ReLU(inplace=True))
 		init.kaiming_normal_(self.C2[0].weight, 0, 'fan_in', 'relu'); init.constant_(self.C2[0].bias, 0.0)
 
+		self.input_norm = input_norm
+		if(input_norm == 'none'): self.normalize_inputs = self.normalize_inputs_none
+		elif(input_norm == 'Linf'): self.normalize_inputs = self.normalize_inputs_Linf
+		elif(input_norm == 'LinfGlobal'): self.normalize_inputs = self.normalize_inputs_LinfGlobal
+		elif(input_norm == 'L2'): self.normalize_inputs = self.normalize_inputs_L2
+		else: assert(False), "Invalid input_norm parameter for PlainDeepBoosting model"
+
+
+	def normalize_inputs_Linf(self, X):
+		return X / (torch.norm(X, p=float('inf'), dim=-3, keepdim=True) + 1e-5)
+
+	def normalize_inputs_LinfGlobal(self, X):
+		return X / (torch.norm(X, p=float('inf'), dim=(-1,-2,-3), keepdim=True) + 1e-5)
+
+	def normalize_inputs_L2(self, X):
+		return X / (torch.norm(X, p=2, dim=-3, keepdim=True) + 1e-5)	
+
+	def normalize_inputs_none(self, X):
+		return X
+
 	def forward(self, inputs):
 		smax = torch.nn.Softmax2d()
-		msfeat = self.msfeat(inputs) 
+
+		# normalize inputs with the specified normalize function
+		norm_inputs = self.normalize_inputs(inputs)
+
+		msfeat = self.msfeat(norm_inputs) 
 		c1 = self.C1(msfeat)
 		
 		dsfeat1 = self.ds1(c1)
@@ -265,9 +289,11 @@ class LITPlainDeepBoosting(LITBaseSPADModel):
 		init_lr = 1e-4,
 		p_tv = 1e-5, 
 		lr_decay_gamma = 0.9,
-		in_channels=1):
+		in_channels=1,
+		input_norm='none'
+		):
 		
-		deep_boosting_model = PlainDeepBoosting(in_channels=in_channels)
+		deep_boosting_model = PlainDeepBoosting(in_channels=in_channels, input_norm=input_norm)
 
 		super(LITPlainDeepBoosting, self).__init__(backbone_net=deep_boosting_model,
 												init_lr = init_lr,

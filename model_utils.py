@@ -57,6 +57,7 @@ def init_model_from_id(cfg, irf=None):
 						, lr_decay_gamma = cfg.train_params.lr_decay_gamma
 						, p_tv = cfg.train_params.p_tv
 						, in_channels = cfg.model.model_params.in_channels
+						, input_norm = cfg.model.model_params.input_norm
 						)
 	elif(cfg.model.model_id == 'DDFN_C64B10_NL_Depth2Depth'):
 		lit_model = LITDeepBoostingDepth2Depth(

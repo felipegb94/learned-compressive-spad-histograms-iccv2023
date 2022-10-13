@@ -4,6 +4,7 @@
 model_id: DDFN_C64B10
 model_params:
   in_channels: 1
+  input_norm: none
 # Model name is used for saving results
-model_name: ${.model_id}
+model_name: ${.model_id}/norm-${.model_params.input_norm}
 data_loss_id: kldiv

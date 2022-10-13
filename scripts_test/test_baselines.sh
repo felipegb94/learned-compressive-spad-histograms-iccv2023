@@ -5,11 +5,11 @@
 set -e 
 
 ## Dataset we are testing with
-# test_dataset=middlebury
+test_dataset=middlebury
 # test_dataset=middlebury_lowsbr #
 # test_dataset=middlebury_highsignal #  
 # test_dataset=middlebury_narrowpulse #  
-test_dataset=middlebury_widepulse #  
+# test_dataset=middlebury_widepulse #  
 # test_dataset=lindell2018_linospad_min
 
 
@@ -23,7 +23,7 @@ train_dataset=nyuv2_64x64x1024_80ps
 model_name=DDFN_C64B10/loss-kldiv_tv-1e-5
 experiment_name=baselines
 model_dirpath=outputs/${train_dataset}/${experiment_name}/${model_name}/2022-04-25_192521
-ckpt_id=epoch=05-step=19910-avgvalrmse=0.0287 # 0.0180 | 0.0177 | 0.0203 | 128 images == 0.0314
+ckpt_id=epoch=05-step=19910-avgvalrmse=0.0287 # 0.0180 | 0.0177 | 0.0203 | 128 images == 0.03095
 python test.py dataset='"'$test_dataset'"' ++model_name='"'$model_name'"' ++experiment_name=$experiment_name ++model_dirpath='"'$model_dirpath'"' ++ckpt_id='"'$ckpt_id'"' ++train_dataset='"'$train_dataset'"'
 
 ## 3D DB Plain Depth2Depth Model --> Full trained model with gradient decay
