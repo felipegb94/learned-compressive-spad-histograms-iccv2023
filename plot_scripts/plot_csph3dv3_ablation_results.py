@@ -33,32 +33,6 @@ def simplify_model_name(model_name):
 
 	return model_name_min
 
-def plot_test_dataset_metrics(model_metrics, metric_id='mae', point_hue_id='mean_sbr', ylim=None, title='Dataset Metrics'):
-	plt.clf()
-	plot_utils.update_fig_size(height=8, width=16)
-	ax = plt.gca()
-	# cmap = sns.cubehelix_palette(rot=-.2, as_cmap=True, reverse=True, light=0.8, dark=0.3)
-	# cmap = sns.cubehelix_palette(start=2, rot=0, dark=0, light=.95, reverse=True, as_cmap=True)
-	cmap = sns.color_palette("mako", n_colors=len(model_metrics_df[point_hue_id].unique()))
-	## legend="full" is needed to display the full name of the hue variable
-	## set zorder to 0 to make sur eit appears below boxplot
-	ax = sns.swarmplot(data=model_metrics, x='model_name', y=metric_id, orient="v", hue=point_hue_id, dodge=True, legend="full", palette=cmap)
-	boxprops = {'facecolor':'black', 'linewidth': 1, 'alpha': 0.3}
-	# medianprops = {'linewidth': 4, 'color': '#ff5252'}
-	# medianprops = {'linewidth': 4, 'color': '#4ba173'}
-	medianprops = {'linewidth': 3, 'color': '#424242', "solid_capstyle": "butt"}
-	# meanprops={"linestyle":"--","linewidth": 3, "color":"white"}
-	meanprops={"marker":"o",
-					"markerfacecolor":"white", 
-					"markeredgecolor":"black",
-					"markersize":"14"}
-	ax = sns.boxplot(data=model_metrics, x='model_name', y=metric_id, ax=ax, orient="v", showfliers = False, boxprops=boxprops, medianprops=medianprops, meanprops=meanprops, showmeans=True)
-	ax.legend(title=point_hue_id, fontsize=14, title_fontsize=14)
-	plt.xticks(rotation=10)
-	if(not (ylim is None)):
-		plt.ylim(ylim)
-	plt.title(title)
-
 if __name__=='__main__':
 
 	## load all dirpaths without creating a job 
@@ -150,21 +124,7 @@ if __name__=='__main__':
 	model_metrics_all, rec_depths_all = process_middlebury_test_results(scene_ids, sbr_params, model_metrics_all, spad_dataset, out_dirpath=None, save_depth_images=False, return_rec_depths=plot_rec_depths)
 
 	## Make into data frame
-	model_metrics_df = pd.DataFrame()	
-	for model_name in model_names_min:
-		model_metrics_df_curr = pd.DataFrame()
-		model_metrics_df_curr['mae'] = model_metrics_all[model_name]['mae']
-		model_metrics_df_curr['mse'] = model_metrics_all[model_name]['mse']
-		model_metrics_df_curr['rmse'] = model_metrics_all[model_name]['rmse']
-		model_metrics_df_curr['1mm_tol_err'] = model_metrics_all[model_name]['1mm_tol_err']
-		model_metrics_df_curr['5mm_tol_err'] = model_metrics_all[model_name]['5mm_tol_err']
-		model_metrics_df_curr['10mm_tol_err'] = model_metrics_all[model_name]['10mm_tol_err']
-		model_metrics_df_curr['model_name'] = [model_name]*len(model_metrics_all[model_name]['mae'])
-		model_metrics_df_curr['mean_sbr'] = model_metrics_all['sbr_params']['mean_sbr']
-		model_metrics_df_curr['mean_signal_photons'] = model_metrics_all['sbr_params']['mean_signal_photons']
-		model_metrics_df_curr['mean_bkg_photons'] = model_metrics_all['sbr_params']['mean_bkg_photons']
-		model_metrics_df_curr['is_high_flux'] = (model_metrics_df_curr['mean_signal_photons'] + model_metrics_df_curr['mean_bkg_photons']) > 100
-		model_metrics_df = pd.concat((model_metrics_df, model_metrics_df_curr), axis=0)
+	model_metrics_df = analyze_test_results_utils.metrics2dataframe(model_names_min, model_metrics_all)
 
 	model_metrics_df_baselines1 = model_metrics_df[model_metrics_df['model_name'].str.contains('DDFN_C64B10/')]
 	model_metrics_df_baselines2 = model_metrics_df[model_metrics_df['model_name'].str.contains('DDFN_C64B10_Depth2Depth/')]
@@ -176,47 +136,47 @@ if __name__=='__main__':
 	if(plot_dataset_results):
 		plt.figure()
 		metric_id = 'mae'
-		plot_test_dataset_metrics(model_metrics_df_filtered, metric_id=metric_id, ylim=mae_ylim, title=test_set_id )
+		analyze_test_results_utils.plot_test_dataset_metrics(model_metrics_df_filtered, metric_id=metric_id, ylim=mae_ylim, title=test_set_id )
 		plot_utils.save_currfig_png(dirpath=out_dirpath, filename=base_fname + '{}_sbr-hue'.format(metric_id))
 
 		plt.figure()
 		metric_id = 'mae'
-		plot_test_dataset_metrics(model_metrics_df_filtered, metric_id=metric_id, ylim=(0.0,0.25),title=test_set_id )
+		analyze_test_results_utils.plot_test_dataset_metrics(model_metrics_df_filtered, metric_id=metric_id, ylim=(0.0,0.25),title=test_set_id )
 		plot_utils.save_currfig_png(dirpath=out_dirpath, filename=base_fname + '{}_sbr-hue_no-ylim'.format(metric_id))
 
 		plt.figure()
 		metric_id = 'mae'
-		plot_test_dataset_metrics(model_metrics_df_filtered, metric_id=metric_id, point_hue_id = "mean_signal_photons", ylim = (0.0,0.25), title=test_set_id )
+		analyze_test_results_utils.plot_test_dataset_metrics(model_metrics_df_filtered, metric_id=metric_id, point_hue_id = "mean_signal_photons", ylim = (0.0,0.25), title=test_set_id )
 		plot_utils.save_currfig_png(dirpath=out_dirpath, filename=base_fname + '{}_signal-hue_no-ylim'.format(metric_id))
 
 		plt.figure()
 		metric_id = 'mae'
-		plot_test_dataset_metrics(model_metrics_df_filtered, metric_id=metric_id, point_hue_id = "mean_bkg_photons", ylim=(0.0,0.25), title=test_set_id )
+		analyze_test_results_utils.plot_test_dataset_metrics(model_metrics_df_filtered, metric_id=metric_id, point_hue_id = "mean_bkg_photons", ylim=(0.0,0.25), title=test_set_id )
 		plot_utils.save_currfig_png(dirpath=out_dirpath, filename=base_fname + '{}_bkg-hue_no-ylim'.format(metric_id))
 
 		# plt.figure()
 		# metric_id = 'rmse'
-		# plot_test_dataset_metrics(model_metrics_df_filtered, metric_id=metric_id)
+		# analyze_test_results_utils.plot_test_dataset_metrics(model_metrics_df_filtered, metric_id=metric_id)
 		# plot_utils.save_currfig_png(dirpath=out_dirpath, filename=base_fname + '{}_sbr-hue'.format(metric_id))
 
 		# plt.figure()
 		# metric_id = 'mse'
-		# plot_test_dataset_metrics(model_metrics_df_filtered, metric_id=metric_id)
+		# analyze_test_results_utils.plot_test_dataset_metrics(model_metrics_df_filtered, metric_id=metric_id)
 		# plot_utils.save_currfig_png(dirpath=out_dirpath, filename=base_fname + '{}_sbr-hue'.format(metric_id))
 
 		# plt.figure()
 		# metric_id = '10mm_tol_err'
-		# plot_test_dataset_metrics(model_metrics_df_filtered, metric_id=metric_id)
+		# analyze_test_results_utils.plot_test_dataset_metrics(model_metrics_df_filtered, metric_id=metric_id)
 		# plot_utils.save_currfig_png(dirpath=out_dirpath, filename=base_fname + '{}_sbr-hue'.format(metric_id))
 
 		# plt.figure()
 		# metric_id = '5mm_tol_err'
-		# plot_test_dataset_metrics(model_metrics_df_filtered, metric_id=metric_id)
+		# analyze_test_results_utils.plot_test_dataset_metrics(model_metrics_df_filtered, metric_id=metric_id)
 		# plot_utils.save_currfig_png(dirpath=out_dirpath, filename=base_fname + '{}_sbr-hue'.format(metric_id))
 
 		# plt.figure()
 		# metric_id = '1mm_tol_err'
-		# plot_test_dataset_metrics(model_metrics_df_filtered, metric_id=metric_id)
+		# analyze_test_results_utils.plot_test_dataset_metrics(model_metrics_df_filtered, metric_id=metric_id)
 		# plot_utils.save_currfig_png(dirpath=out_dirpath, filename=base_fname + '{}_sbr-hue'.format(metric_id))
 
 	if(plot_rec_depths):

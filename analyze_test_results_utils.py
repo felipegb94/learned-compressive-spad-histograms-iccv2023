@@ -4,7 +4,8 @@ import os
 #### Library imports
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy import io
+import pandas as pd
+import seaborn as sns
 import hydra
 from omegaconf import OmegaConf
 from IPython.core import debugger
@@ -91,6 +92,12 @@ def calc_compression_from_ID(id, nt=1024):
 	compression_ratio = (br*bc*bt) / k
 	return compression_ratio
 
+def compute_block_dims(spatial_down_factor, nt, num_tdim_blocks):
+	(block_nr, block_nc) = (spatial_down_factor, spatial_down_factor)
+	assert((nt % num_tdim_blocks) == 0), "nt should be divisible by num_tdim_blocks"
+	block_nt = int(nt / num_tdim_blocks)
+	return (block_nt, block_nr, block_nc)
+
 def csph3d_compression2k(compression_ratio, block_nr, block_nc, block_nt):
 	block_size = int(block_nr*block_nc*block_nt)
 	assert((block_size % compression_ratio) == 0), "block_size should be divisible by compression_ratio"
@@ -103,6 +110,24 @@ def csph3d_k2compression(k, block_nr, block_nc, block_nt):
 	compression_ratio = int(block_size / k)
 	return compression_ratio
 
+def compose_csph3d_model_name(csph3d_model_id = 'DDFN_C64B10_CSPH3D'
+							, k = 512
+							, spatial_down_factor = 4
+							, num_tdim_blocks = 1
+							, tdim_init = 'Rand'
+							, optCt = True
+							, optC = True
+							, encoding_type = 'full'
+							, norm = 'none'
+							, irf = False
+							, zn = True
+							, zeromu = True
+							, smoothtdimC = False
+								
+	):
+		model_name = '{}/k{}_down{}_Mt{}_{}-optCt={}-optC={}_{}_norm-{}_irf-{}_zn-{}_zeromu-{}_smoothtdimC-{}/loss-kldiv_tv-0.0'.format(csph3d_model_id, k, spatial_down_factor, num_tdim_blocks, tdim_init, optCt, optC, encoding_type, norm, irf, zn, zeromu, smoothtdimC)
+		return model_name
+
 def get_model_dirpaths(model_names):
 	'''
 		Given the model name get the dirpath containing all the results for that model. Usually, each model that was trained has a unique ID that is appended to the model_name to generate the dirpath, so in order to not have to keep track of these IDs we simply store them inside a dict whenever we test that model.
@@ -112,6 +137,7 @@ def get_model_dirpaths(model_names):
 	model_dirpaths = []
 	for model_name in model_names:
 		model_dirpaths.append(pretrained_models_all[model_name]['rel_dirpath'])
+	return model_dirpaths
 
 def append_model_metrics(model_metrics, test_set_id, scene_fname, gt_depths, num_bins, tau, model_depths=None):
 	# get model depths if they are not provided
@@ -145,6 +171,63 @@ def append_model_metrics(model_metrics, test_set_id, scene_fname, gt_depths, num
 	# scene_metrics['mse'] = scene_metrics['mse']
 	# scene_metrics['mae'] = scene_metrics['mae']
 	return model_metrics, model_depths, scene_metrics
+
+def metrics2dataframe(model_names, model_metrics_all):
+	## Make into data frame
+	model_metrics_df = pd.DataFrame()	
+	for model_name in model_names:
+		model_metrics_df_curr = pd.DataFrame()
+		model_metrics_df_curr['mae'] = model_metrics_all[model_name]['mae']
+		model_metrics_df_curr['mse'] = model_metrics_all[model_name]['mse']
+		model_metrics_df_curr['rmse'] = model_metrics_all[model_name]['rmse']
+		model_metrics_df_curr['1mm_tol_err'] = model_metrics_all[model_name]['1mm_tol_err']
+		model_metrics_df_curr['5mm_tol_err'] = model_metrics_all[model_name]['5mm_tol_err']
+		model_metrics_df_curr['10mm_tol_err'] = model_metrics_all[model_name]['10mm_tol_err']
+		model_metrics_df_curr['model_name'] = [model_name]*len(model_metrics_all[model_name]['mae'])
+		model_metrics_df_curr['mean_sbr'] = model_metrics_all['sbr_params']['mean_sbr']
+		model_metrics_df_curr['mean_signal_photons'] = model_metrics_all['sbr_params']['mean_signal_photons']
+		model_metrics_df_curr['mean_bkg_photons'] = model_metrics_all['sbr_params']['mean_bkg_photons']
+		model_metrics_df_curr['is_high_flux'] = (model_metrics_df_curr['mean_signal_photons'] + model_metrics_df_curr['mean_bkg_photons']) > 100
+		model_metrics_df = pd.concat((model_metrics_df, model_metrics_df_curr), axis=0)
+	return model_metrics_df
+
+def plot_test_dataset_metrics(model_metrics_df, metric_id='mae', point_hue_id='mean_sbr', ylim=None, title='Dataset Metrics'):
+	n_models = model_metrics_df['model_name'].nunique()
+	fig_width = (1.6*(n_models))
+	## Update the size of the figure
+	plot_utils.update_fig_size(height=5, width=fig_width)
+	plt.clf()
+	ax = plt.gca()
+	# cmap = sns.cubehelix_palette(rot=-.2, as_cmap=True, reverse=True, light=0.8, dark=0.3)
+	# cmap = sns.cubehelix_palette(start=2, rot=0, dark=0, light=.95, reverse=True, as_cmap=True)
+	cmap = sns.color_palette("mako", n_colors=len(model_metrics_df[point_hue_id].unique()))
+	## legend="full" is needed to display the full name of the hue variable
+	## set zorder to 0 to make sur eit appears below boxplot
+	ax = sns.swarmplot(data=model_metrics_df, x='model_name', y=metric_id, orient="v", hue=point_hue_id, dodge=True, legend="full", palette=cmap)
+	boxprops = {'facecolor':'black', 'linewidth': 1, 'alpha': 0.3}
+	# medianprops = {'linewidth': 4, 'color': '#ff5252'}
+	# medianprops = {'linewidth': 4, 'color': '#4ba173'}
+	medianprops = {'linewidth': 3, 'color': '#424242', "solid_capstyle": "butt"}
+	# meanprops={"linestyle":"--","linewidth": 3, "color":"white"}
+	meanprops={"marker":"o",
+					"markerfacecolor":"white", 
+					"markeredgecolor":"black",
+					"markersize":"14"}
+	ax = sns.boxplot(data=model_metrics_df, x='model_name', y=metric_id, ax=ax, orient="v", showfliers = False, boxprops=boxprops, medianprops=medianprops, meanprops=meanprops, showmeans=True)
+	## place legend outside
+	# ax.legend(title=' '.join(point_hue_id.split('_')).capitalize(), fontsize=14, title_fontsize=14, bbox_to_anchor=(1, 0.5), loc='center left')
+	## auto place legend
+	ax.legend(title=' '.join(point_hue_id.split('_')).capitalize(), fontsize=14, title_fontsize=14)
+	## Set the ticks and title
+	plt.xticks(rotation=3)
+	plot_utils.set_ticks(ax, fontsize=12)
+	if(not (ylim is None)):
+		plt.ylim(ylim)
+	plt.title(title)
+	## set the box
+	plot_utils.set_xy_box()
+
+
 
 def get_hydra_io_dirpaths(job_name='tmp'):
 	'''

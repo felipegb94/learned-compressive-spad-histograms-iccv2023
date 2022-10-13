@@ -107,16 +107,7 @@ if __name__=='__main__':
 	model_metrics_all, rec_depths_all = process_middlebury_test_results(scene_ids, sbr_params, model_metrics_all, spad_dataset, out_dirpath=None, save_depth_images=False, return_rec_depths=False)
 
 	## Make into data frame
-	model_metrics_df = pd.DataFrame()	
-	for model_name in model_names_min:
-		model_metrics_df_curr = pd.DataFrame()
-		model_metrics_df_curr['mae'] = model_metrics_all[model_name]['mae']
-		model_metrics_df_curr['model_name'] = [model_name]*len(model_metrics_all[model_name]['mae'])
-		model_metrics_df_curr['mean_sbr'] = model_metrics_all['sbr_params']['mean_sbr']
-		model_metrics_df_curr['mean_signal_photons'] = model_metrics_all['sbr_params']['mean_signal_photons']
-		model_metrics_df_curr['mean_bkg_photons'] = model_metrics_all['sbr_params']['mean_bkg_photons']
-		model_metrics_df_curr['is_high_flux'] = (model_metrics_df_curr['mean_signal_photons'] + model_metrics_df_curr['mean_bkg_photons']) > 100
-		model_metrics_df = pd.concat((model_metrics_df, model_metrics_df_curr), axis=0)
+	model_metrics_df = analyze_test_results_utils.metrics2dataframe(model_names_min, model_metrics_all)
 
 
 	plt.clf()
