@@ -17,6 +17,7 @@ breakpoint = debugger.set_trace
 
 #### Local imports
 from tof_utils import *
+from csph_layers import compute_csph3d_expected_num_params
 from research_utils import plot_utils, np_utils, io_ops
 from spad_dataset import SpadDataset
 import analyze_test_results_utils
@@ -55,26 +56,26 @@ if __name__=='__main__':
 		spatial_down_factor_all = [4]*len(encoding_type_all)
 		num_tdim_blocks_all = [1, 1, 4, 16]
 
-		## Parameters for: Spatial kernel size effect?
-		experiment_id = 'spatial_block_dims_effect'
-		encoding_type_all = ['csph1d', 'csph1d', 'separable', 'separable',  'separable']
-		spatial_down_factor_all = [1, 1, 2, 4, 8]
-		tdim_init_all = ['Rand']*len(encoding_type_all)
-		optCt_all = [True]*len(encoding_type_all)
-		optC_all = [True]*len(encoding_type_all)
-		tdim_init_all[0] = 'HybridGrayFourier'
-		optCt_all[0] = False
-		optC_all[0] = False
-		num_tdim_blocks_all = [1]*len(encoding_type_all)
+		# ## Parameters for: Spatial kernel size effect?
+		# experiment_id = 'spatial_block_dims_effect'
+		# encoding_type_all = ['csph1d', 'csph1d', 'separable', 'separable',  'separable']
+		# spatial_down_factor_all = [1, 1, 2, 4, 8]
+		# tdim_init_all = ['Rand']*len(encoding_type_all)
+		# optCt_all = [True]*len(encoding_type_all)
+		# optC_all = [True]*len(encoding_type_all)
+		# tdim_init_all[0] = 'HybridGrayFourier'
+		# optCt_all[0] = False
+		# optC_all[0] = False
+		# num_tdim_blocks_all = [1]*len(encoding_type_all)
 
-		## Parameters for: Does a good initialization Help Performance?
-		experiment_id = 'tdim_init_effect'
-		tdim_init_all = ['Rand', 'HybridGrayFourier', 'HybridGrayFourier', 'Rand', 'HybridGrayFourier', 'HybridGrayFourier']
-		optCt_all = [True, True, False, True, True, False]
-		optC_all = [True]*len(tdim_init_all)
-		encoding_type_all = ['separable']*len(tdim_init_all)
-		spatial_down_factor_all = [4]*len(tdim_init_all)
-		num_tdim_blocks_all = [1, 1, 1, 16, 16, 16]
+		# ## Parameters for: Does a good initialization Help Performance?
+		# experiment_id = 'tdim_init_effect'
+		# tdim_init_all = ['Rand', 'HybridGrayFourier', 'HybridGrayFourier', 'Rand', 'HybridGrayFourier', 'HybridGrayFourier']
+		# optCt_all = [True, True, False, True, True, False]
+		# optC_all = [True]*len(tdim_init_all)
+		# encoding_type_all = ['separable']*len(tdim_init_all)
+		# spatial_down_factor_all = [4]*len(tdim_init_all)
+		# num_tdim_blocks_all = [1, 1, 1, 16, 16, 16]
 
 		## output dirpaths
 		experiment_name = 'middlebury/test_set_metrics/{}'.format(experiment_id)
@@ -97,6 +98,7 @@ if __name__=='__main__':
 		## Model IDs of the models we want to plot
 		n_csph3d_models = len(encoding_type_all)
 		model_names = []
+		num_model_params = []
 		## Generate names for all csph3d models
 		for i in range(n_csph3d_models):
 			spatial_down_factor = spatial_down_factor_all[i]
@@ -105,6 +107,11 @@ if __name__=='__main__':
 			# Compose name
 			model_name = analyze_test_results_utils.compose_csph3d_model_name(k=k, spatial_down_factor=spatial_down_factor, tdim_init=tdim_init_all[i], encoding_type=encoding_type_all[i], num_tdim_blocks=num_tdim_blocks_all[i], optCt=optCt_all[i], optC=optC_all[i])
 			model_names.append(model_name)
+			num_model_params.append(compute_csph3d_expected_num_params(encoding_type_all[i], block_nt, block_nr*block_nc, k))
+			print("Model Info: ")
+			print("	   Name: {}".format(model_names[i]))
+			print("    CSPH3DLayer Num Params: {}".format(num_model_params[i]))
+
 
 		## Get pretrained models dirpaths
 		model_dirpaths = analyze_test_results_utils.get_model_dirpaths(model_names)
@@ -128,9 +135,9 @@ if __name__=='__main__':
 		plt.figure()
 		metric_id = 'mae'
 		out_fname = out_fname_base + '_' + metric_id
-		mae_ylim = (0, 50)
-		# mae_ylim = None
-		analyze_test_results_utils.plot_test_dataset_metrics(model_metrics_df, metric_id=metric_id, ylim=mae_ylim, title='')
+		metric_ylim = (0, 50)
+		# metric_ylim = None
+		analyze_test_results_utils.plot_test_dataset_metrics(model_metrics_df, metric_id=metric_id, ylim=metric_ylim, title='')
 		# remove ticks and legend for saving
 		plot_utils.remove_xticks()
 		plt.xlabel(''); plt.ylabel('')
@@ -145,8 +152,10 @@ if __name__=='__main__':
 		## Make plot for all metrics
 		plt.figure()
 		metric_id = '5mm_tol_err'
+		metric_ylim = (0.1, 0.9)
+		# metric_ylim = None
 		out_fname = out_fname_base + '_' + metric_id
-		analyze_test_results_utils.plot_test_dataset_metrics(model_metrics_df, metric_id=metric_id, ylim=None, title='')
+		analyze_test_results_utils.plot_test_dataset_metrics(model_metrics_df, metric_id=metric_id, ylim=metric_ylim, title='')
 		# remove ticks and legend for saving
 		plot_utils.remove_xticks()
 		plt.xlabel(''); plt.ylabel('')
@@ -161,8 +170,10 @@ if __name__=='__main__':
 		## Make plot for all metrics
 		plt.figure()
 		metric_id = '1mm_tol_err'
+		metric_ylim = (0, 0.4)
+		# metric_ylim = None
 		out_fname = out_fname_base + '_' + metric_id
-		analyze_test_results_utils.plot_test_dataset_metrics(model_metrics_df, metric_id=metric_id, ylim=None, title='')
+		analyze_test_results_utils.plot_test_dataset_metrics(model_metrics_df, metric_id=metric_id, ylim=metric_ylim, title='')
 		# remove ticks and legend for saving
 		plot_utils.remove_xticks()
 		plt.xlabel(''); plt.ylabel('')
