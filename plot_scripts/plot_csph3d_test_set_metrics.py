@@ -46,14 +46,14 @@ if __name__=='__main__':
 	
 		out_fname_base = 'CR-{}'.format(compression_ratio) 
 		
-		# ## Parameters for: Does decreasing the number of parameters hurt performance?
-		# experiment_id = 'Cmat_size_effect'
-		# encoding_type_all = ['full', 'separable', 'separable', 'separable']
-		# tdim_init_all = ['Rand']*len(encoding_type_all)
-		# optCt_all = [True]*len(encoding_type_all)
-		# optC_all = [True]*len(encoding_type_all)
-		# spatial_down_factor_all = [4]*len(encoding_type_all)
-		# num_tdim_blocks_all = [1, 1, 4, 16]
+		## Parameters for: Does decreasing the number of parameters hurt performance?
+		experiment_id = 'Cmat_size_effect'
+		encoding_type_all = ['full', 'separable', 'separable', 'separable']
+		tdim_init_all = ['Rand']*len(encoding_type_all)
+		optCt_all = [True]*len(encoding_type_all)
+		optC_all = [True]*len(encoding_type_all)
+		spatial_down_factor_all = [4]*len(encoding_type_all)
+		num_tdim_blocks_all = [1, 1, 4, 16]
 
 		## Parameters for: Spatial kernel size effect?
 		experiment_id = 'spatial_block_dims_effect'
@@ -67,14 +67,14 @@ if __name__=='__main__':
 		optC_all[0] = False
 		num_tdim_blocks_all = [1]*len(encoding_type_all)
 
-		# ## Parameters for: Does a good initialization Help Performance?
-		# experiment_id = 'tdim_init_effect'
-		# tdim_init_all = ['Rand', 'HybridGrayFourier', 'HybridGrayFourier', 'Rand', 'HybridGrayFourier', 'HybridGrayFourier']
-		# optCt_all = [True, True, False, True, True, False]
-		# optC_all = [True]*len(tdim_init_all)
-		# encoding_type_all = ['separable']*len(tdim_init_all)
-		# spatial_down_factor_all = [4]*len(tdim_init_all)
-		# num_tdim_blocks_all = [1, 1, 1, 16, 16, 16]
+		## Parameters for: Does a good initialization Help Performance?
+		experiment_id = 'tdim_init_effect'
+		tdim_init_all = ['Rand', 'HybridGrayFourier', 'HybridGrayFourier', 'Rand', 'HybridGrayFourier', 'HybridGrayFourier']
+		optCt_all = [True, True, False, True, True, False]
+		optC_all = [True]*len(tdim_init_all)
+		encoding_type_all = ['separable']*len(tdim_init_all)
+		spatial_down_factor_all = [4]*len(tdim_init_all)
+		num_tdim_blocks_all = [1, 1, 1, 16, 16, 16]
 
 		## output dirpaths
 		experiment_name = 'middlebury/test_set_metrics/{}'.format(experiment_id)
@@ -135,10 +135,10 @@ if __name__=='__main__':
 		plot_utils.remove_xticks()
 		plt.xlabel(''); plt.ylabel('')
 		# save figure with legend
-		plot_utils.save_currfig(dirpath=out_dirpath, filename='legend_'+out_fname)
+		plot_utils.save_currfig(dirpath=out_dirpath, filename='legend_'+out_fname, file_ext='svg')
 		# save figure without legend
 		plt.gca().get_legend().remove()
-		plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname)
+		plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
 		# add title after saving so we know what we plotted
 		plt.title('{} - Compressive Histograms at {}x Compression'.format(metric_id, compression_ratio))
 		
@@ -151,10 +151,10 @@ if __name__=='__main__':
 		plot_utils.remove_xticks()
 		plt.xlabel(''); plt.ylabel('')
 		# save figure with legend
-		plot_utils.save_currfig(dirpath=out_dirpath, filename='legend_'+out_fname)
+		plot_utils.save_currfig(dirpath=out_dirpath, filename='legend_'+out_fname, file_ext='svg')
 		# save figure without legend
 		plt.gca().get_legend().remove()
-		plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname)
+		plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
 		# add title after saving so we know what we plotted
 		plt.title('{} - Compressive Histograms at {}x Compression'.format(metric_id, compression_ratio))
 		
@@ -167,10 +167,10 @@ if __name__=='__main__':
 		plot_utils.remove_xticks()
 		plt.xlabel(''); plt.ylabel('')
 		# save figure with legend
-		plot_utils.save_currfig(dirpath=out_dirpath, filename='legend_'+out_fname)
+		plot_utils.save_currfig(dirpath=out_dirpath, filename='legend_'+out_fname, file_ext='svg')
 		# save figure without legend
 		plt.gca().get_legend().remove()
-		plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname)
+		plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
 		# add title after saving so we know what we plotted
 		plt.title('{} - Compressive Histograms at {}x Compression'.format(metric_id, compression_ratio))
 
