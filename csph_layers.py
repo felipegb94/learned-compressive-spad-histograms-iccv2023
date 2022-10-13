@@ -45,6 +45,17 @@ def norm_vec(v, dim=-1):
 	n_v = v / (torch.linalg.norm(v, ord=2, dim=dim, keepdim=True) + 1e-6)
 	return n_v
 
+def compute_csph3d_expected_num_params(encoding_type, tblock_len, xyblock_len, k):
+	if(encoding_type == 'full'):
+		num_params = tblock_len*xyblock_len*k
+	elif(encoding_type == 'separable'):
+		num_params = (tblock_len*k) + (xyblock_len*k)
+	elif(encoding_type == 'csph1d'):
+		num_params = (tblock_len*k)
+	else:
+		assert(False), "Invalid encoding type for csph3d"
+	return num_params
+
 def get_temporal_cmat_init(k, num_bins, init_id, h_irf=None):
 	if(init_id == 'TruncFourier'):
 		coding_obj = TruncatedFourierCoding(num_bins, n_codes=k, include_zeroth_harmonic=False, h_irf=h_irf, account_irf=True)
@@ -631,6 +642,7 @@ class CSPH3DLayer(nn.Module):
 				self.get_unfilt_backproj_W3d = self.get_unfilt_backproj_W3d_full
 			## Compute the expected number of parameters
 			expected_num_params = self.k*self.encoding_kernel3d_dims[0]*self.encoding_kernel3d_dims[1]*self.encoding_kernel3d_dims[2]
+			expected_num_params_2 = compute_csph3d_expected_num_params(self.encoding_type, self.encoding_kernel3d_dims[0], self.encoding_kernel3d_dims[1]*self.encoding_kernel3d_dims[2], self.k)
 		elif(self.encoding_type == 'separable'):
 			## Separable convolution encoding
 			## Initialize time domain coding layer
@@ -668,6 +680,7 @@ class CSPH3DLayer(nn.Module):
 				self.get_unfilt_backproj_W3d = self.get_unfilt_backproj_W3d_separable
 			## Compute the expected number of parameters
 			expected_num_params = (self.k*self.tblock_len) + (self.k*self.spatial_down_factor*self.spatial_down_factor)
+			expected_num_params_2 = compute_csph3d_expected_num_params(self.encoding_type, self.encoding_kernel3d_dims[0], self.encoding_kernel3d_dims[1]*self.encoding_kernel3d_dims[2], self.k)
 		elif(self.encoding_type == 'csph1d'):
 			assert(self.spatial_down_factor == 1), 'CSPH1D encoding only works for kernels of dimes (tblock_sizex1x1)'
 			## Initialize time domain coding layer
@@ -699,13 +712,17 @@ class CSPH3DLayer(nn.Module):
 				self.get_unfilt_backproj_W3d = self.get_unfilt_backproj_W3d_csph1d
 			## Compute the expected number of parameters
 			expected_num_params = (self.k*self.tblock_len)	
+			expected_num_params_2 = compute_csph3d_expected_num_params(self.encoding_type, self.encoding_kernel3d_dims[0], self.encoding_kernel3d_dims[1]*self.encoding_kernel3d_dims[2], self.k)
 		else:
 			raise ValueError('Invalid encoding_type ({}) given as input.'.format(self.encoding_type))
+		breakpoint()
 		## Verify that the number of parameters we estimated above matches what we get
 		expected_num_params += self.irf_layer.n
+		expected_num_params_2 += self.irf_layer.n
 		num_params = sum(p.numel() for p in self.parameters())
 		print("    - Num CSPH Params: {}".format(num_params))
 		assert(expected_num_params == num_params), "Expected number of params does not match the coding layer params"
+		assert(expected_num_params_2 == num_params), "v2 Expected number of params does not match the coding layer params"
 		self.Cmat_size = num_params
 
 		self.csph_out_norm = csph_out_norm
