@@ -15,6 +15,7 @@ breakpoint = debugger.set_trace
 from tof_utils import *
 from research_utils import io_ops, plot_utils, np_utils
 from spad_dataset import SpadDataset
+from csph_layers import compute_csph3d_expected_num_params
 
 middlebury_test_set_info = {
 	'scene_ids': ['spad_Art', 'spad_Reindeer', 'spad_Books', 'spad_Moebius', 'spad_Bowling1', 'spad_Dolls', 'spad_Laundry', 'spad_Plastic']
@@ -142,6 +143,37 @@ def compose_csph3d_model_name(csph3d_model_id = 'DDFN_C64B10_CSPH3D'
 	):
 		model_name = '{}/k{}_down{}_Mt{}_{}-optCt={}-optC={}_{}_norm-{}_irf-{}_zn-{}_zeromu-{}_smoothtdimC-{}/loss-kldiv_tv-0.0'.format(csph3d_model_id, k, spatial_down_factor, num_tdim_blocks, tdim_init, optCt, optC, encoding_type, norm, irf, zn, zeromu, smoothtdimC)
 		return model_name
+
+def compose_csph3d_model_names_list(compression_ratio_all
+								, spatial_down_factor_all
+								, num_tdim_blocks_all
+								, tdim_init_all
+								, optCt_all
+								, optC_all
+								, encoding_type_all
+								, nt = 1024
+								, csph3d_model_id = 'DDFN_C64B10_CSPH3D'
+								, print_model_params = False
+	):
+	csph3d_model_names = []
+	num_model_params = []
+	## Model IDs of the models we want to plot
+	n_csph3d_models = len(encoding_type_all)
+	## Generate names for all csph3d models at current compression
+	for compression_ratio in compression_ratio_all:		
+		for i in range(n_csph3d_models):
+			spatial_down_factor = spatial_down_factor_all[i]
+			(block_nt, block_nr, block_nc) = compute_block_dims(spatial_down_factor, nt, num_tdim_blocks_all[i])
+			k = csph3d_compression2k(compression_ratio, block_nr, block_nc, block_nt)
+			# Compose name
+			model_name = compose_csph3d_model_name(k=k, spatial_down_factor=spatial_down_factor, tdim_init=tdim_init_all[i], encoding_type=encoding_type_all[i], num_tdim_blocks=num_tdim_blocks_all[i], optCt=optCt_all[i], optC=optC_all[i], csph3d_model_id=csph3d_model_id)
+			csph3d_model_names.append(model_name)
+			num_model_params.append(compute_csph3d_expected_num_params(encoding_type_all[i], block_nt, block_nr*block_nc, k))
+			if(print_model_params):
+				print("Model Info: ")
+				print("	   Name: {}".format(csph3d_model_names[i]))
+				print("    CSPH3DLayer Num Params: {}".format(num_model_params[i]))
+	return (csph3d_model_names, num_model_params)
 	
 def get_model_dirpaths(model_names):
 	'''
@@ -306,7 +338,7 @@ def parse_sbr_params_list(sbr_params_all):
 		mean_sbr_all.append(mean_sbr)
 	return (mean_sbr_all, mean_signal_photons_all, mean_bkg_photons_all)
 
-def process_middlebury_test_results(scene_ids, sbr_params, model_metrics_all, spad_dataset, out_dirpath=None, save_depth_images=False, return_rec_depths=False):
+def process_middlebury_test_results(scene_ids, sbr_params, model_metrics_all, spad_dataset, out_dirpath=None, save_depth_images=False, return_rec_depths=False, file_ext='png'):
 	## For each scene id and sbr param, load model rec_depths and compute error metrics. If save_depth images is true, save them, and if return_rec_depths is True store the rec depths and return them
 	if(not ('sbr_params' in model_metrics_all.keys())): 
 		model_metrics_all['sbr_params'] = {}
@@ -393,10 +425,10 @@ def process_middlebury_test_results(scene_ids, sbr_params, model_metrics_all, sp
 						if(os.path.exists(out_dirpath)):
 							plt.clf()
 							plt.imshow(model_depths, vmin=min_depth, vmax=max_depth)
-							plt.title(model_id)
 							plot_utils.remove_ticks()
-							plot_utils.save_currfig_png(dirpath=os.path.join(out_dirpath, scene_fname), filename=model_id)
-							plt.pause(0.05)
+							plt.title(model_id)
+							out_fname = model_id.replace('/','_')
+							plot_utils.save_currfig(dirpath=os.path.join(out_dirpath, scene_fname), filename=out_fname, file_ext=file_ext)
 						else:
 							print("WARNING: Can't save depth images if the out_dirpath does not exist")
 	# ## Convert all lists into numpy arrray

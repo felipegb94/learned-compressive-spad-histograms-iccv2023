@@ -4,24 +4,22 @@
 '''
 #### Standard Library Imports
 import os
-from humanize import metric
 
 #### Library imports
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
-from scipy import io
 from IPython.core import debugger
 breakpoint = debugger.set_trace
 
 #### Local imports
 from tof_utils import *
 from csph_layers import compute_csph3d_expected_num_params
-from research_utils import plot_utils, np_utils, io_ops
+from research_utils import plot_utils
 from spad_dataset import SpadDataset
 import analyze_test_results_utils
-from analyze_test_results_utils import init_model_metrics_dict, process_middlebury_test_results, get_hydra_io_dirpaths
+from analyze_test_results_utils import init_model_metrics_dict, process_middlebury_test_results, get_hydra_io_dirpaths, compose_csph3d_model_names_list
 
 
 def simplify_model_name(model_name):
@@ -40,7 +38,7 @@ if __name__=='__main__':
 	io_dirpaths = get_hydra_io_dirpaths(job_name='plot_csph3d_test_set_metrics')
 
 	compression_ratio_all = [32, 64, 128]
-	# compression_ratio_all = [128]
+	compression_ratio_all = [128]
 
 	## plot for each compression ratio
 	for compression_ratio in compression_ratio_all:
@@ -99,19 +97,15 @@ if __name__=='__main__':
 		n_csph3d_models = len(encoding_type_all)
 		model_names = []
 		num_model_params = []
-		## Generate names for all csph3d models
-		for i in range(n_csph3d_models):
-			spatial_down_factor = spatial_down_factor_all[i]
-			(block_nt, block_nr, block_nc) = analyze_test_results_utils.compute_block_dims(spatial_down_factor, nt, num_tdim_blocks_all[i])
-			k = analyze_test_results_utils.csph3d_compression2k(compression_ratio, block_nr, block_nc, block_nt)
-			# Compose name
-			model_name = analyze_test_results_utils.compose_csph3d_model_name(k=k, spatial_down_factor=spatial_down_factor, tdim_init=tdim_init_all[i], encoding_type=encoding_type_all[i], num_tdim_blocks=num_tdim_blocks_all[i], optCt=optCt_all[i], optC=optC_all[i])
-			model_names.append(model_name)
-			num_model_params.append(compute_csph3d_expected_num_params(encoding_type_all[i], block_nt, block_nr*block_nc, k))
-			print("Model Info: ")
-			print("	   Name: {}".format(model_names[i]))
-			print("    CSPH3DLayer Num Params: {}".format(num_model_params[i]))
-
+		(model_names, num_model_params) = compose_csph3d_model_names_list(compression_ratio_all
+										, spatial_down_factor_all
+										, num_tdim_blocks_all
+										, tdim_init_all
+										, optCt_all
+										, optC_all
+										, encoding_type_all
+										, nt = nt
+			)
 
 		## Get pretrained models dirpaths
 		model_dirpaths = analyze_test_results_utils.get_model_dirpaths(model_names)
@@ -141,11 +135,12 @@ if __name__=='__main__':
 		# remove ticks and legend for saving
 		plot_utils.remove_xticks()
 		plt.xlabel(''); plt.ylabel('')
+		plt.grid(linestyle='--', linewidth=0.5)
 		# save figure with legend
-		plot_utils.save_currfig(dirpath=out_dirpath, filename='legend_'+out_fname, file_ext='svg')
+		# plot_utils.save_currfig(dirpath=out_dirpath, filename='legend_'+out_fname, file_ext='svg')
 		# save figure without legend
 		plt.gca().get_legend().remove()
-		plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
+		# plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
 		# add title after saving so we know what we plotted
 		plt.title('{} - Compressive Histograms at {}x Compression'.format(metric_id, compression_ratio))
 		
@@ -159,29 +154,12 @@ if __name__=='__main__':
 		# remove ticks and legend for saving
 		plot_utils.remove_xticks()
 		plt.xlabel(''); plt.ylabel('')
+		plt.grid(linestyle='--', linewidth=0.5)
 		# save figure with legend
-		plot_utils.save_currfig(dirpath=out_dirpath, filename='legend_'+out_fname, file_ext='svg')
+		# plot_utils.save_currfig(dirpath=out_dirpath, filename='legend_'+out_fname, file_ext='svg')
 		# save figure without legend
 		plt.gca().get_legend().remove()
-		plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
-		# add title after saving so we know what we plotted
-		plt.title('{} - Compressive Histograms at {}x Compression'.format(metric_id, compression_ratio))
-		
-		## Make plot for all metrics
-		plt.figure()
-		metric_id = '1mm_tol_err'
-		metric_ylim = (0, 0.4)
-		# metric_ylim = None
-		out_fname = out_fname_base + '_' + metric_id
-		analyze_test_results_utils.plot_test_dataset_metrics(model_metrics_df, metric_id=metric_id, ylim=metric_ylim, title='')
-		# remove ticks and legend for saving
-		plot_utils.remove_xticks()
-		plt.xlabel(''); plt.ylabel('')
-		# save figure with legend
-		plot_utils.save_currfig(dirpath=out_dirpath, filename='legend_'+out_fname, file_ext='svg')
-		# save figure without legend
-		plt.gca().get_legend().remove()
-		plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
+		# plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
 		# add title after saving so we know what we plotted
 		plt.title('{} - Compressive Histograms at {}x Compression'.format(metric_id, compression_ratio))
 
