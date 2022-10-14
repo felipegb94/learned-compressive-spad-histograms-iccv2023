@@ -92,6 +92,21 @@ def calc_compression_from_ID(id, nt=1024):
 	compression_ratio = (br*bc*bt) / k
 	return compression_ratio
 
+def calc_compression_from_dirpath(dirpath, nt=1024):
+	if('DDFN_C64B10_CSPH3D/' in dirpath):
+		k = int(dirpath.split('/k')[1].split('_')[0])
+		block_nr = int(dirpath.split('_down')[1].split('_')[0])
+		block_nc = block_nr
+		num_tdim_blocks = int(dirpath.split('_Mt')[1].split('_')[0])
+		assert((nt % num_tdim_blocks) == 0), "nt should be divisible by mt"
+		block_nt = int(nt / num_tdim_blocks) 
+		block_size = (block_nr*block_nc*block_nt)
+		assert((block_size % k) == 0), "block_size should be divisible by k"
+		compression_ratio = int(block_size / k)
+		return compression_ratio
+	else:
+		return 1
+
 def compute_block_dims(spatial_down_factor, nt, num_tdim_blocks):
 	(block_nr, block_nc) = (spatial_down_factor, spatial_down_factor)
 	assert((nt % num_tdim_blocks) == 0), "nt should be divisible by num_tdim_blocks"
@@ -127,7 +142,7 @@ def compose_csph3d_model_name(csph3d_model_id = 'DDFN_C64B10_CSPH3D'
 	):
 		model_name = '{}/k{}_down{}_Mt{}_{}-optCt={}-optC={}_{}_norm-{}_irf-{}_zn-{}_zeromu-{}_smoothtdimC-{}/loss-kldiv_tv-0.0'.format(csph3d_model_id, k, spatial_down_factor, num_tdim_blocks, tdim_init, optCt, optC, encoding_type, norm, irf, zn, zeromu, smoothtdimC)
 		return model_name
-
+	
 def get_model_dirpaths(model_names):
 	'''
 		Given the model name get the dirpath containing all the results for that model. Usually, each model that was trained has a unique ID that is appended to the model_name to generate the dirpath, so in order to not have to keep track of these IDs we simply store them inside a dict whenever we test that model.
@@ -172,6 +187,14 @@ def append_model_metrics(model_metrics, test_set_id, scene_fname, gt_depths, num
 	# scene_metrics['mae'] = scene_metrics['mae']
 	return model_metrics, model_depths, scene_metrics
 
+def extract_model_type(model_name):
+	if('DDFN_C64B10_CSPH3D/' in model_name):	
+		model_type = 'down' + model_name.split('_down')[-1]
+		model_type = model_type.split('_norm')[0]
+		return model_type
+	else:
+		return model_name
+
 def metrics2dataframe(model_names, model_metrics_all):
 	## Make into data frame
 	model_metrics_df = pd.DataFrame()	
@@ -183,7 +206,11 @@ def metrics2dataframe(model_names, model_metrics_all):
 		model_metrics_df_curr['1mm_tol_err'] = model_metrics_all[model_name]['1mm_tol_err']
 		model_metrics_df_curr['5mm_tol_err'] = model_metrics_all[model_name]['5mm_tol_err']
 		model_metrics_df_curr['10mm_tol_err'] = model_metrics_all[model_name]['10mm_tol_err']
-		model_metrics_df_curr['model_name'] = [model_name]*len(model_metrics_all[model_name]['mae'])
+		n_data_samples = len(model_metrics_all[model_name]['mae'])
+		model_metrics_df_curr['model_name'] = [model_name]*n_data_samples
+		model_metrics_df_curr['model_type'] = [extract_model_type(model_name)]*n_data_samples
+		compression_ratio = calc_compression_from_dirpath(model_metrics_all[model_name]['dirpath'])
+		model_metrics_df_curr['compression_ratio'] = [compression_ratio]*n_data_samples
 		model_metrics_df_curr['mean_sbr'] = model_metrics_all['sbr_params']['mean_sbr']
 		model_metrics_df_curr['mean_signal_photons'] = model_metrics_all['sbr_params']['mean_signal_photons']
 		model_metrics_df_curr['mean_bkg_photons'] = model_metrics_all['sbr_params']['mean_bkg_photons']
