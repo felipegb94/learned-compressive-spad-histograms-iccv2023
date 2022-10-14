@@ -7,9 +7,11 @@ import os
 #### Library imports
 import numpy as np
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 import pandas as pd
 import seaborn as sns
 from IPython.core import debugger
+from torch import norm
 breakpoint = debugger.set_trace
 
 #### Local imports
@@ -32,7 +34,7 @@ if __name__=='__main__':
 	## Scene ids and signal and SBR parameters we want to plot for
 	test_set_id = 'test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
 	scene_ids = ['spad_Art']
-	sbr_params = ['50_1000']
+	sbr_params = ['10_10']
 
 	## Check that input scene ids and sbr params are available in test set
 	middlebury_test_set_info = analyze_test_results_utils.middlebury_test_set_info
@@ -46,6 +48,9 @@ if __name__=='__main__':
 	## Create spad dataloader object to get ground truth data for each scene
 	spad_dataset = SpadDataset(datalist_fpath=os.path.join(io_dirpaths.datalists_dirpath, test_set_id+'.txt'), disable_rand_crop=True)
 	(nr,nc,nt,tres_ps) = spad_dataset.get_spad_data_sample_params(0)
+	tau = nt*tres_ps*1e-12
+	depth_range = time2depth(tau)
+	delta_depth = depth_range / nt
 
 	## Generate model_names for the models we want to plots depths for
 	model_names = []
@@ -61,7 +66,7 @@ if __name__=='__main__':
 	spatial_down_factor_all = [1, 1, 4, 4, 4]
 	num_tdim_blocks_all = [1, 1, 1, 4, 16]
 	compression_ratio_all = [32, 64, 128]
-	# compression_ratio_all = [128]
+	compression_ratio_all = [128]
 	# generate the csph3d model names
 	(csph3d_model_names, csph3d_num_model_params) = compose_csph3d_model_names_list(compression_ratio_all
 									, spatial_down_factor_all
@@ -84,7 +89,7 @@ if __name__=='__main__':
 			scene_fname = '{}_{}'.format(scene_id, sbr_param)
 			spad_dataset_sample = spad_dataset.get_item_by_scene_name(scene_fname)
 			# plot intensity
-			intensity_img = spad_dataset_sample['intensity']
+			intensity_img = spad_dataset_sample['intensity'].squeeze().cpu().numpy()
 			plt.clf()
 			plt.imshow(intensity_img, cmap='gray')
 			plot_utils.remove_ticks()
@@ -96,23 +101,108 @@ if __name__=='__main__':
 			model_metrics_all, rec_depths_all = process_middlebury_test_results([scene_id], [sbr_param], model_metrics_all, spad_dataset, return_rec_depths=True)
 			# get gt depth to calculate the colorbar range
 			gt_depths = rec_depths_all['gt']['depths']
-			min_depth = gt_depths.flatten().min() - 0.5*gt_depths.flatten().std() 
-			max_depth = gt_depths.flatten().max() + 0.5*gt_depths.flatten().std()
-			# for each model plot depths
-			for model_id in rec_depths_all.keys():
-				curr_model = rec_depths_all[model_id]
-				model_depths = curr_model['depths']
-				plt.clf()
-				plt.imshow(model_depths, vmin=min_depth, vmax=max_depth)
-				plot_utils.remove_ticks()
-				out_fname = model_id.replace('/','_')
-				plot_utils.save_currfig(dirpath=os.path.join(out_dirpath, scene_fname), filename=out_fname, file_ext='svg')
-				plt.pause(0.05)
-				# save with colorbar
-				plt.colorbar()
-				plot_utils.save_currfig(dirpath=os.path.join(out_dirpath, scene_fname + '/withcbar'), filename=out_fname, file_ext='svg')
-				plt.pause(0.05)
-				plt.title(model_id)
+			min_scene_depth = gt_depths.flatten().min() - 0.5*gt_depths.flatten().std()
+			max_scene_depth = gt_depths.flatten().max() + 0.5*gt_depths.flatten().std()
+			# # for each model plot depths
+			# for model_id in rec_depths_all.keys():
+			# 	curr_model = rec_depths_all[model_id]
+			# 	model_depths = curr_model['depths']
+			# 	plt.clf()
+			# 	plt.imshow(model_depths, vmin=min_scene_depth, vmax=max_scene_depth)
+			# 	plot_utils.remove_ticks()
+			# 	out_fname = model_id.replace('/','_')
+			# 	plot_utils.save_currfig(dirpath=os.path.join(out_dirpath, scene_fname), filename=out_fname, file_ext='svg')
+			# 	plt.pause(0.05)
+			# 	# save with colorbar
+			# 	plt.colorbar()
+			# 	plot_utils.save_currfig(dirpath=os.path.join(out_dirpath, scene_fname + '/withcbar'), filename=out_fname, file_ext='svg')
+			# 	plt.pause(0.05)
+			# 	plt.title(model_id)
+
+			# plot point cloud
+			import open3d as o3d
+			scale_xy = 1; scale_z = 2
+			min_scene_depth_index = int(min_scene_depth / delta_depth)
+			max_scene_depth_index = int(max_scene_depth / delta_depth)
+			scene_depth_range_index = max_scene_depth_index - min_scene_depth_index
+			min_z_index = int(min_scene_depth_index)
+			max_z_index = int(max_scene_depth_index)
+			z_index_range = max_z_index - min_z_index
+
+			spad_hist_img = np.moveaxis(spad_dataset_sample['spad'].squeeze().cpu().numpy(), 0, -1)
+			spad_hist_img_zoomed = spad_hist_img[:,:,min_z_index:max_z_index] 
+			plt.figure()
+			plt.imshow(spad_hist_img_zoomed.sum(axis=-1))
+			plt.pause(0.05)
+			X, Y, Z = np.meshgrid(np.arange(nc)/(nc), np.arange(nr)/(nr), np.arange(z_index_range)/(z_index_range))
+			(x, y, z) = (X.flatten(), Y.flatten(), Z.flatten())
+			idx = (spad_hist_img_zoomed > 0)
+			idx = idx.flatten()
+			photon_counts = spad_hist_img_zoomed.flatten()
+			photon_counts_tm = np.log(1+photon_counts)
+			norm_photon_counts = photon_counts_tm / (photon_counts_tm.max() + 1e-6)
+
+			xyz = np.concatenate((x[idx,np.newaxis],y[idx,np.newaxis],z[idx,np.newaxis]), axis=-1)
+			xyz_colors = 1 - np.concatenate((norm_photon_counts[idx,np.newaxis], norm_photon_counts[idx,np.newaxis], norm_photon_counts[idx,np.newaxis]), axis=-1)
+
+			pcd = o3d.geometry.PointCloud()
+			pcd.points = o3d.utility.Vector3dVector(xyz)
+			pcd.colors = o3d.utility.Vector3dVector(xyz_colors)
+
+			os.makedirs('./tmp', exist_ok=True)
+			o3d.io.write_point_cloud("./tmp/tmp_pc.ply", pcd)
+
+			# Load saved point cloud and visualize it
+			pcd_load = o3d.io.read_point_cloud("./tmp/tmp_pc.ply")
+
+
+			points = [[0, 0, 0], [1, 0, 0], [0, 1, 0], [1, 1, 0], [0, 0, 1], [1, 0, 1],
+					[0, 1, 1], [1, 1, 1]]
+			lines = [[0, 1], [0, 2], [1, 3], [2, 3], [4, 5], [4, 6], [5, 7], [6, 7],
+					[0, 4], [1, 5], [2, 6], [3, 7]]
+			colors = [[1, 0, 0] for i in range(len(lines))]
+			line_set = o3d.geometry.LineSet()
+			line_set.points = o3d.utility.Vector3dVector(points)
+			line_set.lines = o3d.utility.Vector2iVector(lines)
+			line_set.colors = o3d.utility.Vector3dVector(colors)
+
+			vis = o3d.visualization.Visualizer()
+			vis.create_window()
+			vis.add_geometry(pcd_load)
+			vis.add_geometry(line_set)
+			opt = vis.get_render_option()
+			opt.background_color = np.asarray([0, 0, 0])
+			view_control = vis.get_view_control()
+			view_control.set_front(np.array([0.38,-0.20,-0.98]).reshape((3,1)))
+			view_control.set_up(np.array([-0.062,-0.977,0.199]).reshape((3,1)))
+			view_control.set_lookat(np.array([0.494,0.493,0.491]).reshape((3,1)))
+			view_control.set_zoom(1.0)
+			vis.run()
+			vis.destroy_window()
+
+			# o3d.visualization.draw_geometries([pcd_load]
+			# 		, width=1280, height=960
+			# 		, left=10, top=10
+			# 		, zoom=1.1
+			# 		, front=np.array([0.38,-0.20,-0.98]).reshape((3,1))
+			# 		, up=np.array([-0.062,-0.977,0.199]).reshape((3,1))
+			# 		, lookat=np.array([0.494,0.493,0.491]).reshape((3,1))
+			# 		)
+
+			# fig = plt.figure()
+			# ax = fig.add_subplot(111, projection='3d')
+			# scat = ax.scatter(x[idx], y[idx], z[idx], c=photon_counts[idx], cmap='jet', marker="s")
+			# # Some additional formatting
+			# ax.set_xlabel('X', fontsize=9)
+			# ax.set_ylabel('Y', fontsize=9)
+			# ax.set_zlabel('Z', fontsize=9)
+			# # Setting camera angle
+			# az = 150
+			# el = 30
+			# ax.view_init(elev=el, azim=az)
+			# fig.colorbar(scat, shrink=0.5, aspect=5)
+
+
 
 
 
