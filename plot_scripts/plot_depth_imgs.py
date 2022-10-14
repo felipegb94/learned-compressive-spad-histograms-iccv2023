@@ -139,11 +139,12 @@ if __name__=='__main__':
 			idx = (spad_hist_img_zoomed > 0)
 			idx = idx.flatten()
 			photon_counts = spad_hist_img_zoomed.flatten()
-			photon_counts_tm = np.log(1+photon_counts)
-			norm_photon_counts = photon_counts_tm / (photon_counts_tm.max() + 1e-6)
+			photon_counts = np.log(1+photon_counts)
+			norm_photon_counts = 0.1 + photon_counts / (photon_counts.max() + 1e-6)
 
 			xyz = np.concatenate((x[idx,np.newaxis],y[idx,np.newaxis],z[idx,np.newaxis]), axis=-1)
-			xyz_colors = 1 - np.concatenate((norm_photon_counts[idx,np.newaxis], norm_photon_counts[idx,np.newaxis], norm_photon_counts[idx,np.newaxis]), axis=-1)
+			xyz_colors = np.concatenate((norm_photon_counts[idx,np.newaxis], norm_photon_counts[idx,np.newaxis], norm_photon_counts[idx,np.newaxis]), axis=-1)
+			# xyz_colors = 0.8*np.ones_like(xyz) 
 
 			pcd = o3d.geometry.PointCloud()
 			pcd.points = o3d.utility.Vector3dVector(xyz)
