@@ -715,7 +715,6 @@ class CSPH3DLayer(nn.Module):
 			expected_num_params_2 = compute_csph3d_expected_num_params(self.encoding_type, self.encoding_kernel3d_dims[0], self.encoding_kernel3d_dims[1]*self.encoding_kernel3d_dims[2], self.k)
 		else:
 			raise ValueError('Invalid encoding_type ({}) given as input.'.format(self.encoding_type))
-		breakpoint()
 		## Verify that the number of parameters we estimated above matches what we get
 		expected_num_params += self.irf_layer.n
 		expected_num_params_2 += self.irf_layer.n
