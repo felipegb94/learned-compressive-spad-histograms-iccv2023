@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
+from skimage.metrics import structural_similarity as ssim
 import hydra
 from omegaconf import OmegaConf
 from IPython.core import debugger
@@ -36,6 +37,10 @@ def compute_mae(gt, est):
 	mae = np.mean(np.abs(gt - est))
 	return mae
 
+def compute_ssim(gt, est):
+	ssim_score = ssim(gt, est, data_range=est.max() - est.min())
+	return ssim_score
+
 def compute_rmse(gt, est):
 	rmse = np.sqrt(compute_mse(gt,est))
 	return rmse
@@ -57,6 +62,7 @@ def compute_error_metrics(gt, est, eps_tol_thresh=0.01):
 	metrics['mae'] =  compute_mae(gt,est)
 	metrics['mse'] =  compute_mse(gt,est)
 	metrics['rmse'] =  compute_rmse(gt,est)
+	metrics['ssim'] =  compute_ssim(gt,est)
 	metrics['1mm_tol_err'] =  compute_eps_tol_err(gt,est,eps_tol_thresh=1./1000.)
 	metrics['5mm_tol_err'] =  compute_eps_tol_err(gt,est,eps_tol_thresh=5./1000.)
 	metrics['10mm_tol_err'] =  compute_eps_tol_err(gt,est,eps_tol_thresh=10./1000.)
@@ -199,6 +205,7 @@ def append_model_metrics(model_metrics, test_set_id, scene_fname, gt_depths, num
 	if(not ('rmse' in model_metrics.keys())): model_metrics['rmse'] = []
 	if(not ('mae' in model_metrics.keys())): model_metrics['mae'] = []
 	if(not ('mse' in model_metrics.keys())): model_metrics['mse'] = []
+	if(not ('ssim' in model_metrics.keys())): model_metrics['ssim'] = []
 	if(not ('1mm_tol_err' in model_metrics.keys())): model_metrics['1mm_tol_err'] = []
 	if(not ('5mm_tol_err' in model_metrics.keys())): model_metrics['5mm_tol_err'] = []
 	if(not ('10mm_tol_err' in model_metrics.keys())): model_metrics['10mm_tol_err'] = []
@@ -209,6 +216,7 @@ def append_model_metrics(model_metrics, test_set_id, scene_fname, gt_depths, num
 	model_metrics['rmse'].append(scene_metrics['rmse'])
 	model_metrics['mse'].append(scene_metrics['mse'])
 	model_metrics['mae'].append(scene_metrics['mae'])
+	model_metrics['ssim'].append(scene_metrics['ssim'])
 	model_metrics['1mm_tol_err'].append(scene_metrics['1mm_tol_err'])
 	model_metrics['5mm_tol_err'].append(scene_metrics['5mm_tol_err'])
 	model_metrics['10mm_tol_err'].append(scene_metrics['10mm_tol_err'])
@@ -235,6 +243,7 @@ def metrics2dataframe(model_names, model_metrics_all):
 		model_metrics_df_curr['mae'] = model_metrics_all[model_name]['mae']
 		model_metrics_df_curr['mse'] = model_metrics_all[model_name]['mse']
 		model_metrics_df_curr['rmse'] = model_metrics_all[model_name]['rmse']
+		model_metrics_df_curr['ssim'] = model_metrics_all[model_name]['ssim']
 		model_metrics_df_curr['1mm_tol_err'] = model_metrics_all[model_name]['1mm_tol_err']
 		model_metrics_df_curr['5mm_tol_err'] = model_metrics_all[model_name]['5mm_tol_err']
 		model_metrics_df_curr['10mm_tol_err'] = model_metrics_all[model_name]['10mm_tol_err']
