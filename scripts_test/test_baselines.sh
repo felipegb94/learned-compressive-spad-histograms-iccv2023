@@ -23,21 +23,21 @@ train_dataset=nyuv2_64x64x1024_80ps
 model_name=DDFN_C64B10/loss-kldiv_tv-1e-5
 experiment_name=baselines
 model_dirpath=outputs/${train_dataset}/${experiment_name}/${model_name}/2022-04-25_192521
-ckpt_id=epoch=05-step=19910-avgvalrmse=0.0287 # 0.0180 | 0.0177 | 0.0203 | 128 images == 0.03095
+ckpt_id=epoch=05-step=19910-avgvalrmse=0.0287 # 0.0180 | 0.0177 | 0.0203 | 72 images == 0.01760 | 128 images == 0.03095
 python test.py dataset='"'$test_dataset'"' ++model_name='"'$model_name'"' ++experiment_name=$experiment_name ++model_dirpath='"'$model_dirpath'"' ++ckpt_id='"'$ckpt_id'"' ++train_dataset='"'$train_dataset'"'
 
 ## 3D DB Plain Depth2Depth Model --> Full trained model with gradient decay
 model_name=DDFN_C64B10_Depth2Depth/loss-kldiv_tv-1e-5
 experiment_name=baselines
 model_dirpath=outputs/${train_dataset}/${experiment_name}/${model_name}/2022-05-02_085659
-ckpt_id=epoch=05-step=19910-avgvalrmse=0.0357 # | 0.0239 | 0.0276
+ckpt_id=epoch=05-step=19910-avgvalrmse=0.0357 # | 0.0239 | 0.0276 | 72 images == 0.02727 | 128 images == 0.02720
 python test.py dataset='"'$test_dataset'"' ++model_name='"'$model_name'"' ++experiment_name=$experiment_name ++model_dirpath='"'$model_dirpath'"' ++ckpt_id='"'$ckpt_id'"' ++train_dataset='"'$train_dataset'"'
 
 ## 3D DB Plain Depth2Depth Model (No TV) --> Full trained model with gradient decay
 model_name=DDFN_C64B10_Depth2Depth/loss-kldiv_tv-0.0
 experiment_name=baselines
 model_dirpath=outputs/${train_dataset}/${experiment_name}/${model_name}/2022-05-07_171658
-ckpt_id=epoch=08-step=28569-avgvalrmse=0.0263 # | 0.0292
+ckpt_id=epoch=08-step=28569-avgvalrmse=0.0263 # | 0.0292 | 72 images == 0.0354 | 128 images == 0.0396
 python test.py dataset='"'$test_dataset'"' ++model_name='"'$model_name'"' ++experiment_name=$experiment_name ++model_dirpath='"'$model_dirpath'"' ++ckpt_id='"'$ckpt_id'"' ++train_dataset='"'$train_dataset'"'
 
 # ## Peng et al., ECCV 2020 --> Full trained model with gradient decay

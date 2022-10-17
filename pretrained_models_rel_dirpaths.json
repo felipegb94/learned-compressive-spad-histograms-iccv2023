@@ -167,17 +167,17 @@
         }
     },
     "DDFN_C64B10_Depth2Depth/loss-kldiv_tv-0.0": {
-        "rel_dirpath": "outputs/nyuv2_64x64x1024_80ps/baselines/DDFN_C64B10_Depth2Depth/loss-kldiv_tv-0.0/2022-05-07_171658",
-        "ckpt_id": "epoch=08-step=28569-avgvalrmse=0.0263",
+        "rel_dirpath": "outputs/nyuv2_64x64x1024_80ps/no_compression_baselines_lr-1e-4/DDFN_C64B10_Depth2Depth/loss-kldiv_tv-0.0/run-complete_2022-10-13_051623",
+        "ckpt_id": "epoch=29-step=102158-avgvalrmse=0.0249.ckpt",
         "lindell2018_linospad_captured_min": {
             "depths/test_mae": 2.247,
             "depths/test_mse": 10.147,
             "depths/test_rmse": 3.0478
         },
         "middlebury_72x88x1024_98ps": {
-            "depths/test_mae": 0.01429,
-            "depths/test_mse": 0.00847,
-            "depths/test_rmse": 0.03961
+            "depths/test_mae": 0.01407,
+            "depths/test_mse": 0.00646,
+            "depths/test_rmse": 0.03836
         },
         "middlebury_highsignal_72x88x1024_98ps": {
             "depths/test_mae": 0.00846,
@@ -890,12 +890,12 @@
         }
     },
     "DDFN_C64B10_CSPH3D/k2048_down8_Mt1_Rand-optCt=True-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0": {
-        "rel_dirpath": "outputs/nyuv2_64x64x1024_80ps/csph3d_models/DDFN_C64B10_CSPH3D/k2048_down8_Mt1_Rand-optCt=True-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0/run-complete_2022-10-05_122605",
-        "ckpt_id": "epoch=29-step=102158-avgvalrmse=0.0170.ckpt",
+        "rel_dirpath": "outputs/nyuv2_64x64x1024_80ps/csph3d_models_rerun/DDFN_C64B10_CSPH3D/k2048_down8_Mt1_Rand-optCt=True-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0/run-complete_2022-10-12_192900",
+        "ckpt_id": "epoch=28-step=100426-avgvalrmse=0.0172.ckpt",
         "middlebury_72x88x1024_98ps": {
-            "depths/test_mae": 0.01297,
-            "depths/test_mse": 0.00751,
-            "depths/test_rmse": 0.04102
+            "depths/test_mae": 0.00921,
+            "depths/test_mse": 0.00045,
+            "depths/test_rmse": 0.01668
         }
     },
     "DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=False-optC=False_full_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0": {
@@ -1184,6 +1184,42 @@
             "depths/test_mae": 0.01255,
             "depths/test_mse": 0.0015,
             "depths/test_rmse": 0.02983
+        }
+    },
+    "DDFN_C64B10/norm-none/loss-kldiv_tv-1e-05": {
+        "rel_dirpath": "outputs/nyuv2_64x64x1024_80ps/no_compression_baselines_lr-1e-4/DDFN_C64B10/norm-none/loss-kldiv_tv-1e-05/run-complete_2022-10-16_063146",
+        "ckpt_id": "epoch=06-step=22509-avgvalrmse=0.0261.ckpt",
+        "middlebury_72x88x1024_98ps": {
+            "depths/test_mae": 0.00933,
+            "depths/test_mse": 0.00042,
+            "depths/test_rmse": 0.01757
+        }
+    },
+    "DDFN_C64B10/norm-Linf/loss-kldiv_tv-1e-05": {
+        "rel_dirpath": "outputs/nyuv2_64x64x1024_80ps/no_compression_baselines_lr-1e-4/DDFN_C64B10/norm-Linf/loss-kldiv_tv-1e-05/run-complete_2022-10-14_043918",
+        "ckpt_id": "epoch=03-step=13851-avgvalrmse=0.0280.ckpt",
+        "middlebury_72x88x1024_98ps": {
+            "depths/test_mae": 0.01477,
+            "depths/test_mse": 0.00311,
+            "depths/test_rmse": 0.03019
+        }
+    },
+    "DDFN_C64B10/norm-Linf/loss-kldiv_tv-0.0": {
+        "rel_dirpath": "outputs/nyuv2_64x64x1024_80ps/no_compression_baselines_lr-1e-4/DDFN_C64B10/norm-Linf/loss-kldiv_tv-0.0/run-complete_2022-10-13_225106",
+        "ckpt_id": "epoch=29-step=102158-avgvalrmse=0.0178.ckpt",
+        "middlebury_72x88x1024_98ps": {
+            "depths/test_mae": 0.03269,
+            "depths/test_mse": 0.05805,
+            "depths/test_rmse": 0.07615
+        }
+    },
+    "DDFN_C64B10_Depth2Depth/loss-kldiv_tv-1e-05": {
+        "rel_dirpath": "outputs/nyuv2_64x64x1024_80ps/no_compression_baselines_lr-1e-3/DDFN_C64B10_Depth2Depth/loss-kldiv_tv-1e-05/run-complete_2022-10-13_051558",
+        "ckpt_id": "epoch=01-step=5194-avgvalrmse=0.0347.ckpt",
+        "middlebury_72x88x1024_98ps": {
+            "depths/test_mae": 0.02304,
+            "depths/test_mse": 0.00175,
+            "depths/test_rmse": 0.03665
         }
     }
 }

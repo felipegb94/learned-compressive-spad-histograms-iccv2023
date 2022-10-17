@@ -69,7 +69,8 @@ if __name__=='__main__':
 	model_names = []
 	num_model_params = []
 	# add baselines first
-	no_compression_baseline = 'DDFN_C64B10/loss-kldiv_tv-1e-5'
+	# no_compression_baseline = 'DDFN_C64B10/loss-kldiv_tv-1e-5'
+	no_compression_baseline = 'DDFN_C64B10/norm-none/loss-kldiv_tv-1e-05'
 	argmax_compression_baseline = 'DDFN_C64B10_Depth2Depth/loss-kldiv_tv-1e-5'
 	model_names.append(no_compression_baseline)
 	model_names.append(argmax_compression_baseline)
