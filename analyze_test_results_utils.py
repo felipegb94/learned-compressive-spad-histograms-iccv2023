@@ -67,6 +67,10 @@ def compute_error_metrics(gt, est, eps_tol_thresh=0.01):
 	metrics['5mm_tol_err'] =  compute_eps_tol_err(gt,est,eps_tol_thresh=5./1000.)
 	metrics['10mm_tol_err'] =  compute_eps_tol_err(gt,est,eps_tol_thresh=10./1000.)
 	metrics['20mm_tol_err'] =  compute_eps_tol_err(gt,est,eps_tol_thresh=20./1000.)
+	metrics['inverse_1mm_tol_err'] = 1- metrics['1mm_tol_err']  
+	metrics['inverse_5mm_tol_err'] = 1 - metrics['5mm_tol_err'] 
+	metrics['inverse_10mm_tol_err'] = 1 - metrics['10mm_tol_err'] 
+	metrics['inverse_20mm_tol_err'] = 1 - metrics['20mm_tol_err'] 
 	return metrics
 	# return (compute_rmse(gt,est), compute_mse(gt,est), compute_mae(gt,est), abs_errs, np.round(perc_errs[0], decimals=2))
 
@@ -210,6 +214,10 @@ def append_model_metrics(model_metrics, test_set_id, scene_fname, gt_depths, num
 	if(not ('5mm_tol_err' in model_metrics.keys())): model_metrics['5mm_tol_err'] = []
 	if(not ('10mm_tol_err' in model_metrics.keys())): model_metrics['10mm_tol_err'] = []
 	if(not ('20mm_tol_err' in model_metrics.keys())): model_metrics['20mm_tol_err'] = []
+	if(not ('inverse_1mm_tol_err' in model_metrics.keys())): model_metrics['inverse_1mm_tol_err'] = []
+	if(not ('inverse_5mm_tol_err' in model_metrics.keys())): model_metrics['inverse_5mm_tol_err'] = []
+	if(not ('inverse_10mm_tol_err' in model_metrics.keys())): model_metrics['inverse_10mm_tol_err'] = []
+	if(not ('inverse_20mm_tol_err' in model_metrics.keys())): model_metrics['inverse_20mm_tol_err'] = []
 	## Compute error metrics with respect to ground truth
 	scene_metrics = compute_error_metrics(gt_depths, model_depths)
 	# (scene_rmse, scene_mse, scene_mae, scene_abs_errs, scene_perc_errs) = compute_error_metrics(gt_depths, model_depths)
@@ -221,6 +229,10 @@ def append_model_metrics(model_metrics, test_set_id, scene_fname, gt_depths, num
 	model_metrics['5mm_tol_err'].append(scene_metrics['5mm_tol_err'])
 	model_metrics['10mm_tol_err'].append(scene_metrics['10mm_tol_err'])
 	model_metrics['20mm_tol_err'].append(scene_metrics['20mm_tol_err'])
+	model_metrics['inverse_1mm_tol_err'].append(scene_metrics['inverse_1mm_tol_err'])
+	model_metrics['inverse_5mm_tol_err'].append(scene_metrics['inverse_5mm_tol_err'])
+	model_metrics['inverse_10mm_tol_err'].append(scene_metrics['inverse_10mm_tol_err'])
+	model_metrics['inverse_20mm_tol_err'].append(scene_metrics['inverse_20mm_tol_err'])
 	# scene_metrics = {}
 	# scene_metrics['rmse'] = scene_metrics['rmse']
 	# scene_metrics['mse'] = scene_metrics['mse']
@@ -247,6 +259,11 @@ def metrics2dataframe(model_names, model_metrics_all):
 		model_metrics_df_curr['1mm_tol_err'] = model_metrics_all[model_name]['1mm_tol_err']
 		model_metrics_df_curr['5mm_tol_err'] = model_metrics_all[model_name]['5mm_tol_err']
 		model_metrics_df_curr['10mm_tol_err'] = model_metrics_all[model_name]['10mm_tol_err']
+		model_metrics_df_curr['20mm_tol_err'] = model_metrics_all[model_name]['20mm_tol_err']
+		model_metrics_df_curr['inverse_1mm_tol_err'] = model_metrics_all[model_name]['inverse_1mm_tol_err']
+		model_metrics_df_curr['inverse_5mm_tol_err'] = model_metrics_all[model_name]['inverse_5mm_tol_err']
+		model_metrics_df_curr['inverse_10mm_tol_err'] = model_metrics_all[model_name]['inverse_10mm_tol_err']
+		model_metrics_df_curr['inverse_20mm_tol_err'] = model_metrics_all[model_name]['inverse_20mm_tol_err']
 		n_data_samples = len(model_metrics_all[model_name]['mae'])
 		model_metrics_df_curr['model_name'] = [model_name]*n_data_samples
 		model_metrics_df_curr['model_type'] = [extract_model_type(model_name)]*n_data_samples

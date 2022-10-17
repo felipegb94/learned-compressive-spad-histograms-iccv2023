@@ -117,17 +117,83 @@ if __name__=='__main__':
 	baselines_mean_metrics = model_metrics_df_baselines.groupby('model_name').mean()
 
 	## Make plot for all metrics
-	plt.clf()
+	plt.figure()
 	metric_id = 'mae'
 	out_fname = out_fname_base + '_' + metric_id
 	metric_ylim = None
 	ax = sns.lineplot(data=model_metrics_df_csph3d, x="compression_ratio", y=metric_id, hue="model_type", marker="o", err_style="bars", errorbar=("se", 2), linewidth=2)
 	ax.axhline(baselines_mean_metrics.loc[no_compression_baseline][metric_id], linewidth=2, linestyle='--', label=no_compression_baseline, color='red')
 	ax.axhline(baselines_mean_metrics.loc[argmax_compression_baseline][metric_id], linewidth=2, linestyle='--', label=argmax_compression_baseline, color='blue')
-	plt.legend()
 	plt.grid(linestyle='--', linewidth=0.5)
 	plot_utils.set_ticks(fontsize=12)
-	plt.xlabel("Compression Ratio", fontsize=12)
-	plt.ylabel("Mean Absolute Error (mm)", fontsize=12)
+	plt.xlabel("Compression Ratio", fontsize=14)
+	plt.ylabel("Mean Absolute Error (mm)", fontsize=14)
 	plot_utils.set_xy_box()
 	plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
+	plt.legend()
+
+
+	## Make plot for all metrics
+	plt.figure()
+	metric_id = 'ssim'
+	out_fname = out_fname_base + '_' + metric_id
+	metric_ylim = None
+	ax = sns.lineplot(data=model_metrics_df_csph3d, x="compression_ratio", y=metric_id, hue="model_type", marker="o", err_style="bars", errorbar=("se", 2), linewidth=2)
+	ax.axhline(baselines_mean_metrics.loc[no_compression_baseline][metric_id], linewidth=2, linestyle='--', label=no_compression_baseline, color='red')
+	ax.axhline(baselines_mean_metrics.loc[argmax_compression_baseline][metric_id], linewidth=2, linestyle='--', label=argmax_compression_baseline, color='blue')
+	plt.grid(linestyle='--', linewidth=0.5)
+	plot_utils.set_ticks(fontsize=12)
+	plt.xlabel("Compression Ratio", fontsize=14)
+	plt.ylabel("SSIM", fontsize=14)
+	plot_utils.set_xy_box()
+	plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
+	plt.legend()
+
+
+	## Make plot for all metrics
+	plt.figure()
+	metric_id = '5mm_tol_err'
+	out_fname = out_fname_base + '_' + metric_id
+	metric_ylim = None
+	ax = sns.lineplot(data=model_metrics_df_csph3d, x="compression_ratio", y=metric_id, hue="model_type", marker="o", err_style="bars", errorbar=("se", 2), linewidth=2)
+	ax.axhline(baselines_mean_metrics.loc[no_compression_baseline][metric_id], linewidth=2, linestyle='--', label=no_compression_baseline, color='red')
+	ax.axhline(baselines_mean_metrics.loc[argmax_compression_baseline][metric_id], linewidth=2, linestyle='--', label=argmax_compression_baseline, color='blue')
+	plt.grid(linestyle='--', linewidth=0.5)
+	plot_utils.set_ticks(fontsize=12)
+	plt.xlabel("Compression Ratio", fontsize=14)
+	plt.ylabel("Percent Pixels with Errors < 5mm", fontsize=14)
+	plot_utils.set_xy_box()
+	plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
+	plt.legend()
+
+	## Make plot for all metrics
+	plt.figure()
+	metric_id = '10mm_tol_err'
+	out_fname = out_fname_base + '_' + metric_id
+	metric_ylim = None
+	ax = sns.lineplot(data=model_metrics_df_csph3d, x="compression_ratio", y=metric_id, hue="model_type", marker="o", err_style="bars", errorbar=("se", 2), linewidth=2)
+	ax.axhline(baselines_mean_metrics.loc[no_compression_baseline][metric_id], linewidth=2, linestyle='--', label=no_compression_baseline, color='red')
+	ax.axhline(baselines_mean_metrics.loc[argmax_compression_baseline][metric_id], linewidth=2, linestyle='--', label=argmax_compression_baseline, color='blue')
+	plt.grid(linestyle='--', linewidth=0.5)
+	plot_utils.set_ticks(fontsize=12)
+	plt.xlabel("Compression Ratio", fontsize=14)
+	plt.ylabel("Percent Pixels with Errors < 10mm", fontsize=14)
+	plot_utils.set_xy_box()
+	plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
+	plt.legend()
+
+	## Make plot for all metrics
+	plt.figure()
+	metric_id = 'inverse_10mm_tol_err'
+	out_fname = out_fname_base + '_' + metric_id
+	metric_ylim = None
+	ax = sns.lineplot(data=model_metrics_df_csph3d, x="compression_ratio", y=metric_id, hue="model_type", marker="o", err_style="bars", errorbar=("se", 2), linewidth=2)
+	ax.axhline(baselines_mean_metrics.loc[no_compression_baseline][metric_id], linewidth=2, linestyle='--', label=no_compression_baseline, color='red')
+	ax.axhline(baselines_mean_metrics.loc[argmax_compression_baseline][metric_id], linewidth=2, linestyle='--', label=argmax_compression_baseline, color='blue')
+	plt.grid(linestyle='--', linewidth=0.5)
+	plot_utils.set_ticks(fontsize=12)
+	plt.xlabel("Compression Ratio", fontsize=14)
+	plt.ylabel("Percent Pixels with Errors > 10mm", fontsize=14)
+	plot_utils.set_xy_box()
+	plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
+	plt.legend()
