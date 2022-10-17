@@ -76,12 +76,12 @@ if __name__=='__main__':
 	model_names.append(argmax_compression_baseline)
 	num_model_params = [0] * len(model_names)
 	# generate all csph3d model names 
-	encoding_type_all = ['csph1d', 'csph1d', 'separable', 'separable', 'separable']
-	tdim_init_all = ['HybridGrayFourier', 'TruncFourier', 'Rand', 'Rand', 'Rand']
-	optCt_all = [False, False, True, True, True]
-	optC_all = [False, False, True, True, True]
-	spatial_down_factor_all = [1, 1, 4, 4, 4]
-	num_tdim_blocks_all = [1, 1, 1, 4, 16]
+	encoding_type_all = ['csph1d', 'csph1d', 'csph1d', 'separable', 'separable', 'separable']
+	tdim_init_all = ['TruncFourier', 'HybridGrayFourier', 'Rand', 'Rand', 'Rand', 'Rand']
+	optCt_all = [False, False, True, True, True, True]
+	optC_all = [False, False, True, True, True, True]
+	spatial_down_factor_all = [1, 1, 1, 4, 4, 4]
+	num_tdim_blocks_all = [1, 1, 1, 1, 4, 16]
 	(csph3d_model_names, csph3d_num_model_params) = compose_csph3d_model_names_list(compression_ratio_all
 									, spatial_down_factor_all
 									, num_tdim_blocks_all
@@ -121,7 +121,7 @@ if __name__=='__main__':
 	metric_id = 'mae'
 	out_fname = out_fname_base + '_' + metric_id
 	metric_ylim = None
-	ax = sns.lineplot(data=model_metrics_df_csph3d, x="compression_ratio", y=metric_id, hue="model_type", marker="o", err_style="bars", errorbar=("se", 2), linewidth=2)
+	ax = sns.lineplot(data=model_metrics_df_csph3d, x="compression_ratio", y=metric_id, hue="model_type", marker="o", err_style="bars", errorbar=("se", 2), linewidth=2, markersize=8)
 	ax.axhline(baselines_mean_metrics.loc[no_compression_baseline][metric_id], linewidth=2, linestyle='--', label=no_compression_baseline, color='red')
 	ax.axhline(baselines_mean_metrics.loc[argmax_compression_baseline][metric_id], linewidth=2, linestyle='--', label=argmax_compression_baseline, color='blue')
 	plt.grid(linestyle='--', linewidth=0.5)
@@ -129,8 +129,8 @@ if __name__=='__main__':
 	plt.xlabel("Compression Ratio", fontsize=14)
 	plt.ylabel("Mean Absolute Error (mm)", fontsize=14)
 	plot_utils.set_xy_box()
+	plt.gca().get_legend().remove()
 	plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
-	plt.legend()
 
 
 	## Make plot for all metrics
@@ -138,7 +138,7 @@ if __name__=='__main__':
 	metric_id = 'ssim'
 	out_fname = out_fname_base + '_' + metric_id
 	metric_ylim = None
-	ax = sns.lineplot(data=model_metrics_df_csph3d, x="compression_ratio", y=metric_id, hue="model_type", marker="o", err_style="bars", errorbar=("se", 2), linewidth=2)
+	ax = sns.lineplot(data=model_metrics_df_csph3d, x="compression_ratio", y=metric_id, hue="model_type", marker="o", err_style="bars", errorbar=("se", 2), linewidth=2, markersize=8)
 	ax.axhline(baselines_mean_metrics.loc[no_compression_baseline][metric_id], linewidth=2, linestyle='--', label=no_compression_baseline, color='red')
 	ax.axhline(baselines_mean_metrics.loc[argmax_compression_baseline][metric_id], linewidth=2, linestyle='--', label=argmax_compression_baseline, color='blue')
 	plt.grid(linestyle='--', linewidth=0.5)
@@ -146,8 +146,8 @@ if __name__=='__main__':
 	plt.xlabel("Compression Ratio", fontsize=14)
 	plt.ylabel("SSIM", fontsize=14)
 	plot_utils.set_xy_box()
+	plt.gca().get_legend().remove()
 	plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
-	plt.legend()
 
 
 	## Make plot for all metrics
@@ -155,7 +155,7 @@ if __name__=='__main__':
 	metric_id = '5mm_tol_err'
 	out_fname = out_fname_base + '_' + metric_id
 	metric_ylim = None
-	ax = sns.lineplot(data=model_metrics_df_csph3d, x="compression_ratio", y=metric_id, hue="model_type", marker="o", err_style="bars", errorbar=("se", 2), linewidth=2)
+	ax = sns.lineplot(data=model_metrics_df_csph3d, x="compression_ratio", y=metric_id, hue="model_type", marker="o", err_style="bars", errorbar=("se", 2), linewidth=2, markersize=8)
 	ax.axhline(baselines_mean_metrics.loc[no_compression_baseline][metric_id], linewidth=2, linestyle='--', label=no_compression_baseline, color='red')
 	ax.axhline(baselines_mean_metrics.loc[argmax_compression_baseline][metric_id], linewidth=2, linestyle='--', label=argmax_compression_baseline, color='blue')
 	plt.grid(linestyle='--', linewidth=0.5)
@@ -163,15 +163,15 @@ if __name__=='__main__':
 	plt.xlabel("Compression Ratio", fontsize=14)
 	plt.ylabel("Percent Pixels with Errors < 5mm", fontsize=14)
 	plot_utils.set_xy_box()
+	plt.gca().get_legend().remove()
 	plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
-	plt.legend()
 
 	## Make plot for all metrics
 	plt.figure()
 	metric_id = '10mm_tol_err'
 	out_fname = out_fname_base + '_' + metric_id
 	metric_ylim = None
-	ax = sns.lineplot(data=model_metrics_df_csph3d, x="compression_ratio", y=metric_id, hue="model_type", marker="o", err_style="bars", errorbar=("se", 2), linewidth=2)
+	ax = sns.lineplot(data=model_metrics_df_csph3d, x="compression_ratio", y=metric_id, hue="model_type", marker="o", err_style="bars", errorbar=("se", 2), linewidth=2, markersize=8)
 	ax.axhline(baselines_mean_metrics.loc[no_compression_baseline][metric_id], linewidth=2, linestyle='--', label=no_compression_baseline, color='red')
 	ax.axhline(baselines_mean_metrics.loc[argmax_compression_baseline][metric_id], linewidth=2, linestyle='--', label=argmax_compression_baseline, color='blue')
 	plt.grid(linestyle='--', linewidth=0.5)
@@ -179,15 +179,15 @@ if __name__=='__main__':
 	plt.xlabel("Compression Ratio", fontsize=14)
 	plt.ylabel("Percent Pixels with Errors < 10mm", fontsize=14)
 	plot_utils.set_xy_box()
+	plt.gca().get_legend().remove()
 	plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
-	plt.legend()
 
 	## Make plot for all metrics
 	plt.figure()
 	metric_id = 'inverse_10mm_tol_err'
 	out_fname = out_fname_base + '_' + metric_id
 	metric_ylim = None
-	ax = sns.lineplot(data=model_metrics_df_csph3d, x="compression_ratio", y=metric_id, hue="model_type", marker="o", err_style="bars", errorbar=("se", 2), linewidth=2)
+	ax = sns.lineplot(data=model_metrics_df_csph3d, x="compression_ratio", y=metric_id, hue="model_type", marker="o", err_style="bars", errorbar=("se", 2), linewidth=2, markersize=8)
 	ax.axhline(baselines_mean_metrics.loc[no_compression_baseline][metric_id], linewidth=2, linestyle='--', label=no_compression_baseline, color='red')
 	ax.axhline(baselines_mean_metrics.loc[argmax_compression_baseline][metric_id], linewidth=2, linestyle='--', label=argmax_compression_baseline, color='blue')
 	plt.grid(linestyle='--', linewidth=0.5)
@@ -195,5 +195,5 @@ if __name__=='__main__':
 	plt.xlabel("Compression Ratio", fontsize=14)
 	plt.ylabel("Percent Pixels with Errors > 10mm", fontsize=14)
 	plot_utils.set_xy_box()
+	plt.gca().get_legend().remove()
 	plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
-	plt.legend()
