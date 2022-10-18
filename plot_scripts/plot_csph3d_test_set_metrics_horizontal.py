@@ -35,10 +35,10 @@ def simplify_model_name(model_name):
 if __name__=='__main__':
 
 	## load all dirpaths without creating a job 
-	io_dirpaths = get_hydra_io_dirpaths(job_name='plot_csph3d_test_set_metrics')
+	io_dirpaths = get_hydra_io_dirpaths(job_name='plot_csph3d_test_set_metrics_horizontal')
 
 	compression_ratio_all = [32, 64, 128]
-	# compression_ratio_all = [128]
+	compression_ratio_all = [128]
 
 	## plot for each compression ratio
 	for compression_ratio in compression_ratio_all:
@@ -54,17 +54,17 @@ if __name__=='__main__':
 		spatial_down_factor_all = [4]*len(encoding_type_all)
 		num_tdim_blocks_all = [1, 1, 4, 16]
 
-		## Parameters for: Spatial kernel size effect?
-		experiment_id = 'spatial_block_dims_effect'
-		encoding_type_all = ['csph1d', 'csph1d', 'separable', 'separable',  'separable']
-		spatial_down_factor_all = [1, 1, 2, 4, 8]
-		tdim_init_all = ['Rand']*len(encoding_type_all)
-		optCt_all = [True]*len(encoding_type_all)
-		optC_all = [True]*len(encoding_type_all)
-		tdim_init_all[0] = 'HybridGrayFourier'
-		optCt_all[0] = False
-		optC_all[0] = False
-		num_tdim_blocks_all = [1]*len(encoding_type_all)
+		# ## Parameters for: Spatial kernel size effect?
+		# experiment_id = 'spatial_block_dims_effect'
+		# encoding_type_all = ['csph1d', 'csph1d', 'separable', 'separable',  'separable']
+		# spatial_down_factor_all = [1, 1, 2, 4, 8]
+		# tdim_init_all = ['Rand']*len(encoding_type_all)
+		# optCt_all = [True]*len(encoding_type_all)
+		# optC_all = [True]*len(encoding_type_all)
+		# tdim_init_all[0] = 'HybridGrayFourier'
+		# optCt_all[0] = False
+		# optC_all[0] = False
+		# num_tdim_blocks_all = [1]*len(encoding_type_all)
 
 		# ## Parameters for: Does a good initialization Help Performance?
 		# experiment_id = 'tdim_init_effect'
@@ -76,7 +76,7 @@ if __name__=='__main__':
 		# num_tdim_blocks_all = [1, 1, 1, 16, 16, 16]
 
 		## output dirpaths
-		experiment_name = 'middlebury/test_set_metrics/{}'.format(experiment_id)
+		experiment_name = 'middlebury/test_set_metrics/horizontal_{}'.format(experiment_id)
 		# out_dirpath = os.path.join(io_dirpaths.results_weekly_dirpath, experiment_name)
 		out_dirpath = os.path.join(io_dirpaths.results_figures_dirpath, experiment_name)
 		os.makedirs(out_dirpath, exist_ok=True)
@@ -126,117 +126,134 @@ if __name__=='__main__':
 		## scale MAE to make its units mm
 		model_metrics_df['mae'] = model_metrics_df['mae']*1000
 
+		## Make plot for all metrics
+		plt.figure()
+		metric_id = 'mae'
+		out_fname = out_fname_base + '_' + metric_id
+		metric_lim = (0, 50)
+		# metric_lim = None
+		analyze_test_results_utils.plot_test_dataset_metrics_horizontal(model_metrics_df, metric_id=metric_id, metric_lim=metric_lim, title='', height_per_model=1.5)
+		# remove ticks and legend for saving
+		plot_utils.remove_yticks()
+		plt.xlabel(''); plt.ylabel('')
+		plt.grid(linestyle='--', linewidth=0.5)
+		# save figure with legend
+		plot_utils.save_currfig(dirpath=out_dirpath, filename='legend_'+out_fname, file_ext='svg')
+		# save figure without legend
+		plt.gca().get_legend().remove()
+		plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname+'_height-1.5', file_ext='svg')
+		# add title after saving so we know what we plotted
+		plt.title('{} - Compressive Histograms at {}x Compression'.format(metric_id, compression_ratio))
 
 		## Make plot for all metrics
 		plt.figure()
 		metric_id = 'mae'
 		out_fname = out_fname_base + '_' + metric_id
-		metric_ylim = (0, 50)
-		# metric_ylim = None
-		analyze_test_results_utils.plot_test_dataset_metrics(model_metrics_df, metric_id=metric_id, ylim=metric_ylim, title='', fig_width=3.0)
+		metric_lim = (0, 50)
+		# metric_lim = None
+		analyze_test_results_utils.plot_test_dataset_metrics_horizontal(model_metrics_df, metric_id=metric_id, metric_lim=metric_lim, title='', height_per_model=1.25)
 		# remove ticks and legend for saving
-		plot_utils.remove_xticks()
+		plot_utils.remove_yticks()
 		plt.xlabel(''); plt.ylabel('')
 		plt.grid(linestyle='--', linewidth=0.5)
 		# save figure with legend
 		plot_utils.save_currfig(dirpath=out_dirpath, filename='legend_'+out_fname, file_ext='svg')
 		# save figure without legend
 		plt.gca().get_legend().remove()
-		plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname+"_width-3.0", file_ext='svg')
+		plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname+'_height-1.25', file_ext='svg')
 		# add title after saving so we know what we plotted
 		plt.title('{} - Compressive Histograms at {}x Compression'.format(metric_id, compression_ratio))
-
 
 		## Make plot for all metrics
 		plt.figure()
 		metric_id = 'mae'
 		out_fname = out_fname_base + '_' + metric_id
-		metric_ylim = (0, 50)
-		# metric_ylim = None
-		analyze_test_results_utils.plot_test_dataset_metrics(model_metrics_df, metric_id=metric_id, ylim=metric_ylim, title='', fig_width=2.0)
+		metric_lim = (0, 50)
+		# metric_lim = None
+		analyze_test_results_utils.plot_test_dataset_metrics_horizontal(model_metrics_df, metric_id=metric_id, metric_lim=metric_lim, title='', height_per_model=1.75)
 		# remove ticks and legend for saving
-		plot_utils.remove_xticks()
+		plot_utils.remove_yticks()
 		plt.xlabel(''); plt.ylabel('')
 		plt.grid(linestyle='--', linewidth=0.5)
 		# save figure with legend
 		plot_utils.save_currfig(dirpath=out_dirpath, filename='legend_'+out_fname, file_ext='svg')
 		# save figure without legend
 		plt.gca().get_legend().remove()
-		plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname+"_width-2.0", file_ext='svg')
+		plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname+'_height-1.75', file_ext='svg')
 		# add title after saving so we know what we plotted
 		plt.title('{} - Compressive Histograms at {}x Compression'.format(metric_id, compression_ratio))
 
-		## Make plot for all metrics
-		plt.figure()
-		metric_id = 'ssim'
-		out_fname = out_fname_base + '_' + metric_id
-		metric_ylim = (0.7, 1.0)
-		analyze_test_results_utils.plot_test_dataset_metrics(model_metrics_df, metric_id=metric_id, ylim=metric_ylim, title='', fig_width=3)
-		# remove ticks and legend for saving
-		plot_utils.remove_xticks()
-		plt.xlabel(''); plt.ylabel('')
-		plt.grid(linestyle='--', linewidth=0.5)
-		# save figure with legend
-		plot_utils.save_currfig(dirpath=out_dirpath, filename='legend_'+out_fname, file_ext='svg')
-		# save figure without legend
-		plt.gca().get_legend().remove()
-		plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
-		# add title after saving so we know what we plotted
-		plt.title('{} - Compressive Histograms at {}x Compression'.format(metric_id, compression_ratio))
+		# ## Make plot for all metrics
+		# plt.figure()
+		# metric_id = 'ssim'
+		# out_fname = out_fname_base + '_' + metric_id
+		# metric_lim = (0.7, 1.0)
+		# analyze_test_results_utils.plot_test_dataset_metrics_horizontal(model_metrics_df, metric_id=metric_id, lim=metric_lim, title='')
+		# # remove ticks and legend for saving
+		# plot_utils.remove_xticks()
+		# plt.xlabel(''); plt.ylabel('')
+		# plt.grid(linestyle='--', linewidth=0.5)
+		# # save figure with legend
+		# plot_utils.save_currfig(dirpath=out_dirpath, filename='legend_'+out_fname, file_ext='svg')
+		# # save figure without legend
+		# plt.gca().get_legend().remove()
+		# plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
+		# # add title after saving so we know what we plotted
+		# plt.title('{} - Compressive Histograms at {}x Compression'.format(metric_id, compression_ratio))
 		
-		## Make plot for all metrics
-		plt.figure()
-		metric_id = '5mm_tol_err'
-		metric_ylim = (0.1, 0.9)
-		# metric_ylim = None
-		out_fname = out_fname_base + '_' + metric_id
-		analyze_test_results_utils.plot_test_dataset_metrics(model_metrics_df, metric_id=metric_id, ylim=metric_ylim, title='', fig_width=3)
-		# remove ticks and legend for saving
-		plot_utils.remove_xticks()
-		plt.xlabel(''); plt.ylabel('')
-		plt.grid(linestyle='--', linewidth=0.5)
-		# save figure with legend
-		plot_utils.save_currfig(dirpath=out_dirpath, filename='legend_'+out_fname, file_ext='svg')
-		# save figure without legend
-		plt.gca().get_legend().remove()
-		plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
-		# add title after saving so we know what we plotted
-		plt.title('{} - Compressive Histograms at {}x Compression'.format(metric_id, compression_ratio))
+		# ## Make plot for all metrics
+		# plt.figure()
+		# metric_id = '5mm_tol_err'
+		# metric_lim = (0.1, 0.9)
+		# # metric_lim = None
+		# out_fname = out_fname_base + '_' + metric_id
+		# analyze_test_results_utils.plot_test_dataset_metrics_horizontal(model_metrics_df, metric_id=metric_id, lim=metric_lim, title='')
+		# # remove ticks and legend for saving
+		# plot_utils.remove_xticks()
+		# plt.xlabel(''); plt.ylabel('')
+		# plt.grid(linestyle='--', linewidth=0.5)
+		# # save figure with legend
+		# plot_utils.save_currfig(dirpath=out_dirpath, filename='legend_'+out_fname, file_ext='svg')
+		# # save figure without legend
+		# plt.gca().get_legend().remove()
+		# plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
+		# # add title after saving so we know what we plotted
+		# plt.title('{} - Compressive Histograms at {}x Compression'.format(metric_id, compression_ratio))
 
-		## Make plot for all metrics
-		plt.figure()
-		metric_id = '10mm_tol_err'
-		metric_ylim = (0.2, 1.0)
-		# metric_ylim = None
-		out_fname = out_fname_base + '_' + metric_id
-		analyze_test_results_utils.plot_test_dataset_metrics(model_metrics_df, metric_id=metric_id, ylim=metric_ylim, title='', fig_width=3)
-		# remove ticks and legend for saving
-		plot_utils.remove_xticks()
-		plt.xlabel(''); plt.ylabel('')
-		plt.grid(linestyle='--', linewidth=0.5)
-		# save figure with legend
-		plot_utils.save_currfig(dirpath=out_dirpath, filename='legend_'+out_fname, file_ext='svg')
-		# save figure without legend
-		plt.gca().get_legend().remove()
-		plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
-		# add title after saving so we know what we plotted
-		plt.title('{} - Compressive Histograms at {}x Compression'.format(metric_id, compression_ratio))
+		# ## Make plot for all metrics
+		# plt.figure()
+		# metric_id = '10mm_tol_err'
+		# metric_lim = (0.2, 1.0)
+		# # metric_lim = None
+		# out_fname = out_fname_base + '_' + metric_id
+		# analyze_test_results_utils.plot_test_dataset_metrics_horizontal(model_metrics_df, metric_id=metric_id, lim=metric_lim, title='')
+		# # remove ticks and legend for saving
+		# plot_utils.remove_xticks()
+		# plt.xlabel(''); plt.ylabel('')
+		# plt.grid(linestyle='--', linewidth=0.5)
+		# # save figure with legend
+		# plot_utils.save_currfig(dirpath=out_dirpath, filename='legend_'+out_fname, file_ext='svg')
+		# # save figure without legend
+		# plt.gca().get_legend().remove()
+		# plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
+		# # add title after saving so we know what we plotted
+		# plt.title('{} - Compressive Histograms at {}x Compression'.format(metric_id, compression_ratio))
 
-		## Make plot for all metrics
-		plt.figure()
-		metric_id = 'inverse_10mm_tol_err'
-		metric_ylim = (0.0, 0.8)
-		# metric_ylim = None
-		out_fname = out_fname_base + '_' + metric_id
-		analyze_test_results_utils.plot_test_dataset_metrics(model_metrics_df, metric_id=metric_id, ylim=metric_ylim, title='', fig_width=3)
-		# remove ticks and legend for saving
-		plot_utils.remove_xticks()
-		plt.xlabel(''); plt.ylabel('')
-		plt.grid(linestyle='--', linewidth=0.5)
-		# save figure with legend
-		plot_utils.save_currfig(dirpath=out_dirpath, filename='legend_'+out_fname, file_ext='svg')
-		# save figure without legend
-		plt.gca().get_legend().remove()
-		plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
-		# add title after saving so we know what we plotted
-		plt.title('{} - Compressive Histograms at {}x Compression'.format(metric_id, compression_ratio))
+		# ## Make plot for all metrics
+		# plt.figure()
+		# metric_id = 'inverse_10mm_tol_err'
+		# metric_lim = (0.0, 0.8)
+		# # metric_lim = None
+		# out_fname = out_fname_base + '_' + metric_id
+		# analyze_test_results_utils.plot_test_dataset_metrics_horizontal(model_metrics_df, metric_id=metric_id, lim=metric_lim, title='')
+		# # remove ticks and legend for saving
+		# plot_utils.remove_xticks()
+		# plt.xlabel(''); plt.ylabel('')
+		# plt.grid(linestyle='--', linewidth=0.5)
+		# # save figure with legend
+		# plot_utils.save_currfig(dirpath=out_dirpath, filename='legend_'+out_fname, file_ext='svg')
+		# # save figure without legend
+		# plt.gca().get_legend().remove()
+		# plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
+		# # add title after saving so we know what we plotted
+		# plt.title('{} - Compressive Histograms at {}x Compression'.format(metric_id, compression_ratio))

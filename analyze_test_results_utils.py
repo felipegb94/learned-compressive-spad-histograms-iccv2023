@@ -276,11 +276,11 @@ def metrics2dataframe(model_names, model_metrics_all):
 		model_metrics_df = pd.concat((model_metrics_df, model_metrics_df_curr), axis=0)
 	return model_metrics_df
 
-def plot_test_dataset_metrics(model_metrics_df, metric_id='mae', point_hue_id='mean_sbr', ylim=None, title='Dataset Metrics'):
+def plot_test_dataset_metrics(model_metrics_df, metric_id='mae', point_hue_id='mean_sbr', ylim=None, title='Dataset Metrics', fig_width=1.6):
 	n_models = model_metrics_df['model_name'].nunique()
-	fig_width = (1.6*(n_models))
+	fig_width = (fig_width*(n_models))
 	## Update the size of the figure
-	plot_utils.update_fig_size(height=5, width=fig_width)
+	plot_utils.update_fig_size(height=4, width=fig_width)
 	plt.clf()
 	ax = plt.gca()
 	# cmap = sns.cubehelix_palette(rot=-.2, as_cmap=True, reverse=True, light=0.8, dark=0.3)
@@ -305,9 +305,45 @@ def plot_test_dataset_metrics(model_metrics_df, metric_id='mae', point_hue_id='m
 	ax.legend(title=' '.join(point_hue_id.split('_')).capitalize(), fontsize=14, title_fontsize=14)
 	## Set the ticks and title
 	plt.xticks(rotation=3)
-	plot_utils.set_ticks(ax, fontsize=12)
+	plot_utils.set_ticks(ax, fontsize=14)
 	if(not (ylim is None)):
 		plt.ylim(ylim)
+	plt.title(title)
+	## set the box
+	plot_utils.set_xy_box()
+
+def plot_test_dataset_metrics_horizontal(model_metrics_df, metric_id='mae', point_hue_id='mean_sbr', metric_lim=None, title='Dataset Metrics', height_per_model=1.6):
+	n_models = model_metrics_df['model_name'].nunique()
+	fig_height = (height_per_model*(n_models))
+	## Update the size of the figure
+	plot_utils.update_fig_size(height=fig_height, width=5)
+	plt.clf()
+	ax = plt.gca()
+	# cmap = sns.cubehelix_palette(rot=-.2, as_cmap=True, reverse=True, light=0.8, dark=0.3)
+	# cmap = sns.cubehelix_palette(start=2, rot=0, dark=0, light=.95, reverse=True, as_cmap=True)
+	cmap = sns.color_palette("mako", n_colors=len(model_metrics_df[point_hue_id].unique()))
+	## legend="full" is needed to display the full name of the hue variable
+	## set zorder to 0 to make sur eit appears below boxplot
+	ax = sns.swarmplot(data=model_metrics_df, y='model_name', x=metric_id, orient="h", hue=point_hue_id, dodge=True, legend="full", palette=cmap)
+	boxprops = {'facecolor':'black', 'linewidth': 1, 'alpha': 0.3}
+	# medianprops = {'linewidth': 4, 'color': '#ff5252'}
+	# medianprops = {'linewidth': 4, 'color': '#4ba173'}
+	medianprops = {'linewidth': 3, 'color': '#424242', "solid_capstyle": "butt"}
+	# meanprops={"linestyle":"--","linewidth": 3, "color":"white"}
+	meanprops={"marker":"o",
+					"markerfacecolor":"white", 
+					"markeredgecolor":"black",
+					"markersize":"14"}
+	ax = sns.boxplot(data=model_metrics_df, y='model_name', x=metric_id, ax=ax, orient="h", showfliers = False, boxprops=boxprops, medianprops=medianprops, meanprops=meanprops, showmeans=True)
+	## place legend outside
+	# ax.legend(title=' '.join(point_hue_id.split('_')).capitalize(), fontsize=14, title_fontsize=14, bbox_to_anchor=(1, 0.5), loc='center left')
+	## auto place legend
+	ax.legend(title=' '.join(point_hue_id.split('_')).capitalize(), fontsize=14, title_fontsize=14)
+	## Set the ticks and title
+	plt.yticks(rotation=3)
+	plot_utils.set_ticks(ax, fontsize=14)
+	if(not (metric_lim is None)):
+		plt.xlim(metric_lim)
 	plt.title(title)
 	## set the box
 	plot_utils.set_xy_box()
