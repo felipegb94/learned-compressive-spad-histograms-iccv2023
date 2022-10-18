@@ -33,8 +33,8 @@ if __name__=='__main__':
 
 	## Scene ids and signal and SBR parameters we want to plot for
 	test_set_id = 'test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
-	scene_ids = ['spad_Art']
-	sbr_params = ['10_1000','10_10','10_200']
+	scene_ids = ['spad_Art','spad_Reindeer']
+	sbr_params = ['10_1000','10_10','10_50','10_200']
 
 	## Check that input scene ids and sbr params are available in test set
 	middlebury_test_set_info = analyze_test_results_utils.middlebury_test_set_info
@@ -69,14 +69,26 @@ if __name__=='__main__':
 	# num_tdim_blocks_all = [1, 1, 1, 1, 4, 16]
 	# compression_ratio_all = [32, 64, 128]
 
-	## CSPH3D Models for: Effect of Size of C
-	## Parameters for: Does decreasing the number of parameters hurt performance?
-	encoding_type_all = ['full', 'separable', 'separable', 'separable']
+	# ## CSPH3D Models for: Effect of Size of C
+	# ## Parameters for: Does decreasing the number of parameters hurt performance?
+	# encoding_type_all = ['full', 'separable', 'separable', 'separable']
+	# tdim_init_all = ['Rand']*len(encoding_type_all)
+	# optCt_all = [True]*len(encoding_type_all)
+	# optC_all = [True]*len(encoding_type_all)
+	# spatial_down_factor_all = [4]*len(encoding_type_all)
+	# num_tdim_blocks_all = [1, 1, 4, 16]
+	# compression_ratio_all = [32, 64, 128]
+
+	## Parameters for: Spatial kernel size effect?
+	encoding_type_all = ['csph1d', 'csph1d', 'separable', 'separable',  'separable']
+	spatial_down_factor_all = [1, 1, 2, 4, 8]
 	tdim_init_all = ['Rand']*len(encoding_type_all)
 	optCt_all = [True]*len(encoding_type_all)
 	optC_all = [True]*len(encoding_type_all)
-	spatial_down_factor_all = [4]*len(encoding_type_all)
-	num_tdim_blocks_all = [1, 1, 4, 16]
+	tdim_init_all[0] = 'HybridGrayFourier'
+	optCt_all[0] = False
+	optC_all[0] = False
+	num_tdim_blocks_all = [1]*len(encoding_type_all)
 	compression_ratio_all = [32, 64, 128]
 
 	# generate the csph3d model names

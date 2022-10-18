@@ -56,14 +56,14 @@ if __name__=='__main__':
 
 		## Parameters for: Spatial kernel size effect?
 		experiment_id = 'spatial_block_dims_effect'
-		encoding_type_all = ['csph1d', 'csph1d', 'separable', 'separable',  'separable']
-		spatial_down_factor_all = [1, 1, 2, 4, 8]
+		encoding_type_all = ['csph1d', 'separable', 'separable',  'separable']
+		spatial_down_factor_all = [1, 2, 4, 8]
 		tdim_init_all = ['Rand']*len(encoding_type_all)
 		optCt_all = [True]*len(encoding_type_all)
 		optC_all = [True]*len(encoding_type_all)
-		tdim_init_all[0] = 'HybridGrayFourier'
-		optCt_all[0] = False
-		optC_all[0] = False
+		# tdim_init_all[0] = 'HybridGrayFourier'
+		# optCt_all[0] = False
+		# optC_all[0] = False
 		num_tdim_blocks_all = [1]*len(encoding_type_all)
 
 		# ## Parameters for: Does a good initialization Help Performance?
