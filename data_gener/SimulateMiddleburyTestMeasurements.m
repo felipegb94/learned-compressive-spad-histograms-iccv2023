@@ -17,7 +17,7 @@ bin_size = 100e-9/num_bins; %approximately the bin size (in secs)
 c = 3e8; 
 % Dark and Bright image parameter idx
 dark_img_param_idx = 0; % For dark count image
-psf_img_param_idx = 2; % For bright image from which the PSF/pulse wavefor is extracted (see LoadAndPreprocessBightPSFImg.m for options)
+psf_img_param_idx = 0; % For bright image from which the PSF/pulse wavefor is extracted (see LoadAndPreprocessBightPSFImg.m for options)
 % Noise params to use during simulation
 param_idx = 'all';
 % 
@@ -33,7 +33,8 @@ dataset_name_prefix = 'SimSPADDataset';
 % create a dataset name similar to the one created in the train set.
 nr = 576; nc = 704;
 if LOW_RES
-    lres_factor = 1/8;
+%     lres_factor = 1/8;
+    lres_factor = 1/4;
 else
     lres_factor = 1;
 end
