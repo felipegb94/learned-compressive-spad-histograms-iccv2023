@@ -35,6 +35,18 @@ train_dataset=nyuv2_64x64x1024_80ps
 # model_dirpath=outputs/${train_dataset}/${experiment_name}/${model_name}/run-complete_2022-10-07_193425
 # ckpt_id=epoch=23-step=83111-avgvalrmse=0.0176.ckpt #  | 120 images== | 128 images==0.0213
 # python test.py dataset='"'$test_dataset'"' ++model_name='"'$model_name'"' ++experiment_name=$experiment_name ++model_dirpath='"'$model_dirpath'"' ++ckpt_id='"'$ckpt_id'"' ++train_dataset='"'$train_dataset'"'
+# Re-Run 3D CSPH 1024x4x4 - Compression=256x --> k=64
+model_name=DDFN_C64B10_CSPH3D/k64_down4_Mt1_Rand-optCt=True-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0
+experiment_name=csph3d_models_rerun
+model_dirpath=outputs/${train_dataset}/${experiment_name}/${model_name}/run-complete_2022-10-17_205501
+ckpt_id=epoch=29-step=103889-avgvalrmse=0.2630.ckpt #  | 120 images== | 128 images==5.791 --> not converged
+python test.py dataset='"'$test_dataset'"' ++model_name='"'$model_name'"' ++experiment_name=$experiment_name ++model_dirpath='"'$model_dirpath'"' ++ckpt_id='"'$ckpt_id'"' ++train_dataset='"'$train_dataset'"'
+# Re-Run 3D CSPH 1024x4x4 - Compression=256x --> k=32
+model_name=DDFN_C64B10_CSPH3D/k32_down4_Mt1_Rand-optCt=True-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0
+experiment_name=csph3d_models_rerun
+model_dirpath=outputs/${train_dataset}/${experiment_name}/${model_name}/run-complete_2022-10-17_205501
+ckpt_id=epoch=23-step=83111-avgvalrmse=0.0214.ckpt #  | 120 images== | 128 images==0.02840
+python test.py dataset='"'$test_dataset'"' ++model_name='"'$model_name'"' ++experiment_name=$experiment_name ++model_dirpath='"'$model_dirpath'"' ++ckpt_id='"'$ckpt_id'"' ++train_dataset='"'$train_dataset'"'
 
 # ## Models with 1024x2x2 Separable Encoding Kernel
 
@@ -65,12 +77,12 @@ train_dataset=nyuv2_64x64x1024_80ps
 # model_dirpath=outputs/${train_dataset}/${experiment_name}/${model_name}/run-complete_2022-10-05_122605
 # ckpt_id=epoch=29-step=102158-avgvalrmse=0.0170.ckpt #  | 120 images== | 128 images==0.0410
 # python test.py dataset='"'$test_dataset'"' ++model_name='"'$model_name'"' ++experiment_name=$experiment_name ++model_dirpath='"'$model_dirpath'"' ++ckpt_id='"'$ckpt_id'"' ++train_dataset='"'$train_dataset'"'
-# 3D CSPH 1024x8x8 - Compression=32x --> k=2048
-model_name=DDFN_C64B10_CSPH3D/k2048_down8_Mt1_Rand-optCt=True-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0
-experiment_name=csph3d_models_rerun
-model_dirpath=outputs/${train_dataset}/${experiment_name}/${model_name}/run-complete_2022-10-12_192900
-ckpt_id=epoch=28-step=100426-avgvalrmse=0.0172.ckpt #  | 120 images== | 128 images==0.01668
-python test.py dataset='"'$test_dataset'"' ++model_name='"'$model_name'"' ++experiment_name=$experiment_name ++model_dirpath='"'$model_dirpath'"' ++ckpt_id='"'$ckpt_id'"' ++train_dataset='"'$train_dataset'"'
+# # 3D CSPH 1024x8x8 - Compression=32x --> k=2048
+# model_name=DDFN_C64B10_CSPH3D/k2048_down8_Mt1_Rand-optCt=True-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0
+# experiment_name=csph3d_models_rerun
+# model_dirpath=outputs/${train_dataset}/${experiment_name}/${model_name}/run-complete_2022-10-12_192900
+# ckpt_id=epoch=28-step=100426-avgvalrmse=0.0172.ckpt #  | 120 images== | 128 images==0.01668
+# python test.py dataset='"'$test_dataset'"' ++model_name='"'$model_name'"' ++experiment_name=$experiment_name ++model_dirpath='"'$model_dirpath'"' ++ckpt_id='"'$ckpt_id'"' ++train_dataset='"'$train_dataset'"'
 # # 3D CSPH 1024x8x8 - Compression=64x --> k=1024
 # model_name=DDFN_C64B10_CSPH3D/k1024_down8_Mt1_Rand-optCt=True-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0
 # experiment_name=csph3d_models
