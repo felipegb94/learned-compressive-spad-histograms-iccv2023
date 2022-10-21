@@ -289,7 +289,7 @@ def load_model_from_ckpt(model_name, ckpt_id, logger=None, model_dirpath=None):
 	if(model_dirpath is None):
 		model_dirpath = './'
 	ckpt_fpath = os.path.join(model_dirpath, 'checkpoints/', ckpt_id)
-	print(os.listdir(os.path.join(model_dirpath, "checkpoints/")))
+	# print(os.listdir(os.path.join(model_dirpath, "checkpoints/")))
 	print(os.getcwd())
 	assert(os.path.exists(ckpt_fpath)), "Input checkpoint does not exist ({})".format(ckpt_id)
 	if(logger is None):
