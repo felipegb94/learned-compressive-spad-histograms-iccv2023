@@ -74,14 +74,30 @@ if __name__=='__main__':
 
 	model_metrics_df = pd.DataFrame()
 
-	## output dirpaths
+	## Choose the test set to plot with
+	## Regular test set
+	test_set_id = 'test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
 	experiment_name = 'middlebury/compression_vs_test_metrics'
+	mae_ylim = (5, 70); tol10mm_ylim = (0.12, 0.85)
+	## Regular test set
+	test_set_id = 'test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
+	experiment_name = 'middlebury/compression_vs_test_metrics_large_ylims'
+	mae_ylim = (5, 100); tol10mm_ylim = (0., 0.85)
+	# ## Test set with larger depths than what was trained for
+	# test_set_id = 'test_middlebury_largedepth_LargeDepthSimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
+	# experiment_name = 'middlebury_largedepth/compression_vs_test_metrics'
+	# mae_ylim = (5, 100); tol10mm_ylim = (0., 0.85)
+	# ## Test set with timebins above 9m set to 0
+	# test_set_id = 'test_middlebury_maskedhightimebins_MaskedHighTimeBinsSimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
+	# experiment_name = 'middlebury_maskedhightimebins/compression_vs_test_metrics'
+	# mae_ylim = (5, 100); tol10mm_ylim = (0., 0.85)
+
+	## create output dirpaths
 	out_dirpath = os.path.join(io_dirpaths.results_figures_dirpath, experiment_name)
 	os.makedirs(out_dirpath, exist_ok=True)
 	out_fname_base = 'compression_vs'
 
 	## Scene ID and Params
-	test_set_id = 'test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
 	middlebury_test_set_info = analyze_test_results_utils.middlebury_test_set_info
 	scene_ids = middlebury_test_set_info['scene_ids']
 	sbr_params_low_flux = middlebury_test_set_info['sbr_params_low_flux']
@@ -166,8 +182,7 @@ if __name__=='__main__':
 		## Make plot for all metrics
 		plt.figure()
 		metric_id = 'mae'
-		# metric_ylim = (7, 45)
-		metric_ylim = None
+		metric_ylim = mae_ylim
 		out_fname = out_fname_base + '_' + metric_id
 		ax = plot_compression_vs_metric(model_metrics_df_csph3d, baselines_mean_metrics, metric_id = metric_id, metric_ylim=metric_ylim)
 		plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname + '_' + dataset_id, file_ext='svg')
@@ -194,7 +209,7 @@ if __name__=='__main__':
 
 		plt.figure()
 		metric_id = '10mm_tol_err'
-		metric_ylim = None
+		metric_ylim = tol10mm_ylim
 		out_fname = out_fname_base + '_' + metric_id
 		ax = plot_compression_vs_metric(model_metrics_df_csph3d, baselines_mean_metrics, metric_id = metric_id, metric_ylim=metric_ylim)
 		plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname + '_' + dataset_id, file_ext='svg')

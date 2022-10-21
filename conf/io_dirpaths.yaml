@@ -10,6 +10,8 @@ io_dirpaths:
   middlebury_lowsbr_spad_dataset_dirpath: ${hydra:runtime.cwd}/./data_gener/TestData/middlebury/processed/LowSBRSimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0
   middlebury_narrowpulse_spad_dataset_dirpath: ${hydra:runtime.cwd}/./data_gener/TestData/middlebury/processed/SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-2
   middlebury_widepulse_spad_dataset_dirpath: ${hydra:runtime.cwd}/./data_gener/TestData/middlebury/processed/SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-3
+  middlebury_largedepth_spad_dataset_dirpath: ${hydra:runtime.cwd}/./data_gener/TestData/middlebury/processed/LargeDepthSimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0
+  middlebury_maskedhightimebins_spad_dataset_dirpath: ${hydra:runtime.cwd}/./data_gener/TestData/middlebury/processed/MaskedHighTimeBinsSimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0
   lindell_linospad_dataset_dirpath: ${hydra:runtime.cwd}/./2018SIGGRAPH_lindell_test_data/captured
   lindell_linospad_min_dataset_dirpath: ${hydra:runtime.cwd}/./2018SIGGRAPH_lindell_test_data/captured_min
   lindell_linospad_patch_dataset_dirpath: ${hydra:runtime.cwd}/./2018SIGGRAPH_lindell_test_data/captured_patches-64-64

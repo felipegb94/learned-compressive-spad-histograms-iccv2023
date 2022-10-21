@@ -87,6 +87,26 @@ def make_test_lists(cfg):
 	write_fpaths(os.path.join(datalists_dirpath, 'test_'+middlebury_widepulse_spad_dataset_name+'.txt'), middlebury_widepulse_spad_dataset_fpaths)
 	print('Wrote {} test file for {} dataset'.format(len(middlebury_widepulse_spad_dataset_fpaths), middlebury_widepulse_spad_dataset_name))
 
+	## Repeat for Middlebury Large Depths dataset
+	middlebury_largedepth_spad_dataset_dirpath = cfg.io_dirpaths.middlebury_largedepth_spad_dataset_dirpath
+	middlebury_largedepth_spad_dataset_dirpath = os.path.abspath(middlebury_largedepth_spad_dataset_dirpath)
+	## Input single dirpath to look into
+	middlebury_largedepth_spad_dataset_fpaths = generate_spad_data_fpaths([middlebury_largedepth_spad_dataset_dirpath])
+	## Set the dataset name
+	middlebury_largedepth_spad_dataset_name = 'middlebury_largedepth_' + os.path.basename(middlebury_largedepth_spad_dataset_dirpath)
+	write_fpaths(os.path.join(datalists_dirpath, 'test_'+middlebury_largedepth_spad_dataset_name+'.txt'), middlebury_largedepth_spad_dataset_fpaths)
+	print('Wrote {} test file for {} dataset'.format(len(middlebury_largedepth_spad_dataset_fpaths), middlebury_largedepth_spad_dataset_name))
+
+	## Repeat for Middlebury Masked High Time Bins dataset
+	middlebury_maskedhightimebins_spad_dataset_dirpath = cfg.io_dirpaths.middlebury_maskedhightimebins_spad_dataset_dirpath
+	middlebury_maskedhightimebins_spad_dataset_dirpath = os.path.abspath(middlebury_maskedhightimebins_spad_dataset_dirpath)
+	## Input single dirpath to look into
+	middlebury_maskedhightimebins_spad_dataset_fpaths = generate_spad_data_fpaths([middlebury_maskedhightimebins_spad_dataset_dirpath])
+	## Set the dataset name
+	middlebury_maskedhightimebins_spad_dataset_name = 'middlebury_maskedhightimebins_' + os.path.basename(middlebury_maskedhightimebins_spad_dataset_dirpath)
+	write_fpaths(os.path.join(datalists_dirpath, 'test_'+middlebury_maskedhightimebins_spad_dataset_name+'.txt'), middlebury_maskedhightimebins_spad_dataset_fpaths)
+	print('Wrote {} test file for {} dataset'.format(len(middlebury_maskedhightimebins_spad_dataset_fpaths), middlebury_maskedhightimebins_spad_dataset_name))
+
 	## Repeat for linospad dataset
 	lindell_linospad_dataset_dirpath = cfg.io_dirpaths.lindell_linospad_dataset_dirpath
 	lindell_linospad_dataset_dirpath = os.path.abspath(lindell_linospad_dataset_dirpath)

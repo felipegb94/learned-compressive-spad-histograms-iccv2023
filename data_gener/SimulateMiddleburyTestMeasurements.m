@@ -128,7 +128,7 @@ for ss = 1:length(scenes)
 
     % When simulating the large depth dataset apply a fixed offset
     if(strcmp(dataset_sim_id, 'LargeDepthSimSPADDataset'))
-        depth_offset = 9;
+        depth_offset = 7;
         depth = depth + depth_offset;
     end
 
