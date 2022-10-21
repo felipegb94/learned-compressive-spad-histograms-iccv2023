@@ -38,9 +38,14 @@ def simplify_model_name(model_name):
 	return model_name_min
 
 def plot_compression_vs_metric(model_metrics_df_csph3d, baselines_mean_metrics, metric_id = 'mae', metric_ylim=None):
+	colors = plot_utils.get_color_cycle()
 	plt.clf()
 	ax = sns.lineplot(data=model_metrics_df_csph3d, x="compression_ratio", y=metric_id, hue="model_type", marker="o", err_style="bars", err_kws={'capsize': 12, 'elinewidth': 1.5, 'capthick': 1.5}, errorbar=("ci", 95), linewidth=2.5, markersize=8)
 	plt.ylim(metric_ylim)
+	# figure out how many models were plotted above to select the correct color for the horizontal lines
+	csph3d_model_types = model_metrics_df_csph3d['model_type'].unique()
+	n_csph3d_models = len(csph3d_model_types)
+	# plot baselines as horizontal lines
 	ax.axhline(baselines_mean_metrics.loc[no_compression_baseline][metric_id], linewidth=2.5, linestyle='--', label=no_compression_baseline, color=colors[n_csph3d_models])
 	ax.axhline(baselines_mean_metrics.loc[argmax_compression_baseline][metric_id], linewidth=2.5, linestyle='--', label=argmax_compression_baseline, color=colors[n_csph3d_models+1])
 	plt.grid(linestyle='--', linewidth=0.5)
@@ -56,7 +61,6 @@ def plot_compression_vs_metric(model_metrics_df_csph3d, baselines_mean_metrics, 
 
 if __name__=='__main__':
 
-	colors = plot_utils.get_color_cycle()
 
 	## load all dirpaths without creating a job 
 	io_dirpaths = get_hydra_io_dirpaths(job_name='plot_compression_vs_test_metrics')
@@ -139,47 +143,70 @@ if __name__=='__main__':
 	## scale MAE to make its units mm
 	model_metrics_df['mae'] = model_metrics_df['mae']*1000
 	
-	## separate into csph3d and baselines
-	model_metrics_df_csph3d = model_metrics_df[model_metrics_df['compression_ratio']>1]
-	csph3d_model_types = model_metrics_df_csph3d['model_type'].unique()
-	n_csph3d_models = len(csph3d_model_types)
-	model_metrics_df_baselines = model_metrics_df[model_metrics_df['compression_ratio']==1]
-	baseline_model_names = model_metrics_df_baselines['model_name'].unique()
-	baselines_mean_metrics = model_metrics_df_baselines.groupby('model_name').mean()
+	## divide the dataframe into 3 different SBR ranges
+	# 1. include all sbr levels
+	# 2. only high sbr above sbr threshold (low_sbr_thresh)
+	# 3. only low sbr below sbr threshold (low_sbr_thresh)
+	low_sbr_model_metrics_df = model_metrics_df[model_metrics_df['mean_sbr']<=low_sbr_threshold]
+	high_sbr_model_metrics_df = model_metrics_df[model_metrics_df['mean_sbr']>low_sbr_threshold]
+	
+	## create a list of the 3 dataframes and an id use to save the plot
+	dataset_ids = ['all_sbr', 'low_sbr', 'high_sbr']
+	model_metrics_df_list = [model_metrics_df, low_sbr_model_metrics_df, high_sbr_model_metrics_df]
 
-	## Make plot for all metrics
-	plt.clf()
-	metric_id = 'mae'
-	metric_ylim = (7, 45)
-	out_fname = out_fname_base + '_' + metric_id
-	ax = plot_compression_vs_metric(model_metrics_df_csph3d, baselines_mean_metrics, metric_id = metric_id, metric_ylim=metric_ylim)
-	plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
+	for i, dataset_id in enumerate(dataset_ids):
+		curr_model_metrics_df = model_metrics_df_list[i]
 
-	# plt.figure()
-	# metric_id = 'ssim'
-	# metric_ylim = None
-	# out_fname = out_fname_base + '_' + metric_id
-	# ax = plot_compression_vs_metric(model_metrics_df_csph3d, baselines_mean_metrics, metric_id = metric_id, metric_ylim=metric_ylim)
-	# plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
+		## separate into csph3d and baselines
+		model_metrics_df_csph3d = curr_model_metrics_df[curr_model_metrics_df['compression_ratio']>1]
+		model_metrics_df_baselines = curr_model_metrics_df[curr_model_metrics_df['compression_ratio']==1]
+		baseline_model_names = model_metrics_df_baselines['model_name'].unique()
+		baselines_mean_metrics = model_metrics_df_baselines.groupby('model_name').mean()
 
-	# plt.figure()
-	# metric_id = '5mm_tol_err'
-	# metric_ylim = None
-	# out_fname = out_fname_base + '_' + metric_id
-	# ax = plot_compression_vs_metric(model_metrics_df_csph3d, baselines_mean_metrics, metric_id = metric_id, metric_ylim=metric_ylim)
-	# plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
+		## Make plot for all metrics
+		plt.figure()
+		metric_id = 'mae'
+		# metric_ylim = (7, 45)
+		metric_ylim = None
+		out_fname = out_fname_base + '_' + metric_id
+		ax = plot_compression_vs_metric(model_metrics_df_csph3d, baselines_mean_metrics, metric_id = metric_id, metric_ylim=metric_ylim)
+		plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname + '_' + dataset_id, file_ext='svg')
+		plt.title("{} for {} dataset".format(metric_id, dataset_id))
+		plt.pause(0.1)
 
-	# plt.figure()
-	# metric_id = '10mm_tol_err'
-	# metric_ylim = None
-	# out_fname = out_fname_base + '_' + metric_id
-	# ax = plot_compression_vs_metric(model_metrics_df_csph3d, baselines_mean_metrics, metric_id = metric_id, metric_ylim=metric_ylim)
-	# plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
+		# plt.figure()
+		# metric_id = 'ssim'
+		# metric_ylim = None
+		# out_fname = out_fname_base + '_' + metric_id
+		# ax = plot_compression_vs_metric(model_metrics_df_csph3d, baselines_mean_metrics, metric_id = metric_id, metric_ylim=metric_ylim)
+		# plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname + '_' + dataset_id, file_ext='svg')
+		# plt.title("{} for {} dataset".format(metric_id, dataset_id))
+		# plt.pause(0.1)
 
-	# plt.figure()
-	# metric_id = 'inverse_10mm_tol_err'
-	# metric_ylim = None
-	# out_fname = out_fname_base + '_' + metric_id
-	# ax = plot_compression_vs_metric(model_metrics_df_csph3d, baselines_mean_metrics, metric_id = metric_id, metric_ylim=metric_ylim)
-	# plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
+		# plt.figure()
+		# metric_id = '5mm_tol_err'
+		# metric_ylim = None
+		# out_fname = out_fname_base + '_' + metric_id
+		# ax = plot_compression_vs_metric(model_metrics_df_csph3d, baselines_mean_metrics, metric_id = metric_id, metric_ylim=metric_ylim)
+		# plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname + '_' + dataset_id, file_ext='svg')
+		# plt.title("{} for {} dataset".format(metric_id, dataset_id))
+		# plt.pause(0.1)
+
+		plt.figure()
+		metric_id = '10mm_tol_err'
+		metric_ylim = None
+		out_fname = out_fname_base + '_' + metric_id
+		ax = plot_compression_vs_metric(model_metrics_df_csph3d, baselines_mean_metrics, metric_id = metric_id, metric_ylim=metric_ylim)
+		plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname + '_' + dataset_id, file_ext='svg')
+		plt.title("{} for {} dataset".format(metric_id, dataset_id))
+		plt.pause(0.1)
+
+		# plt.figure()
+		# metric_id = 'inverse_10mm_tol_err'
+		# metric_ylim = None
+		# out_fname = out_fname_base + '_' + metric_id
+		# ax = plot_compression_vs_metric(model_metrics_df_csph3d, baselines_mean_metrics, metric_id = metric_id, metric_ylim=metric_ylim)
+		# plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname + '_' + dataset_id, file_ext='svg')
+		# plt.title("{} for {} dataset".format(metric_id, dataset_id))
+		# plt.pause(0.1)
 
