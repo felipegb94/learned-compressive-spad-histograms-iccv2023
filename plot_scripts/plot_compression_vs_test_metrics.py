@@ -37,13 +37,36 @@ def simplify_model_name(model_name):
 	model_name_min = model_name_min.replace('_Mt16_','x64_')
 	return model_name_min
 
+def plot_compression_vs_metric(model_metrics_df_csph3d, baselines_mean_metrics, metric_id = 'mae', metric_ylim=None):
+	plt.clf()
+	ax = sns.lineplot(data=model_metrics_df_csph3d, x="compression_ratio", y=metric_id, hue="model_type", marker="o", err_style="bars", err_kws={'capsize': 12, 'elinewidth': 1.5, 'capthick': 1.5}, errorbar=("ci", 95), linewidth=2.5, markersize=8)
+	plt.ylim(metric_ylim)
+	ax.axhline(baselines_mean_metrics.loc[no_compression_baseline][metric_id], linewidth=2.5, linestyle='--', label=no_compression_baseline, color=colors[n_csph3d_models])
+	ax.axhline(baselines_mean_metrics.loc[argmax_compression_baseline][metric_id], linewidth=2.5, linestyle='--', label=argmax_compression_baseline, color=colors[n_csph3d_models+1])
+	plt.grid(linestyle='--', linewidth=0.5)
+	plot_utils.set_ticks(fontsize=12)
+	# plt.xlabel("Compression Ratio", fontsize=14)
+	# plt.ylabel("Mean Absolute Error (mm)", fontsize=14)
+	plt.xlabel("")
+	plt.ylabel("")
+	plot_utils.set_xy_box()
+	plt.gca().get_legend().remove()
+	plot_utils.update_fig_size(height=4, width=6)
+	return ax
+
 if __name__=='__main__':
+
+	colors = plot_utils.get_color_cycle()
 
 	## load all dirpaths without creating a job 
 	io_dirpaths = get_hydra_io_dirpaths(job_name='plot_compression_vs_test_metrics')
 
+	## Set compression ratios we want to plot
 	compression_ratio_all = [32, 64, 128]
 	# compression_ratio_all = [128]
+	
+	## Set SBR threshold we want to use to separate the plots
+	low_sbr_threshold = 0.1
 
 	model_metrics_df = pd.DataFrame()
 
@@ -59,7 +82,7 @@ if __name__=='__main__':
 	scene_ids = middlebury_test_set_info['scene_ids']
 	sbr_params_low_flux = middlebury_test_set_info['sbr_params_low_flux']
 	sbr_params_high_flux = middlebury_test_set_info['sbr_params_high_flux']
-	sbr_params = sbr_params_low_flux
+	sbr_params = sbr_params_low_flux + sbr_params_high_flux
 
 	## Create spad dataloader object to get ground truth data for each scene
 	spad_dataset = SpadDataset(datalist_fpath=os.path.join(io_dirpaths.datalists_dirpath, test_set_id+'.txt'), disable_rand_crop=True)
@@ -76,12 +99,18 @@ if __name__=='__main__':
 	model_names.append(argmax_compression_baseline)
 	num_model_params = [0] * len(model_names)
 	# generate all csph3d model names 
-	encoding_type_all = ['csph1d', 'csph1d', 'csph1d', 'separable', 'separable', 'separable']
-	tdim_init_all = ['TruncFourier', 'HybridGrayFourier', 'Rand', 'Rand', 'Rand', 'Rand']
-	optCt_all = [False, False, True, True, True, True]
-	optC_all = [False, False, True, True, True, True]
-	spatial_down_factor_all = [1, 1, 1, 4, 4, 4]
-	num_tdim_blocks_all = [1, 1, 1, 1, 4, 16]
+	# encoding_type_all = ['csph1d', 'csph1d', 'csph1d', 'separable', 'separable', 'separable']
+	# tdim_init_all = ['TruncFourier', 'HybridGrayFourier', 'Rand', 'Rand', 'Rand', 'Rand']
+	# optCt_all = [False, False, True, True, True, True]
+	# optC_all = [False, False, True, True, True, True]
+	# spatial_down_factor_all = [1, 1, 1, 4, 4, 4]
+	# num_tdim_blocks_all = [1, 1, 1, 1, 4, 16]
+	encoding_type_all = ['csph1d', 'csph1d', 'csph1d', 'separable', 'separable']
+	tdim_init_all = ['TruncFourier', 'HybridGrayFourier', 'Rand', 'Rand', 'Rand']
+	optCt_all = [False, False, True, True, True]
+	optC_all = [False, False, True, True, True]
+	spatial_down_factor_all = [1, 1, 1, 4, 4]
+	num_tdim_blocks_all = [1, 1, 1, 1, 4]
 	(csph3d_model_names, csph3d_num_model_params) = compose_csph3d_model_names_list(compression_ratio_all
 									, spatial_down_factor_all
 									, num_tdim_blocks_all
@@ -112,88 +141,45 @@ if __name__=='__main__':
 	
 	## separate into csph3d and baselines
 	model_metrics_df_csph3d = model_metrics_df[model_metrics_df['compression_ratio']>1]
+	csph3d_model_types = model_metrics_df_csph3d['model_type'].unique()
+	n_csph3d_models = len(csph3d_model_types)
 	model_metrics_df_baselines = model_metrics_df[model_metrics_df['compression_ratio']==1]
 	baseline_model_names = model_metrics_df_baselines['model_name'].unique()
 	baselines_mean_metrics = model_metrics_df_baselines.groupby('model_name').mean()
 
 	## Make plot for all metrics
-	plt.figure()
+	plt.clf()
 	metric_id = 'mae'
+	metric_ylim = (7, 45)
 	out_fname = out_fname_base + '_' + metric_id
-	metric_ylim = None
-	ax = sns.lineplot(data=model_metrics_df_csph3d, x="compression_ratio", y=metric_id, hue="model_type", marker="o", err_style="bars", errorbar=("se", 2), linewidth=2, markersize=8)
-	ax.axhline(baselines_mean_metrics.loc[no_compression_baseline][metric_id], linewidth=2, linestyle='--', label=no_compression_baseline, color='red')
-	ax.axhline(baselines_mean_metrics.loc[argmax_compression_baseline][metric_id], linewidth=2, linestyle='--', label=argmax_compression_baseline, color='blue')
-	plt.grid(linestyle='--', linewidth=0.5)
-	plot_utils.set_ticks(fontsize=12)
-	plt.xlabel("Compression Ratio", fontsize=14)
-	plt.ylabel("Mean Absolute Error (mm)", fontsize=14)
-	plot_utils.set_xy_box()
-	plt.gca().get_legend().remove()
+	ax = plot_compression_vs_metric(model_metrics_df_csph3d, baselines_mean_metrics, metric_id = metric_id, metric_ylim=metric_ylim)
 	plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
 
+	# plt.figure()
+	# metric_id = 'ssim'
+	# metric_ylim = None
+	# out_fname = out_fname_base + '_' + metric_id
+	# ax = plot_compression_vs_metric(model_metrics_df_csph3d, baselines_mean_metrics, metric_id = metric_id, metric_ylim=metric_ylim)
+	# plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
 
-	## Make plot for all metrics
-	plt.figure()
-	metric_id = 'ssim'
-	out_fname = out_fname_base + '_' + metric_id
-	metric_ylim = None
-	ax = sns.lineplot(data=model_metrics_df_csph3d, x="compression_ratio", y=metric_id, hue="model_type", marker="o", err_style="bars", errorbar=("se", 2), linewidth=2, markersize=8)
-	ax.axhline(baselines_mean_metrics.loc[no_compression_baseline][metric_id], linewidth=2, linestyle='--', label=no_compression_baseline, color='red')
-	ax.axhline(baselines_mean_metrics.loc[argmax_compression_baseline][metric_id], linewidth=2, linestyle='--', label=argmax_compression_baseline, color='blue')
-	plt.grid(linestyle='--', linewidth=0.5)
-	plot_utils.set_ticks(fontsize=12)
-	plt.xlabel("Compression Ratio", fontsize=14)
-	plt.ylabel("SSIM", fontsize=14)
-	plot_utils.set_xy_box()
-	plt.gca().get_legend().remove()
-	plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
+	# plt.figure()
+	# metric_id = '5mm_tol_err'
+	# metric_ylim = None
+	# out_fname = out_fname_base + '_' + metric_id
+	# ax = plot_compression_vs_metric(model_metrics_df_csph3d, baselines_mean_metrics, metric_id = metric_id, metric_ylim=metric_ylim)
+	# plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
 
+	# plt.figure()
+	# metric_id = '10mm_tol_err'
+	# metric_ylim = None
+	# out_fname = out_fname_base + '_' + metric_id
+	# ax = plot_compression_vs_metric(model_metrics_df_csph3d, baselines_mean_metrics, metric_id = metric_id, metric_ylim=metric_ylim)
+	# plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
 
-	## Make plot for all metrics
-	plt.figure()
-	metric_id = '5mm_tol_err'
-	out_fname = out_fname_base + '_' + metric_id
-	metric_ylim = None
-	ax = sns.lineplot(data=model_metrics_df_csph3d, x="compression_ratio", y=metric_id, hue="model_type", marker="o", err_style="bars", errorbar=("se", 2), linewidth=2, markersize=8)
-	ax.axhline(baselines_mean_metrics.loc[no_compression_baseline][metric_id], linewidth=2, linestyle='--', label=no_compression_baseline, color='red')
-	ax.axhline(baselines_mean_metrics.loc[argmax_compression_baseline][metric_id], linewidth=2, linestyle='--', label=argmax_compression_baseline, color='blue')
-	plt.grid(linestyle='--', linewidth=0.5)
-	plot_utils.set_ticks(fontsize=12)
-	plt.xlabel("Compression Ratio", fontsize=14)
-	plt.ylabel("Percent Pixels with Errors < 5mm", fontsize=14)
-	plot_utils.set_xy_box()
-	plt.gca().get_legend().remove()
-	plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
+	# plt.figure()
+	# metric_id = 'inverse_10mm_tol_err'
+	# metric_ylim = None
+	# out_fname = out_fname_base + '_' + metric_id
+	# ax = plot_compression_vs_metric(model_metrics_df_csph3d, baselines_mean_metrics, metric_id = metric_id, metric_ylim=metric_ylim)
+	# plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
 
-	## Make plot for all metrics
-	plt.figure()
-	metric_id = '10mm_tol_err'
-	out_fname = out_fname_base + '_' + metric_id
-	metric_ylim = None
-	ax = sns.lineplot(data=model_metrics_df_csph3d, x="compression_ratio", y=metric_id, hue="model_type", marker="o", err_style="bars", errorbar=("se", 2), linewidth=2, markersize=8)
-	ax.axhline(baselines_mean_metrics.loc[no_compression_baseline][metric_id], linewidth=2, linestyle='--', label=no_compression_baseline, color='red')
-	ax.axhline(baselines_mean_metrics.loc[argmax_compression_baseline][metric_id], linewidth=2, linestyle='--', label=argmax_compression_baseline, color='blue')
-	plt.grid(linestyle='--', linewidth=0.5)
-	plot_utils.set_ticks(fontsize=12)
-	plt.xlabel("Compression Ratio", fontsize=14)
-	plt.ylabel("Percent Pixels with Errors < 10mm", fontsize=14)
-	plot_utils.set_xy_box()
-	plt.gca().get_legend().remove()
-	plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
-
-	## Make plot for all metrics
-	plt.figure()
-	metric_id = 'inverse_10mm_tol_err'
-	out_fname = out_fname_base + '_' + metric_id
-	metric_ylim = None
-	ax = sns.lineplot(data=model_metrics_df_csph3d, x="compression_ratio", y=metric_id, hue="model_type", marker="o", err_style="bars", errorbar=("se", 2), linewidth=2, markersize=8)
-	ax.axhline(baselines_mean_metrics.loc[no_compression_baseline][metric_id], linewidth=2, linestyle='--', label=no_compression_baseline, color='red')
-	ax.axhline(baselines_mean_metrics.loc[argmax_compression_baseline][metric_id], linewidth=2, linestyle='--', label=argmax_compression_baseline, color='blue')
-	plt.grid(linestyle='--', linewidth=0.5)
-	plot_utils.set_ticks(fontsize=12)
-	plt.xlabel("Compression Ratio", fontsize=14)
-	plt.ylabel("Percent Pixels with Errors > 10mm", fontsize=14)
-	plot_utils.set_xy_box()
-	plt.gca().get_legend().remove()
-	plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
