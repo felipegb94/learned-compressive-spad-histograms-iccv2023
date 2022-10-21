@@ -10,11 +10,13 @@ dataset_dir = fullfile(base_dirpath, 'raw');
 scenedir = dataset_dir;
 out_base_dirpath = fullfile(base_dirpath, 'processed');
 
-% Time bin size, number of bins
-num_bins = 1024; 
-bin_size = 100e-9/num_bins; %approximately the bin size (in secs)
 % Speed of light
 c = 3e8; 
+% Time bin size, number of bins
+num_bins = 1024; 
+repetition_period = 100e-9;
+unambiguous_depth_range = ToF2Dist(repetition_period, c);
+bin_size = repetition_period/num_bins; %approximately the bin size (in secs)
 % Dark and Bright image parameter idx
 dark_img_param_idx = 0; % For dark count image
 psf_img_param_idx = 0; % For bright image from which the PSF/pulse wavefor is extracted (see LoadAndPreprocessBightPSFImg.m for options)
@@ -23,9 +25,11 @@ param_idx = 'all';
 % 
 LOW_RES = 1;  % use 0 or 1
 % additional identifier for dataset
-dataset_name_prefix = 'SimSPADDataset';
-% dataset_name_prefix = 'LowSBRSimSPADDataset';
-% dataset_name_prefix = 'HighSignalSimSPADDataset';
+% dataset_sim_id = 'SimSPADDataset'; % regular test set
+dataset_sim_id = 'MaskedHighTimeBinsSimSPADDataset'; % Test set with the time bins above a certain threshold being set to 0
+dataset_sim_id = 'LargeDepthSimSPADDataset';
+% dataset_sim_id = 'LowSBRSimSPADDataset'; % low sbr test set 
+% dataset_sim_id = 'HighSignalSimSPADDataset'; % low signal test set
 
 
 % IMPORTANT NOTE: NOT ALL SCENES HAVE THE DIMENSIONS BELOW, IN THE INNER
@@ -33,8 +37,8 @@ dataset_name_prefix = 'SimSPADDataset';
 % create a dataset name similar to the one created in the train set.
 nr = 576; nc = 704;
 if LOW_RES
-%     lres_factor = 1/8;
-    lres_factor = 1/4;
+    lres_factor = 1/8;
+%     lres_factor = 1/4;
 else
     lres_factor = 1;
 end
@@ -42,7 +46,7 @@ nr = nr * lres_factor; nc = nc * lres_factor;
 
 % Create output directory
 sim_param_str = ComposeSimParamString(nr, nc, num_bins, bin_size, dark_img_param_idx, psf_img_param_idx);
-outdir = fullfile(out_base_dirpath, sprintf('%s_%s', dataset_name_prefix,sim_param_str));
+outdir = fullfile(out_base_dirpath, sprintf('%s_%s', dataset_sim_id,sim_param_str));
 if ~exist(outdir, 'dir')
     mkdir(outdir)
 end
@@ -51,7 +55,7 @@ end
 scenes = GetFolderNamesInDir(dataset_dir);
 
 
-if(strcmp(dataset_name_prefix, 'LowSBRSimSPADDataset'))
+if(strcmp(dataset_sim_id, 'LowSBRSimSPADDataset'))
     simulation_params_lowSBR = [3 100;
                                 2 100;
                                 1 100;
@@ -64,7 +68,7 @@ if(strcmp(dataset_name_prefix, 'LowSBRSimSPADDataset'))
                                 100, 20000
     ];
     simulation_params = simulation_params_lowSBR;
-elseif(strcmp(dataset_name_prefix, 'HighSignalSimSPADDataset'))
+elseif(strcmp(dataset_sim_id, 'HighSignalSimSPADDataset'))
     simulation_params_lowSBR = [
                                 200, 500;
                                 200, 2000;
@@ -121,6 +125,16 @@ for ss = 1:length(scenes)
     disparity = (single(imread(fullfile(scenedir, scenes{ss}, 'disp1.png'))) + dmin);
     depth = f*b ./ disparity;    
     intensity = rgb2gray(im2double(imread(fullfile(scenedir, scenes{ss}, '/view1.png'))));   
+
+    % When simulating the large depth dataset apply a fixed offset
+    if(strcmp(dataset_sim_id, 'LargeDepthSimSPADDataset'))
+        depth_offset = 9;
+        depth = depth + depth_offset;
+    end
+
+    max_scene_depth = max(depth(:));
+    fprintf('    Max scene depth: %f...\n',max_scene_depth);
+
 
     if LOW_RES
         disp('Conduct on LR...');
@@ -210,10 +224,22 @@ for ss = 1:length(scenes)
         % Simulate the SPAD measuements at the correct resolution
         [spad, detections, rates, range_bins] = SimulateSPADMeasurement(albedo, intensity, dist, PSF_img, bin_size, num_bins, nr, nc, mean_signal_photons, mean_background_photons, dark_img, c);
 	    range_bins_hr = ToF2Bins(Dist2ToF(dist_hr, c), bin_size, num_bins, false);
+        
+        % Zero out time bins above a certain distance
+        if(strcmp(dataset_sim_id, 'MaskedHighTimeBinsSimSPADDataset'))
+            depth_thresh = 9;
+            tof_thresh = Dist2ToF(depth_thresh, c);
+            bin_thresh = ToF2Bins(tof_thresh, bin_size, num_bins, true);
+            % mask bins above bin_thresh
+            detections(:,:,bin_thresh:end) = 0;
+            spad = sparse(reshape(detections, nr*nc, []));
+        end
+
         % normalize the rate function to 0 to 1
 	    [norm_rates, rates_offset, rates_scaling] = NormalizePhotonRates(rates);
         rates_norm_params.rates_offset = rates_offset;
         rates_norm_params.rates_scaling = rates_scaling;
+        
         % Estimate depths with some baseline methods
         est_range_bins.est_range_bins_lmf = EstDepthBinsLogMatchedFilter(detections, PSF_img);
         est_range_bins.est_range_bins_zncc = EstDepthBinsZNCC(detections, PSF_img);
