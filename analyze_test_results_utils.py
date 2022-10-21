@@ -196,6 +196,22 @@ def get_model_dirpaths(model_names):
 		model_dirpaths.append(pretrained_models_all[model_name]['rel_dirpath'])
 	return model_dirpaths
 
+def get_model_ckpt_fpaths(model_names):
+	'''
+		Given the model name get the dirpath containing all the results for that model. Usually, each model that was trained has a unique ID that is appended to the model_name to generate the dirpath, so in order to not have to keep track of these IDs we simply store them inside a dict whenever we test that model.
+	'''
+	## Get pretrained models dirpaths
+	pretrained_models_all = io_ops.load_json('pretrained_models_rel_dirpaths.json')
+	model_ckpt_fpaths = []
+	model_ckpt_fnames = []
+	for model_name in model_names:
+		model_dirpath = pretrained_models_all[model_name]['rel_dirpath']
+		model_ckpt_fname = pretrained_models_all[model_name]['ckpt_id']
+		if(not ('.ckpt' in model_ckpt_fname)): model_ckpt_fname += '.ckpt' 
+		model_ckpt_fnames.append(model_ckpt_fname)
+		model_ckpt_fpaths.append(os.path.join(model_dirpath, 'checkpoints', model_ckpt_fname))
+	return model_ckpt_fpaths, model_ckpt_fnames
+
 def append_model_metrics(model_metrics, test_set_id, scene_fname, gt_depths, num_bins, tau, model_depths=None):
 	# get model depths if they are not provided
 	if(model_depths is None):
