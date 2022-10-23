@@ -79,7 +79,7 @@ if __name__=='__main__':
 	test_set_id = 'test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
 	experiment_name = 'middlebury/compression_vs_test_metrics'
 	mae_ylim = (5, 70); tol10mm_ylim = (0.12, 0.85)
-	## Regular test set
+	## Regular test set (larger ylims)
 	test_set_id = 'test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
 	experiment_name = 'middlebury/compression_vs_test_metrics_large_ylims'
 	mae_ylim = (5, 100); tol10mm_ylim = (0., 0.85)

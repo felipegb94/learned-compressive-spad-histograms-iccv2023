@@ -26,13 +26,19 @@ if __name__=='__main__':
 	## load all dirpaths without creating a job 
 	io_dirpaths = get_hydra_io_dirpaths(job_name='plot_depth_imgs')
 
-	## output dirpaths
+	## Choose the test set to plot with
+	## Regular test set
 	experiment_name_base = 'middlebury/depth_imgs'
+	test_set_id = 'test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
+	## Test set with larger depths than what was trained for
+	experiment_name = 'middlebury_largedepth/compression_vs_test_metrics'
+	test_set_id = 'test_middlebury_largedepth_LargeDepthSimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
+
+	## output dirpaths
 	out_dirpath = os.path.join(io_dirpaths.results_figures_dirpath, experiment_name_base)
 	os.makedirs(out_dirpath, exist_ok=True)
 
 	## Scene ids and signal and SBR parameters we want to plot for
-	test_set_id = 'test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
 	scene_ids = ['spad_Art','spad_Reindeer']
 	sbr_params = ['10_1000','10_10','10_50','10_200']
 
@@ -60,14 +66,15 @@ if __name__=='__main__':
 	model_names.append(no_compression_baseline)
 	model_names.append(argmax_compression_baseline)
 	
-	# ## CSPH3D models: Temporal vs. Spatio-Temporal Compression
-	# encoding_type_all = ['csph1d', 'csph1d', 'csph1d', 'separable', 'separable', 'separable']
-	# tdim_init_all = ['TruncFourier', 'HybridGrayFourier', 'Rand', 'Rand', 'Rand', 'Rand']
-	# optCt_all = [False, False, True, True, True, True]
-	# optC_all = [False, False, True, True, True, True]
-	# spatial_down_factor_all = [1, 1, 1, 4, 4, 4]
-	# num_tdim_blocks_all = [1, 1, 1, 1, 4, 16]
-	# compression_ratio_all = [32, 64, 128]
+
+	## CSPH3D models: Temporal vs. Spatio-Temporal Compression
+	encoding_type_all = ['csph1d', 'csph1d', 'csph1d', 'separable', 'separable']
+	tdim_init_all = ['TruncFourier', 'HybridGrayFourier', 'Rand', 'Rand', 'Rand']
+	optCt_all = [False, False, True, True, True]
+	optC_all = [False, False, True, True, True]
+	spatial_down_factor_all = [1, 1, 1, 4, 4]
+	num_tdim_blocks_all = [1, 1, 1, 1, 4]
+	compression_ratio_all = [32, 64, 128]
 
 	# ## CSPH3D Models for: Effect of Size of C
 	# ## Parameters for: Does decreasing the number of parameters hurt performance?
@@ -79,17 +86,17 @@ if __name__=='__main__':
 	# num_tdim_blocks_all = [1, 1, 4, 16]
 	# compression_ratio_all = [32, 64, 128]
 
-	## Parameters for: Spatial kernel size effect?
-	encoding_type_all = ['csph1d', 'csph1d', 'separable', 'separable',  'separable']
-	spatial_down_factor_all = [1, 1, 2, 4, 8]
-	tdim_init_all = ['Rand']*len(encoding_type_all)
-	optCt_all = [True]*len(encoding_type_all)
-	optC_all = [True]*len(encoding_type_all)
-	tdim_init_all[0] = 'HybridGrayFourier'
-	optCt_all[0] = False
-	optC_all[0] = False
-	num_tdim_blocks_all = [1]*len(encoding_type_all)
-	compression_ratio_all = [32, 64, 128]
+	# ## Parameters for: Spatial kernel size effect?
+	# encoding_type_all = ['csph1d', 'csph1d', 'separable', 'separable',  'separable']
+	# spatial_down_factor_all = [1, 1, 2, 4, 8]
+	# tdim_init_all = ['Rand']*len(encoding_type_all)
+	# optCt_all = [True]*len(encoding_type_all)
+	# optC_all = [True]*len(encoding_type_all)
+	# tdim_init_all[0] = 'HybridGrayFourier'
+	# optCt_all[0] = False
+	# optC_all[0] = False
+	# num_tdim_blocks_all = [1]*len(encoding_type_all)
+	# compression_ratio_all = [32, 64, 128]
 
 	# generate the csph3d model names
 	(csph3d_model_names, csph3d_num_model_params) = compose_csph3d_model_names_list(compression_ratio_all

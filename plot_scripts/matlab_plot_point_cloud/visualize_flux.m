@@ -1,19 +1,20 @@
 clear all
-
+close all
 
 % Set input data filepaths for middlebury dataset
 dataset_id = 'middlebury';
-scene_name = 'spad_Art';
+scene_name = 'spad_Moebius';
 sbr_params = '10_1000';
+sbr_params = '2_50';
 scene_id = [scene_name, '_', sbr_params];
 data_dirpath = 'data_gener/TestData/middlebury/processed/SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0/';
 data_dirpath = 'data_gener/TestData/middlebury/processed/SimSPADDataset_nr-144_nc-176_nt-1024_tres-98ps_dark-0_psf-0/';
 
-% % Set input data filepaths for linospad dataset
-% dataset_id = 'linospad';
-% scene_name = 'stuff';
-% scene_id = scene_name;
-% data_dirpath = '2018SIGGRAPH_lindell_test_data/captured/';
+% Set input data filepaths for linospad dataset
+dataset_id = 'linospad';
+scene_name = 'stuff';
+scene_id = scene_name;
+data_dirpath = '2018SIGGRAPH_lindell_test_data/captured/';
 
 % load spad data
 scene_fname = [scene_id, '.mat'];
@@ -29,9 +30,9 @@ elseif(strcmp(dataset_id, 'linospad'))
     bin_size = 26e-12;
     hist_img = reshape(full(spad_data.spad_processed_data{1}), ntbins, nrows, ncols);
     hist_img = permute(hist_img, [2, 3, 1]);
-    scale_factor = 0.5;
-    hist_img = imresize3(hist_img, scale_factor);
-    bin_size = (26e-12) / scale_factor;
+%     scale_factor = 0.5;
+%     hist_img = imresize3(hist_img, [128,128,1536]);
+%     bin_size = (26e-12) / scale_factor;
 else
     error('invalid dataset id')
 end
@@ -42,27 +43,30 @@ out_dirpath = fullfile('results/raw_figures/histogram_image_vis', dataset_id);
 if(not(isfolder(out_dirpath)))
     mkdir(out_dirpath);
 end
-
-
+out_fname = [scene_id, '_', num2str(ntbins), 'x', num2str(nrows), 'x', num2str(ncols)];
+out_fpath = fullfile(out_dirpath, out_fname);
 
 %% Variables
 % bin_t = 80e-12; 
 bin_t = bin_size;
 c = 3e8; 
+
+% interpolation scale factor
+scale_xy = 1; scale_z = 2.0;
 d_min = 1.40; d_max = 2.17;
+
 if(strcmp(scene_name, 'spad_Art'))
     d_min = 1.40; d_max = 2.17;
 elseif(strcmp(scene_name, 'spad_Reindeer'))
     d_min = 1.30; d_max = 2.3;
 elseif(strcmp(scene_name, 'stuff'))
     d_min = 0.6; d_max = 1.5;
+    scale_xy = 1; scale_z = 1.0;
 end
 start_idx = floor((2*d_min/c)/bin_t);
 end_idx = ceil((2*d_max/c)/bin_t);
 
 
-% interpolation scale factor
-scale_xy = 1; scale_z = 2.0;
 
 
 % intensity correction
@@ -173,9 +177,23 @@ ptCloud = pointCloud(points, 'Color', rgb);
 figure; title(['\color{white}','']); xlabel(''); ylabel(''); zlabel('');
 fig = gcf; fig.Color = 'black'; fig.InvertHardcopy = 'off';
 pcshow(ptCloud, 'MarkerSize', 1e-3);
-box on; ax =gca; ax.BoxStyle = 'full'; ax.XColor = 'red'; ax.YColor = 'red'; ax.ZColor = 'red'; ax.LineWidth = 3;
+box on; ax =gca; ax.BoxStyle = 'full'; ax.XColor = 'red'; ax.YColor = 'red'; ax.ZColor = 'red'; ax.LineWidth = 4;
 xticks([]); yticks([]); zticks([]);
 set(gcf, 'Position', get(0, 'Screensize'));
 
-view([-69, 15])
+if(strcmp(scene_name, 'spad_Reindeer'))
+    view([-74.5537, 3.0547]);
+elseif(strcmp(scene_name, 'spad_Moebius'))
+    view([-69.9854, 5.2588]);
+elseif(strcmp(scene_name, 'stuff'))
+    view([-103.3623, 5.0361])
+else
+    view([-69, 15]);
+end
+
+
+saveas(gcf, out_fpath, 'svg');
+
+
+% exportgraphics(gca,[out_fpath,'.png'], 'Resolution', 900);
 
