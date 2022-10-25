@@ -40,14 +40,14 @@ def simplify_model_name(model_name):
 def plot_compression_vs_metric(model_metrics_df_csph3d, baselines_mean_metrics, metric_id = 'mae', metric_ylim=None):
 	colors = plot_utils.get_color_cycle()
 	plt.clf()
-	ax = sns.lineplot(data=model_metrics_df_csph3d, x="compression_ratio", y=metric_id, hue="model_type", marker="o", err_style="bars", err_kws={'capsize': 12, 'elinewidth': 1.5, 'capthick': 1.5}, errorbar=("ci", 95), linewidth=2.5, markersize=8)
+	ax = sns.lineplot(data=model_metrics_df_csph3d, x="compression_ratio", y=metric_id, hue="model_type", marker="o", err_style="bars", err_kws={'capsize': 14, 'elinewidth': 1.5, 'capthick': 1.5}, errorbar=("ci", 95), linewidth=3.5, markersize=10)
 	plt.ylim(metric_ylim)
 	# figure out how many models were plotted above to select the correct color for the horizontal lines
 	csph3d_model_types = model_metrics_df_csph3d['model_type'].unique()
 	n_csph3d_models = len(csph3d_model_types)
 	# plot baselines as horizontal lines
-	ax.axhline(baselines_mean_metrics.loc[no_compression_baseline][metric_id], linewidth=2.5, linestyle='--', label=no_compression_baseline, color=colors[n_csph3d_models])
-	ax.axhline(baselines_mean_metrics.loc[argmax_compression_baseline][metric_id], linewidth=2.5, linestyle='--', label=argmax_compression_baseline, color=colors[n_csph3d_models+1])
+	ax.axhline(baselines_mean_metrics.loc[no_compression_baseline][metric_id], linewidth=3.5, linestyle='--', label=no_compression_baseline, color=colors[n_csph3d_models])
+	ax.axhline(baselines_mean_metrics.loc[argmax_compression_baseline][metric_id], linewidth=3.5, linestyle='--', label=argmax_compression_baseline, color=colors[n_csph3d_models+1])
 	plt.grid(linestyle='--', linewidth=0.5)
 	plot_utils.set_ticks(fontsize=12)
 	# plt.xlabel("Compression Ratio", fontsize=14)
@@ -66,7 +66,7 @@ if __name__=='__main__':
 	io_dirpaths = get_hydra_io_dirpaths(job_name='plot_compression_vs_test_metrics')
 
 	## Set compression ratios we want to plot
-	compression_ratio_all = [32, 64, 128]
+	compression_ratio_all = [32, 64, 128, 256]
 	# compression_ratio_all = [128]
 	
 	## Set SBR threshold we want to use to separate the plots
@@ -82,15 +82,15 @@ if __name__=='__main__':
 	## Regular test set (larger ylims)
 	test_set_id = 'test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
 	experiment_name = 'middlebury/compression_vs_test_metrics_large_ylims'
-	mae_ylim = (5, 100); tol10mm_ylim = (0., 0.85)
-	# ## Test set with larger depths than what was trained for
-	# test_set_id = 'test_middlebury_largedepth_LargeDepthSimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
-	# experiment_name = 'middlebury_largedepth/compression_vs_test_metrics'
-	# mae_ylim = (5, 100); tol10mm_ylim = (0., 0.85)
+	mae_ylim = (5, 150); tol10mm_ylim = (0., 0.85)
+	## Test set with larger depths than what was trained for
+	test_set_id = 'test_middlebury_largedepth_LargeDepthSimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
+	experiment_name = 'middlebury_largedepth/compression_vs_test_metrics'
+	mae_ylim = (5, 150); tol10mm_ylim = (0., 0.85)
 	# ## Test set with timebins above 9m set to 0
 	# test_set_id = 'test_middlebury_maskedhightimebins_MaskedHighTimeBinsSimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
 	# experiment_name = 'middlebury_maskedhightimebins/compression_vs_test_metrics'
-	# mae_ylim = (5, 100); tol10mm_ylim = (0., 0.85)
+	# mae_ylim = (5, 150); tol10mm_ylim = (0., 0.85)
 
 	## create output dirpaths
 	out_dirpath = os.path.join(io_dirpaths.results_figures_dirpath, experiment_name)

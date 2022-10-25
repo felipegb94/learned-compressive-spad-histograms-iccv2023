@@ -10,55 +10,35 @@ set -e
 
 ## Dataset we are testing with
 test_dataset=middlebury
-test_dataset=middlebury_largedepth
-test_dataset=middlebury_maskedhightimebins
+# test_dataset=middlebury_largedepth
+# test_dataset=middlebury_maskedhightimebins
 # test_dataset=lindell2018_linospad_min
+test_dataset=lindell2018_linospad
 
 ## Dataset we trained the models with
 train_dataset=nyuv2_64x64x1024_80ps
 
 
-#### Models at k=2 (512x compression) --> NOTE: k=2 models should not work because the zero_norm operation require k>=3 
-
-# ## 1D Temporal CSPH - tblock_init=TruncFourier)
-# model_name=DDFN_C64B10_CSPH3D/k2_down1_Mt1_TruncFourier-optCt=False-optC=False_csph1d_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0
-# experiment_name=csph3D_tdim_baselines
-# model_dirpath=outputs/${train_dataset}/${experiment_name}/${model_name}/run-complete_2022-10-17_210248
-# ckpt_id=epoch=25-step=90037-avgvalrmse=0.0660.ckpt # | 128 imgs==1.267
-# python test.py dataset='"'$test_dataset'"' ++model_name='"'$model_name'"' ++experiment_name=$experiment_name ++model_dirpath='"'$model_dirpath'"' ++ckpt_id='"'$ckpt_id'"' ++train_dataset='"'$train_dataset'"'
-# ## 1D Temporal CSPH - tblock_init=HybridGrayFourier)
-# model_name=DDFN_C64B10_CSPH3D/k2_down1_Mt1_HybridGrayFourier-optCt=False-optC=False_csph1d_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0
-# experiment_name=csph3D_tdim_baselines
-# model_dirpath=outputs/${train_dataset}/${experiment_name}/${model_name}/run-latest_2022-10-17_221621
-# ckpt_id=epoch=17-step=60602-avgvalrmse=0.0664.ckpt # | 128 imgs==1.313
-# python test.py dataset='"'$test_dataset'"' ++model_name='"'$model_name'"' ++experiment_name=$experiment_name ++model_dirpath='"'$model_dirpath'"' ++ckpt_id='"'$ckpt_id'"' ++train_dataset='"'$train_dataset'"'
-# ## 1D Temporal CSPH - tblock_init=Rand + Opt Codes
-# model_name=DDFN_C64B10_CSPH3D/k2_down1_Mt1_Rand-optCt=True-optC=True_csph1d_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0
-# experiment_name=csph3D_tdim_baselines
-# model_dirpath=outputs/${train_dataset}/${experiment_name}/${model_name}/run-latest_2022-10-17_221709
-# ckpt_id=epoch=18-step=64065-avgvalrmse=0.2630.ckpt # | 128 imgs==5.791 (Not converged)
-# python test.py dataset='"'$test_dataset'"' ++model_name='"'$model_name'"' ++experiment_name=$experiment_name ++model_dirpath='"'$model_dirpath'"' ++ckpt_id='"'$ckpt_id'"' ++train_dataset='"'$train_dataset'"'
-
 # #### Models at k=4 (256x compression)
 
-# ## 1D Temporal CSPH - tblock_init=TruncFourier)
-# model_name=DDFN_C64B10_CSPH3D/k4_down1_Mt1_TruncFourier-optCt=False-optC=False_csph1d_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0
-# experiment_name=csph3D_tdim_baselines
-# model_dirpath=outputs/${train_dataset}/${experiment_name}/${model_name}/run-complete_2022-10-17_212101
-# ckpt_id=epoch=28-step=98695-avgvalrmse=0.0245.ckpt # | 128 imgs==0.115
-# python test.py dataset='"'$test_dataset'"' ++model_name='"'$model_name'"' ++experiment_name=$experiment_name ++model_dirpath='"'$model_dirpath'"' ++ckpt_id='"'$ckpt_id'"' ++train_dataset='"'$train_dataset'"'
-# ## 1D Temporal CSPH - tblock_init=HybridGrayFourier)
-# model_name=DDFN_C64B10_CSPH3D/k4_down1_Mt1_HybridGrayFourier-optCt=False-optC=False_csph1d_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0
-# experiment_name=csph3D_tdim_baselines
-# model_dirpath=outputs/${train_dataset}/${experiment_name}/${model_name}/run-complete_2022-10-17_212547
-# ckpt_id=epoch=29-step=103889-avgvalrmse=0.0246.ckpt # | 128 imgs==0.113
-# python test.py dataset='"'$test_dataset'"' ++model_name='"'$model_name'"' ++experiment_name=$experiment_name ++model_dirpath='"'$model_dirpath'"' ++ckpt_id='"'$ckpt_id'"' ++train_dataset='"'$train_dataset'"'
-# ## 1D Temporal CSPH - tblock_init=Rand + Opt Codes)
-# model_name=DDFN_C64B10_CSPH3D/k4_down1_Mt1_Rand-optCt=True-optC=True_csph1d_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0
-# experiment_name=csph3D_tdim_baselines
-# model_dirpath=outputs/${train_dataset}/${experiment_name}/${model_name}/run-complete_2022-10-17_213238
-# ckpt_id=epoch=29-step=103889-avgvalrmse=0.2630.ckpt # | 128 imgs==5.791
-# python test.py dataset='"'$test_dataset'"' ++model_name='"'$model_name'"' ++experiment_name=$experiment_name ++model_dirpath='"'$model_dirpath'"' ++ckpt_id='"'$ckpt_id'"' ++train_dataset='"'$train_dataset'"'
+## 1D Temporal CSPH - tblock_init=TruncFourier)
+model_name=DDFN_C64B10_CSPH3D/k4_down1_Mt1_TruncFourier-optCt=False-optC=False_csph1d_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0
+experiment_name=csph3D_tdim_baselines
+model_dirpath=outputs/${train_dataset}/${experiment_name}/${model_name}/run-complete_2022-10-17_212101
+ckpt_id=epoch=28-step=98695-avgvalrmse=0.0245.ckpt # | 128 imgs==0.115 | 128 imgs large depth (7m offset):0.12844
+python test.py dataset='"'$test_dataset'"' ++model_name='"'$model_name'"' ++experiment_name=$experiment_name ++model_dirpath='"'$model_dirpath'"' ++ckpt_id='"'$ckpt_id'"' ++train_dataset='"'$train_dataset'"'
+## 1D Temporal CSPH - tblock_init=HybridGrayFourier)
+model_name=DDFN_C64B10_CSPH3D/k4_down1_Mt1_HybridGrayFourier-optCt=False-optC=False_csph1d_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0
+experiment_name=csph3D_tdim_baselines
+model_dirpath=outputs/${train_dataset}/${experiment_name}/${model_name}/run-complete_2022-10-17_212547
+ckpt_id=epoch=29-step=103889-avgvalrmse=0.0246.ckpt # | 128 imgs==0.113 | 128 imgs large depth (7m offset): 0.1279
+python test.py dataset='"'$test_dataset'"' ++model_name='"'$model_name'"' ++experiment_name=$experiment_name ++model_dirpath='"'$model_dirpath'"' ++ckpt_id='"'$ckpt_id'"' ++train_dataset='"'$train_dataset'"'
+## 1D Temporal CSPH - tblock_init=Rand + Opt Codes)
+model_name=DDFN_C64B10_CSPH3D/k4_down1_Mt1_Rand-optCt=True-optC=True_csph1d_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0
+experiment_name=csph3D_tdim_baselines
+model_dirpath=outputs/${train_dataset}/${experiment_name}/${model_name}/run-complete_2022-10-22_213847
+ckpt_id=epoch=29-step=103889-avgvalrmse=0.0258.ckpt # | 128 imgs==0.12787 | 128 imgs large depth (7m offset): 5.44686
+python test.py dataset='"'$test_dataset'"' ++model_name='"'$model_name'"' ++experiment_name=$experiment_name ++model_dirpath='"'$model_dirpath'"' ++ckpt_id='"'$ckpt_id'"' ++train_dataset='"'$train_dataset'"'
 
 #### Models at k=8 (128x compression)
 
@@ -94,7 +74,7 @@ ckpt_id=epoch=25-step=88306-avgvalrmse=0.0201.ckpt # | 128 imgs==0.08441 | 128 i
 python test.py dataset='"'$test_dataset'"' ++model_name='"'$model_name'"' ++experiment_name=$experiment_name ++model_dirpath='"'$model_dirpath'"' ++ckpt_id='"'$ckpt_id'"' ++train_dataset='"'$train_dataset'"'
 
 
-### Models at k=16 (64x compression)
+# ### Models at k=16 (64x compression)
 
 ## 1D Temporal CSPH - tblock_init=TruncFourier)
 model_name=DDFN_C64B10_CSPH3D/k16_down1_Mt1_TruncFourier-optCt=False-optC=False_csph1d_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0
@@ -159,3 +139,26 @@ experiment_name=csph3D_tdim_baselines
 model_dirpath=outputs/${train_dataset}/${experiment_name}/${model_name}/run-complete_2022-10-04_002551
 ckpt_id=epoch=26-step=91769-avgvalrmse=0.0151.ckpt # | 128 imgs==0.02983 | 128 imgs large depth (9m offset) = 0.80546 | 128 imgs large depth (7m offset): 0.22598 | 128 images masked tbins (9m): 0.1602
 python test.py dataset='"'$test_dataset'"' ++model_name='"'$model_name'"' ++experiment_name=$experiment_name ++model_dirpath='"'$model_dirpath'"' ++ckpt_id='"'$ckpt_id'"' ++train_dataset='"'$train_dataset'"'
+
+
+
+#### Models at k=2 (512x compression) --> NOTE: k=2 models should not work because the zero_norm operation require k>=3 
+
+# ## 1D Temporal CSPH - tblock_init=TruncFourier)
+# model_name=DDFN_C64B10_CSPH3D/k2_down1_Mt1_TruncFourier-optCt=False-optC=False_csph1d_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0
+# experiment_name=csph3D_tdim_baselines
+# model_dirpath=outputs/${train_dataset}/${experiment_name}/${model_name}/run-complete_2022-10-17_210248
+# ckpt_id=epoch=25-step=90037-avgvalrmse=0.0660.ckpt # | 128 imgs==1.267
+# python test.py dataset='"'$test_dataset'"' ++model_name='"'$model_name'"' ++experiment_name=$experiment_name ++model_dirpath='"'$model_dirpath'"' ++ckpt_id='"'$ckpt_id'"' ++train_dataset='"'$train_dataset'"'
+# ## 1D Temporal CSPH - tblock_init=HybridGrayFourier)
+# model_name=DDFN_C64B10_CSPH3D/k2_down1_Mt1_HybridGrayFourier-optCt=False-optC=False_csph1d_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0
+# experiment_name=csph3D_tdim_baselines
+# model_dirpath=outputs/${train_dataset}/${experiment_name}/${model_name}/run-latest_2022-10-17_221621
+# ckpt_id=epoch=17-step=60602-avgvalrmse=0.0664.ckpt # | 128 imgs==1.313
+# python test.py dataset='"'$test_dataset'"' ++model_name='"'$model_name'"' ++experiment_name=$experiment_name ++model_dirpath='"'$model_dirpath'"' ++ckpt_id='"'$ckpt_id'"' ++train_dataset='"'$train_dataset'"'
+# ## 1D Temporal CSPH - tblock_init=Rand + Opt Codes
+# model_name=DDFN_C64B10_CSPH3D/k2_down1_Mt1_Rand-optCt=True-optC=True_csph1d_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0
+# experiment_name=csph3D_tdim_baselines
+# model_dirpath=outputs/${train_dataset}/${experiment_name}/${model_name}/run-latest_2022-10-17_221709
+# ckpt_id=epoch=18-step=64065-avgvalrmse=0.2630.ckpt # | 128 imgs==5.791 (Not converged)
+# python test.py dataset='"'$test_dataset'"' ++model_name='"'$model_name'"' ++experiment_name=$experiment_name ++model_dirpath='"'$model_dirpath'"' ++ckpt_id='"'$ckpt_id'"' ++train_dataset='"'$train_dataset'"'
