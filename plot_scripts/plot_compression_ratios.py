@@ -148,3 +148,107 @@ if __name__=='__main__':
 	plot_utils.update_fig_size(height=4, width=8)
 	plot_utils.set_ticks(fontsize=12)
 	plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname_base+'_transmission_encoding-separable')
+
+
+	################ Compression ratios using separable coding matrices
+
+	## Compressive Histogram
+	# M = np.sqrt(n.reshape((n.size,1)) / N_b.reshape((1, N_b.size))) # Coding Tensor Size
+	M = 0.1*(n.reshape((n.size,1)) / N_b.reshape((1, N_b.size))) # Coding Tensor Size
+	B_size = k*N_b
+	C_size = k*M
+	comp_hist_r = B_size.reshape((1, N_b.size))
+	comp_hist_s = B_size.reshape((1, N_b.size)) + C_size
+
+	print("Data Transfer Rate and Storage as a function of number of pixels:")
+	print("    Coding Tensor Size (M): {}".format(M))
+	print("    k: {}".format(k))
+	print("    Number of Signal Blocks: {}".format(N_b))
+
+	## In-sensor storage compression ration
+	CR_s = conv_hist_s / comp_hist_s
+	CR_r = conv_hist_r / comp_hist_r
+
+	plt.figure()
+	fig = plt.gcf()
+	ax = plt.gca()
+	ax.imshow(CR_s,norm=colors.LogNorm(vmin=min_compression, vmax=max_compression)); 
+	plt.title("In-sensor Storage Compression Ratios (K={})".format(k), fontsize=16)
+	annotate_heatmap(N_b, n, CR_s, ax=ax)
+	ax.set_xticks(np.arange(len(N_b)))
+	ax.set_xticklabels(N_b)
+	# ax.set_xlabel("Number of Signal Blocks (N_b)", fontsize=12)
+	ax.set_yticks(np.arange(len(n)))
+	ax.set_yticklabels(n)
+	# ax.set_ylabel("Histogram Image Size (n)", fontsize=12)
+	plot_utils.update_fig_size(height=4, width=8)
+	plot_utils.set_ticks(fontsize=12)
+	plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname_base+'_storage_encoding-separable-10x')
+
+	plt.figure()
+	fig = plt.gcf()
+	ax = plt.gca()
+	ax.imshow(CR_r,norm=colors.LogNorm(vmin=min_compression, vmax=max_compression)); 
+	plt.title("Off-sensor Data Transfer Compression Ratios (K={})".format(k), fontsize=16)
+	annotate_heatmap(N_b, n, CR_r, ax=ax)
+	ax.set_xticks(np.arange(len(N_b)))
+	ax.set_xticklabels(N_b)
+	# ax.set_xlabel("Number of Signal Blocks (N_b)", fontsize=12)
+	ax.set_yticks(np.arange(len(n)))
+	ax.set_yticklabels(n)
+	# ax.set_ylabel("Histogram Image Size (n)", fontsize=12)
+	plot_utils.update_fig_size(height=4, width=8)
+	plot_utils.set_ticks(fontsize=12)
+	plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname_base+'_transmission_encoding-separable-10x')
+
+	################ Compression ratios using separable coding matrices
+
+	## Compressive Histogram
+	# M = np.sqrt(n.reshape((n.size,1)) / N_b.reshape((1, N_b.size))) # Coding Tensor Size
+	M = (1./16.)*(n.reshape((n.size,1)) / N_b.reshape((1, N_b.size))) # Coding Tensor Size
+	B_size = k*N_b
+	C_size = k*M
+	comp_hist_r = B_size.reshape((1, N_b.size))
+	comp_hist_s = B_size.reshape((1, N_b.size)) + C_size
+
+	print("Data Transfer Rate and Storage as a function of number of pixels:")
+	print("    Coding Tensor Size (M): {}".format(M))
+	print("    k: {}".format(k))
+	print("    Number of Signal Blocks: {}".format(N_b))
+
+	## In-sensor storage compression ration
+	CR_s = conv_hist_s / comp_hist_s
+	CR_r = conv_hist_r / comp_hist_r
+
+	plt.figure()
+	fig = plt.gcf()
+	ax = plt.gca()
+	ax.imshow(CR_s,norm=colors.LogNorm(vmin=min_compression, vmax=max_compression)); 
+	plt.title("In-sensor Storage Compression Ratios (K={})".format(k), fontsize=16)
+	annotate_heatmap(N_b, n, CR_s, ax=ax)
+	ax.set_xticks(np.arange(len(N_b)))
+	ax.set_xticklabels(N_b)
+	# ax.set_xlabel("Number of Signal Blocks (N_b)", fontsize=12)
+	ax.set_yticks(np.arange(len(n)))
+	ax.set_yticklabels(n)
+	# ax.set_ylabel("Histogram Image Size (n)", fontsize=12)
+	plot_utils.update_fig_size(height=4, width=8)
+	plot_utils.set_ticks(fontsize=12)
+	plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname_base+'_storage_encoding-separable-16x')
+
+	plt.figure()
+	fig = plt.gcf()
+	ax = plt.gca()
+	ax.imshow(CR_r,norm=colors.LogNorm(vmin=min_compression, vmax=max_compression)); 
+	plt.title("Off-sensor Data Transfer Compression Ratios (K={})".format(k), fontsize=16)
+	annotate_heatmap(N_b, n, CR_r, ax=ax)
+	ax.set_xticks(np.arange(len(N_b)))
+	ax.set_xticklabels(N_b)
+	# ax.set_xlabel("Number of Signal Blocks (N_b)", fontsize=12)
+	ax.set_yticks(np.arange(len(n)))
+	ax.set_yticklabels(n)
+	# ax.set_ylabel("Histogram Image Size (n)", fontsize=12)
+	plot_utils.update_fig_size(height=4, width=8)
+	plot_utils.set_ticks(fontsize=12)
+	plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname_base+'_transmission_encoding-separable-16x')
+
