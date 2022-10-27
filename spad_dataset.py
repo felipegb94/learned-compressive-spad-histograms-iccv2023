@@ -361,6 +361,16 @@ class Lindell2018LinoSpadDataset(torch.utils.data.Dataset):
 		idx = self.get_idx_from_scene_name(scene_name)
 		return self.__getitem__(idx)
 
+	def get_spad_data_sample_params(self, idx):
+		'''
+			Load the first sample and look at some of the parameters of the simulation
+		'''
+		# load spad data
+		data_sample = self.__getitem__(idx)
+		spad = data_sample['spad']
+		(nt, nr, nc) = spad.squeeze().shape
+		return (nt, nr, nc, self.tres_ps)
+
 	def tryitem(self, idx):
 		'''
 			Try to load the spad data sample.
@@ -370,6 +380,8 @@ class Lindell2018LinoSpadDataset(torch.utils.data.Dataset):
 		spad_data_fname = self.spad_data_fpaths[idx]
 		spad_data = scipy.io.loadmat(spad_data_fname)
 		frame_num = 0 # frame number to use (some data files have multiple frames in them)
+		if('stairs_ball' in os.path.basename(self.spad_data_fpaths[idx])):
+			frame_num = 11
 
 		## load intensity img
 		intensity_imgs = np.asarray(spad_data['cam_processed_data'])[0]
@@ -380,7 +392,7 @@ class Lindell2018LinoSpadDataset(torch.utils.data.Dataset):
 		spad = np.asarray(scipy.sparse.csc_matrix.todense(spad_sparse_data[frame_num])).astype(np.float32)
 		spad = spad.reshape((self.max_nt, self.max_nr, self.max_nc)).swapaxes(-1,-2)
 		spad = spad[np.newaxis, :]
-
+		
 		## reshape and resample the linospad signal (1536x256x256 histogram image)
 		# NOTE: resample tdim. CSPH with a kernel of tdim size 1024 require a lot of padding to process a 1536 sized input which changes the data distribution significantly (i.e., we need to pad 512 bins). So to avoid this we simply resample the tdim to 1024 which was what we trained on.
 		# although this resampling changes the time bin size and the signal waveform used during training, all models seem to be robust to this small model mismatch
