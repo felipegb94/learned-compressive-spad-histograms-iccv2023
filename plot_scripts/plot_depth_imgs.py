@@ -21,6 +21,18 @@ from spad_dataset import SpadDataset
 import analyze_test_results_utils
 from analyze_test_results_utils import init_model_metrics_dict, process_middlebury_test_results, get_hydra_io_dirpaths, compose_csph3d_model_names_list
 
+def plot_depth_img(model_depths, min_scene_depth, max_scene_depth, model_id, out_dirpath, scene_fname, file_ext='svg'):
+	plt.imshow(model_depths, vmin=min_scene_depth, vmax=max_scene_depth)
+	plot_utils.remove_ticks()
+	out_fname = model_id.replace('/','_')
+	plot_utils.save_currfig(dirpath=os.path.join(out_dirpath, scene_fname), filename=out_fname, file_ext=file_ext)
+	plt.pause(0.05)
+	# save with colorbar
+	plt.colorbar()
+	plot_utils.save_currfig(dirpath=os.path.join(out_dirpath, scene_fname + '/withcbar'), filename=out_fname, file_ext=file_ext)
+	plt.pause(0.05)
+	plt.title(model_id)
+
 if __name__=='__main__':
 
 	## load all dirpaths without creating a job 
@@ -145,16 +157,17 @@ if __name__=='__main__':
 				curr_model = rec_depths_all[model_id]
 				model_depths = curr_model['depths']
 				plt.clf()
-				plt.imshow(model_depths, vmin=min_scene_depth, vmax=max_scene_depth)
-				plot_utils.remove_ticks()
-				out_fname = model_id.replace('/','_')
-				plot_utils.save_currfig(dirpath=os.path.join(out_dirpath, scene_fname), filename=out_fname, file_ext='svg')
-				plt.pause(0.05)
-				# save with colorbar
-				plt.colorbar()
-				plot_utils.save_currfig(dirpath=os.path.join(out_dirpath, scene_fname + '/withcbar'), filename=out_fname, file_ext='svg')
-				plt.pause(0.05)
-				plt.title(model_id)
+				plot_depth_img(model_depths, min_scene_depth, max_scene_depth, model_id, out_dirpath, scene_fname)
+				# plt.imshow(model_depths, vmin=min_scene_depth, vmax=max_scene_depth)
+				# plot_utils.remove_ticks()
+				# out_fname = model_id.replace('/','_')
+				# plot_utils.save_currfig(dirpath=os.path.join(out_dirpath, scene_fname), filename=out_fname, file_ext='svg')
+				# plt.pause(0.05)
+				# # save with colorbar
+				# plt.colorbar()
+				# plot_utils.save_currfig(dirpath=os.path.join(out_dirpath, scene_fname + '/withcbar'), filename=out_fname, file_ext='svg')
+				# plt.pause(0.05)
+				# plt.title(model_id)
 
 			# #####################################################################
 			# # plot point cloud

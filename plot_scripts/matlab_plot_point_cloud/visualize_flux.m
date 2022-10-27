@@ -12,9 +12,38 @@ data_dirpath = 'data_gener/TestData/middlebury/processed/SimSPADDataset_nr-144_n
 
 % Set input data filepaths for linospad dataset
 dataset_id = 'linospad';
+scene_name = 'elephant';
+scene_name = 'stairs_ball';
+scene_name = 'lamp';
 scene_name = 'stuff';
 scene_id = scene_name;
 data_dirpath = '2018SIGGRAPH_lindell_test_data/captured/';
+
+% interpolation scale factor
+scale_xy = 1; scale_z = 2.0;
+d_min = 1.40; d_max = 2.17;
+
+if(strcmp(scene_name, 'spad_Art'))
+    d_min = 1.40; d_max = 2.17;
+elseif(strcmp(scene_name, 'spad_Reindeer'))
+    d_min = 1.30; d_max = 2.3;
+elseif(strcmp(scene_name, 'stuff'))
+    d_min = 0.6; d_max = 1.5;
+    scale_xy = 1; scale_z = 1.0;
+    frame_num = 1;
+elseif(strcmp(scene_name, 'elephant'))
+    d_min = 0.5; d_max = 1.5;
+    scale_xy = 1; scale_z = 1.0;
+    frame_num = 1;
+elseif(strcmp(scene_name, 'lamp'))
+    d_min = 0.5; d_max = 1.5;
+    scale_xy = 1; scale_z = 1.0;
+    frame_num = 1;
+elseif(strcmp(scene_name, 'stairs_ball'))
+    d_min = 0.9; d_max = 2.2;
+    scale_xy = 1; scale_z = 1.0;
+    frame_num = 10;
+end
 
 % load spad data
 scene_fname = [scene_id, '.mat'];
@@ -28,7 +57,7 @@ if(strcmp(dataset_id, 'middlebury'))
 elseif(strcmp(dataset_id, 'linospad'))
     nrows = 256; ncols = 256; ntbins = 1536;
     bin_size = 26e-12;
-    hist_img = reshape(full(spad_data.spad_processed_data{1}), ntbins, nrows, ncols);
+    hist_img = reshape(full(spad_data.spad_processed_data{frame_num}), ntbins, nrows, ncols);
     hist_img = permute(hist_img, [2, 3, 1]);
 %     scale_factor = 0.5;
 %     hist_img = imresize3(hist_img, [128,128,1536]);
@@ -51,18 +80,7 @@ out_fpath = fullfile(out_dirpath, out_fname);
 bin_t = bin_size;
 c = 3e8; 
 
-% interpolation scale factor
-scale_xy = 1; scale_z = 2.0;
-d_min = 1.40; d_max = 2.17;
 
-if(strcmp(scene_name, 'spad_Art'))
-    d_min = 1.40; d_max = 2.17;
-elseif(strcmp(scene_name, 'spad_Reindeer'))
-    d_min = 1.30; d_max = 2.3;
-elseif(strcmp(scene_name, 'stuff'))
-    d_min = 0.6; d_max = 1.5;
-    scale_xy = 1; scale_z = 1.0;
-end
 start_idx = floor((2*d_min/c)/bin_t);
 end_idx = ceil((2*d_max/c)/bin_t);
 
@@ -186,9 +204,11 @@ if(strcmp(scene_name, 'spad_Reindeer'))
 elseif(strcmp(scene_name, 'spad_Moebius'))
     view([-69.9854, 5.2588]);
 elseif(strcmp(scene_name, 'stuff'))
-    view([-103.3623, 5.0361])
+%     view([-103.3623, 5.0361])
+    view([-63.8652,6.9580])
 else
-    view([-69, 15]);
+    view([-63.8652,6.9580])
+%     view([-69, 15]);
 end
 
 
