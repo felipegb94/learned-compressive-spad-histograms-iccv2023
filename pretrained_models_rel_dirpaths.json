@@ -169,6 +169,11 @@
             "depths/test_mae": 0.01433,
             "depths/test_mse": 0.00261,
             "depths/test_rmse": 0.0289
+        },
+        "lindell2018_linospad_captured": {
+            "depths/test_mae": 11.988,
+            "depths/test_mse": 482.55,
+            "depths/test_rmse": 16.004
         }
     },
     "DDFN_C64B10_Depth2Depth/loss-kldiv_tv-0.0": {
@@ -208,6 +213,11 @@
             "depths/test_mae": 0.01627,
             "depths/test_mse": 0.01145,
             "depths/test_rmse": 0.0463
+        },
+        "lindell2018_linospad_captured": {
+            "depths/test_mae": 11.837,
+            "depths/test_mse": 486.31,
+            "depths/test_rmse": 16.081
         }
     },
     "DDFN_C64B10_NL_original/loss-kldiv_tv-1e-5": {
@@ -1393,6 +1403,11 @@
             "depths/test_mae": 0.00933,
             "depths/test_mse": 0.00042,
             "depths/test_rmse": 0.01757
+        },
+        "lindell2018_linospad_captured": {
+            "depths/test_mae": 11.92,
+            "depths/test_mse": 488.25,
+            "depths/test_rmse": 16.113
         }
     },
     "DDFN_C64B10/norm-Linf/loss-kldiv_tv-1e-05": {
@@ -1425,6 +1440,11 @@
             "depths/test_mae": 0.01402,
             "depths/test_mse": 0.00216,
             "depths/test_rmse": 0.02848
+        },
+        "lindell2018_linospad_captured": {
+            "depths/test_mae": 11.938,
+            "depths/test_mse": 477.77,
+            "depths/test_rmse": 15.928
         }
     },
     "DDFN_C64B10_CSPH3D/k2_down1_Mt1_TruncFourier-optCt=False-optC=False_csph1d_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0": {
