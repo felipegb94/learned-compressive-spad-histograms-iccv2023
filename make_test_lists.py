@@ -107,6 +107,26 @@ def make_test_lists(cfg):
 	write_fpaths(os.path.join(datalists_dirpath, 'test_'+middlebury_maskedhightimebins_spad_dataset_name+'.txt'), middlebury_maskedhightimebins_spad_dataset_fpaths)
 	print('Wrote {} test file for {} dataset'.format(len(middlebury_maskedhightimebins_spad_dataset_fpaths), middlebury_maskedhightimebins_spad_dataset_name))
 
+	## Repeat for Middlebury at higher res dataset
+	middlebury_down4_spad_dataset_dirpath = cfg.io_dirpaths.middlebury_down4_spad_dataset_dirpath
+	middlebury_down4_spad_dataset_dirpath = os.path.abspath(middlebury_down4_spad_dataset_dirpath)
+	## Input single dirpath to look into
+	middlebury_down4_spad_dataset_fpaths = generate_spad_data_fpaths([middlebury_down4_spad_dataset_dirpath])
+	## Set the dataset name
+	middlebury_down4_spad_dataset_name = 'middlebury_down4_' + os.path.basename(middlebury_down4_spad_dataset_dirpath)
+	write_fpaths(os.path.join(datalists_dirpath, 'test_'+middlebury_down4_spad_dataset_name+'.txt'), middlebury_down4_spad_dataset_fpaths)
+	print('Wrote {} test file for {} dataset'.format(len(middlebury_down4_spad_dataset_fpaths), middlebury_down4_spad_dataset_name))
+
+	## Repeat for Middlebury at higher res dataset
+	middlebury_down2_spad_dataset_dirpath = cfg.io_dirpaths.middlebury_down2_spad_dataset_dirpath
+	middlebury_down2_spad_dataset_dirpath = os.path.abspath(middlebury_down2_spad_dataset_dirpath)
+	## Input single dirpath to look into
+	middlebury_down2_spad_dataset_fpaths = generate_spad_data_fpaths([middlebury_down2_spad_dataset_dirpath])
+	## Set the dataset name
+	middlebury_down2_spad_dataset_name = 'middlebury_down2_' + os.path.basename(middlebury_down2_spad_dataset_dirpath)
+	write_fpaths(os.path.join(datalists_dirpath, 'test_'+middlebury_down2_spad_dataset_name+'.txt'), middlebury_down2_spad_dataset_fpaths)
+	print('Wrote {} test file for {} dataset'.format(len(middlebury_down2_spad_dataset_fpaths), middlebury_down2_spad_dataset_name))
+
 	## Repeat for linospad dataset
 	lindell_linospad_dataset_dirpath = cfg.io_dirpaths.lindell_linospad_dataset_dirpath
 	lindell_linospad_dataset_dirpath = os.path.abspath(lindell_linospad_dataset_dirpath)

@@ -25,9 +25,9 @@ param_idx = 'all';
 % 
 LOW_RES = 1;  % use 0 or 1
 % additional identifier for dataset
-% dataset_sim_id = 'SimSPADDataset'; % regular test set
-dataset_sim_id = 'MaskedHighTimeBinsSimSPADDataset'; % Test set with the time bins above a certain threshold being set to 0
-dataset_sim_id = 'LargeDepthSimSPADDataset';
+dataset_sim_id = 'SimSPADDataset'; % regular test set
+% dataset_sim_id = 'MaskedHighTimeBinsSimSPADDataset'; % Test set with the time bins above a certain threshold being set to 0
+% dataset_sim_id = 'LargeDepthSimSPADDataset';
 % dataset_sim_id = 'LowSBRSimSPADDataset'; % low sbr test set 
 % dataset_sim_id = 'HighSignalSimSPADDataset'; % low signal test set
 
@@ -37,8 +37,9 @@ dataset_sim_id = 'LargeDepthSimSPADDataset';
 % create a dataset name similar to the one created in the train set.
 nr = 576; nc = 704;
 if LOW_RES
-    lres_factor = 1/8;
-%     lres_factor = 1/4;
+%     lres_factor = 1/8;
+    lres_factor = 1/4;
+    lres_factor = 1/2;
 else
     lres_factor = 1;
 end
