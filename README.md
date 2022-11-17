@@ -3,6 +3,18 @@ Spatio Temporal Compressive Single-Photon Histograms
 
 To clone: `git clone --recurse-submodules git@github.com:felipegb94/spatio-temporal-csph.git`
 
+## Getting started
+
+All scripts and code should be run from the top-level directory, except for the data generation MATLAB code which should be run from the `data_gener` directory.
+
+1. Clone
+2. Go over the setup instructions to create the conda environment. To make sure the environment is setup correctly run: `python csph_layers.py`
+3. Download nyuv2 dataset. Run `python scripts/download_nyuv2_simulated_spad_data.py`
+4. Try training a model. See `scripts_train/` for example train commands
+
+To re-train a similar model to Peng et al., ECCV 2020 run: `python train.py ++experiment=no_compression_baselines_lr-1e-4 model=DDFN_C64B10 ++model.model_params.input_norm=none ++train_params.epoch=30 ++random_seed=1235 ++train_params.batch_size=4 ++resume_train=true ++train_params.p_tv=1e-5 ++train_params.lri=1e-4`
+`
+
 ## Setup
 
 ### Step 1: Make sure CUDA drivers work
