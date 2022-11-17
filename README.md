@@ -7,8 +7,8 @@ To clone: `git clone --recurse-submodules git@github.com:felipegb94/spatio-tempo
 
 All scripts and code should be run from the top-level directory, except for the data generation MATLAB code which should be run from the `data_gener` directory.
 
-1. Clone
-2. Go over the setup instructions to create the conda environment. To make sure the environment is setup correctly run: `python csph_layers.py`
+1. Clone `git clone --recurse-submodules git@github.com:felipegb94/spatio-temporal-csph.git`
+2. Go over the setup instructions to create the conda environment (see below). To make sure the environment is setup correctly run: `python csph_layers.py`
 3. Download nyuv2 dataset. Run `python scripts/download_nyuv2_simulated_spad_data.py`
 4. Try training a model. See `scripts_train/` for example train commands
 
