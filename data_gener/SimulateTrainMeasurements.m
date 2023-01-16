@@ -67,10 +67,10 @@ for ss = 1:length(scenes)
         spad_out = fullfile(outdir, spad_out_fname);
         %         spad_out = sprintf('%s/spad_%s_p%d.mat', outdir, nums{ii}, param_idx);
         % Skip file if it already exists
-%         if exist(spad_out,'file')
-%             fprintf("Continuiing. %s already exists \n", spad_out);
-%             continue;
-%         end
+        if exist(spad_out,'file')
+            fprintf("Continuiing. %s already exists \n", spad_out);
+            continue;
+        end
         % Load other files needed for simulation
         try        
             dist_hr_mat = load(sprintf('%s/%s/%s',dataset_dir, scene_name, dist_imgs{ii}));
