@@ -1,6 +1,6 @@
 
 
-tres_ps: 80 # in picosecs
+tres_ps: 55 # in picosecs
 nr: 64 # num rows
 nc: 64 # num cols
 nt: 1024 # num tbins

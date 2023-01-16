@@ -31,6 +31,10 @@ from research_utils.io_ops import get_filepaths_in_dir
 def get_dataset_url(dataset_id):
     if(dataset_id == 'SimSPADDataset_nr-64_nc-64_nt-1024_tres-80ps_dark-1_psf-1'):
         gdrive_dataset_folder_url = 'https://drive.google.com/drive/folders/1fxUxFwg3frDHCi8jkHdDRhaRG5JrZq8Q'
+    elif(dataset_id == 'SimSPADDataset_nr-64_nc-64_nt-1024_tres-60ps_dark-1_psf-1'):
+        gdrive_dataset_folder_url = 'https://drive.google.com/drive/folders/1D6Tq-Z37xb37yBw6chn-rgrVthxDbsU4'
+    elif(dataset_id == 'SimSPADDataset_nr-64_nc-64_nt-1024_tres-55ps_dark-1_psf-1'):
+        gdrive_dataset_folder_url = 'https://drive.google.com/drive/folders/1AyqhLjsPOyQjTnsA1IdOPqYVXVCVjwni'
     elif(dataset_id == 'SimSPADDataset_min'):
         gdrive_dataset_folder_url = 'https://drive.google.com/drive/folders/17W987nnzLnqCgV_Z3waLxha3gs1IY7kO'
     else: assert(False), "Invalid dataset ID"
