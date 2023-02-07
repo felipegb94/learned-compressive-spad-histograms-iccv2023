@@ -28,7 +28,7 @@ param_idx = 1;
 dataset_dir = './TrainData/processed';
 % Directory where we will output the simulated data
 sim_param_str = ComposeSimParamString(res, res, num_bins, bin_size, dark_img_param_idx, psf_img_param_idx);
-output_base_dir = sprintf('./TrainData/SimSPADDataset_%s', sim_param_str);
+output_base_dir = sprintf('./TrainData/ModuloSimSPADDataset_%s', sim_param_str);
 
 if ~exist(output_base_dir, 'dir')
     mkdir(output_base_dir)

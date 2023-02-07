@@ -122,6 +122,8 @@ for ss = 1:length(scenes)
 	    dist = imresize(dist_hr, [nr nc], 'bilinear');
 
         % Simulate the SPAD measuements at the correct resolution
+        % NOTE: For depths outside of range range_bins may not contain a
+        % wrapped around value or a truncated value
         [spad, detections, rates, range_bins] = SimulateSPADMeasurement(albedo, intensity, dist, PSF_img, bin_size, num_bins, nr, nc, mean_signal_photons, mean_background_photons, dark_img, c);
 	    range_bins_hr = ToF2Bins(Dist2ToF(dist_hr, c), bin_size, num_bins, false);
         % normalize the rate function to 0 to 1
@@ -160,9 +162,8 @@ for ss = 1:length(scenes)
         end
 
         % save sparse spad detections to file
-        SaveSimulatedSPADImg(spad_out, spad, SBR, range_bins, range_bins_hr, est_range_bins, rates_norm_params, norm_rates, intensity, intensity_hr, mean_signal_photons, mean_background_photons, bin_size);
+        SaveSimulatedSPADImg(spad_out, spad, SBR, range_bins, range_bins_hr, est_range_bins, rates_norm_params, norm_rates, intensity, intensity_hr, mean_signal_photons, mean_background_photons, bin_size, dist);
 
-        %         parsave(spad_out, spad, SBR, range_bins, range_bins_hr, mean_signal_photons, rates);
         
     end
 end

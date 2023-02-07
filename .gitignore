@@ -33,6 +33,7 @@ data_gener/TrainData/jiayong_data*
 data_gener/TestData/middlebury/processed
 
 data_gener/TrainData/SimSPADDataset*
+data_gener/TrainData/*SimSPADDataset*
 
 testing/preTrain
 testing/TestOut

@@ -10,7 +10,15 @@ function [range_bins] = ToF2Bins(tof, bin_size, num_bins, round_bin)
     if any(reshape(range_bins > num_bins, 1, []))
         fprintf('some photon events out of range\n');
     end
-    % Truncated
-    range_bins = min(range_bins, num_bins);   
+    % BUG: We should not truncate depths that are larger we should wrap
+    % them around
+    % As of 02-06-2023 we changed the following from truncate to wrap
+    % around instead
+    % OLD: Truncate
+%     range_bins = min(range_bins, num_bins);   
+%     range_bins = max(range_bins, 1);
+    % NEW: Modulo range bins
+    range_bins = mod(range_bins, num_bins);   
     range_bins = max(range_bins, 1);
+
 end

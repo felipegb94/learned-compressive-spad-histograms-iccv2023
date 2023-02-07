@@ -37,9 +37,9 @@ dataset_sim_id = 'SimSPADDataset'; % regular test set
 % create a dataset name similar to the one created in the train set.
 nr = 576; nc = 704;
 if LOW_RES
-%     lres_factor = 1/8;
-    lres_factor = 1/4;
-    lres_factor = 1/2;
+    lres_factor = 1/8;
+%     lres_factor = 1/4;
+%     lres_factor = 1/2;
 else
     lres_factor = 1;
 end
@@ -296,7 +296,7 @@ for ss = 1:length(scenes)
         % gray image, 72*88. 'rates' is actually the GT 3D histogram.
         out_fname = sprintf('spad_%s_%s_%s.mat', scenes{ss}, num2str(mean_signal_photons), num2str(mean_background_photons));
         out_fpath = fullfile(outdir, out_fname);
-        SaveSimulatedSPADImg(out_fpath, spad, SBR, range_bins, range_bins_hr, est_range_bins, rates_norm_params, norm_rates, intensity, intensity_hr, mean_signal_photons, mean_background_photons, bin_size)
+        SaveSimulatedSPADImg(out_fpath, spad, SBR, range_bins, range_bins_hr, est_range_bins, rates_norm_params, norm_rates, intensity, intensity_hr, mean_signal_photons, mean_background_photons, bin_size, dist)
 
     end
 end

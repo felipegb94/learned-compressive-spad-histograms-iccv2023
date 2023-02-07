@@ -1,5 +1,5 @@
 % function SaveSimulatedSPADImg(fname, spad, SBR, range_bins, range_bins_hr, est_range_bins, rates_norm_params, rates, mean_signal_photons, mean_background_photons, bin_size)
-function SaveSimulatedSPADImg(fname, spad, SBR, range_bins, range_bins_hr, est_range_bins, rates_norm_params, rates, intensity, intensity_hr, mean_signal_photons, mean_background_photons, bin_size)
+function SaveSimulatedSPADImg(fname, spad, SBR, range_bins, range_bins_hr, est_range_bins, rates_norm_params, rates, intensity, intensity_hr, mean_signal_photons, mean_background_photons, bin_size, dist)
 %SaveSimulatedSPADImg Summary of this function goes here
 %   * spad: sparse vector of the simulated photon counts
 %   * SBR: Mean signal to background ration of the image
@@ -30,6 +30,6 @@ est_range_bins_argmax = est_range_bins.est_range_bins_argmax;
 est_range_bins_lmf = est_range_bins.est_range_bins_lmf;
 est_range_bins_zncc = est_range_bins.est_range_bins_zncc;
 
-save(fname, 'spad', 'SBR', 'bin', 'range_bins', 'bin_hr', 'est_range_bins_argmax', 'est_range_bins_lmf', 'est_range_bins_zncc', 'rates_norm_params', 'rates', 'intensity', 'intensity_hr', 'mean_signal_photons', 'mean_background_photons', 'bin_size', 'photons');
+save(fname, 'spad', 'SBR', 'bin', 'range_bins', 'bin_hr', 'est_range_bins_argmax', 'est_range_bins_lmf', 'est_range_bins_zncc', 'rates_norm_params', 'rates', 'intensity', 'intensity_hr', 'mean_signal_photons', 'mean_background_photons', 'bin_size', 'photons', 'dist');
 
 end
