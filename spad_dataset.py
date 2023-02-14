@@ -79,12 +79,17 @@ def pad_xydim(inputs, num_kernel_rows, num_kernel_cols):
 
 
 class SpadDataset(torch.utils.data.Dataset):
-	def __init__(self, datalist_fpath, noise_idx=None, output_size=None, disable_rand_crop=False):
+	def __init__(self, datalist_fpath, noise_idx=None, output_size=None, disable_rand_crop=False, logger=None):
 		"""__init__
 		:param datalist_fpath: path to text file with list of spad data files
 		:param noise_idx: the noise index list to include in the dataset (e.g., 1 or 2
 		:param output_size: the output size after random crop. If set to None it will output the full image
 		"""
+
+		if(logger is None):
+			self.log = print
+		else:
+			self.log = logger.info 
 
 		with open(datalist_fpath) as f: 
 			self.spad_data_fpaths_all = f.read().split()
@@ -118,9 +123,10 @@ class SpadDataset(torch.utils.data.Dataset):
 		if(len(psf_fpaths) >= 1):
 			# If file exists load it and use it
 			if(len(psf_fpaths) > 1):
-				print("Warning: More than one PSF/IRF avaiable. Choosing {}".format(psf_fpaths[0]))
+				self.log("Warning: More than one PSF/IRF avaiable. Choosing {}".format(psf_fpaths[0]))
 			psf_data = scipy.io.loadmat(psf_fpaths[0])
 			## If there is only a single psf then assign that, otherwise take the mean and save that
+			self.log("Loading PSF: {}".format(psf_fpaths[0]))
 			psf_raw = psf_data['psf'].squeeze()
 			if(psf_raw.ndim == 1):
 				self.psf = psf_raw
@@ -128,7 +134,7 @@ class SpadDataset(torch.utils.data.Dataset):
 				self.psf = psf_data['psf'].mean(axis=-1)
 		else:
 			# If file does not exist, just generate simple psf
-			print("No PSF/IRF available. Generating a simple narrow Gaussian")
+			self.log("No PSF/IRF available. Generating a simple narrow Gaussian")
 			from research_utils.signalproc_ops import gaussian_pulse
 			psf_len = 11
 			psf_mu = psf_len // 2
@@ -141,7 +147,7 @@ class SpadDataset(torch.utils.data.Dataset):
 		(_, _, _, tres_ps) = self.get_spad_data_sample_params(idx=0)
 		self.tres_ps = tres_ps # time resolution in picosecs
 
-		print("SpadDataset with {} files".format(len(self.spad_data_fpaths)))
+		self.log("SpadDataset with {} files".format(len(self.spad_data_fpaths)))
 
 	def __len__(self):
 		return len(self.spad_data_fpaths)
