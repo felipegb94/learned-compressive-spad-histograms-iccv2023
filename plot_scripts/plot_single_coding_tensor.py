@@ -48,19 +48,26 @@ def get_model_name_min(model_name):
 
 if __name__=='__main__':
 
-	## Modulo 55ps dataset 1024x4x4 separable
-	model_ckpt_fpath = 'outputs/modulo_nyuv2_64x64x1024_55ps/validate_new_modulo_dataset_20230207/DDFN_C64B10_CSPH3D/k128_down4_Mt1_Rand-optCt=True-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0/run-latest_2023-02-07_205141/checkpoints/epoch=13-step=46750-avgvalrmse=0.0449.ckpt'
+	# ## Modulo 55ps dataset 1024x4x4 separable
+	# model_ckpt_fpath = 'outputs/modulo_nyuv2_64x64x1024_55ps/validate_new_modulo_dataset_20230213/DDFN_C64B10_CSPH3D/k128_down4_Mt1_Rand-optCt=True-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0/run-complete_2023-02-14_065901/checkpoints/epoch=29-step=103889-avgvalrmse=0.0435.ckpt'
 	
-	## 80 ps dataset 1024x4x4 separable
-	model_ckpt_fpath = 'outputs/nyuv2_64x64x1024_80ps/csph3d_models_rerun/DDFN_C64B10_CSPH3D/k128_down4_Mt1_Rand-optCt=True-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0/run-complete_2022-10-07_193425/checkpoints/epoch=29-step=103889-avgvalrmse=0.0177.ckpt'
+	# ## 80 ps dataset 1024x4x4 separable
+	# model_ckpt_fpath = 'outputs/nyuv2_64x64x1024_80ps/csph3d_models_rerun/DDFN_C64B10_CSPH3D/k128_down4_Mt1_Rand-optCt=True-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0/run-complete_2022-10-07_193425/checkpoints/epoch=29-step=103889-avgvalrmse=0.0177.ckpt'
 
-	# ## 80 ps dataset 1024x1x1 learned
+	# ## Modulo 55ps dataset 256x4x4 separable
+	# model_ckpt_fpath = 'outputs/modulo_nyuv2_64x64x1024_55ps/validate_new_modulo_dataset_20230213/DDFN_C64B10_CSPH3D/k32_down4_Mt4_Rand-optCt=True-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0/run-complete_2023-02-14_065801/checkpoints/epoch=28-step=98695-avgvalrmse=0.0461.ckpt'
+	
+	# ## 80 ps dataset 256x4x4 separable
+	# model_ckpt_fpath = 'outputs/nyuv2_64x64x1024_80ps/csph3d_models/DDFN_C64B10_CSPH3D/k32_down4_Mt4_Rand-optCt=True-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0/run-complete_2022-09-24_175849/checkpoints/epoch=29-step=103889-avgvalrmse=0.0208.ckpt'
+
+	## Modulo 55ps dataset 1024x1x1 separable
+	model_ckpt_fpath = 'outputs/modulo_nyuv2_64x64x1024_55ps/validate_new_modulo_dataset_20230213/DDFN_C64B10_CSPH3D/k8_down1_Mt1_Rand-optCt=True-optC=True_csph1d_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0/run-complete_2023-02-14_065601/checkpoints/epoch=29-step=103889-avgvalrmse=0.0469.ckpt'
+	
+	# ## 80 ps dataset 1024x1x1 separable
 	# model_ckpt_fpath = 'outputs/nyuv2_64x64x1024_80ps/csph3D_tdim_baselines/DDFN_C64B10_CSPH3D/k8_down1_Mt1_Rand-optCt=True-optC=True_csph1d_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0/run-complete_2022-10-05_115838/checkpoints/epoch=25-step=88306-avgvalrmse=0.0201.ckpt'
 
-	# ## 55ps dataset 1024x1x1 learned
-	# model_ckpt_fpath = 'outputs_fmu/nyuv2_64x64x1024_55ps/validate_new_dataset_20230116/DDFN_C64B10_CSPH3D/k8_down1_Mt1_Rand-optCt=True-optC=True_csph1d_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0/run-complete_2023-01-18_072412/checkpoints/epoch=20-step=72722-avgvalrmse=0.0209.ckpt'
-	
-	
+
+
 	
 	model_ckpt_fname = os.path.basename(model_ckpt_fpath)
 	model_dirpath = model_ckpt_fpath.split('/checkpoints/')[0]
