@@ -7,10 +7,6 @@
 #   - Optimize Encoding Kernels = FALSE
 #   - tblock_init = [Rand]
 
-# Question we want to answer:
-#      - Can spatio-temporal compressive histograms beat temporal only ones?
-
-
 ## Models with 1024x4x4 Encoding Kernel
 
 # [STATUS==DONE RAN IN EULER] 3D CSPH 1024x4x4 - Compression=32x --> k=512
