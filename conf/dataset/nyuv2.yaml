@@ -1,18 +1,18 @@
 
 
-tres_ps: 55 # in picosecs
+tres_ps: 80 # in picosecs
 nr: 64 # num rows
 nc: 64 # num cols
 nt: 1024 # num tbins
 dark_param_id: 1 # dark image parameter used when simulating the data
 psf_param_id: 1 # PSF image parameter used when simulating the data
-# ## Old Traing Datasets
-# name: nyuv2_${.nr}x${.nc}x${.nt}_${.tres_ps}ps
-# train_datalist_fname: nyuv2_train_SimSPADDataset_nr-${.nr}_nc-${.nc}_nt-${.nt}_tres-${.tres_ps}ps_dark-${.dark_param_id}_psf-${.psf_param_id}.txt
-# val_datalist_fname: nyuv2_val_SimSPADDataset_nr-${.nr}_nc-${.nc}_nt-${.nt}_tres-${.tres_ps}ps_dark-${.dark_param_id}_psf-${.psf_param_id}.txt
-# test_datalist_fname: nyuv2_val_SimSPADDataset_nr-${.nr}_nc-${.nc}_nt-${.nt}_tres-${.tres_ps}ps_dark-${.dark_param_id}_psf-${.psf_param_id}.txt
-## New Modulo train dataset
-name: modulo_nyuv2_${.nr}x${.nc}x${.nt}_${.tres_ps}ps
-train_datalist_fname: nyuv2_train_ModuloSimSPADDataset_nr-${.nr}_nc-${.nc}_nt-${.nt}_tres-${.tres_ps}ps_dark-${.dark_param_id}_psf-${.psf_param_id}.txt
-val_datalist_fname: nyuv2_val_ModuloSimSPADDataset_nr-${.nr}_nc-${.nc}_nt-${.nt}_tres-${.tres_ps}ps_dark-${.dark_param_id}_psf-${.psf_param_id}.txt
-test_datalist_fname: nyuv2_val_ModuloSimSPADDataset_nr-${.nr}_nc-${.nc}_nt-${.nt}_tres-${.tres_ps}ps_dark-${.dark_param_id}_psf-${.psf_param_id}.txt
+## Original Traing Datasets
+name: nyuv2_${.nr}x${.nc}x${.nt}_${.tres_ps}ps
+train_datalist_fname: nyuv2_train_SimSPADDataset_nr-${.nr}_nc-${.nc}_nt-${.nt}_tres-${.tres_ps}ps_dark-${.dark_param_id}_psf-${.psf_param_id}.txt
+val_datalist_fname: nyuv2_val_SimSPADDataset_nr-${.nr}_nc-${.nc}_nt-${.nt}_tres-${.tres_ps}ps_dark-${.dark_param_id}_psf-${.psf_param_id}.txt
+test_datalist_fname: nyuv2_val_SimSPADDataset_nr-${.nr}_nc-${.nc}_nt-${.nt}_tres-${.tres_ps}ps_dark-${.dark_param_id}_psf-${.psf_param_id}.txt
+# ## New Modulo train dataset
+# name: modulo_nyuv2_${.nr}x${.nc}x${.nt}_${.tres_ps}ps
+# train_datalist_fname: nyuv2_train_ModuloSimSPADDataset_nr-${.nr}_nc-${.nc}_nt-${.nt}_tres-${.tres_ps}ps_dark-${.dark_param_id}_psf-${.psf_param_id}.txt
+# val_datalist_fname: nyuv2_val_ModuloSimSPADDataset_nr-${.nr}_nc-${.nc}_nt-${.nt}_tres-${.tres_ps}ps_dark-${.dark_param_id}_psf-${.psf_param_id}.txt
+# test_datalist_fname: nyuv2_val_ModuloSimSPADDataset_nr-${.nr}_nc-${.nc}_nt-${.nt}_tres-${.tres_ps}ps_dark-${.dark_param_id}_psf-${.psf_param_id}.txt
