@@ -933,12 +933,12 @@
         }
     },
     "DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0": {
-        "rel_dirpath": "outputs/nyuv2_64x64x1024_80ps/csph3d_models_rerun/DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0/run-complete_2022-10-06_141241",
-        "ckpt_id": "epoch=28-step=100426-avgvalrmse=0.0156.ckpt",
+        "rel_dirpath": "outputs/modulo_nyuv2_64x64x1024_55ps/validate_new_modulo_dataset_20230213/DDFN_C64B10_CSPH3D/k512_down4_Mt1_Rand-optCt=True-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0/run-complete_2023-02-14_065901",
+        "ckpt_id": "epoch=25-step=88306-avgvalrmse=0.0399.ckpt",
         "middlebury_72x88x1024_98ps": {
-            "depths/test_mae": 0.00874,
-            "depths/test_mse": 0.00031,
-            "depths/test_rmse": 0.01475
+            "depths/test_mae": 0.09978,
+            "depths/test_mse": 0.49165,
+            "depths/test_rmse": 0.34415
         },
         "middlebury_largedepth_72x88x1024_98ps": {
             "depths/test_mae": 0.03814,
@@ -952,12 +952,12 @@
         }
     },
     "DDFN_C64B10_CSPH3D/k256_down4_Mt1_Rand-optCt=True-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0": {
-        "rel_dirpath": "outputs/nyuv2_64x64x1024_80ps/csph3d_models_rerun/DDFN_C64B10_CSPH3D/k256_down4_Mt1_Rand-optCt=True-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0/run-complete_2022-10-06_141241",
-        "ckpt_id": "epoch=29-step=102158-avgvalrmse=0.0164.ckpt",
+        "rel_dirpath": "outputs/modulo_nyuv2_64x64x1024_55ps/validate_new_modulo_dataset_20230213/DDFN_C64B10_CSPH3D/k256_down4_Mt1_Rand-optCt=True-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0/run-complete_2023-02-14_065901",
+        "ckpt_id": "epoch=28-step=100426-avgvalrmse=0.0413.ckpt",
         "middlebury_72x88x1024_98ps": {
-            "depths/test_mae": 0.00997,
-            "depths/test_mse": 0.00051,
-            "depths/test_rmse": 0.01746
+            "depths/test_mae": 0.07937,
+            "depths/test_mse": 0.20201,
+            "depths/test_rmse": 0.27813
         },
         "middlebury_largedepth_72x88x1024_98ps": {
             "depths/test_mae": 0.02736,
@@ -971,12 +971,12 @@
         }
     },
     "DDFN_C64B10_CSPH3D/k128_down4_Mt1_Rand-optCt=True-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0": {
-        "rel_dirpath": "outputs/nyuv2_64x64x1024_55ps/validate_new_dataset_20230118/DDFN_C64B10_CSPH3D/k128_down4_Mt1_Rand-optCt=True-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0/run-latest_2023-01-18_231454",
-        "ckpt_id": "epoch=15-step=55407-avgvalrmse=0.0396.ckpt",
+        "rel_dirpath": "outputs/modulo_nyuv2_64x64x1024_55ps/validate_new_modulo_dataset_20230213/DDFN_C64B10_CSPH3D/k128_down4_Mt1_Rand-optCt=True-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0/run-complete_2023-02-14_065901",
+        "ckpt_id": "epoch=29-step=103889-avgvalrmse=0.0435.ckpt",
         "middlebury_72x88x1024_98ps": {
-            "depths/test_mae": 0.05265,
-            "depths/test_mse": 0.06967,
-            "depths/test_rmse": 0.15185
+            "depths/test_mae": 0.03186,
+            "depths/test_mse": 0.03722,
+            "depths/test_rmse": 0.10633
         },
         "middlebury_largedepth_72x88x1024_98ps": {
             "depths/test_mae": 0.28486,
@@ -1252,12 +1252,12 @@
         }
     },
     "DDFN_C64B10_CSPH3D/k8_down1_Mt1_HybridGrayFourier-optCt=False-optC=False_csph1d_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0": {
-        "rel_dirpath": "outputs/nyuv2_64x64x1024_55ps/validate_new_dataset_20230118/DDFN_C64B10_CSPH3D/k8_down1_Mt1_HybridGrayFourier-optCt=False-optC=False_csph1d_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0/run-latest_2023-01-18_231501",
-        "ckpt_id": "epoch=17-step=62333-avgvalrmse=0.0382.ckpt",
+        "rel_dirpath": "outputs/modulo_nyuv2_64x64x1024_55ps/validate_new_modulo_dataset_20230207/DDFN_C64B10_CSPH3D/k8_down1_Mt1_HybridGrayFourier-optCt=False-optC=False_csph1d_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0/run-latest_2023-02-08_090245",
+        "ckpt_id": "epoch=02-step=8657-avgvalrmse=0.0492.ckpt",
         "middlebury_72x88x1024_98ps": {
-            "depths/test_mae": 0.0353,
-            "depths/test_mse": 0.00886,
-            "depths/test_rmse": 0.06082
+            "depths/test_mae": 0.03972,
+            "depths/test_mse": 0.00924,
+            "depths/test_rmse": 0.06494
         },
         "lindell2018_linospad_captured": {
             "depths/test_mae": 11.602,
@@ -1294,12 +1294,12 @@
         }
     },
     "DDFN_C64B10_CSPH3D/k8_down1_Mt1_Rand-optCt=True-optC=True_csph1d_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0": {
-        "rel_dirpath": "outputs/nyuv2_64x64x1024_55ps/validate_new_dataset_20230118/DDFN_C64B10_CSPH3D/k8_down1_Mt1_Rand-optCt=True-optC=True_csph1d_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0/run-latest_2023-01-18_231501",
-        "ckpt_id": "epoch=18-step=64065-avgvalrmse=0.0411.ckpt",
+        "rel_dirpath": "outputs/modulo_nyuv2_64x64x1024_55ps/validate_new_modulo_dataset_20230213/DDFN_C64B10_CSPH3D/k8_down1_Mt1_Rand-optCt=True-optC=True_csph1d_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0/run-complete_2023-02-14_065601",
+        "ckpt_id": "epoch=29-step=103889-avgvalrmse=0.0469.ckpt",
         "middlebury_72x88x1024_98ps": {
-            "depths/test_mae": 0.33579,
-            "depths/test_mse": 1.2645,
-            "depths/test_rmse": 0.57855
+            "depths/test_mae": 0.2851,
+            "depths/test_mse": 1.0271,
+            "depths/test_rmse": 0.49488
         },
         "lindell2018_linospad_captured": {
             "depths/test_mae": 11.591,
@@ -1308,12 +1308,12 @@
         }
     },
     "DDFN_C64B10_CSPH3D/k16_down1_Mt1_Rand-optCt=True-optC=True_csph1d_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0": {
-        "rel_dirpath": "outputs/nyuv2_64x64x1024_80ps/csph3D_tdim_baselines/DDFN_C64B10_CSPH3D/k16_down1_Mt1_Rand-optCt=True-optC=True_csph1d_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0/run-complete_2022-10-04_002644",
-        "ckpt_id": "epoch=29-step=102158-avgvalrmse=0.0168.ckpt",
+        "rel_dirpath": "outputs/modulo_nyuv2_64x64x1024_55ps/validate_new_modulo_dataset_20230213/DDFN_C64B10_CSPH3D/k16_down1_Mt1_Rand-optCt=True-optC=True_csph1d_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0/run-complete_2023-02-14_065716",
+        "ckpt_id": "epoch=27-step=95232-avgvalrmse=0.0419.ckpt",
         "middlebury_72x88x1024_98ps": {
-            "depths/test_mae": 0.01174,
-            "depths/test_mse": 0.00106,
-            "depths/test_rmse": 0.02208
+            "depths/test_mae": 0.04578,
+            "depths/test_mse": 0.07317,
+            "depths/test_rmse": 0.12015
         },
         "lindell2018_linospad_captured": {
             "depths/test_mae": 11.596,
@@ -1336,12 +1336,12 @@
         }
     },
     "DDFN_C64B10_CSPH3D/k32_down1_Mt1_HybridGrayFourier-optCt=False-optC=False_csph1d_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0": {
-        "rel_dirpath": "outputs/nyuv2_64x64x1024_80ps/csph3D_tdim_baselines/DDFN_C64B10_CSPH3D/k32_down1_Mt1_HybridGrayFourier-optCt=False-optC=False_csph1d_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0/run-complete_2022-10-04_002644",
-        "ckpt_id": "epoch=28-step=98695-avgvalrmse=0.0148.ckpt",
+        "rel_dirpath": "outputs/modulo_nyuv2_64x64x1024_55ps/validate_new_modulo_dataset_20230213/DDFN_C64B10_CSPH3D/k32_down1_Mt1_HybridGrayFourier-optCt=False-optC=False_csph1d_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0/run-complete_2023-02-14_065548",
+        "ckpt_id": "epoch=29-step=102158-avgvalrmse=0.0372.ckpt",
         "middlebury_72x88x1024_98ps": {
-            "depths/test_mae": 0.01121,
-            "depths/test_mse": 0.00059,
-            "depths/test_rmse": 0.01859
+            "depths/test_mae": 0.0119,
+            "depths/test_mse": 0.00128,
+            "depths/test_rmse": 0.02204
         },
         "lindell2018_linospad_captured": {
             "depths/test_mae": 11.654,
@@ -1392,12 +1392,12 @@
         }
     },
     "DDFN_C64B10/norm-none/loss-kldiv_tv-1e-05": {
-        "rel_dirpath": "outputs/nyuv2_64x64x1024_80ps/no_compression_baselines_lr-1e-4/DDFN_C64B10/norm-none/loss-kldiv_tv-1e-05/run-complete_2022-10-16_063146",
-        "ckpt_id": "epoch=06-step=22509-avgvalrmse=0.0261.ckpt",
+        "rel_dirpath": "outputs/modulo_nyuv2_64x64x1024_55ps/validate_new_modulo_dataset_20230207/DDFN_C64B10/norm-none/loss-kldiv_tv-1e-05/run-latest_2023-02-08_221657",
+        "ckpt_id": "epoch=07-step=25972-avgvalrmse=0.0585.ckpt",
         "middlebury_72x88x1024_98ps": {
-            "depths/test_mae": 0.00933,
-            "depths/test_mse": 0.00042,
-            "depths/test_rmse": 0.01757
+            "depths/test_mae": 0.01051,
+            "depths/test_mse": 0.00052,
+            "depths/test_rmse": 0.01881
         },
         "middlebury_maskedhightimebins_72x88x1024_98ps": {
             "depths/test_mae": 0.00933,
@@ -1626,6 +1626,15 @@
             "depths/test_mae": 14.863,
             "depths/test_mse": 514.93,
             "depths/test_rmse": 16.569
+        }
+    },
+    "DDFN_C64B10_CSPH3D/k128_down4_Mt1_Rand-optCt=True-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-1e-06": {
+        "rel_dirpath": "outputs/modulo_nyuv2_64x64x1024_55ps/validate_new_modulo_dataset_20230213_compoptics/DDFN_C64B10_CSPH3D/k128_down4_Mt1_Rand-optCt=True-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-1e-06/run-latest_2023-02-15_221701",
+        "ckpt_id": "epoch=09-step=32898-avgvalrmse=0.0470.ckpt",
+        "middlebury_72x88x1024_98ps": {
+            "depths/test_mae": 0.03244,
+            "depths/test_mse": 0.031,
+            "depths/test_rmse": 0.10792
         }
     }
 }

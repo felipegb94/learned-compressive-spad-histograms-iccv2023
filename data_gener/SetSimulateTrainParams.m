@@ -10,8 +10,7 @@ addpath('./TrainData/nyu_utils');
 % 1024 bins + bin_size=55e-12 --> Depth Range ~ 8.44m,
 % 1024 bins + bin_size=52e-12 --> Depth Range ~ 8m,
 % 1024 bins + bin_size=48.8e-12 --> Depth Range ~ 7.5m,
-bin_size = 55e-12; %approximately the bin size (in secs)
-% bin_size = 80e-12; %approximately the bin size (in secs)
+bin_size = 80e-12; %approximately the bin size (in secs)
 num_bins = 1024;
 
 % Spatial resolution (vertical and horizontal
