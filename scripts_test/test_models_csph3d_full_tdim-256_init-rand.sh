@@ -69,7 +69,7 @@ ckpt_id=epoch=29-step=102157-avgvalrmse=0.0213.ckpt #  128 images==0.02488 | 128
 python test.py dataset='"'$test_dataset'"' ++model_name='"'$model_name'"' ++experiment_name=$experiment_name ++model_dirpath='"'$model_dirpath'"' ++ckpt_id='"'$ckpt_id'"' ++train_dataset='"'$train_dataset'"'
 
 
-# # ## Models with 256x8x8 Encoding Kernel [NOT RUN YET...]
+# # ## Models with 256x8x8 Encoding Kernel
 
 ## # 3D CSPH 256x8x8 - Compression=32x --> k=512
 model_name=DDFN_C64B10_CSPH3D/k512_down8_Mt4_Rand-optCt=True-optC=True_full_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0
