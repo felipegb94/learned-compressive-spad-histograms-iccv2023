@@ -112,6 +112,32 @@ def get_rand_torch_conv3d_W(k, kernel3d_size, separable=False):
 	conv3d_W = torch.nn.Parameter(conv3d_tensor, requires_grad=True) 
 	return conv3d_W
 
+def compute_scale(beta, alpha, beta_q, alpha_q):
+	return (float(beta) - float(alpha)) / (float(beta_q) - float(alpha_q))
+
+def compute_zero_point(scale, alpha, alpha_q):
+	## Cast everything to float first to make sure that we dont input torch.tensors to zero point
+	return round(-1*((float(alpha)/float(scale)) - float(alpha_q)))
+
+def quantize_qint8_manual(X, X_range=None):
+	if(X_range is None):
+		(X_min, X_max) = (X.min(), X.max())
+	else:
+		X_min = X_range[0]
+		X_max = X_range[1]
+		# assert(X_min <= X.detach().cpu().numpy().min()), "minimum should be contained in range"
+		# assert(X_max >= X.detach().cpu().numpy().max()), "maximum should be contained in range"
+	(min_q, max_q) = (-128, 127)
+	scale = compute_scale(X_max, X_min, max_q, min_q)
+	zero_point = compute_zero_point(scale, X_min, min_q)
+	qX = (X / scale) + zero_point
+	qX_int8  = torch.round(qX).type(torch.int8)
+	return  (qX_int8, scale, zero_point)
+
+def dequantize_qint8(X_qint8, X_scale, X_zero_point):
+	## Cast everything to float 32 first since X_zero_point may have different precision than X_qint8
+	return (X_qint8.type(torch.float32) - float(X_zero_point))*float(X_scale)
+
 class CSPH1DGlobalEncodingLayer(nn.Module):
 	def __init__(self, k=2, num_bins=1024, init='TruncFourier', h_irf=None, optimize_weights=False):
 		# Init parent class
@@ -557,7 +583,7 @@ class CSPH3DLayer(nn.Module):
 		super(CSPH3DLayer, self).__init__()
 		# Validate some input params
 		assert((num_bins % nt_blocks) == 0), "Number of bins should be divisible by number of time blocks"
-
+		self.emulate_int8_quantization = False
 		self.num_bins = num_bins
 		self.k = k
 		self.tblock_init=tblock_init
@@ -746,12 +772,59 @@ class CSPH3DLayer(nn.Module):
 		B1 = F.conv3d(inputs, self.get_Cmat(), bias=None, stride=self.encoding_kernel3d_t, padding=0, dilation = 1, groups = 1)
 		B = F.conv3d(B1, self.Cmat_xydim, bias=None, stride=self.encoding_kernel3d_xy, padding=0, dilation = 1, groups = self.k)
 		return B
+	
+	def enable_quantization_emulation(self):
+		'''
+			Change the encoding layer to a quantized one.
+
+			This should only be enabled at test time.
+		'''
+		self.emulate_int8_quantization = True
+		if(self.encoding_type == 'separable'):
+			self.csph_layer = self.csph_layer_separable_quantized
+		elif(self.encoding_type == 'csph1d'):
+			self.csph_layer = self.csph_layer_csph1d_quantized
+		else:
+			assert(False), "invalid encoding type for quantization emulation"
+
+	def csph_layer_separable_quantized(self, inputs):
+		'''
+			Assume a separable coding matrix representation where the 1st dim is independent from 2nd and 3rd
+
+			Quantization is emulated here by going to int8 first, and then going back to float32. So the float32 numbers will have quantization errors. The reason we have to cast everyting back to float32 is because we want the output compressed histogram to be 16 or even 32-bits, and not 8-bits. Although, the weights are 8-bits, the compressed histogram should have higher bit-depth because otherwise it would overflow. Unfortunately, to my knowledge pytorch does not support a conv3d that returns a different type with a higher bit-depth to avoid overflow.
+		'''
+		## Convert inputs and weights to int8 and back to float 32 to emulat quantization
+		# can simply cast to int8 since spad inputs are already integers btwn 0-255
+		inputs_int8_dequantized = inputs.type(torch.int8).type(torch.float32)
+		(Cmat_tdim_int8, Cmat_tdim_scale, Cmat_tdim_zero_point) = quantize_qint8_manual(self.get_Cmat(), X_range=(-1,1))
+		Cmat_tdim_int8_dequantized = dequantize_qint8(Cmat_tdim_int8, Cmat_tdim_scale, Cmat_tdim_zero_point)
+		(Cmat_xydim_int8, Cmat_xydim_scale, Cmat_xydim_zero_point) = quantize_qint8_manual(self.Cmat_xydim, X_range=(-1,1))
+		Cmat_xydim_int8_dequantized = dequantize_qint8(Cmat_xydim_int8, Cmat_xydim_scale, Cmat_xydim_zero_point)
+		## Run regular encoding with the emulated quantized layers
+		B1 = F.conv3d(inputs_int8_dequantized, Cmat_tdim_int8_dequantized, bias=None, stride=self.encoding_kernel3d_t, padding=0, dilation = 1, groups = 1)
+		B = F.conv3d(B1, Cmat_xydim_int8_dequantized, bias=None, stride=self.encoding_kernel3d_xy, padding=0, dilation = 1, groups = self.k)
+		return B
 
 	def csph_layer_csph1d(self, inputs):
 		'''
 			Assume a separable coding matrix representation where the 1st dim is independent from 2nd and 3rd
 		'''
 		B = F.conv3d(inputs, self.get_Cmat(), bias=None, stride=self.encoding_kernel3d_t, padding=0, dilation = 1, groups = 1)
+		return B
+	
+	def csph_layer_csph1d_quantized(self, inputs):
+		'''
+			Assume a separable coding matrix representation where the 1st dim is independent from 2nd and 3rd
+			
+			Quantization is emulated here by going to int8 first, and then going back to float32. So the float32 numbers will have quantization errors. The reason we have to cast everyting back to float32 is because we want the output compressed histogram to be 16 or even 32-bits, and not 8-bits. Although, the weights are 8-bits, the compressed histogram should have higher bit-depth because otherwise it would overflow. Unfortunately, to my knowledge pytorch does not support a conv3d that returns a different type with a higher bit-depth to avoid overflow.
+		'''
+		## Convert inputs and weights to int8 and back to float 32 to emulat quantization
+		# can simply cast to int8 since spad inputs are already integers btwn 0-255
+		inputs_int8_dequantized = inputs.type(torch.int8).type(torch.float32)
+		(Cmat_tdim_int8, Cmat_tdim_scale, Cmat_tdim_zero_point) = quantize_qint8_manual(self.get_Cmat(), X_range=(-1,1))
+		Cmat_tdim_int8_dequantized = dequantize_qint8(Cmat_tdim_int8, Cmat_tdim_scale, Cmat_tdim_zero_point)
+		## Run regular encoding with the emulated quantized layers
+		B = F.conv3d(inputs_int8_dequantized, Cmat_tdim_int8_dequantized, bias=None, stride=self.encoding_kernel3d_t, padding=0, dilation = 1, groups = 1)
 		return B
 
 	def apply_irf_on_W(self, W):
