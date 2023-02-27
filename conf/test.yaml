@@ -24,6 +24,9 @@ defaults:
 
 train_dataset: nyuv2_64x64x1024_80ps
 
+# Emulate int8 quantization on csph3d_layer weights?
+emulate_int8_quantization: false
+
 ##########################################
 ## Peng et al., 2020 Baselines and Modified 
 # ## Peng et al., 2020 (Plain Deep Boosting w/out NL) --> Full trained model with gradient decay

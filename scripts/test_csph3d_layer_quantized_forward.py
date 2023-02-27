@@ -68,29 +68,21 @@ def dequantize_qint8(X_qint8, X_scale, X_zero_point):
 if __name__=='__main__':
 
 	## Test scene to load
-	test_data_fpath = 'data_gener/TestData/middlebury/processed/SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0/spad_Art_50_50.mat'
+	test_data_fpath = 'data_gener/TestData/middlebury/processed/SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0/spad_Art_50_1000.mat'
+	# test_data_fpath = 'data_gener/TestData/middlebury/processed/SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0/spad_Art_10_10.mat'
+	# test_data_fpath = 'data_gener/TestData/middlebury/processed/SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0/spad_Reindeer_50_1000.mat'
 	test_data = scipy.io.loadmat(test_data_fpath)
-	spad = np.asarray(scipy.sparse.csc_matrix.todense(test_data['spad'])).astype(np.int8)
-	spad = spad.reshape((72, 88, 1024))
-	spad = spad[np.newaxis, :]
-	spad = np.transpose(spad, (0, 3, 2, 1))
-	
-	# ## 80 ps dataset 256x4x4 separable
-	# model_ckpt_fpath = 'outputs/nyuv2_64x64x1024_80ps/csph3d_models/DDFN_C64B10_CSPH3D/k32_down4_Mt4_Rand-optCt=True-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0/run-complete_2022-09-24_175849/checkpoints/epoch=29-step=103889-avgvalrmse=0.0208.ckpt'
-
+	spad_np = np.asarray(scipy.sparse.csc_matrix.todense(test_data['spad']))
+	spad_np = spad_np.reshape((88, 72, 1024))
+	spad_np = spad_np[np.newaxis, :]
+	spad_np = np.transpose(spad_np, (0, 3, 2, 1))
+	spad = torch.tensor(spad_np).unsqueeze(0)
 
 	## 80 ps dataset 256x2x2 K=8 separable trunc fourier
 	model_ckpt_fpath = 'outputs/nyuv2_64x64x1024_80ps/csph3d_models_20230218/DDFN_C64B10_CSPH3D/k8_down2_Mt4_TruncFourier-optCt=False-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0/run-complete_2023-02-19_010108/checkpoints/epoch=29-step=101292-avgvalrmse=0.0208.ckpt'
 
 	# ## 80 ps dataset 256x2x2 K=16 separable trunc fourier
 	# model_ckpt_fpath = 'outputs/nyuv2_64x64x1024_80ps/csph3d_models_20230218/DDFN_C64B10_CSPH3D/k16_down2_Mt4_TruncFourier-optCt=False-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0/run-complete_2023-02-19_010116/checkpoints/epoch=29-step=103887-avgvalrmse=0.0188.ckpt'
-
-
-	# ## 80 ps dataset 256x1x1 K=4  trunc fourier
-	# model_ckpt_fpath = 'outputs/nyuv2_64x64x1024_80ps/csph3D_tdim-256_20230218/DDFN_C64B10_CSPH3D/k4_down1_Mt4_TruncFourier-optCt=False-optC=False_csph1d_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0/run-complete_2023-02-19_011009/checkpoints/epoch=29-step=103022-avgvalrmse=0.0203.ckpt'
-
-	# # ## 80 ps dataset 256x1x1 K=8 trunc fourier
-	# model_ckpt_fpath = 'outputs/nyuv2_64x64x1024_80ps/csph3D_tdim-256_20230218/DDFN_C64B10_CSPH3D/k8_down1_Mt4_TruncFourier-optCt=False-optC=False_csph1d_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0/run-complete_2023-02-19_011012/checkpoints/epoch=29-step=102157-avgvalrmse=0.0173.ckpt'
 
 	# ## 80 ps dataset 1024x1x1 K=8  trunc fourier
 	# model_ckpt_fpath = 'outputs/nyuv2_64x64x1024_80ps/csph3D_tdim_baselines/DDFN_C64B10_CSPH3D/k8_down1_Mt1_TruncFourier-optCt=False-optC=False_csph1d_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0/run-complete_2022-10-04_002521/checkpoints/epoch=29-step=103889-avgvalrmse=0.0193.ckpt'
@@ -103,11 +95,6 @@ if __name__=='__main__':
 	model_dirpath = model_ckpt_fpath.split('/checkpoints/')[0]
 	model_name = '/'.join(model_dirpath.split('/')[3:-1])
 
-	## dirpath to save the quantized weights
-	out_dirpath = os.path.join(model_dirpath, "csph3d_layer_qint8")
-	os.makedirs(out_dirpath, exist_ok=True)
-	out_fname = model_ckpt_fname.split('.ckpt')[0]
-	out_fpath = os.path.join(out_dirpath, out_fname)
 
 	model, _ = load_model_from_ckpt(model_name, model_ckpt_fname, logger=None, model_dirpath=model_dirpath)
 	
@@ -115,15 +102,15 @@ if __name__=='__main__':
 	encoding_type = model.csph3d_layer.encoding_type
 	K = encoding_layer.k
 	if(encoding_type == 'separable'):
-		Cmat_tdim = encoding_layer.Cmat_tdim.detach().cpu().numpy()
-		Cmat_xydim = encoding_layer.Cmat_xydim.detach().cpu().numpy()
+		Cmat_tdim = encoding_layer.Cmat_tdim
+		Cmat_xydim = encoding_layer.Cmat_xydim
 		Cmat_txydim = Cmat_xydim*Cmat_tdim
 	elif(encoding_type == 'full'):
-		Cmat_txydim = encoding_layer.Cmat_txydim.detach().cpu().numpy()
+		Cmat_txydim = encoding_layer.Cmat_txydim
 		Cmat_tdim = Cmat_txydim.mean(axis=(-1,-2), keepdims=True)
 		Cmat_xydim = Cmat_txydim.mean(axis=(-3), keepdims=True)
 	elif(encoding_type == 'csph1d'):
-		Cmat_tdim = encoding_layer.Cmat_tdim.detach().cpu().numpy()
+		Cmat_tdim = encoding_layer.Cmat_tdim
 		Cmat_xydim = np.ones((K, 1, 1, 1, 1)).astype(Cmat_tdim.dtype)
 		Cmat_txydim = Cmat_xydim*Cmat_tdim
 	else:
@@ -135,57 +122,48 @@ if __name__=='__main__':
 	(Cmat_xydim_int8, Cmat_xydim_scale, Cmat_xydim_zero_point) = quantize_qint8_manual(Cmat_xydim, X_range=X_range) 
 	(Cmat_txydim_int8, Cmat_txydim_scale, Cmat_txydim_zero_point) = quantize_qint8_manual(Cmat_txydim, X_range=X_range) 
 	
+	## Run regular encoding without quantization
+	B = encoding_layer.csph_layer(spad.type(torch.float32))
+	W = encoding_layer.get_unfilt_backproj_W3d()
+	B_norm = encoding_layer.zncc_norm(B, dims=-4) # for 3D signals the channel dimension is -4 dimension 
+	W_norm = encoding_layer.zncc_norm(W, dims=0) # for weights the channel dimension is the first channel
+	X = encoding_layer.unfiltered_backproj_layer(y=B_norm, W=W_norm)
+
+	## Run encoding with quantization
+	# convert inputs to int8 (can simply cast to int8 since spad inputs are already integers btwn 0-255)
+	spad_int8_dequantized = spad.type(torch.int8).type(torch.float32)
+	Cmat_tdim_int8_dequantized = dequantize_qint8(Cmat_tdim_int8, Cmat_tdim_scale, Cmat_tdim_zero_point)
+	Cmat_xydim_int8_dequantized = dequantize_qint8(Cmat_xydim_int8, Cmat_xydim_scale, Cmat_xydim_zero_point)
+	# quantized csph layer
+	import torch.nn.functional as F
+	B1_quantized = F.conv3d(spad_int8_dequantized, Cmat_tdim_int8_dequantized, bias=None, stride=encoding_layer.encoding_kernel3d_t, padding=0, dilation = 1, groups = 1)
+	B_quantized = F.conv3d(B1_quantized, Cmat_xydim_int8_dequantized, bias=None, stride=encoding_layer.encoding_kernel3d_xy, padding=0, dilation = 1, groups = encoding_layer.k)
+
+	## Run encoding with quantization
+	B_quantized2 = encoding_layer.csph_layer_separable_quantized(spad.type(torch.float32))
+
+
+	## Dequantize the weights and view outputs
 	(Cmat_tdim_fp32) = dequantize_qint8(Cmat_tdim_int8, Cmat_tdim_scale, Cmat_tdim_zero_point) 
 	(Cmat_xydim_fp32) = dequantize_qint8(Cmat_xydim_int8, Cmat_xydim_scale, Cmat_xydim_zero_point) 
 	(Cmat_txydim_fp32) = dequantize_qint8(Cmat_txydim_int8, Cmat_txydim_scale, Cmat_txydim_zero_point)
 
-	## save the file
-	#NOTE: scale and zero_point shpould match for all if X_range is fixed
-	np.savez(out_fpath 
-	  , range_float32=X_range
-	  , range_int8=(-128,127)
-	  , Cmat_tdim_int8=Cmat_tdim_int8.squeeze()
-	  , Cmat_tdim=Cmat_tdim.squeeze()
-	  , Cmat_xydim_int8=Cmat_xydim_int8.squeeze()
-	  , Cmat_xydim=Cmat_xydim.squeeze()
-	  , Cmat_txydim_int8=Cmat_txydim_int8.squeeze()
-	  , Cmat_txydim=Cmat_txydim.squeeze()
-	  , scale=Cmat_tdim_scale
-	  , zero_point=Cmat_tdim_zero_point
-	  )
-
+	## Make everything numpy arrays to visualize
+	Cmat_tdim_np = Cmat_tdim.detach().cpu().numpy()
+	Cmat_tdim_int8_np = Cmat_tdim_int8.detach().cpu().numpy()
+	Cmat_tdim_fp32_np = Cmat_tdim_fp32.detach().cpu().numpy()
+	Cmat_xydim_np = Cmat_xydim.detach().cpu().numpy()
+	Cmat_xydim_int8_np = Cmat_xydim_int8.detach().cpu().numpy()
+	Cmat_xydim_fp32_np = Cmat_xydim_fp32.detach().cpu().numpy()
+	Cmat_txydim_np = Cmat_txydim.detach().cpu().numpy()
+	Cmat_txydim_int8_np = Cmat_txydim_int8.detach().cpu().numpy()
+	Cmat_txydim_fp32_np = Cmat_txydim_fp32.detach().cpu().numpy()
 
 	plt.clf()
 	plt.subplot(2,1,1)
 	plt.title("Original FP32")
-	plt.plot(Cmat_tdim.squeeze().transpose())
+	plt.plot(Cmat_tdim_np.squeeze().transpose())
 	plt.subplot(2,1,2)
 	plt.title("Dequantized FP32")
-	plt.plot(Cmat_tdim_fp32.squeeze().transpose())
-
-
-	## VALIDATE Quantization Code
-
-	## Generate between X_min and X_max
-	(min_val, max_val) = (-0.5, 0.5)
-	X_fp32_1 = (min_val - max_val) * torch.rand(20) + max_val
-	# X_fp32_1 = (min_val - max_val) * np.random.rand(10).astype(np.float32) + max_val
-	# X_fp32_1_torch = torch.tensor(X_fp32_1)
-	# X_fp32_1 = torch.tensor([-0.3, -0.2, 0.1, 0.4])
-	# X_fp32_1 = torch.tensor([-0.4, -0.26, -0.2, 0.01, 0.05, 0.1, 0.15, 0.3])
-	print("Output of torch quantize and dequantize:")
-	print("    Initial fp32: {}".format(X_fp32_1))
-	X_qint8_1 = quantize_qint8(X_fp32_1, X_range)
-	print("    Torch Quantized int8: {}".format(X_qint8_1))
-	print("    Torch DeQuantized fp32: {}".format(X_qint8_1.dequantize()))
-	print("Output of manual quantize and dequantize:")
-	print("    Initial fp32: {}".format(X_fp32_1))
-	(X_qint8_2, X_qint8_2_scale, X_qint8_2_zero_point) = quantize_qint8_manual(X_fp32_1, X_range)
-	print("    Manual Quantized int8: {}".format(X_qint8_2))
-	X_fp32_2 = dequantize_qint8(X_qint8_2, X_qint8_2_scale, X_qint8_2_zero_point)
-	print("    Manual DeQuantized fp32: {}".format(X_fp32_2))
-
-	assert(np.all((X_qint8_1.dequantize() == X_fp32_2).numpy())), "manual quantization does not match pytorch"
-
-
+	plt.plot(Cmat_tdim_fp32_np.squeeze().transpose())
 

@@ -213,6 +213,17 @@ class LITBaseSPADModel(pl.LightningModule):
 
 		
 		return {'dep': dep, 'dep_re': dep_re}
+	
+	def get_sample_spad_data_ids(self, sample):
+		'''
+			Get the sample ids. This function was created mainly to be able to change the ids depending on the processing mode
+		'''
+		dataloader_idx = 0 # If multiple dataloaders are available you need to change this using the input args to the test_step function
+		curr_dataloader = self.trainer.test_dataloaders[dataloader_idx]
+		spad_data_ids = []
+		for idx in sample['idx']:
+			spad_data_ids.append(curr_dataloader.dataset.get_spad_data_sample_id(idx))
+		return spad_data_ids
 
 	def test_step(self, sample, batch_idx):
 
@@ -245,9 +256,7 @@ class LITBaseSPADModel(pl.LightningModule):
 		tau = nt*tres
 		### Save model outputs in a folder with the dataset name and with a filename equal to the train data filename
 		# First get dataloader to generate the data ids
-		spad_data_ids = []
-		for idx in sample['idx']:
-			spad_data_ids.append(curr_dataloader.dataset.get_spad_data_sample_id(idx))
+		spad_data_ids = self.get_sample_spad_data_ids(sample)
 		out_rel_dirpath = os.path.dirname(spad_data_ids[0])
 		if(not os.path.exists(out_rel_dirpath)):
 			os.makedirs(out_rel_dirpath, exist_ok=True)
