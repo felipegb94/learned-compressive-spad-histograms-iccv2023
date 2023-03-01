@@ -38,33 +38,46 @@ if __name__=='__main__':
 	io_dirpaths = get_hydra_io_dirpaths(job_name='plot_csph3d_test_set_metrics')
 
 	compression_ratio_all = [32, 64, 128]
-	# compression_ratio_all = [128]
+	# compression_ratio_all = [64]
+	compression_ratio_all = [32, 128]
 
 	## plot for each compression ratio
 	for compression_ratio in compression_ratio_all:
 	
 		out_fname_base = 'CR-{}'.format(compression_ratio) 
 		
+		# ## CSPH3D Models for: Effect of Size of C
+		# experiment_id = 'Cmat_size_effect'
+		# encoding_type_all = ['full', 'separable', 'separable', 'separable']
+		# tdim_init_all = ['Rand']*len(encoding_type_all)
+		# optCt_all = [True]*len(encoding_type_all)
+		# optC_all = [True]*len(encoding_type_all)
+		# spatial_down_factor_all = [4]*len(encoding_type_all)
+		# num_tdim_blocks_all = [1, 1, 4, 16]
+
+		## CSPH3D Models for: Effect of Size of C (supplement)
 		## Parameters for: Does decreasing the number of parameters hurt performance?
-		experiment_id = 'Cmat_size_effect'
-		encoding_type_all = ['full', 'separable', 'separable', 'separable']
+		experiment_id = 'Cmat_size_effect_supplement'
+		encoding_type_all = ['full', 'full', 'separable', 'separable', 'separable', 'separable']
 		tdim_init_all = ['Rand']*len(encoding_type_all)
 		optCt_all = [True]*len(encoding_type_all)
 		optC_all = [True]*len(encoding_type_all)
 		spatial_down_factor_all = [4]*len(encoding_type_all)
-		num_tdim_blocks_all = [1, 1, 4, 16]
+		num_tdim_blocks_all = [1, 4, 1, 4, 16, 64]
+		compression_ratio_all = [32, 64, 128]
 
-		## Parameters for: Spatial kernel size effect?
-		experiment_id = 'spatial_block_dims_effect'
-		encoding_type_all = ['csph1d', 'separable', 'separable',  'separable']
-		spatial_down_factor_all = [1, 2, 4, 8]
-		tdim_init_all = ['Rand']*len(encoding_type_all)
-		optCt_all = [True]*len(encoding_type_all)
-		optC_all = [True]*len(encoding_type_all)
-		# tdim_init_all[0] = 'HybridGrayFourier'
-		# optCt_all[0] = False
-		# optC_all[0] = False
-		num_tdim_blocks_all = [1]*len(encoding_type_all)
+		# ## Parameters for: Spatial kernel size effect?
+		# num_tdim_blocks = 4
+		# experiment_id = 'spatial_block_dims_effect_Mt-{}'.format(num_tdim_blocks)
+		# encoding_type_all = ['csph1d', 'separable', 'separable',  'separable']
+		# spatial_down_factor_all = [1, 2, 4, 8]
+		# tdim_init_all = ['Rand']*len(encoding_type_all)
+		# optCt_all = [True]*len(encoding_type_all)
+		# optC_all = [True]*len(encoding_type_all)
+		# # tdim_init_all[0] = 'HybridGrayFourier'
+		# # optCt_all[0] = False
+		# # optC_all[0] = False
+		# num_tdim_blocks_all = [num_tdim_blocks]*len(encoding_type_all)
 
 		# ## Parameters for: Does a good initialization Help Performance?
 		# experiment_id = 'tdim_init_effect'
@@ -166,77 +179,77 @@ if __name__=='__main__':
 		# add title after saving so we know what we plotted
 		plt.title('{} - Compressive Histograms at {}x Compression'.format(metric_id, compression_ratio))
 
-		## Make plot for all metrics
-		plt.figure()
-		metric_id = 'ssim'
-		out_fname = out_fname_base + '_' + metric_id
-		metric_ylim = (0.7, 1.0)
-		analyze_test_results_utils.plot_test_dataset_metrics(model_metrics_df, metric_id=metric_id, ylim=metric_ylim, title='', fig_width=3)
-		# remove ticks and legend for saving
-		plot_utils.remove_xticks()
-		plt.xlabel(''); plt.ylabel('')
-		plt.grid(linestyle='--', linewidth=0.5)
-		# save figure with legend
-		plot_utils.save_currfig(dirpath=out_dirpath, filename='legend_'+out_fname, file_ext='svg')
-		# save figure without legend
-		plt.gca().get_legend().remove()
-		plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
-		# add title after saving so we know what we plotted
-		plt.title('{} - Compressive Histograms at {}x Compression'.format(metric_id, compression_ratio))
+		# ## Make plot for all metrics
+		# plt.figure()
+		# metric_id = 'ssim'
+		# out_fname = out_fname_base + '_' + metric_id
+		# metric_ylim = (0.7, 1.0)
+		# analyze_test_results_utils.plot_test_dataset_metrics(model_metrics_df, metric_id=metric_id, ylim=metric_ylim, title='', fig_width=3)
+		# # remove ticks and legend for saving
+		# plot_utils.remove_xticks()
+		# plt.xlabel(''); plt.ylabel('')
+		# plt.grid(linestyle='--', linewidth=0.5)
+		# # save figure with legend
+		# plot_utils.save_currfig(dirpath=out_dirpath, filename='legend_'+out_fname, file_ext='svg')
+		# # save figure without legend
+		# plt.gca().get_legend().remove()
+		# plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
+		# # add title after saving so we know what we plotted
+		# plt.title('{} - Compressive Histograms at {}x Compression'.format(metric_id, compression_ratio))
 		
-		## Make plot for all metrics
-		plt.figure()
-		metric_id = '5mm_tol_err'
-		metric_ylim = (0.1, 0.9)
-		# metric_ylim = None
-		out_fname = out_fname_base + '_' + metric_id
-		analyze_test_results_utils.plot_test_dataset_metrics(model_metrics_df, metric_id=metric_id, ylim=metric_ylim, title='', fig_width=3)
-		# remove ticks and legend for saving
-		plot_utils.remove_xticks()
-		plt.xlabel(''); plt.ylabel('')
-		plt.grid(linestyle='--', linewidth=0.5)
-		# save figure with legend
-		plot_utils.save_currfig(dirpath=out_dirpath, filename='legend_'+out_fname, file_ext='svg')
-		# save figure without legend
-		plt.gca().get_legend().remove()
-		plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
-		# add title after saving so we know what we plotted
-		plt.title('{} - Compressive Histograms at {}x Compression'.format(metric_id, compression_ratio))
+		# ## Make plot for all metrics
+		# plt.figure()
+		# metric_id = '5mm_tol_err'
+		# metric_ylim = (0.1, 0.9)
+		# # metric_ylim = None
+		# out_fname = out_fname_base + '_' + metric_id
+		# analyze_test_results_utils.plot_test_dataset_metrics(model_metrics_df, metric_id=metric_id, ylim=metric_ylim, title='', fig_width=3)
+		# # remove ticks and legend for saving
+		# plot_utils.remove_xticks()
+		# plt.xlabel(''); plt.ylabel('')
+		# plt.grid(linestyle='--', linewidth=0.5)
+		# # save figure with legend
+		# plot_utils.save_currfig(dirpath=out_dirpath, filename='legend_'+out_fname, file_ext='svg')
+		# # save figure without legend
+		# plt.gca().get_legend().remove()
+		# plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
+		# # add title after saving so we know what we plotted
+		# plt.title('{} - Compressive Histograms at {}x Compression'.format(metric_id, compression_ratio))
 
-		## Make plot for all metrics
-		plt.figure()
-		metric_id = '10mm_tol_err'
-		metric_ylim = (0.2, 1.0)
-		# metric_ylim = None
-		out_fname = out_fname_base + '_' + metric_id
-		analyze_test_results_utils.plot_test_dataset_metrics(model_metrics_df, metric_id=metric_id, ylim=metric_ylim, title='', fig_width=3)
-		# remove ticks and legend for saving
-		plot_utils.remove_xticks()
-		plt.xlabel(''); plt.ylabel('')
-		plt.grid(linestyle='--', linewidth=0.5)
-		# save figure with legend
-		plot_utils.save_currfig(dirpath=out_dirpath, filename='legend_'+out_fname, file_ext='svg')
-		# save figure without legend
-		plt.gca().get_legend().remove()
-		plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
-		# add title after saving so we know what we plotted
-		plt.title('{} - Compressive Histograms at {}x Compression'.format(metric_id, compression_ratio))
+		# ## Make plot for all metrics
+		# plt.figure()
+		# metric_id = '10mm_tol_err'
+		# metric_ylim = (0.2, 1.0)
+		# # metric_ylim = None
+		# out_fname = out_fname_base + '_' + metric_id
+		# analyze_test_results_utils.plot_test_dataset_metrics(model_metrics_df, metric_id=metric_id, ylim=metric_ylim, title='', fig_width=3)
+		# # remove ticks and legend for saving
+		# plot_utils.remove_xticks()
+		# plt.xlabel(''); plt.ylabel('')
+		# plt.grid(linestyle='--', linewidth=0.5)
+		# # save figure with legend
+		# plot_utils.save_currfig(dirpath=out_dirpath, filename='legend_'+out_fname, file_ext='svg')
+		# # save figure without legend
+		# plt.gca().get_legend().remove()
+		# plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
+		# # add title after saving so we know what we plotted
+		# plt.title('{} - Compressive Histograms at {}x Compression'.format(metric_id, compression_ratio))
 
-		## Make plot for all metrics
-		plt.figure()
-		metric_id = 'inverse_10mm_tol_err'
-		metric_ylim = (0.0, 0.8)
-		# metric_ylim = None
-		out_fname = out_fname_base + '_' + metric_id
-		analyze_test_results_utils.plot_test_dataset_metrics(model_metrics_df, metric_id=metric_id, ylim=metric_ylim, title='', fig_width=3)
-		# remove ticks and legend for saving
-		plot_utils.remove_xticks()
-		plt.xlabel(''); plt.ylabel('')
-		plt.grid(linestyle='--', linewidth=0.5)
-		# save figure with legend
-		plot_utils.save_currfig(dirpath=out_dirpath, filename='legend_'+out_fname, file_ext='svg')
-		# save figure without legend
-		plt.gca().get_legend().remove()
-		plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
-		# add title after saving so we know what we plotted
-		plt.title('{} - Compressive Histograms at {}x Compression'.format(metric_id, compression_ratio))
+		# ## Make plot for all metrics
+		# plt.figure()
+		# metric_id = 'inverse_10mm_tol_err'
+		# metric_ylim = (0.0, 0.8)
+		# # metric_ylim = None
+		# out_fname = out_fname_base + '_' + metric_id
+		# analyze_test_results_utils.plot_test_dataset_metrics(model_metrics_df, metric_id=metric_id, ylim=metric_ylim, title='', fig_width=3)
+		# # remove ticks and legend for saving
+		# plot_utils.remove_xticks()
+		# plt.xlabel(''); plt.ylabel('')
+		# plt.grid(linestyle='--', linewidth=0.5)
+		# # save figure with legend
+		# plot_utils.save_currfig(dirpath=out_dirpath, filename='legend_'+out_fname, file_ext='svg')
+		# # save figure without legend
+		# plt.gca().get_legend().remove()
+		# plot_utils.save_currfig(dirpath=out_dirpath, filename=out_fname, file_ext='svg')
+		# # add title after saving so we know what we plotted
+		# plt.title('{} - Compressive Histograms at {}x Compression'.format(metric_id, compression_ratio))

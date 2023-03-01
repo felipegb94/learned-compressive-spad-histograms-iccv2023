@@ -42,9 +42,9 @@ if __name__=='__main__':
 	## Regular test set
 	experiment_name_base = 'middlebury/depth_imgs'
 	test_set_id = 'test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
-	## Test set with larger depths than what was trained for
-	experiment_name_base = 'middlebury_largedepth/depth_imgs'
-	test_set_id = 'test_middlebury_largedepth_LargeDepthSimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
+	# ## Test set with larger depths than what was trained for
+	# experiment_name_base = 'middlebury_largedepth/depth_imgs'
+	# test_set_id = 'test_middlebury_largedepth_LargeDepthSimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
 
 	## output dirpaths
 	out_dirpath = os.path.join(io_dirpaths.results_figures_dirpath, experiment_name_base)
@@ -53,6 +53,7 @@ if __name__=='__main__':
 	## Scene ids and signal and SBR parameters we want to plot for
 	scene_ids = ['spad_Art','spad_Reindeer','spad_Moebius']
 	sbr_params = ['10_1000','10_10','10_50','10_200']
+	sbr_params = ['50_500','50_200']
 
 	## Check that input scene ids and sbr params are available in test set
 	middlebury_test_set_info = analyze_test_results_utils.middlebury_test_set_info
@@ -79,14 +80,14 @@ if __name__=='__main__':
 	model_names.append(argmax_compression_baseline)
 	
 
-	## CSPH3D models: Temporal vs. Spatio-Temporal Compression
-	encoding_type_all = ['csph1d', 'csph1d', 'csph1d', 'separable', 'separable']
-	tdim_init_all = ['TruncFourier', 'HybridGrayFourier', 'Rand', 'Rand', 'Rand']
-	optCt_all = [False, False, True, True, True]
-	optC_all = [False, False, True, True, True]
-	spatial_down_factor_all = [1, 1, 1, 4, 4]
-	num_tdim_blocks_all = [1, 1, 1, 1, 4]
-	compression_ratio_all = [32, 64, 128]
+	# ## CSPH3D models: Temporal vs. Spatio-Temporal Compression
+	# encoding_type_all = ['csph1d', 'csph1d', 'csph1d', 'separable', 'separable']
+	# tdim_init_all = ['TruncFourier', 'HybridGrayFourier', 'Rand', 'Rand', 'Rand']
+	# optCt_all = [False, False, True, True, True]
+	# optC_all = [False, False, True, True, True]
+	# spatial_down_factor_all = [1, 1, 1, 4, 4]
+	# num_tdim_blocks_all = [1, 1, 1, 1, 4]
+	# compression_ratio_all = [32, 64, 128]
 
 	# ## CSPH3D Models for: Effect of Size of C
 	# ## Parameters for: Does decreasing the number of parameters hurt performance?
@@ -97,14 +98,25 @@ if __name__=='__main__':
 	# spatial_down_factor_all = [4]*len(encoding_type_all)
 	# num_tdim_blocks_all = [1, 1, 4, 16]
 	# compression_ratio_all = [32, 64, 128]
+ 
+	## CSPH3D Models for: Effect of Size of C (supplement)
+	## Parameters for: Does decreasing the number of parameters hurt performance?
+	encoding_type_all = ['full', 'full', 'separable', 'separable', 'separable', 'separable']
+	tdim_init_all = ['Rand']*len(encoding_type_all)
+	optCt_all = [True]*len(encoding_type_all)
+	optC_all = [True]*len(encoding_type_all)
+	spatial_down_factor_all = [4]*len(encoding_type_all)
+	num_tdim_blocks_all = [1, 4, 1, 4, 16, 64]
+	compression_ratio_all = [32, 64, 128]
 
 	# ## Parameters for: Spatial kernel size effect?
+	# num_tdim_blocks = 4
 	# encoding_type_all = ['csph1d', 'separable', 'separable',  'separable']
 	# spatial_down_factor_all = [1, 2, 4, 8]
 	# tdim_init_all = ['Rand']*len(encoding_type_all)
 	# optCt_all = [True]*len(encoding_type_all)
 	# optC_all = [True]*len(encoding_type_all)
-	# num_tdim_blocks_all = [1]*len(encoding_type_all)
+	# num_tdim_blocks_all = [num_tdim_blocks]*len(encoding_type_all)
 	# compression_ratio_all = [32, 64, 128]
 
 	# ## CSPH3D models: Importance of learned coding
