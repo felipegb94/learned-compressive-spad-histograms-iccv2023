@@ -51,9 +51,9 @@ if __name__=='__main__':
 	os.makedirs(out_dirpath, exist_ok=True)
 
 	## Scene ids and signal and SBR parameters we want to plot for
-	scene_ids = ['spad_Art','spad_Reindeer','spad_Moebius']
-	sbr_params = ['10_1000','10_10','10_50','10_200']
-	sbr_params = ['50_500','50_200']
+	scene_ids = ['spad_Art','spad_Reindeer','spad_Moebius', 'spad_Laundry']
+	sbr_params = ['10_1000','10_10','10_50','10_200', '50_500']
+	# sbr_params = ['50_500','50_200']
 
 	## Check that input scene ids and sbr params are available in test set
 	middlebury_test_set_info = analyze_test_results_utils.middlebury_test_set_info
@@ -99,15 +99,15 @@ if __name__=='__main__':
 	# num_tdim_blocks_all = [1, 1, 4, 16]
 	# compression_ratio_all = [32, 64, 128]
  
-	## CSPH3D Models for: Effect of Size of C (supplement)
-	## Parameters for: Does decreasing the number of parameters hurt performance?
-	encoding_type_all = ['full', 'full', 'separable', 'separable', 'separable', 'separable']
-	tdim_init_all = ['Rand']*len(encoding_type_all)
-	optCt_all = [True]*len(encoding_type_all)
-	optC_all = [True]*len(encoding_type_all)
-	spatial_down_factor_all = [4]*len(encoding_type_all)
-	num_tdim_blocks_all = [1, 4, 1, 4, 16, 64]
-	compression_ratio_all = [32, 64, 128]
+	# ## CSPH3D Models for: Effect of Size of C (supplement)
+	# ## Parameters for: Does decreasing the number of parameters hurt performance?
+	# encoding_type_all = ['full', 'full', 'separable', 'separable', 'separable', 'separable']
+	# tdim_init_all = ['Rand']*len(encoding_type_all)
+	# optCt_all = [True]*len(encoding_type_all)
+	# optC_all = [True]*len(encoding_type_all)
+	# spatial_down_factor_all = [4]*len(encoding_type_all)
+	# num_tdim_blocks_all = [1, 4, 1, 4, 16, 64]
+	# compression_ratio_all = [32, 64, 128]
 
 	# ## Parameters for: Spatial kernel size effect?
 	# num_tdim_blocks = 4
@@ -118,6 +118,20 @@ if __name__=='__main__':
 	# optC_all = [True]*len(encoding_type_all)
 	# num_tdim_blocks_all = [num_tdim_blocks]*len(encoding_type_all)
 	# compression_ratio_all = [32, 64, 128]
+
+	## Parameters for: Fourier vs. Learned tdim
+	experiment_id = 'learned_vs_fourier_tdim'
+	encoding_type_all = ['separable', 'separable', 'separable', 'separable', 'csph1d', 'csph1d', 'csph1d', 'csph1d']
+	spatial_down_factor_all = [4, 4, 2, 2, 1, 1, 1, 1]
+	tdim_init_all = ['Rand', 'TruncFourier', 'Rand', 'TruncFourier', 'Rand', 'TruncFourier', 'TruncFourier', 'HybridGrayFourier'] 
+	optCt_all = [True, False, True, False, True, False, False, False]
+	optC_all = [True]*len(encoding_type_all)
+	optC_all[-1] = False
+	optC_all[-2] = False
+	optC_all[-3] = False
+	num_tdim_blocks_all = [4, 4, 4, 4, 4, 4, 1, 1]
+	compression_ratio_all = [32, 64, 128]
+
 
 	# ## CSPH3D models: Importance of learned coding
 	# encoding_type_all = ['csph1d', 'csph1d', 'csph1d', 'csph1d', 'full', 'full']

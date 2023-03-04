@@ -39,7 +39,7 @@ if __name__=='__main__':
 
 	compression_ratio_all = [32, 64, 128]
 	# compression_ratio_all = [64]
-	compression_ratio_all = [32, 128]
+	# compression_ratio_all = [32, 128]
 
 	## plot for each compression ratio
 	for compression_ratio in compression_ratio_all:
@@ -55,16 +55,16 @@ if __name__=='__main__':
 		# spatial_down_factor_all = [4]*len(encoding_type_all)
 		# num_tdim_blocks_all = [1, 1, 4, 16]
 
-		## CSPH3D Models for: Effect of Size of C (supplement)
-		## Parameters for: Does decreasing the number of parameters hurt performance?
-		experiment_id = 'Cmat_size_effect_supplement'
-		encoding_type_all = ['full', 'full', 'separable', 'separable', 'separable', 'separable']
-		tdim_init_all = ['Rand']*len(encoding_type_all)
-		optCt_all = [True]*len(encoding_type_all)
-		optC_all = [True]*len(encoding_type_all)
-		spatial_down_factor_all = [4]*len(encoding_type_all)
-		num_tdim_blocks_all = [1, 4, 1, 4, 16, 64]
-		compression_ratio_all = [32, 64, 128]
+		# ## CSPH3D Models for: Effect of Size of C (supplement)
+		# ## Parameters for: Does decreasing the number of parameters hurt performance?
+		# experiment_id = 'Cmat_size_effect_supplement'
+		# encoding_type_all = ['full', 'full', 'separable', 'separable', 'separable', 'separable']
+		# tdim_init_all = ['Rand']*len(encoding_type_all)
+		# optCt_all = [True]*len(encoding_type_all)
+		# optC_all = [True]*len(encoding_type_all)
+		# spatial_down_factor_all = [4]*len(encoding_type_all)
+		# num_tdim_blocks_all = [1, 4, 1, 4, 16, 64]
+		# compression_ratio_all = [32, 64, 128]
 
 		# ## Parameters for: Spatial kernel size effect?
 		# num_tdim_blocks = 4
@@ -78,6 +78,32 @@ if __name__=='__main__':
 		# # optCt_all[0] = False
 		# # optC_all[0] = False
 		# num_tdim_blocks_all = [num_tdim_blocks]*len(encoding_type_all)
+
+
+		# ## Parameters for: Spatial kernel size effect? (Fourier initialization)
+		# num_tdim_blocks = 4
+		# experiment_id = 'spatial_block_dims_effect_Mt-{}-fourier'.format(num_tdim_blocks)
+		# encoding_type_all = ['csph1d', 'separable', 'separable']
+		# spatial_down_factor_all = [1, 2, 4]
+		# tdim_init_all = ['TruncFourier']*len(encoding_type_all)
+		# optCt_all = [False]*len(encoding_type_all)
+		# optC_all = [True]*len(encoding_type_all)
+		# optC_all[0] = False
+		# # optC_all[1] = False
+		# num_tdim_blocks_all = [num_tdim_blocks]*len(encoding_type_all)
+
+		## Parameters for: Fourier vs. Learned tdim
+		experiment_id = 'learned_vs_fourier_tdim'
+		encoding_type_all = ['separable', 'separable', 'separable', 'separable', 'csph1d', 'csph1d', 'csph1d', 'csph1d']
+		spatial_down_factor_all = [4, 4, 2, 2, 1, 1, 1, 1]
+		tdim_init_all = ['Rand', 'TruncFourier', 'Rand', 'TruncFourier', 'Rand', 'TruncFourier', 'TruncFourier', 'HybridGrayFourier'] 
+		optCt_all = [True, False, True, False, True, False, False, False]
+		optC_all = [True]*len(encoding_type_all)
+		optC_all[-1] = False
+		optC_all[-2] = False
+		optC_all[-3] = False
+		num_tdim_blocks_all = [4, 4, 4, 4, 4, 4, 1, 1]
+		compression_ratio_all = [32, 64, 128]
 
 		# ## Parameters for: Does a good initialization Help Performance?
 		# experiment_id = 'tdim_init_effect'
