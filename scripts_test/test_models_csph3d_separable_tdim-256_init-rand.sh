@@ -62,30 +62,36 @@ train_dataset=nyuv2_64x64x1024_80ps
 # model_dirpath=outputs/${train_dataset}/${experiment_name}/${model_name}/run-complete_2023-02-19_010637
 # ckpt_id=epoch=28-step=99559-avgvalrmse=0.0186.ckpt #  128 images==0.019386 | 128 images large depth (9m offset): | 128 images large depth (7m offset):  | 128 images masked tbins (9m): 
 # python test.py dataset='"'$test_dataset'"' ++model_name='"'$model_name'"' ++experiment_name=$experiment_name ++model_dirpath='"'$model_dirpath'"' ++ckpt_id='"'$ckpt_id'"' ++train_dataset='"'$train_dataset'"'
-# ## 3D CSPH 256x2x2 - Compression=128x --> k=8
+## 3D CSPH 256x2x2 - Compression=128x --> k=8
 # model_name=DDFN_C64B10_CSPH3D/k8_down2_Mt4_Rand-optCt=True-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0
 # experiment_name=csph3d_models_20230218
 # model_dirpath=outputs/${train_dataset}/${experiment_name}/${model_name}/run-complete_2023-02-19_010637
 # ckpt_id=epoch=28-step=99559-avgvalrmse=0.0214.ckpt #  128 images==0.025026 | 128 images large depth (9m offset): | 128 images large depth (7m offset):  | 128 images masked tbins (9m): 
 # python test.py dataset='"'$test_dataset'"' ++model_name='"'$model_name'"' ++experiment_name=$experiment_name ++model_dirpath='"'$model_dirpath'"' ++ckpt_id='"'$ckpt_id'"' ++train_dataset='"'$train_dataset'"'
+## 3D CSPH 256x2x2 - Compression=256x --> k=4
+model_name=DDFN_C64B10_CSPH3D/k4_down2_Mt4_Rand-optCt=True-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0
+experiment_name=csph3d_models_20230218
+model_dirpath=outputs/${train_dataset}/${experiment_name}/${model_name}/run-complete_2023-03-04_224649
+ckpt_id=epoch=29-step=103889-avgvalrmse=0.0260.ckpt #  128 images==0.037149 | 128 images large depth (9m offset): | 128 images large depth (7m offset):  | 128 images masked tbins (9m): 
+python test.py dataset='"'$test_dataset'"' ++model_name='"'$model_name'"' ++experiment_name=$experiment_name ++model_dirpath='"'$model_dirpath'"' ++ckpt_id='"'$ckpt_id'"' ++train_dataset='"'$train_dataset'"'
 
-# # ## Models with 256x8x8 Encoding Kernel [NOT RUN YET...]
+# # ## Models with 256x8x8 Encoding Kernel 
 
-## # 3D CSPH 256x8x8 - Compression=32x --> k=512
-model_name=DDFN_C64B10_CSPH3D/k512_down8_Mt4_Rand-optCt=True-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0
-experiment_name=csph3d_models_20230218
-model_dirpath=outputs/${train_dataset}/${experiment_name}/${model_name}/run-complete_2023-02-23_175206
-ckpt_id=epoch=29-step=103887-avgvalrmse=0.0180.ckpt #  128 images==0.0181255 | 128 images large depth (9m offset): | 128 images large depth (7m offset):  | 128 images masked tbins (9m): 
-python test.py dataset='"'$test_dataset'"' ++model_name='"'$model_name'"' ++experiment_name=$experiment_name ++model_dirpath='"'$model_dirpath'"' ++ckpt_id='"'$ckpt_id'"' ++train_dataset='"'$train_dataset'"'
-## # 3D CSPH 256x8x8 - Compression=64x --> k=256
-model_name=DDFN_C64B10_CSPH3D/k256_down8_Mt4_Rand-optCt=True-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0
-experiment_name=csph3d_models_20230218
-model_dirpath=outputs/${train_dataset}/${experiment_name}/${model_name}/run-complete_2023-02-19_010643
-ckpt_id=epoch=29-step=103887-avgvalrmse=0.0188.ckpt #  128 images==0.0201290 | 128 images large depth (9m offset): | 128 images large depth (7m offset):  | 128 images masked tbins (9m): 
-python test.py dataset='"'$test_dataset'"' ++model_name='"'$model_name'"' ++experiment_name=$experiment_name ++model_dirpath='"'$model_dirpath'"' ++ckpt_id='"'$ckpt_id'"' ++train_dataset='"'$train_dataset'"'
-## # 3D CSPH 256x8x8 - Compression=128x --> k=128
-model_name=DDFN_C64B10_CSPH3D/k128_down8_Mt4_Rand-optCt=True-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0
-experiment_name=csph3d_models_20230218
-model_dirpath=outputs/${train_dataset}/${experiment_name}/${model_name}/run-complete_2023-02-19_010643
-ckpt_id=epoch=29-step=103022-avgvalrmse=0.0206.ckpt #  128 images==0.02389 | 128 images large depth (9m offset): | 128 images large depth (7m offset):  | 128 images masked tbins (9m): 
-python test.py dataset='"'$test_dataset'"' ++model_name='"'$model_name'"' ++experiment_name=$experiment_name ++model_dirpath='"'$model_dirpath'"' ++ckpt_id='"'$ckpt_id'"' ++train_dataset='"'$train_dataset'"'
+# ## # 3D CSPH 256x8x8 - Compression=32x --> k=512
+# model_name=DDFN_C64B10_CSPH3D/k512_down8_Mt4_Rand-optCt=True-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0
+# experiment_name=csph3d_models_20230218
+# model_dirpath=outputs/${train_dataset}/${experiment_name}/${model_name}/run-complete_2023-02-23_175206
+# ckpt_id=epoch=29-step=103887-avgvalrmse=0.0180.ckpt #  128 images==0.0181255 | 128 images large depth (9m offset): | 128 images large depth (7m offset):  | 128 images masked tbins (9m): 
+# python test.py dataset='"'$test_dataset'"' ++model_name='"'$model_name'"' ++experiment_name=$experiment_name ++model_dirpath='"'$model_dirpath'"' ++ckpt_id='"'$ckpt_id'"' ++train_dataset='"'$train_dataset'"'
+# ## # 3D CSPH 256x8x8 - Compression=64x --> k=256
+# model_name=DDFN_C64B10_CSPH3D/k256_down8_Mt4_Rand-optCt=True-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0
+# experiment_name=csph3d_models_20230218
+# model_dirpath=outputs/${train_dataset}/${experiment_name}/${model_name}/run-complete_2023-02-19_010643
+# ckpt_id=epoch=29-step=103887-avgvalrmse=0.0188.ckpt #  128 images==0.0201290 | 128 images large depth (9m offset): | 128 images large depth (7m offset):  | 128 images masked tbins (9m): 
+# python test.py dataset='"'$test_dataset'"' ++model_name='"'$model_name'"' ++experiment_name=$experiment_name ++model_dirpath='"'$model_dirpath'"' ++ckpt_id='"'$ckpt_id'"' ++train_dataset='"'$train_dataset'"'
+# ## # 3D CSPH 256x8x8 - Compression=128x --> k=128
+# model_name=DDFN_C64B10_CSPH3D/k128_down8_Mt4_Rand-optCt=True-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0
+# experiment_name=csph3d_models_20230218
+# model_dirpath=outputs/${train_dataset}/${experiment_name}/${model_name}/run-complete_2023-02-19_010643
+# ckpt_id=epoch=29-step=103022-avgvalrmse=0.0206.ckpt #  128 images==0.02389 | 128 images large depth (9m offset): | 128 images large depth (7m offset):  | 128 images masked tbins (9m): 
+# python test.py dataset='"'$test_dataset'"' ++model_name='"'$model_name'"' ++experiment_name=$experiment_name ++model_dirpath='"'$model_dirpath'"' ++ckpt_id='"'$ckpt_id'"' ++train_dataset='"'$train_dataset'"'

@@ -2154,5 +2154,59 @@
             "depths/test_mse": 0.00051,
             "depths/test_rmse": 0.01884
         }
+    },
+    "DDFN_C64B10_CSPH3D/k4_down2_Mt4_Rand-optCt=True-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0": {
+        "rel_dirpath": "outputs/nyuv2_64x64x1024_80ps/csph3d_models_20230218/DDFN_C64B10_CSPH3D/k4_down2_Mt4_Rand-optCt=True-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0/run-complete_2023-03-04_224649",
+        "ckpt_id": "epoch=29-step=103889-avgvalrmse=0.0260.ckpt",
+        "middlebury_72x88x1024_98ps": {
+            "depths/test_mae": 0.02259,
+            "depths/test_mse": 0.00192,
+            "depths/test_rmse": 0.03715
+        }
+    },
+    "DDFN_C64B10_CSPH3D/k128_down1_Mt1_CoarseHist-optCt=False-optC=False_csph1d_norm-none_irf-False_zn-True_zeromu-False_smoothtdimC-False/loss-kldiv_tv-0.0": {
+        "rel_dirpath": "outputs/nyuv2_64x64x1024_80ps/csph3D_coarsehist_20230306/DDFN_C64B10_CSPH3D/k128_down1_Mt1_CoarseHist-optCt=False-optC=False_csph1d_norm-none_irf-False_zn-True_zeromu-False_smoothtdimC-False/loss-kldiv_tv-0.0/run-complete_2023-03-06_161556",
+        "ckpt_id": "epoch=29-step=103889-avgvalrmse=0.0136.ckpt",
+        "middlebury_72x88x1024_98ps": {
+            "depths/test_mae": 0.01322,
+            "depths/test_mse": 0.00045,
+            "depths/test_rmse": 0.01906
+        }
+    },
+    "DDFN_C64B10_CSPH3D/k16_down1_Mt1_CoarseHist-optCt=False-optC=False_csph1d_norm-none_irf-False_zn-True_zeromu-False_smoothtdimC-False/loss-kldiv_tv-0.0": {
+        "rel_dirpath": "outputs/nyuv2_64x64x1024_80ps/csph3D_coarsehist_20230306/DDFN_C64B10_CSPH3D/k16_down1_Mt1_CoarseHist-optCt=False-optC=False_csph1d_norm-none_irf-False_zn-True_zeromu-False_smoothtdimC-False/loss-kldiv_tv-0.0/run-complete_2023-03-06_162133",
+        "ckpt_id": "epoch=26-step=93500-avgvalrmse=0.0218.ckpt",
+        "middlebury_72x88x1024_98ps": {
+            "depths/test_mae": 0.17464,
+            "depths/test_mse": 0.04597,
+            "depths/test_rmse": 0.20869
+        }
+    },
+    "DDFN_C64B10_CSPH3D/k64_down1_Mt1_CoarseHist-optCt=False-optC=False_csph1d_norm-none_irf-False_zn-True_zeromu-False_smoothtdimC-False/loss-kldiv_tv-0.0": {
+        "rel_dirpath": "outputs/nyuv2_64x64x1024_80ps/csph3D_coarsehist_20230306/DDFN_C64B10_CSPH3D/k64_down1_Mt1_CoarseHist-optCt=False-optC=False_csph1d_norm-none_irf-False_zn-True_zeromu-False_smoothtdimC-False/loss-kldiv_tv-0.0/run-complete_2023-03-06_162133",
+        "ckpt_id": "epoch=29-step=103889-avgvalrmse=0.0145.ckpt",
+        "middlebury_72x88x1024_98ps": {
+            "depths/test_mae": 0.03019,
+            "depths/test_mse": 0.0017,
+            "depths/test_rmse": 0.04031
+        }
+    },
+    "DDFN_C64B10_CSPH3D/k32_down1_Mt1_CoarseHist-optCt=False-optC=False_csph1d_norm-none_irf-False_zn-True_zeromu-False_smoothtdimC-False/loss-kldiv_tv-0.0": {
+        "rel_dirpath": "outputs/nyuv2_64x64x1024_80ps/csph3D_coarsehist_20230306/DDFN_C64B10_CSPH3D/k32_down1_Mt1_CoarseHist-optCt=False-optC=False_csph1d_norm-none_irf-False_zn-True_zeromu-False_smoothtdimC-False/loss-kldiv_tv-0.0/run-complete_2023-03-06_162133",
+        "ckpt_id": "epoch=29-step=103889-avgvalrmse=0.0169.ckpt",
+        "middlebury_72x88x1024_98ps": {
+            "depths/test_mae": 0.08113,
+            "depths/test_mse": 0.0106,
+            "depths/test_rmse": 0.10191
+        }
+    },
+    "DDFN_C64B10_CSPH3D/k256_down1_Mt1_CoarseHist-optCt=False-optC=False_csph1d_norm-none_irf-False_zn-True_zeromu-False_smoothtdimC-False/loss-kldiv_tv-0.0": {
+        "rel_dirpath": "outputs/nyuv2_64x64x1024_80ps/csph3D_coarsehist_20230306/DDFN_C64B10_CSPH3D/k256_down1_Mt1_CoarseHist-optCt=False-optC=False_csph1d_norm-none_irf-False_zn-True_zeromu-False_smoothtdimC-False/loss-kldiv_tv-0.0/run-complete_2023-03-06_162133",
+        "ckpt_id": "epoch=28-step=98695-avgvalrmse=0.0132.ckpt",
+        "middlebury_72x88x1024_98ps": {
+            "depths/test_mae": 0.0072,
+            "depths/test_mse": 0.00018,
+            "depths/test_rmse": 0.01155
+        }
     }
 }

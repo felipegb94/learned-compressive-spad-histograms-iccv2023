@@ -46,8 +46,13 @@ def plot_compression_vs_metric(model_metrics_df_csph3d, baselines_mean_metrics, 
 	csph3d_model_types = model_metrics_df_csph3d['model_type'].unique()
 	n_csph3d_models = len(csph3d_model_types)
 	# plot baselines as horizontal lines
-	ax.axhline(baselines_mean_metrics.loc[no_compression_baseline][metric_id], linewidth=3.5, linestyle='--', label=no_compression_baseline, color=colors[n_csph3d_models])
-	ax.axhline(baselines_mean_metrics.loc[argmax_compression_baseline][metric_id], linewidth=3.5, linestyle='--', label=argmax_compression_baseline, color=colors[n_csph3d_models+1])
+	counter = 0
+	for idx, row in baselines_mean_metrics.iterrows():
+		ax.axhline(row[metric_id], linewidth=3.5, linestyle='--', label=idx, color=colors[n_csph3d_models+counter])
+		print("plotting axhline for {} baseline".format(idx))
+		counter += 1
+	# ax.axhline(baselines_mean_metrics.loc[no_compression_baseline][metric_id], linewidth=3.5, linestyle='--', label=no_compression_baseline, color=colors[n_csph3d_models])
+	# ax.axhline(baselines_mean_metrics.loc[argmax_compression_baseline][metric_id], linewidth=3.5, linestyle='--', label=argmax_compression_baseline, color=colors[n_csph3d_models+1])
 	plt.grid(linestyle='--', linewidth=0.5)
 	plot_utils.set_ticks(fontsize=12)
 	# plt.xlabel("Compression Ratio", fontsize=14)
@@ -67,7 +72,7 @@ if __name__=='__main__':
 
 	## Set compression ratios we want to plot
 	compression_ratio_all = [32, 64, 128, 256]
-	compression_ratio_all = [32, 64, 128]
+	# compression_ratio_all = [32, 64, 128]
 	# compression_ratio_all = [128]
 	
 	## Set SBR threshold we want to use to separate the plots
@@ -142,7 +147,6 @@ if __name__=='__main__':
 	optC_all = [False, True, True, True]
 	spatial_down_factor_all = [1, 1, 2, 4]
 	num_tdim_blocks_all = [1, 1, 4, 4]
-
 	
 	(csph3d_model_names, csph3d_num_model_params) = compose_csph3d_model_names_list(compression_ratio_all
 									, spatial_down_factor_all
@@ -156,19 +160,47 @@ if __name__=='__main__':
 	model_names += csph3d_model_names
 	num_model_params += csph3d_num_model_params
 
+	## Coarse Hist model with 64 bins 
+	coarsehist_encoding_type = ['csph1d']
+	coarsehist_tdim_init = ['CoarseHist']
+	coarsehist_optCt = [False]
+	coarsehist_optC = [False]
+	coarsehist_spatial_down_factor = [1]
+	coarsehist_num_tdim_blocks = [1]
+	coarsehist_compression_ratio = [16]
+
+	(coarsehist_model_names, coarsehist_num_model_params) = compose_csph3d_model_names_list(coarsehist_compression_ratio
+									, coarsehist_spatial_down_factor
+									, coarsehist_num_tdim_blocks
+									, coarsehist_tdim_init
+									, coarsehist_optCt
+									, coarsehist_optC
+									, coarsehist_encoding_type
+									, nt = nt
+		)
+	coarsehist_model_names = [curr_name.replace('zeromu-True','zeromu-False') for curr_name in coarsehist_model_names]
+
 	## Get pretrained models dirpaths
 	model_dirpaths = analyze_test_results_utils.get_model_dirpaths(model_names)
+	coarsehist_model_dirpaths = analyze_test_results_utils.get_model_dirpaths(coarsehist_model_names)
 
 	## init model metrics dict
 	model_metrics_all = init_model_metrics_dict(model_names, model_dirpaths)
+	coarsehist_model_metrics_all = init_model_metrics_dict(coarsehist_model_names, coarsehist_model_dirpaths)
 
 	## process results and append metrics
 	model_metrics_all, rec_depths_all = process_middlebury_test_results(scene_ids, sbr_params, model_metrics_all, spad_dataset, out_dirpath=None, save_depth_images=False, return_rec_depths=False)
+	coarsehist_model_metrics_all, coarsehist_rec_depths_all = process_middlebury_test_results(scene_ids, sbr_params, coarsehist_model_metrics_all, spad_dataset, out_dirpath=None, save_depth_images=False, return_rec_depths=False)
 
 	## Make into data frame
 	curr_model_metrics_df = analyze_test_results_utils.metrics2dataframe(model_names, model_metrics_all)
 	model_metrics_df = pd.concat((model_metrics_df, curr_model_metrics_df), axis=0)
 	
+	coarsehist_model_metrics_df = analyze_test_results_utils.metrics2dataframe(coarsehist_model_names, coarsehist_model_metrics_all)
+	# force compression ratio to 1 so that coarsehist is considered as a baseline to we only plot hlines for it
+	coarsehist_model_metrics_df['compression_ratio'] = 1
+	model_metrics_df = pd.concat((model_metrics_df, coarsehist_model_metrics_df), axis=0)
+
 	## scale MAE to make its units mm
 	model_metrics_df['mae'] = model_metrics_df['mae']*1000
 	
@@ -189,6 +221,8 @@ if __name__=='__main__':
 		## separate into csph3d and baselines
 		model_metrics_df_csph3d = curr_model_metrics_df[curr_model_metrics_df['compression_ratio']>1]
 		model_metrics_df_baselines = curr_model_metrics_df[curr_model_metrics_df['compression_ratio']==1]
+		
+		## All baselines have a unique name
 		baseline_model_names = model_metrics_df_baselines['model_name'].unique()
 		baselines_mean_metrics = model_metrics_df_baselines.groupby('model_name').mean()
 

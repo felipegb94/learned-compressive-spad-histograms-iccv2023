@@ -52,6 +52,7 @@ if __name__=='__main__':
 
 	## Scene ids and signal and SBR parameters we want to plot for
 	scene_ids = ['spad_Art','spad_Reindeer','spad_Moebius', 'spad_Laundry']
+	scene_ids = ['spad_Reindeer']
 	sbr_params = ['10_1000','10_10','10_50','10_200', '50_500']
 	# sbr_params = ['50_500','50_200']
 
@@ -119,21 +120,21 @@ if __name__=='__main__':
 	# num_tdim_blocks_all = [num_tdim_blocks]*len(encoding_type_all)
 	# compression_ratio_all = [32, 64, 128]
 
-	## Parameters for: Fourier vs. Learned tdim
-	experiment_id = 'learned_vs_fourier_tdim'
-	encoding_type_all = ['separable', 'separable', 'separable', 'separable', 'csph1d', 'csph1d', 'csph1d', 'csph1d']
-	spatial_down_factor_all = [4, 4, 2, 2, 1, 1, 1, 1]
-	tdim_init_all = ['Rand', 'TruncFourier', 'Rand', 'TruncFourier', 'Rand', 'TruncFourier', 'TruncFourier', 'HybridGrayFourier'] 
-	optCt_all = [True, False, True, False, True, False, False, False]
-	optC_all = [True]*len(encoding_type_all)
-	optC_all[-1] = False
-	optC_all[-2] = False
-	optC_all[-3] = False
-	num_tdim_blocks_all = [4, 4, 4, 4, 4, 4, 1, 1]
-	compression_ratio_all = [32, 64, 128]
+	# ## Parameters for: Fourier vs. Learned tdim
+	# experiment_id = 'learned_vs_fourier_tdim'
+	# encoding_type_all = ['separable', 'separable', 'separable', 'separable', 'csph1d', 'csph1d', 'csph1d', 'csph1d']
+	# spatial_down_factor_all = [4, 4, 2, 2, 1, 1, 1, 1]
+	# tdim_init_all = ['Rand', 'TruncFourier', 'Rand', 'TruncFourier', 'Rand', 'TruncFourier', 'TruncFourier', 'HybridGrayFourier'] 
+	# optCt_all = [True, False, True, False, True, False, False, False]
+	# optC_all = [True]*len(encoding_type_all)
+	# optC_all[-1] = False
+	# optC_all[-2] = False
+	# optC_all[-3] = False
+	# num_tdim_blocks_all = [4, 4, 4, 4, 4, 4, 1, 1]
+	# compression_ratio_all = [32, 64, 128]
 
 
-	# ## CSPH3D models: Importance of learned coding
+	# ## CSPH3D models: Importance of learned coding (OLD FIGURE)
 	# encoding_type_all = ['csph1d', 'csph1d', 'csph1d', 'csph1d', 'full', 'full']
 	# tdim_init_all = ['TruncFourier', 'HybridGrayFourier', 'Rand', 'Rand', 'Rand', 'Rand']
 	# optCt_all = [False, False, False, True, True, False]
@@ -141,6 +142,25 @@ if __name__=='__main__':
 	# spatial_down_factor_all = [1, 1, 1, 1, 4, 4]
 	# num_tdim_blocks_all = [1, 1, 1, 1, 1, 1]
 	# compression_ratio_all = [32, 64, 128]
+
+	## CSPH3D models: Importance of learned coding (NEW FIGURE)
+	encoding_type_all = ['csph1d', 'csph1d', 'csph1d', 'csph1d', 'csph1d', 'csph1d', 'separable', 'separable']
+	tdim_init_all = ['TruncFourier', 'CoarseHist', 'Rand', 'Rand', 'Rand', 'Rand', 'Rand', 'Rand']
+	optCt_all = [False, False, False, True, False, True, False, True]
+	optC_all = [False, False, False, True, False, True, False, True]
+	spatial_down_factor_all = [1, 1, 1, 1, 1, 1, 4, 4]
+	num_tdim_blocks_all = [1, 1, 1, 1, 4, 4, 4, 4]
+	compression_ratio_all = [32, 64, 128]
+
+	## CSPH3D models: Importance of learned coding (NEW FIGURE)
+	encoding_type_all = ['separable', 'separable']
+	tdim_init_all = ['Rand', 'Rand']
+	optCt_all = [ False, True]
+	optC_all = [False, True]
+	spatial_down_factor_all = [ 2, 2]
+	num_tdim_blocks_all = [4, 4]
+	compression_ratio_all = [32, 64, 128]
+
 
 	# generate the csph3d model names
 	(csph3d_model_names, csph3d_num_model_params) = compose_csph3d_model_names_list(compression_ratio_all
