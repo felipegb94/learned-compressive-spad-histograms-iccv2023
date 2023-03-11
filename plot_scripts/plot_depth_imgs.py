@@ -52,7 +52,7 @@ if __name__=='__main__':
 
 	## Scene ids and signal and SBR parameters we want to plot for
 	scene_ids = ['spad_Art','spad_Reindeer','spad_Moebius', 'spad_Laundry']
-	scene_ids = ['spad_Reindeer']
+	# scene_ids = ['spad_Reindeer']
 	sbr_params = ['10_1000','10_10','10_50','10_200', '50_500']
 	# sbr_params = ['50_500','50_200']
 
@@ -82,6 +82,7 @@ if __name__=='__main__':
 	
 
 	# ## CSPH3D models: Temporal vs. Spatio-Temporal Compression
+	# zeromu=True
 	# encoding_type_all = ['csph1d', 'csph1d', 'csph1d', 'separable', 'separable']
 	# tdim_init_all = ['TruncFourier', 'HybridGrayFourier', 'Rand', 'Rand', 'Rand']
 	# optCt_all = [False, False, True, True, True]
@@ -92,6 +93,7 @@ if __name__=='__main__':
 
 	# ## CSPH3D Models for: Effect of Size of C
 	# ## Parameters for: Does decreasing the number of parameters hurt performance?
+	# zeromu=True
 	# encoding_type_all = ['full', 'separable', 'separable', 'separable']
 	# tdim_init_all = ['Rand']*len(encoding_type_all)
 	# optCt_all = [True]*len(encoding_type_all)
@@ -102,6 +104,7 @@ if __name__=='__main__':
  
 	# ## CSPH3D Models for: Effect of Size of C (supplement)
 	# ## Parameters for: Does decreasing the number of parameters hurt performance?
+	# zeromu=True
 	# encoding_type_all = ['full', 'full', 'separable', 'separable', 'separable', 'separable']
 	# tdim_init_all = ['Rand']*len(encoding_type_all)
 	# optCt_all = [True]*len(encoding_type_all)
@@ -111,6 +114,7 @@ if __name__=='__main__':
 	# compression_ratio_all = [32, 64, 128]
 
 	# ## Parameters for: Spatial kernel size effect?
+	# zeromu=True
 	# num_tdim_blocks = 4
 	# encoding_type_all = ['csph1d', 'separable', 'separable',  'separable']
 	# spatial_down_factor_all = [1, 2, 4, 8]
@@ -121,6 +125,7 @@ if __name__=='__main__':
 	# compression_ratio_all = [32, 64, 128]
 
 	# ## Parameters for: Fourier vs. Learned tdim
+	# zeromu=True
 	# experiment_id = 'learned_vs_fourier_tdim'
 	# encoding_type_all = ['separable', 'separable', 'separable', 'separable', 'csph1d', 'csph1d', 'csph1d', 'csph1d']
 	# spatial_down_factor_all = [4, 4, 2, 2, 1, 1, 1, 1]
@@ -135,6 +140,7 @@ if __name__=='__main__':
 
 
 	# ## CSPH3D models: Importance of learned coding (OLD FIGURE)
+	# zeromu=True
 	# encoding_type_all = ['csph1d', 'csph1d', 'csph1d', 'csph1d', 'full', 'full']
 	# tdim_init_all = ['TruncFourier', 'HybridGrayFourier', 'Rand', 'Rand', 'Rand', 'Rand']
 	# optCt_all = [False, False, False, True, True, False]
@@ -144,6 +150,7 @@ if __name__=='__main__':
 	# compression_ratio_all = [32, 64, 128]
 
 	## CSPH3D models: Importance of learned coding (NEW FIGURE)
+	zeromu=True
 	encoding_type_all = ['csph1d', 'csph1d', 'csph1d', 'csph1d', 'csph1d', 'csph1d', 'separable', 'separable']
 	tdim_init_all = ['TruncFourier', 'CoarseHist', 'Rand', 'Rand', 'Rand', 'Rand', 'Rand', 'Rand']
 	optCt_all = [False, False, False, True, False, True, False, True]
@@ -153,6 +160,7 @@ if __name__=='__main__':
 	compression_ratio_all = [32, 64, 128]
 
 	## CSPH3D models: Importance of learned coding (NEW FIGURE)
+	zeromu=True
 	encoding_type_all = ['separable', 'separable']
 	tdim_init_all = ['Rand', 'Rand']
 	optCt_all = [ False, True]
@@ -161,6 +169,15 @@ if __name__=='__main__':
 	num_tdim_blocks_all = [4, 4]
 	compression_ratio_all = [32, 64, 128]
 
+	## CoarseHist models: Importance of learned coding (NEW FIGURE)
+	zeromu=False
+	encoding_type_all = ['csph1d']
+	tdim_init_all = ['CoarseHist']
+	optCt_all = [False]
+	optC_all = [False]
+	spatial_down_factor_all = [1]
+	num_tdim_blocks_all = [1]
+	compression_ratio_all = [64, 32, 16, 8, 4]
 
 	# generate the csph3d model names
 	(csph3d_model_names, csph3d_num_model_params) = compose_csph3d_model_names_list(compression_ratio_all
@@ -172,6 +189,8 @@ if __name__=='__main__':
 									, encoding_type_all
 									, nt = nt
 		)
+	if(not zeromu):
+		csph3d_model_names = [curr_name.replace('zeromu-True','zeromu-False') for curr_name in csph3d_model_names]
 	model_names += csph3d_model_names
 
 	## Get pretrained models dirpaths
