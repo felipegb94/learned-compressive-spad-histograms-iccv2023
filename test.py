@@ -61,12 +61,14 @@ def test(cfg):
 	encoding_kernel_dims = None
 	if(isinstance(model, LITPlainDeepBoostingCSPH3D)):
 		encoding_kernel_dims = model.csph3d_layer.encoding_kernel3d_dims
-		if(cfg.emulate_int8_quantization):
-			model.enable_quantization_emulation()
 	elif(isinstance(model, LITPlainDeepBoostingCSPH3Dv2)):
 		encoding_kernel_dims = model.csph3d_layer.encoding_kernel3d_dims
 	elif(isinstance(model, LITPlainDeepBoostingCSPH3Dv1)):
 		encoding_kernel_dims = model.csph3d_layer.encoding_kernel_dims
+
+	## int8 quantization only impacts CSPH3D models
+	if(cfg.emulate_int8_quantization):
+		model.enable_quantization_emulation()
 
 	logger.info("Loading test data...")
 	logger.info("Test Datalist: {}".format(cfg.params.test_datalist_fpath))
@@ -92,7 +94,7 @@ def test(cfg):
 		logger.info("WARNING k=64_down4_Mt1 runs very slow in RTX 2070 for some reason...")
 
 	if(cfg.params.cuda):
-		trainer = pl.Trainer(accelerator="gpu", devices=1, logger=tb_logger, callbacks=callbacks, benchmark=False) # 
+		trainer = pl.Trainer(accelerator="gpu", devices=1, logger=tb_logger, callbacks=callbacks, benchmark=True) # 
 	else:
 		trainer = pl.Trainer(logger=tb_logger, callbacks=callbacks) # 
 

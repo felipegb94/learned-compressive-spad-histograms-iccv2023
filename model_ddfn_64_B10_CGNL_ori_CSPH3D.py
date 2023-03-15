@@ -50,17 +50,18 @@ class LITPlainDeepBoostingCSPH3D(LITPlainDeepBoosting):
 		return out
 	
 	def enable_quantization_emulation(self):
+		super(LITPlainDeepBoostingCSPH3D, self).enable_quantization_emulation()
 		self.csph3d_layer.enable_quantization_emulation()
 
-	def get_sample_spad_data_ids(self, sample):
-		'''
-			if quantization is enabled modify them
-		'''
-		spad_data_ids = super(LITPlainDeepBoostingCSPH3D, self).get_sample_spad_data_ids(sample)
-		if(self.csph3d_layer.emulate_int8_quantization):
-			for i in range(len(spad_data_ids)):
-				spad_data_ids[i] = 'quantized_{}'.format(spad_data_ids[i])
-		return spad_data_ids
+	# def get_sample_spad_data_ids(self, sample):
+	# 	'''
+	# 		if quantization is enabled modify them
+	# 	'''
+	# 	spad_data_ids = super(LITPlainDeepBoostingCSPH3D, self).get_sample_spad_data_ids(sample)
+	# 	if(self.csph3d_layer.emulate_int8_quantization):
+	# 		for i in range(len(spad_data_ids)):
+	# 			spad_data_ids[i] = 'quantized_{}'.format(spad_data_ids[i])
+	# 	return spad_data_ids
 class LITPlainDeepBoostingCSPH3Dv2(LITPlainDeepBoosting):
 	def __init__(self 
 		, init_lr = 1e-4

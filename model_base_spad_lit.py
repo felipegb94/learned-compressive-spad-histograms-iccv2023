@@ -59,6 +59,10 @@ class LITBaseSPADModel(pl.LightningModule):
 		self.lr_decay_gamma = lr_decay_gamma
 		self.p_tv = p_tv
 		self.data_loss_id = data_loss_id
+		
+		## Only for Compressive Histogram models. All other models are not affected by this flag
+		self.emulate_int8_quantization = False
+
 
 		self.backbone_net = backbone_net
 
@@ -223,6 +227,9 @@ class LITBaseSPADModel(pl.LightningModule):
 		spad_data_ids = []
 		for idx in sample['idx']:
 			spad_data_ids.append(curr_dataloader.dataset.get_spad_data_sample_id(idx))
+		if(self.emulate_int8_quantization):
+			for i in range(len(spad_data_ids)):
+				spad_data_ids[i] = 'quantized_{}'.format(spad_data_ids[i])
 		return spad_data_ids
 
 	def test_step(self, sample, batch_idx):
@@ -345,6 +352,14 @@ class LITBaseSPADModel(pl.LightningModule):
 		# Proper logging of hyperparams and metrics in TB
 		# self.logger.log_hyperparams(self.hparams, {"loss/train": 0, "loss/avg_val": 0, "rmse/train": 0, "rmse/avg_val": 0})
 		self.logger.log_hyperparams(self.hparams)
+
+	def enable_quantization_emulation(self):
+		'''
+			Do nothing if not implemented
+		'''
+		self.emulate_int8_quantization = True
+		return
+
 
 
 class LITL1LossBaseSpadModel(LITBaseSPADModel):

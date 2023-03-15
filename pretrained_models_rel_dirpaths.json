@@ -1844,18 +1844,18 @@
         "rel_dirpath": "outputs/nyuv2_64x64x1024_80ps/csph3d_models_20230218/DDFN_C64B10_CSPH3D/k16_down2_Mt4_TruncFourier-optCt=False-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0/run-complete_2023-02-19_010116",
         "ckpt_id": "epoch=29-step=103887-avgvalrmse=0.0188.ckpt",
         "middlebury_72x88x1024_98ps": {
-            "depths/test_mae": 0.01227,
+            "depths/test_mae": 0.01228,
             "depths/test_mse": 0.00054,
-            "depths/test_rmse": 0.01978
+            "depths/test_rmse": 0.01982
         }
     },
     "DDFN_C64B10_CSPH3D/k8_down2_Mt4_TruncFourier-optCt=False-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0": {
         "rel_dirpath": "outputs/nyuv2_64x64x1024_80ps/csph3d_models_20230218/DDFN_C64B10_CSPH3D/k8_down2_Mt4_TruncFourier-optCt=False-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0/run-complete_2023-02-19_010108",
         "ckpt_id": "epoch=29-step=101292-avgvalrmse=0.0208.ckpt",
         "middlebury_72x88x1024_98ps": {
-            "depths/test_mae": 0.01756,
+            "depths/test_mae": 0.01761,
             "depths/test_mse": 0.00091,
-            "depths/test_rmse": 0.027
+            "depths/test_rmse": 0.02703
         }
     },
     "DDFN_C64B10_CSPH3D/k32_down4_Mt16_TruncFourier-optCt=False-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0": {
@@ -2171,6 +2171,11 @@
             "depths/test_mae": 0.01322,
             "depths/test_mse": 0.00045,
             "depths/test_rmse": 0.01906
+        },
+        "middlebury_largedepth_72x88x1024_98ps": {
+            "depths/test_mae": 0.01707,
+            "depths/test_mse": 0.01106,
+            "depths/test_rmse": 0.05083
         }
     },
     "DDFN_C64B10_CSPH3D/k16_down1_Mt1_CoarseHist-optCt=False-optC=False_csph1d_norm-none_irf-False_zn-True_zeromu-False_smoothtdimC-False/loss-kldiv_tv-0.0": {
@@ -2189,6 +2194,11 @@
             "depths/test_mae": 0.03019,
             "depths/test_mse": 0.0017,
             "depths/test_rmse": 0.04031
+        },
+        "middlebury_largedepth_72x88x1024_98ps": {
+            "depths/test_mae": 0.03358,
+            "depths/test_mse": 0.01315,
+            "depths/test_rmse": 0.07142
         }
     },
     "DDFN_C64B10_CSPH3D/k32_down1_Mt1_CoarseHist-optCt=False-optC=False_csph1d_norm-none_irf-False_zn-True_zeromu-False_smoothtdimC-False/loss-kldiv_tv-0.0": {
@@ -2207,6 +2217,11 @@
             "depths/test_mae": 0.0072,
             "depths/test_mse": 0.00018,
             "depths/test_rmse": 0.01155
+        },
+        "middlebury_largedepth_72x88x1024_98ps": {
+            "depths/test_mae": 0.00984,
+            "depths/test_mse": 0.00563,
+            "depths/test_rmse": 0.03348
         }
     }
 }
