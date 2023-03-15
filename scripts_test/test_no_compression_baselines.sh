@@ -56,7 +56,7 @@ python test.py dataset='"'$test_dataset'"' ++model_name='"'$model_name'"' ++expe
 
 # ### Argmax Compression + Peng et al. ECCV 2020 model
 
-## LR=1e-4, TV=1e-5 -- 3D DB Plain Depth2Depth Model --> Full trained model with gradient decay
+## [USE THIS ONE. FROM TWO RUNS THIS PERFORMED BEST] LR=1e-4, TV=1e-5 -- 3D DB Plain Depth2Depth Model --> Full trained model with gradient decay
 model_name=DDFN_C64B10_Depth2Depth/loss-kldiv_tv-1e-5
 experiment_name=baselines
 model_dirpath=outputs/${train_dataset}/${experiment_name}/${model_name}/2022-05-02_085659
