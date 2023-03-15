@@ -1,0 +1,11 @@
+## This model compute the argmax from a K-bin hist which is input to the 3D CNN model similar to the peak compression baseline
+
+# Model ID is used to select the correct model objcet
+model_id: DDFN_C64B10_KBinHistDepth2Depth
+model_params:
+  in_channels: 1
+  k: 256
+# Model name is used for saving results
+model_name: ${.model_id}
+data_loss_id: kldiv
+

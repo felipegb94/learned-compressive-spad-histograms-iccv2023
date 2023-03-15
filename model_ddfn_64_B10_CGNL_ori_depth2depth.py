@@ -34,3 +34,19 @@ class LITPlainDeepBoostingDepth2Depth(LITPlainDeepBoosting):
 	def get_input_data(self, sample):
 		return sample["est_bins_argmax_hist"]
 	
+class LITPlainDeepBoostingKBinHistDepth2Depth(LITPlainDeepBoosting):
+	def __init__(self, 
+		init_lr = 1e-4,
+		p_tv = 1e-5, 
+		lr_decay_gamma = 0.9,
+		in_channels=1,
+		kbins = 256
+		):
+		# Init parent class
+		super(LITPlainDeepBoostingKBinHistDepth2Depth, self).__init__(init_lr=init_lr,p_tv=p_tv,lr_decay_gamma=lr_decay_gamma,in_channels=in_channels)
+		self.kbins = kbins
+		
+	def get_input_data(self, sample):
+		return sample["est_bins_argmax_coarsehist"]
+	
+	

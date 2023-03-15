@@ -13,7 +13,7 @@ breakpoint = debugger.set_trace
 from research_utils import io_ops
 from model_ddfn_64_B10_CGNL_ori import LITDeepBoosting, LITPlainDeepBoosting
 from model_ddfn_64_B10_CGNL_ori_old import LITDeepBoostingOriginal
-from model_ddfn_64_B10_CGNL_ori_depth2depth import LITDeepBoostingDepth2Depth, LITPlainDeepBoostingDepth2Depth
+from model_ddfn_64_B10_CGNL_ori_depth2depth import LITDeepBoostingDepth2Depth, LITPlainDeepBoostingDepth2Depth, LITPlainDeepBoostingKBinHistDepth2Depth
 from model_ddfn_64_B10_CGNL_ori_CSPH import LITPlainDeepBoostingCSPH
 from model_ddfn_64_B10_CGNL_ori_CSPH3D import LITPlainDeepBoostingCSPH3D, LITPlainDeepBoostingCSPH3Dv1, LITPlainDeepBoostingCSPH3Dv2
 from model_ddfn_64_B10_CGNL_ori_CSPH1D import LITPlainDeepBoostingCSPH1D
@@ -72,6 +72,14 @@ def init_model_from_id(cfg, irf=None):
 						, lr_decay_gamma = cfg.train_params.lr_decay_gamma
 						, p_tv = cfg.train_params.p_tv
 						, in_channels = cfg.model.model_params.in_channels
+						)
+	elif(cfg.model.model_id == 'DDFN_C64B10_KBinHistDepth2Depth'):
+		lit_model = LITPlainDeepBoostingKBinHistDepth2Depth(
+						init_lr = cfg.train_params.lri
+						, lr_decay_gamma = cfg.train_params.lr_decay_gamma
+						, p_tv = cfg.train_params.p_tv
+						, in_channels = cfg.model.model_params.in_channels
+						, kbins = cfg.model.model_params.k
 						)
 	elif(cfg.model.model_id == 'DDFN_C64B10_CSPH'):
 		lit_model = LITPlainDeepBoostingCSPH(
@@ -301,6 +309,8 @@ def load_model_from_ckpt(model_name, ckpt_id, logger=None, model_dirpath=None):
 		model = LITDeepBoostingDepth2Depth.load_from_checkpoint(ckpt_fpath)
 	elif('DDFN_C64B10_Depth2Depth/' in model_name):
 		model = LITPlainDeepBoostingDepth2Depth.load_from_checkpoint(ckpt_fpath)
+	elif('DDFN_C64B10_KBinHistDepth2Depth/' in model_name):
+		model = LITPlainDeepBoostingKBinHistDepth2Depth.load_from_checkpoint(ckpt_fpath)
 	elif('DDFN_C64B10_CSPH/' in model_name):
 		model = LITPlainDeepBoostingCSPH.load_from_checkpoint(ckpt_fpath)
 	elif('DDFN_C64B10_CSPH3D/' in model_name):
