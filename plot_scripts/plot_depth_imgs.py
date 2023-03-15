@@ -42,6 +42,9 @@ if __name__=='__main__':
 	## Regular test set
 	experiment_name_base = 'middlebury/depth_imgs'
 	test_set_id = 'test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
+	## Quantized Results from Regular test set
+	experiment_name_base = 'middlebury_quantized/depth_imgs'
+	test_set_id = 'quantized_test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
 	# ## Test set with larger depths than what was trained for
 	# experiment_name_base = 'middlebury_largedepth/depth_imgs'
 	# test_set_id = 'test_middlebury_largedepth_LargeDepthSimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
@@ -53,8 +56,8 @@ if __name__=='__main__':
 	## Scene ids and signal and SBR parameters we want to plot for
 	scene_ids = ['spad_Art','spad_Reindeer','spad_Moebius', 'spad_Laundry']
 	# scene_ids = ['spad_Reindeer']
-	sbr_params = ['10_1000','10_10','10_50','10_200', '50_500']
-	# sbr_params = ['50_500','50_200']
+	# sbr_params = ['10_1000','10_10','10_50','10_200', '50_500']
+	sbr_params = ['50_500']
 
 	## Check that input scene ids and sbr params are available in test set
 	middlebury_test_set_info = analyze_test_results_utils.middlebury_test_set_info
@@ -168,6 +171,27 @@ if __name__=='__main__':
 	spatial_down_factor_all = [ 2, 2]
 	num_tdim_blocks_all = [4, 4]
 	compression_ratio_all = [32, 64, 128]
+
+	## CoarseHist models: Importance of learned coding (NEW FIGURE)
+	zeromu=False
+	encoding_type_all = ['csph1d']
+	tdim_init_all = ['CoarseHist']
+	optCt_all = [False]
+	optC_all = [False]
+	spatial_down_factor_all = [1]
+	num_tdim_blocks_all = [1]
+	compression_ratio_all = [64, 32, 16, 8, 4]
+
+
+	## Models evaluated for 8-bit weight quantization for UltraPhase eval
+	zeromu=True
+	encoding_type_all = ['csph1d', 'separable']
+	tdim_init_all = ['TruncFourier', 'TruncFourier']
+	optCt_all = [False, False]
+	optC_all = [False, True]
+	spatial_down_factor_all = [1, 2]
+	num_tdim_blocks_all = [1, 4]
+	compression_ratio_all = [128, 64]
 
 	## CoarseHist models: Importance of learned coding (NEW FIGURE)
 	zeromu=False

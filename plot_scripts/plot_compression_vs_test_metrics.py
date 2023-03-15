@@ -89,10 +89,10 @@ if __name__=='__main__':
 	# test_set_id = 'test_middlebury_SimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
 	# experiment_name = 'middlebury/compression_vs_test_metrics_large_ylims'
 	# mae_ylim = (5, 150); tol10mm_ylim = (0., 0.85)
-	# ## Test set with larger depths than what was trained for
-	# test_set_id = 'test_middlebury_largedepth_LargeDepthSimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
-	# experiment_name = 'middlebury_largedepth/compression_vs_test_metrics'
-	# mae_ylim = (5, 150); tol10mm_ylim = (0., 0.85)
+	## Test set with larger depths than what was trained for
+	test_set_id = 'test_middlebury_largedepth_LargeDepthSimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
+	experiment_name = 'middlebury_largedepth/compression_vs_test_metrics'
+	mae_ylim = (5, 150); tol10mm_ylim = (0., 0.85)
 	# ## Test set with timebins above 9m set to 0
 	# test_set_id = 'test_middlebury_maskedhightimebins_MaskedHighTimeBinsSimSPADDataset_nr-72_nc-88_nt-1024_tres-98ps_dark-0_psf-0'
 	# experiment_name = 'middlebury_maskedhightimebins/compression_vs_test_metrics'
@@ -147,7 +147,15 @@ if __name__=='__main__':
 	optC_all = [False, True, True, True]
 	spatial_down_factor_all = [1, 1, 2, 4]
 	num_tdim_blocks_all = [1, 1, 4, 4]
-	
+
+	## NEW MODELS USED IN DATASET BIAS SUPPLEMENTARY SECTION 
+	encoding_type_all = ['csph1d', 'csph1d', 'separable', 'separable']
+	tdim_init_all = ['TruncFourier', 'Rand', 'Rand', 'Rand']
+	optCt_all = [False, True, True, True]
+	optC_all = [False, True, True, True]
+	spatial_down_factor_all = [1, 1, 4, 4]
+	num_tdim_blocks_all = [1, 1, 1, 4]
+
 	(csph3d_model_names, csph3d_num_model_params) = compose_csph3d_model_names_list(compression_ratio_all
 									, spatial_down_factor_all
 									, num_tdim_blocks_all
