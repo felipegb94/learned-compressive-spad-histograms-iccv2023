@@ -94,7 +94,7 @@ def test(cfg):
 		logger.info("WARNING k=64_down4_Mt1 runs very slow in RTX 2070 for some reason...")
 
 	if(cfg.params.cuda):
-		trainer = pl.Trainer(accelerator="gpu", devices=1, logger=tb_logger, callbacks=callbacks, benchmark=True) # 
+		trainer = pl.Trainer(accelerator="gpu", devices=1, logger=tb_logger, callbacks=callbacks, benchmark=False) # 
 	else:
 		trainer = pl.Trainer(logger=tb_logger, callbacks=callbacks) # 
 

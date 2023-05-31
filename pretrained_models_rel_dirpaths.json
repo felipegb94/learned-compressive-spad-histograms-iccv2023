@@ -1820,6 +1820,11 @@
             "depths/test_mae": 0.01027,
             "depths/test_mse": 0.00065,
             "depths/test_rmse": 0.02129
+        },
+        "lindell2018_linospad_captured": {
+            "depths/test_mae": 11.637,
+            "depths/test_mse": 540.74,
+            "depths/test_rmse": 16.492
         }
     },
     "DDFN_C64B10_CSPH3D/k32_down4_Mt4_TruncFourier-optCt=False-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0": {
@@ -1829,6 +1834,11 @@
             "depths/test_mae": 0.01235,
             "depths/test_mse": 0.00072,
             "depths/test_rmse": 0.02357
+        },
+        "lindell2018_linospad_captured": {
+            "depths/test_mae": 11.661,
+            "depths/test_mse": 542.56,
+            "depths/test_rmse": 16.518
         }
     },
     "DDFN_C64B10_CSPH3D/k32_down2_Mt4_TruncFourier-optCt=False-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0": {
@@ -1838,6 +1848,11 @@
             "depths/test_mae": 0.00859,
             "depths/test_mse": 0.00034,
             "depths/test_rmse": 0.0149
+        },
+        "lindell2018_linospad_captured": {
+            "depths/test_mae": 11.932,
+            "depths/test_mse": 545.05,
+            "depths/test_rmse": 16.716
         }
     },
     "DDFN_C64B10_CSPH3D/k16_down2_Mt4_TruncFourier-optCt=False-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0": {
@@ -1847,6 +1862,11 @@
             "depths/test_mae": 0.01228,
             "depths/test_mse": 0.00054,
             "depths/test_rmse": 0.01982
+        },
+        "lindell2018_linospad_captured": {
+            "depths/test_mae": 11.755,
+            "depths/test_mse": 540.67,
+            "depths/test_rmse": 16.577
         }
     },
     "DDFN_C64B10_CSPH3D/k8_down2_Mt4_TruncFourier-optCt=False-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0": {
@@ -1856,6 +1876,11 @@
             "depths/test_mae": 0.01761,
             "depths/test_mse": 0.00091,
             "depths/test_rmse": 0.02703
+        },
+        "lindell2018_linospad_captured": {
+            "depths/test_mae": 11.685,
+            "depths/test_mse": 534.03,
+            "depths/test_rmse": 16.463
         }
     },
     "DDFN_C64B10_CSPH3D/k32_down4_Mt16_TruncFourier-optCt=False-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0": {
@@ -1901,6 +1926,11 @@
             "depths/test_mae": 0.01151,
             "depths/test_mse": 0.00053,
             "depths/test_rmse": 0.01948
+        },
+        "lindell2018_linospad_captured": {
+            "depths/test_mae": 11.654,
+            "depths/test_mse": 543.28,
+            "depths/test_rmse": 16.514
         }
     },
     "DDFN_C64B10_CSPH3D/k8_down2_Mt4_Rand-optCt=True-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0": {
@@ -1910,6 +1940,11 @@
             "depths/test_mae": 0.01432,
             "depths/test_mse": 0.00083,
             "depths/test_rmse": 0.02499
+        },
+        "lindell2018_linospad_captured": {
+            "depths/test_mae": 11.655,
+            "depths/test_mse": 540.43,
+            "depths/test_rmse": 16.489
         }
     },
     "DDFN_C64B10_CSPH3D/k128_down8_Mt4_Rand-optCt=True-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0": {
@@ -2153,6 +2188,11 @@
             "depths/test_mae": 0.0093,
             "depths/test_mse": 0.00051,
             "depths/test_rmse": 0.01884
+        },
+        "lindell2018_linospad_captured": {
+            "depths/test_mae": 11.636,
+            "depths/test_mse": 540.52,
+            "depths/test_rmse": 16.478
         }
     },
     "DDFN_C64B10_CSPH3D/k4_down2_Mt4_Rand-optCt=True-optC=True_separable_norm-none_irf-False_zn-True_zeromu-True_smoothtdimC-False/loss-kldiv_tv-0.0": {
@@ -2162,6 +2202,11 @@
             "depths/test_mae": 0.02259,
             "depths/test_mse": 0.00192,
             "depths/test_rmse": 0.03715
+        },
+        "lindell2018_linospad_captured": {
+            "depths/test_mae": 11.654,
+            "depths/test_mse": 542.45,
+            "depths/test_rmse": 16.502
         }
     },
     "DDFN_C64B10_CSPH3D/k128_down1_Mt1_CoarseHist-optCt=False-optC=False_csph1d_norm-none_irf-False_zn-True_zeromu-False_smoothtdimC-False/loss-kldiv_tv-0.0": {

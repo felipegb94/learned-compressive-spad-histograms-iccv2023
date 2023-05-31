@@ -43,7 +43,7 @@ if __name__=='__main__':
 
 	## Choose the test set to plot with
 	## Regular test set
-	experiment_name = 'linospad_results'
+	experiment_name = 'linospad_results_rebuttal'
 	test_set_id = 'test_lindell2018_linospad_captured'
 
 	## output dirpaths
@@ -61,10 +61,14 @@ if __name__=='__main__':
 	# scene_id = 'elephant'
 	# scene_id = 'checkerboard'
 	scene_id = 'stairs_ball'
-	scene_id = 'lamp'
-	scene_id = 'stuff'
+	scene_id = 'stairs_walking'
+	# scene_id = 'lamp'
+	# scene_id = 'stuff'
+	# scene_id = 'hallway'
+	# scene_id = 'kitchen'
+	scene_id = 'roll'
 
-	## Create dataset object and load raw data for this scene
+	# Create dataset object and load raw data for this scene
 	raw_data_sample = dataset.get_item_by_scene_name(scene_id)
 	plt.clf()
 	plt.imshow(raw_data_sample['intensity_img'].cpu().numpy())
@@ -83,15 +87,34 @@ if __name__=='__main__':
 	model_names.append(no_compression_baseline)
 	model_names.append(argmax_compression_baseline)
 
-	## CSPH3D models: Temporal vs. Spatio-Temporal Compression
-	encoding_type_all = ['csph1d', 'csph1d', 'csph1d', 'csph1d', 'separable', 'separable']
-	tdim_init_all = ['CoarseHist', 'TruncFourier', 'HybridGrayFourier', 'Rand', 'Rand', 'Rand']
-	optCt_all = [False,False, False, True, True, True]
-	optC_all = [False,False, False, True, True, True]
-	spatial_down_factor_all = [1,1, 1, 1, 4, 4]
-	num_tdim_blocks_all = [1, 1, 1, 1, 1, 4]
-	compression_ratio_all = [32, 64, 128]
-	# compression_ratio_all = [32,]
+	## CSPH3D models for rebuttal 2023-05-29
+	encoding_type_all = [ 'csph1d', 'separable', 'separable', 'separable', 'separable']
+	tdim_init_all = [ 'TruncFourier', 'Rand', 'Rand', 'TruncFourier', 'TruncFourier']
+	optCt_all = [ False, True, True, False, False]
+	optC_all = [ False, True, True, True, True]
+	spatial_down_factor_all = [ 1, 2, 4, 2, 4]
+	num_tdim_blocks_all = [ 1, 4, 4, 4, 4]
+	compression_ratio_all = [64, 128]
+
+	## CSPH3D models for rebuttal 2023-05-29
+	encoding_type_all = [ 'csph1d', 'separable', 'separable']
+	tdim_init_all = [ 'TruncFourier', 'Rand', 'Rand']
+	optCt_all = [ False, True, True]
+	optC_all = [ False, True, True]
+	spatial_down_factor_all = [ 1, 2, 4]
+	num_tdim_blocks_all = [ 1, 4, 4]
+	compression_ratio_all = [64, 128, 256]
+
+	# ## CSPH3D models: Temporal vs. Spatio-Temporal Compression
+	# encoding_type_all = ['csph1d', 'csph1d', 'csph1d', 'csph1d', 'separable', 'separable']
+	# tdim_init_all = ['CoarseHist', 'TruncFourier', 'HybridGrayFourier', 'Rand', 'Rand', 'Rand']
+	# optCt_all = [False,False, False, True, True, True]
+	# optC_all = [False,False, False, True, True, True]
+	# spatial_down_factor_all = [1, 1, 1, 1, 4, 4]
+	# num_tdim_blocks_all = [1, 1, 1, 1, 1, 4]
+	# compression_ratio_all = [32, 64, 128]
+
+
 	# generate the csph3d model names
 	(csph3d_model_names, csph3d_num_model_params) = compose_csph3d_model_names_list(compression_ratio_all
 									, spatial_down_factor_all
@@ -113,6 +136,10 @@ if __name__=='__main__':
 	if(scene_id == 'stuff'): (vmin, vmax)=(0.5, 2.2)
 	if(scene_id == 'checkerboard'): (vmin, vmax)=(0.6, 1.1)
 	if(scene_id == 'stairs_ball'): (vmin, vmax)=(0.8, 3.0)
+	if(scene_id == 'stairs_walking'): (vmin, vmax)=(0.6, 3.0)
+	if(scene_id == 'hallway'): (vmin, vmax)=(1.5, 5.0)
+	if(scene_id == 'kitchen'): (vmin, vmax)=(1.3, 4.5)
+	if(scene_id == 'roll'): (vmin, vmax)=(0.5, 2.4)
 
 	## load the depths (in units of bins)
 	rec_depths_all = []
@@ -131,8 +158,9 @@ if __name__=='__main__':
 	model_names.append('argmax')
 
 	## Plot all depth images
+	plt.close('all')
 	for i, rec_depth in enumerate(rec_depths_all):
-		plt.clf()
+		plt.figure()
 		plot_depth_img(rec_depths_all[i], vmin, vmax, model_names[i], out_dirpath, scene_id)
 		plt.pause(0.1)
 

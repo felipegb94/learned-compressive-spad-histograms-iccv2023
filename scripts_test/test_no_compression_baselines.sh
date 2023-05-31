@@ -8,10 +8,10 @@
 set -e 
 
 ## Dataset we are testing with
-test_dataset=middlebury
+# test_dataset=middlebury
 # test_dataset=middlebury_largedepth
 # test_dataset=middlebury_maskedhightimebins
-# test_dataset=lindell2018_linospad
+test_dataset=lindell2018_linospad
 # test_dataset=lindell2018_linospad_min
 
 ## Dataset we trained the models with
