@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+#SBATCH --partition=research
+#SBATCH --cpus-per-task=10
+#SBATCH --gres=gpu:gtx1080:2
+#SBATCH --mem=60000
+#SBATCH --time=96:0:0
+###SBATCH --nodelist=euler19
+#SBATCH --exclude=euler09
+#SBATCH -o slurm.%j.%N.out # STDOUT
+#SBATCH -e slurm.%j.%N.err # STDERR
+#SBATCH --job-name=penlocal
+
+
+# Changes from README
+# conda install pytorch==1.11.0 torchvision==0.12.0 torchaudio==0.11.0 cudatoolkit=11.3 -c pytorch
+# pip install tensorboard
+# pip install pytorch-lightning==1.6
+
+
+module load anaconda/mini/4.9.2
+bootstrap_conda
+conda activate csphenv38man
+
+# python train.py ++experiment=no_compression_baselines_lr-1e-4_rep model=DDFN_C64B10 ++model.model_params.input_norm=none ++train_params.epoch=30 ++random_seed=1235 ++train_params.batch_size=4 ++resume_train=true ++train_params.p_tv=1e-5 ++train_params.lri=1e-4
+
+#python train.py ++experiment=csph3D_tdim_baselines_truc3 model=DDFN_C64B10_CSPH3D ++model.model_params.tblock_init=TruncFourier ++model.model_params.k=2 ++model.model_params.spatial_down_factor=1 ++model.model_params.nt_blocks=1 ++model.model_params.optimize_codes=false ++model.model_params.optimize_tdim_codes=false ++model.model_params.zero_mean_tdim_codes=true ++model.model_params.apply_zncc_norm=true ++model.model_params.encoding_type=csph1d ++train_params.p_tv=0.0 ++train_params.epoch=30 ++train_params.lri=1e-3 ++random_seed=1235 ++train_params.batch_size=4 ++resume_train=true
+
+# python train.py ++experiment=csph3D_tdim_baselines_truc_allk model=DDFN_C64B10_CSPH3D ++model.model_params.tblock_init=TruncFourier ++model.model_params.k=64 ++model.model_params.spatial_down_factor=1 ++model.model_params.nt_blocks=1 ++model.model_params.optimize_codes=false ++model.model_params.optimize_tdim_codes=false ++model.model_params.zero_mean_tdim_codes=true ++model.model_params.apply_zncc_norm=true ++model.model_params.encoding_type=csph1d ++train_params.p_tv=0.0 ++train_params.epoch=30 ++train_params.lri=1e-3 ++random_seed=1235 ++train_params.batch_size=4 ++resume_train=true
+
+# python train.py ++experiment=csph3D_tdim_baselines_hgray_allk model=DDFN_C64B10_CSPH3D ++model.model_params.tblock_init=HybridGrayFourier ++model.model_params.k=16 ++model.model_params.spatial_down_factor=1 ++model.model_params.nt_blocks=1 ++model.model_params.optimize_codes=false ++model.model_params.optimize_tdim_codes=false ++model.model_params.zero_mean_tdim_codes=true ++model.model_params.apply_zncc_norm=true ++model.model_params.encoding_type=csph1d ++train_params.p_tv=0.0 ++train_params.epoch=30 ++train_params.lri=1e-3 ++random_seed=1235 ++train_params.batch_size=4 ++resume_train=true
+
+# python train.py ++experiment=csph3D_tdim_baselines_truc_allk_multi model=DDFN_C64B10_CSPH3D ++model.model_params.tblock_init=TruncFourier ++model.model_params.k=2 ++model.model_params.spatial_down_factor=1 ++model.model_params.nt_blocks=1 ++model.model_params.optimize_codes=false ++model.model_params.optimize_tdim_codes=false ++model.model_params.zero_mean_tdim_codes=true ++model.model_params.apply_zncc_norm=true ++model.model_params.encoding_type=csph1d ++train_params.p_tv=0.0 ++train_params.epoch=30 ++train_params.lri=1e-3 ++random_seed=1235 ++train_params.batch_size=4 ++train_params.gpu_num=2 ++resume_train=true

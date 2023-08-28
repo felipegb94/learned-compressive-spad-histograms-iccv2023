@@ -81,7 +81,7 @@ def train(cfg):
 	if(cfg.train_params.overfit_batches):
 		# trainer = pl.Trainer(fast_dev_run=True, logger=tb_logger, callbacks=[lr_monitor_callback]) # 
 		if(cfg.train_params.cuda):
-			trainer = pl.Trainer(accelerator="gpu", devices=1, max_epochs=cfg.train_params.epoch, 
+			trainer = pl.Trainer(accelerator="gpu", devices=cfg.train_params.gpu_num, max_epochs=cfg.train_params.epoch, 
 				logger=tb_logger, callbacks=[lr_monitor_callback], 
 				log_every_n_steps=2, val_check_interval=1.0, overfit_batches=0.03,track_grad_norm=2) # 
 		else:
@@ -95,7 +95,7 @@ def train(cfg):
 			# 	logger=tb_logger, callbacks=callbacks,
 			# 	log_every_n_steps=1, val_check_interval=0.5
 			#  	) # Runs single batch
-			trainer = pl.Trainer(accelerator="gpu", devices=1, max_epochs=cfg.train_params.epoch, 
+			trainer = pl.Trainer(accelerator="gpu", devices=cfg.train_params.gpu_num, max_epochs=cfg.train_params.epoch, 
 				logger=tb_logger, callbacks=callbacks, 
 				log_every_n_steps=10, val_check_interval=0.5, benchmark=False
 				# ,track_grad_norm=2

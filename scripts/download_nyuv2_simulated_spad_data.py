@@ -50,8 +50,8 @@ if __name__=='__main__':
     
     ## dataset folder ID
     dataset_id = 'SimSPADDataset_nr-64_nc-64_nt-1024_tres-80ps_dark-1_psf-1'
-    dataset_id = 'SimSPADDataset_nr-64_nc-64_nt-1024_tres-55ps_dark-1_psf-1'
-    dataset_id = 'ModuloSimSPADDataset_nr-64_nc-64_nt-1024_tres-55ps_dark-1_psf-1'
+    #dataset_id = 'SimSPADDataset_nr-64_nc-64_nt-1024_tres-55ps_dark-1_psf-1'
+    #dataset_id = 'ModuloSimSPADDataset_nr-64_nc-64_nt-1024_tres-55ps_dark-1_psf-1'
     # dataset_id = 'SimSPADDataset_min'
     dataset_dir = os.path.join(out_dir, dataset_id)
 
