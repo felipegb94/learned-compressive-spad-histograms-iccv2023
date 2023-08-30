@@ -2,12 +2,14 @@ clear; close all;
 
 visualize_data = true;
 % Add paths
-addpath('/srv/home/bhavya/Documents/votnet/sunrgbd/sunrgbd_trainval/')
+load('/nobackup/bhavya/datasets/sunrgbd/SUNRGBDMeta3DBB_v2.mat');
+load('/nobackup/bhavya/datasets/sunrgbd/SUNRGBDMeta2DBB_v2.mat');
+addpath('/nobackup/bhavya/votenet/sunrgbd/sunrgbd_trainval/')
 % addpath('./TestData/middlebury/nyu_utils');
 
 % Set paths
 % base_dirpath = './TestData/middlebury';
-base_dirpath = '/srv/home/bhavya/Documents/votnet/sunrgbd/sunrgbd_trainval/';
+base_dirpath = '/nobackup/bhavya/votenet/sunrgbd/sunrgbd_trainval/';
 % dataset_dir = fullfile(base_dirpath, 'raw');
 dataset_dir = base_dirpath;
 scenedir = fullfile(base_dirpath, 'image');
@@ -59,8 +61,12 @@ end
 % Get all scene names
 % scenes = GetFolderNamesInDir(dataset_dir);
 scenes = load(fullfile(base_dirpath, 'train_data_idx.txt'));
+for ss = 1:length(scenes)
+    aa = dlmread(fullfile("/nobackup/bhavya/datasets/sunrgbd", SUNRGBDMeta(scenes(ss)).sequenceName, 'intrinsics.txt'));
+    focallength(ss) = aa(1,1);
+end
 scenes = num2str(scenes, '%06d');
-scenes = string(scenes)
+scenes = string(scenes);
 
 
 if(strcmp(dataset_sim_id, 'LowSBRSimSPADDataset'))
@@ -119,50 +125,31 @@ else
 end
 % 
 
-% Depth parameters used from https://github.com/facebookresearch/omnivore/issues/12
-datasets = ["kv1", "kv1_b", "kv2", "realsense", "xtion"];
-baselines = [0.075, "kv1_b", "kv2", "realsense", "xtion"];
+% Sensor parameters from https://github.com/facebookresearch/omnivore/issues/12
+% datasets = ["kv1", "kv1_b", "kv2", "realsense", "xtion"];
+% baselines = [0.075, 0.075, 0.075, 0.095, 0.095];
 % sensor_to_params = dictionary(datasets, baselines)
 
 
-sensor_to_params = {
-%     "kv1": {
-%         "baseline": 0.075,
-%     },
-%     "kv1_b": {
-%         "baseline": 0.075,
-%     },
-%     "kv2": {
-%         "baseline": 0.075,
-%     },
-%     "realsense": {
-%         "baseline": 0.095,
-%     },
-%     "xtion": {
-%         "baseline": 0.095, # guessed based on length of 18cm for ASUS xtion v1
-%     },
-% }
-
-
 t_s = tic;
-for ss = 1:5
-    % length(scenes)
+for ss = 1:length(scenes)
     fprintf('Processing scene %s...\n',scenes{ss});
 
     % fid = fopen(fullfile(scenedir, scenes{ss}, 'dmin.txt'));
     % dmin = textscan(fid,'%f');
-    dmin = 0.01;
+    dmin = 0.;
     % dmin{1};
     % fclose(fid);
 
     % TODO: this can be skipped with depth images
     f = 3740;
-    % f = 525;
+    f = focallength(ss);
     b = .1600;
-    % b = 0.075;
     disparity = (single(imread(fullfile(depthdir, sprintf('%s.png', scenes{ss})) ) ) + dmin);
     % depth = f*b ./ disparity;    
-    depth = disparity./1000;    
+    depth = disparity./1000;
+    depth(depth>50)=50;
+    depth(depth<0.01)=0.01;
     % intensity = rgb2gray(im2double(imread(fullfile(scenedir, scenes{ss}, '/view1.png'))));   
     intensity = rgb2gray(im2double(imread(fullfile(scenedir, sprintf('%s.jpg', scenes{ss})))));   
 
@@ -292,8 +279,8 @@ for ss = 1:5
         spad = reshape(spad, size(detections));
         if ~LOW_RES
             disp('Conducting on HR...');
-            r1 = 64 - mod(bins1,64);
-            r2 = 64 - mod(bins2,64);
+            r1 = 64 - mod(size(spad,1),64);
+            r2 = 64 - mod(size(spad,2),64);
             r1_l = floor(r1/2) + 16;
             r1_r = ceil(r1/2) + 16;
             r2_l = floor(r2/2) + 16;
