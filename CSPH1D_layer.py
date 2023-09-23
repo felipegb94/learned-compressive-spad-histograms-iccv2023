@@ -13,9 +13,6 @@ import pytorch_lightning as pl
 import torchvision
 from IPython.core import debugger
 breakpoint = debugger.set_trace
-import scipy.io
-import open3d as o3d
-import tof_utils
 
 #### Local imports
 from toflib.coding import TruncatedFourierCoding, HybridGrayBasedFourierCoding, GatedCoding, HybridFourierBasedGrayCoding
@@ -127,114 +124,68 @@ class CSPH1DLayer(nn.Module):
 def count_parameters(model):
 	return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
-def use_o3d(pts, write_text):
-    pcd = o3d.geometry.PointCloud()
-
-    # the method Vector3dVector() will convert numpy array of shape (n, 3) to Open3D format.
-    # see http://www.open3d.org/docs/release/python_api/open3d.utility.Vector3dVector.html#open3d.utility.Vector3dVector
-    pcd.points = o3d.utility.Vector3dVector(pts)
-
-    # http://www.open3d.org/docs/release/python_api/open3d.io.write_point_cloud.html#open3d.io.write_point_cloud
-    o3d.io.write_point_cloud("my_pts.ply", pcd, write_ascii=write_text)
-
-    # read ply file
-    pcd = o3d.io.read_point_cloud('my_pts.ply')
-
-    # visualize
-    o3d.visualization.draw_geometries([pcd])
-
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-
 
 if __name__=='__main__':
 	import matplotlib.pyplot as plt
 
-	# # Set random input
-	# batch_size = 3
-	# (nr, nc, nt) = (32, 32, 1024) 
-	# inputs = torch.randn((batch_size, 1, nt, nr, nc))
-	# inputs[inputs<2] = 0
+	# Set random input
+	batch_size = 3
+	(nr, nc, nt) = (32, 32, 1024) 
+	inputs = torch.randn((batch_size, 1, nt, nr, nc))
+	inputs[inputs<2] = 0
 
-	# simple_hist_input = torch.zeros((2, 1, nt, 32, 32))
-	# simple_hist_input[0, 0, 100, 0, 0] = 3
-	# simple_hist_input[0, 0, 200, 0, 0] = 1
-	# simple_hist_input[0, 0, 50, 0, 0] = 1
-	# simple_hist_input[0, 0, 540, 0, 0] = 1
+	simple_hist_input = torch.zeros((2, 1, nt, 32, 32))
+	simple_hist_input[0, 0, 100, 0, 0] = 3
+	simple_hist_input[0, 0, 200, 0, 0] = 1
+	simple_hist_input[0, 0, 50, 0, 0] = 1
+	simple_hist_input[0, 0, 540, 0, 0] = 1
 
-	# simple_hist_input[1, 0, 300, 0, 0] = 2
-	# simple_hist_input[1, 0, 800, 0, 0] = 1
-	# simple_hist_input[1, 0, 34, 0, 0] = 1
-	# simple_hist_input[1, 0, 900, 0, 0] = 1
+	simple_hist_input[1, 0, 300, 0, 0] = 2
+	simple_hist_input[1, 0, 800, 0, 0] = 1
+	simple_hist_input[1, 0, 34, 0, 0] = 1
+	simple_hist_input[1, 0, 900, 0, 0] = 1
 
-	# ## Init CSPH Layer Set compression params
-	# k = 2
+	## Init CSPH Layer Set compression params
+	k = 16
 	# init_id = 'TruncFourier'
-	# # init_id = 'HybridGrayFourier'
-	# # init_id = 'HybridFourierGray'
-	# # init_id = 'CoarseHist'
-	# # init_id = 'Rand'
-	# csph1D_layer = CSPH1DLayer(k=k, num_bins=nt, init=init_id)
-	# print("csph1D_layer Layer N Params: {}".format(count_parameters(csph1D_layer)))
+	init_id = 'HybridGrayFourier'
+	# init_id = 'HybridFourierGray'
+	# init_id = 'CoarseHist'
+	# init_id = 'Rand'
+	csph1D_layer = CSPH1DLayer(k=k, num_bins=nt, init=init_id)
+	print("csph1D_layer Layer N Params: {}".format(count_parameters(csph1D_layer)))
 
-	# ## Plot codes
-	# Cmat = csph1D_layer.Cmat.cpu().numpy()
-	# assert(Cmat.shape[-1] == k), "Incorrect Cmat shape"
-	# plt.clf()
-	# plt.subplot(2,1,1)
-	# c=0; plt.plot(Cmat[:,c], label='Code/Col: {}'.format(c))
-	# c=k//4; plt.plot(Cmat[:,c], label='Code/Col: {}'.format(c))
-	# c=k//2; plt.plot(Cmat[:,c], label='Code/Col: {}'.format(c))
-	# plt.legend()
+	## Plot codes
+	Cmat = csph1D_layer.Cmat.cpu().numpy()
+	assert(Cmat.shape[-1] == k), "Incorrect Cmat shape"
+	plt.clf()
+	plt.subplot(2,1,1)
+	c=0; plt.plot(Cmat[:,c], label='Code/Col: {}'.format(c))
+	c=k//4; plt.plot(Cmat[:,c], label='Code/Col: {}'.format(c))
+	c=k//2; plt.plot(Cmat[:,c], label='Code/Col: {}'.format(c))
+	plt.legend()
 
-	# ## Test with random inputs
-	# zncc, B = csph1D_layer(inputs)
-	# # zncc2, B2 = csph1D_layer.forward_conv(inputs)
-	# print("Input Shape: {}".format(inputs.shape))
-	# print("ZNCC Out Shape: {}".format(zncc.shape))
-	# print("B Out Shape: {}".format(B.shape))
+	## Test with random inputs
+	zncc, B = csph1D_layer(inputs)
+	# zncc2, B2 = csph1D_layer.forward_conv(inputs)
+	print("Input Shape: {}".format(inputs.shape))
+	print("ZNCC Out Shape: {}".format(zncc.shape))
+	print("B Out Shape: {}".format(B.shape))
 	
-	# # Look at outputs
-	# plt.subplot(2,1,2)
-	# # plt.plot(inputs[0,0,:,10,10], '--', label="Inputs 1")
-	# # plt.plot(zncc[0,0,:,10,10], label='ZNCC Outputs 1')
+	# Look at outputs
+	plt.subplot(2,1,2)
+	# plt.plot(inputs[0,0,:,10,10], '--', label="Inputs 1")
+	# plt.plot(zncc[0,0,:,10,10], label='ZNCC Outputs 1')
 
-	# ## Test with random inputs
-	# zncc, B = csph1D_layer(simple_hist_input)
-	# print("Input Shape: {}".format(simple_hist_input.shape))
-	# print("ZNCC Out Shape: {}".format(zncc.shape))
-	# print("B Out Shape: {}".format(B.shape))
+	## Test with random inputs
+	zncc, B = csph1D_layer(simple_hist_input)
+	print("Input Shape: {}".format(simple_hist_input.shape))
+	print("ZNCC Out Shape: {}".format(zncc.shape))
+	print("B Out Shape: {}".format(B.shape))
 	
-	# # Look at outputs
-	# plt.plot(simple_hist_input[0,0,:,0,0], '--', label="Inputs 2")
-	# plt.plot(zncc[0,0,:,0,0], label='ZNCC Outputs 2')
-	# plt.plot(simple_hist_input[1,0,:,0,0], '--', label="Inputs 3")
-	# plt.plot(zncc[1,0,:,0,0], label='ZNCC Outputs 3')
-	# plt.legend()
-
-
-	data = scipy.io.loadmat('/nobackup/bhavya/votenet/sunrgbd/sunrgbd_trainval/processed/SimSPADDataset_nr-72_nc-88_nt-1024_tres-586ps_dark-0_psf-0/spad_005051_2_2.mat')
-	nr, nc, nt = data['detections'].shape
-	focallength = data['focal_length'][0,0]
-	detections = data['detections'].argmax(-1)
-	dist = tof_utils.tof2depth(detections*data['bin_size'])
-	mindist = dist.copy()
-	mindist = mindist.reshape(-1)
-	mindist.sort()
-	print(mindist[:100])
-	# plt.imshow(dist)
-	# plt.savefig('fig.png')
-	pts = []
-	for ii in range(nr):
-		for jj in range(nc):
-			dd = dist[ii,jj]
-			depth = dd / ( ( ( ii**2 + jj**2)/(focallength**2) + 1 )**(0.5) )
-			X = ii*depth/focallength
-			Y = jj*depth/focallength
-			pts.append((X, Y, depth))
-
-	# print(pts[:10])
-	write_text = True
-	use_o3d(pts, write_text)
-
-
+	# Look at outputs
+	plt.plot(simple_hist_input[0,0,:,0,0], '--', label="Inputs 2")
+	plt.plot(zncc[0,0,:,0,0], label='ZNCC Outputs 2')
+	plt.plot(simple_hist_input[1,0,:,0,0], '--', label="Inputs 3")
+	plt.plot(zncc[1,0,:,0,0], label='ZNCC Outputs 3')
+	plt.legend()

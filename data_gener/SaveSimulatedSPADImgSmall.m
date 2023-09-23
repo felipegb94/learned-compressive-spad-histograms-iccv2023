@@ -1,3 +1,3 @@
-function SaveSimulatedSPADImgSmall(fname, detections, SBR, range_bins, intensity, bin_size, focal_length)
-save(fname, 'detections', 'SBR', 'range_bins', 'intensity', 'bin_size', 'focal_length');
+function SaveSimulatedSPADImgSmall(fname, spad, SBR, range_bins, intensity, bin_size, K, num_bins)
+save(fname, 'spad', 'SBR', 'range_bins', 'intensity', 'bin_size', 'K', 'num_bins');
 end

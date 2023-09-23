@@ -2,25 +2,19 @@ clear; close all;
 
 visualize_data = true;
 % Add paths
-load('/nobackup/bhavya/datasets/sunrgbd/SUNRGBDMeta3DBB_v2.mat');
-load('/nobackup/bhavya/datasets/sunrgbd/SUNRGBDMeta2DBB_v2.mat');
-addpath('/nobackup/bhavya/votenet/sunrgbd/sunrgbd_trainval/')
-% addpath('./TestData/middlebury/nyu_utils');
+addpath('./TestData/middlebury/nyu_utils');
 
 % Set paths
-% base_dirpath = './TestData/middlebury';
-base_dirpath = '/nobackup/bhavya/votenet/sunrgbd/sunrgbd_trainval/';
-% dataset_dir = fullfile(base_dirpath, 'raw');
-dataset_dir = base_dirpath;
-scenedir = fullfile(base_dirpath, 'image');
-depthdir = fullfile(base_dirpath, 'depth');
+base_dirpath = './TestData/middlebury';
+dataset_dir = fullfile(base_dirpath, 'raw');
+scenedir = dataset_dir;
 out_base_dirpath = fullfile(base_dirpath, 'processed');
 
 % Speed of light
 c = 3e8; 
 % Time bin size, number of bins
 num_bins = 1024; 
-repetition_period = 600e-9;
+repetition_period = 100e-9;
 unambiguous_depth_range = ToF2Dist(repetition_period, c);
 bin_size = repetition_period/num_bins; %approximately the bin size (in secs)
 % Dark and Bright image parameter idx
@@ -59,17 +53,7 @@ if ~exist(outdir, 'dir')
 end
 
 % Get all scene names
-% scenes = GetFolderNamesInDir(dataset_dir);
-scenes = load(fullfile(base_dirpath, 'train_data_idx.txt'));
-for ss = 1:length(scenes)
-    aa = dlmread(fullfile("/nobackup/bhavya/datasets/sunrgbd", SUNRGBDMeta(scenes(ss)).sequenceName, 'intrinsics.txt'));
-    focallength(ss) = aa(1,1);
-    % TODO: size for each image is different, we should use original size for inference.
-    % color_image = imread(fullfile(scenedir, sprintf('%s.jpg', scenes{ss})))
-    % dims(ss) = size(color_image);
-end
-scenes = num2str(scenes, '%06d');
-scenes = string(scenes);
+scenes = GetFolderNamesInDir(dataset_dir);
 
 
 if(strcmp(dataset_sim_id, 'LowSBRSimSPADDataset'))
@@ -117,7 +101,7 @@ else
     ];
     
     
-    simulation_params_highFlux_medSNR = [ 50, 50; 
+    simulation_params_highFlux_medSNR = [50, 50; 
                                   50, 200;
                                   50, 500;
                                   50, 1000
@@ -128,36 +112,20 @@ else
 end
 % 
 
-% Sensor parameters from https://github.com/facebookresearch/omnivore/issues/12
-% don't need these values for now.
-% datasets = ["kv1", "kv1_b", "kv2", "realsense", "xtion"];
-% baselines = [0.075, 0.075, 0.075, 0.095, 0.095];
-% sensor_to_params = dictionary(datasets, baselines)
-
-
 t_s = tic;
-for ss = 1:10
-    % length(scenes)
+for ss = 1:length(scenes)
     fprintf('Processing scene %s...\n',scenes{ss});
 
-    % fid = fopen(fullfile(scenedir, scenes{ss}, 'dmin.txt'));
-    % dmin = textscan(fid,'%f');
-    dmin = 0.;
-    % dmin{1};
-    % fclose(fid);
+    fid = fopen(fullfile(scenedir, scenes{ss}, 'dmin.txt'));
+    dmin = textscan(fid,'%f');
+    dmin = dmin{1};
+    fclose(fid);
 
-    % f = 3740;
-    f = focallength(ss);
-    % b = .1600;
-    % disparity = (single(imread(fullfile(depthdir, sprintf('%s.png', scenes{ss})) ) ) + dmin);
-    % depth = f*b ./ disparity;    
-    depth = (single(imread(fullfile(depthdir, sprintf('%s.png', scenes{ss})) ) ) + dmin);
-    disparity = depth; % This is not disparity, just naming the variable that to keep the code same as before.
-    depth = depth./1000;
-    % depth(depth>50)=50;
-    % depth(depth<0.01)=0.01;
-    % intensity = rgb2gray(im2double(imread(fullfile(scenedir, scenes{ss}, '/view1.png'))));   
-    intensity = rgb2gray(im2double(imread(fullfile(scenedir, sprintf('%s.jpg', scenes{ss})))));   
+    f = 3740;
+    b = .1600;
+    disparity = (single(imread(fullfile(scenedir, scenes{ss}, 'disp1.png'))) + dmin);
+    depth = f*b ./ disparity;    
+    intensity = rgb2gray(im2double(imread(fullfile(scenedir, scenes{ss}, '/view1.png'))));   
 
     % When simulating the large depth dataset apply a fixed offset
     if(strcmp(dataset_sim_id, 'LargeDepthSimSPADDataset'))
@@ -166,10 +134,8 @@ for ss = 1:10
     end
 
     max_scene_depth = max(depth(:));
-    min_scene_depth = min(depth(:));
     fprintf('    Max scene depth: %f...\n',max_scene_depth);
-    fprintf('    Min scene depth: %f...\n',min_scene_depth);
-    size(depth)
+
 
     if LOW_RES
         disp('Conduct on LR...');
@@ -205,6 +171,7 @@ for ss = 1:10
 
         depth_hr = depth;
         intensity_hr = intensity;
+
         depth = imresize(depth, lres_factor, 'bicubic');        
         intensity = imresize(intensity, lres_factor, 'bicubic');
         depth = max(depth, 0);
@@ -284,8 +251,8 @@ for ss = 1:10
         spad = reshape(spad, size(detections));
         if ~LOW_RES
             disp('Conducting on HR...');
-            r1 = 64 - mod(size(spad,1),64);
-            r2 = 64 - mod(size(spad,2),64);
+            r1 = 64 - mod(bins1,64);
+            r2 = 64 - mod(bins2,64);
             r1_l = floor(r1/2) + 16;
             r1_r = ceil(r1/2) + 16;
             r2_l = floor(r2/2) + 16;
@@ -329,10 +296,9 @@ for ss = 1:10
         % gray image, 72*88. 'rates' is actually the GT 3D histogram.
         out_fname = sprintf('spad_%s_%s_%s.mat', scenes{ss}, num2str(mean_signal_photons), num2str(mean_background_photons));
         out_fpath = fullfile(outdir, out_fname);
-        SaveSimulatedSPADImgSmall(out_fpath, detections, SBR, range_bins, intensity, bin_size, f)
+        SaveSimulatedSPADImg(out_fpath, spad, SBR, range_bins, range_bins_hr, est_range_bins, rates_norm_params, norm_rates, intensity, intensity_hr, mean_signal_photons, mean_background_photons, bin_size, dist)
 
     end
 end
 t_cost = toc(t_s);
 disp(['Time cost: ', num2str(t_cost)]);
-
