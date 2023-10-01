@@ -7,11 +7,11 @@ function SimulateSUNRGBDMeasurements(startidx, endidx)
 	%addpath('/nobackup/bhavya/votenet/sunrgbd/sunrgbd_trainval/')
 	
 	% Set paths
-	base_dirpath = '/srv/home/bhavya/Documents/votnet/sunrgbd/sunrgbd_trainval/';
+	base_dirpath = '/srv/home/bgoyal2/Documents/votnet/sunrgbd/sunrgbd_trainval/';
 	dataset_dir = base_dirpath;
 	scenedir = fullfile(base_dirpath, 'image');
 	depthdir = fullfile(base_dirpath, 'depth');
-	out_base_dirpath = fullfile(base_dirpath, 'processed_full');
+	out_base_dirpath = fullfile(base_dirpath, 'processed_full_lowflux');
 	
 	% Speed of light
 	c = 3e8; 
@@ -62,10 +62,10 @@ function SimulateSUNRGBDMeasurements(startidx, endidx)
 	    cx(ss) = K(2, 7); cy(ss) = K(2, 8);
 	end
 	
-	simulation_params_highFlux_medSNR = [ 50, 1; 
-	                                %   200, 1;
-	                                  50, 50;
-	                                %   50, 1000
+	simulation_params_highFlux_medSNR = [ 5, 1; 
+	                                   5, 5;
+	                                  5, 10;
+	                                   5, 50
 	];
 	simulation_params = [simulation_params_highFlux_medSNR];
 	
@@ -81,6 +81,11 @@ function SimulateSUNRGBDMeasurements(startidx, endidx)
 	t_s = tic;
 	for ss = startidx:endidx
 	    fprintf('Processing scene %s...\n',scenes{ss});
+	    out_fname = sprintf('spad_%s_%s_%s.mat', scenes{ss}, num2str(simulation_params(end,1)), num2str(simulation_params(end,2)));
+		out_fpath = fullfile(outdir, out_fname)
+	    if exist(out_fpath)
+		    continue
+	    end
 	
 	    dmin = 0.;
 	    % f = focallength(ss);
