@@ -4,7 +4,7 @@ This repository contains the code for the [ICCV 2023 paper Learned Compressive R
 
 > **IMPORTANT NOTE from 2023-11-18:** The code in this repository still needs to be cleaned up and organized for better reproducibility, but we have made it public early. A new release with a simplified codebase will be made available in the next couple months. In the meantime, if you have any questions about the code, please create an issue.
 
-To clone: `git clone --recurse-submodules git@github.com:felipegb94/spatio-temporal-csph.git`
+To clone: `git clone --recurse-submodules git@github.com:felipegb94/learned-compressive-spad-histograms-iccv2023.git`
 
 If you use the code in this repository please cite:
 
@@ -22,7 +22,7 @@ If you use the code in this repository please cite:
 
 All scripts and code should be run from the top-level directory, except for the data generation MATLAB code which should be run from the `data_gener` directory.
 
-1. Clone `git clone --recurse-submodules git@github.com:felipegb94/spatio-temporal-csph.git`
+1. Clone `git clone --recurse-submodules git@github.com:felipegb94/learned-compressive-spad-histograms-iccv2023.git`
 2. Go over the setup instructions to create the conda environment (see below). To make sure the environment is setup correctly run: `python csph_layers.py`
 3. Download nyuv2 dataset. Run `python scripts/download_nyuv2_simulated_spad_data.py`
 4. Try training a model. See `scripts_train/` for example train commands
