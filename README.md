@@ -1,5 +1,8 @@
-# spatio-temporal-csph
-Spatio Temporal Compressive Single-Photon Histograms
+# Learned Compressive Representations for Single-Photon 3D Imaging (ICCV 2023)
+
+This repository contains the code for the [ICCV 2023 paper Learned Compressive Representations for Single-Photon 3D Imaging](https://openaccess.thecvf.com/content/ICCV2023/html/Gutierrez-Barragan_Learned_Compressive_Representations_for_Single-Photon_3D_Imaging_ICCV_2023_paper.html).
+
+> **IMPORTANT NOTE from 2023-11-18:** The code in this repository still needs to be cleaned up and organized for better reproducibility, but we have made it public early. A new release with a simplified codebase will be made available in the next couple months. In the meantime, if you have any questions about the code, please create an issue.
 
 To clone: `git clone --recurse-submodules git@github.com:felipegb94/spatio-temporal-csph.git`
 
@@ -54,6 +57,7 @@ Alternatively, you can manuall create it as follows:
    2. Packages like `numpy`, `scipy`, `matplotlib` are automatically installed with the above installation steps.
 
 **Option 2:** Install using the copy of my conda environment in `PENonLocalEnvironment.yml`.
+
 ## Citation and Acknowledgements
 
 If you use the code in this repository, in addition to citing our work, please make sure to cite [Peng et al., ECCV 2020](https://github.com/JiayongO-O/PENonLocal) and [Lindell et al., SIGGRAPH 2018](https://davidlindell.com/publications/single-photon-3d). The initial version of the models in this repos were based on Peng et al, and the data generation code was based on Lindell et al.
