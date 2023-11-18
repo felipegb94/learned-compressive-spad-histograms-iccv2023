@@ -6,6 +6,18 @@ This repository contains the code for the [ICCV 2023 paper Learned Compressive R
 
 To clone: `git clone --recurse-submodules git@github.com:felipegb94/spatio-temporal-csph.git`
 
+If you use the code in this repository please cite:
+
+```
+@inproceedings{gutierrez2023learned,
+  title={Learned Compressive Representations for Single-Photon 3D Imaging},
+  author={Gutierrez-Barragan, Felipe and Mu, Fangzhou and Ardelean, Andrei and Ingle, Atul and Bruschini, Claudio and Charbon, Edoardo and Li, Yin and Gupta, Mohit and Velten, Andreas},
+  booktitle={Proceedings of the IEEE/CVF International Conference on Computer Vision},
+  pages={10756--10766},
+  year={2023}
+}
+```
+
 ## Getting started
 
 All scripts and code should be run from the top-level directory, except for the data generation MATLAB code which should be run from the `data_gener` directory.
@@ -61,4 +73,16 @@ Alternatively, you can manuall create it as follows:
 ## Citation and Acknowledgements
 
 If you use the code in this repository, in addition to citing our work, please make sure to cite [Peng et al., ECCV 2020](https://github.com/JiayongO-O/PENonLocal) and [Lindell et al., SIGGRAPH 2018](https://davidlindell.com/publications/single-photon-3d). The initial version of the models in this repos were based on Peng et al, and the data generation code was based on Lindell et al.
+
+```
+@inproceedings{gutierrez2023learned,
+  title={Learned Compressive Representations for Single-Photon 3D Imaging},
+  author={Gutierrez-Barragan, Felipe and Mu, Fangzhou and Ardelean, Andrei and Ingle, Atul and Bruschini, Claudio and Charbon, Edoardo and Li, Yin and Gupta, Mohit and Velten, Andreas},
+  booktitle={Proceedings of the IEEE/CVF International Conference on Computer Vision},
+  pages={10756--10766},
+  year={2023}
+}
+```
+
+
 
