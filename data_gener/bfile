@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 #SBATCH --partition=research
-#SBATCH --cpus-per-task=96
-#SBATCH --mem=160000
-#SBATCH --time=96:0:0
-###SBATCH --nodelist=euler141
+#SBATCH --cpus-per-task=150
+#SBATCH --mem=600000
+#SBATCH --time=48:0:0
+#SBATCH --nodelist=euler141
 ###SBATCH --exclude=euler09
 #SBATCH -o slurm.%j.%N.out # STDOUT
 #SBATCH -e slurm.%j.%N.err # STDERR

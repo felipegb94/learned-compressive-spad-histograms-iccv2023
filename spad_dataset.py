@@ -79,7 +79,7 @@ def pad_xydim(inputs, num_kernel_rows, num_kernel_cols):
 
 
 class SpadDataset(torch.utils.data.Dataset):
-	def __init__(self, datalist_fpath, noise_idx=None, output_size=None, disable_rand_crop=False, logger=None):
+	def __init__(self, datalist_fpath, noise_idx=None, output_size=None, disable_rand_crop=False, logger=None, start=None, end=None):
 		"""__init__
 		:param datalist_fpath: path to text file with list of spad data files
 		:param noise_idx: the noise index list to include in the dataset (e.g., 1 or 2
@@ -102,6 +102,13 @@ class SpadDataset(torch.utils.data.Dataset):
 		self.spad_data_fpaths = []
 		if(noise_idx is None):
 			self.spad_data_fpaths = self.spad_data_fpaths_all
+			start_idx = 0
+			end_idx = len(self.spad_data_fpaths)
+			if(start is not None):
+				start_idx = start
+			if(end is not None):
+				end_idx = end
+			self.spad_data_fpaths = self.spad_data_fpaths[start_idx:end_idx]
 		else:
 			if(isinstance(noise_idx, int)):
 				noise_idx = [noise_idx]
@@ -168,7 +175,8 @@ class SpadDataset(torch.utils.data.Dataset):
 		# SBR = spad_data['SBR'].squeeze()
 		# mean_signal_photons = spad_data['mean_signal_photons'].squeeze()
 		# mean_background_photons = spad_data['mean_background_photons'].squeeze()
-		(nr, nc, nt) = spad_data['rates'].shape
+		nr, nc = spad_data['intensity'].shape
+		(_, nt) = spad_data['spad'].shape
 		tres_ps = spad_data['bin_size'].squeeze()*1e12
 		return (nr, nc, nt, tres_ps)
 
@@ -199,13 +207,18 @@ class SpadDataset(torch.utils.data.Dataset):
 
 		# load intensity image
 		intensity = spad_data['intensity'].astype(np.float32)
+		nr, nc = intensity.shape
+		n_bins = spad_data['num_bins'][0,0]
 
+		rates = None
+		# if 'rates' is not in mat file, I only saved few variables
 		# normalized pulse as GT histogram
-		rates = np.asarray(spad_data['rates']).astype(np.float32)
-		(nr, nc, n_bins) = rates.shape
-		rates = rates[np.newaxis,: ]
-		rates = np.transpose(rates, (0, 3, 1, 2))
-		rates = rates / (np.sum(rates, axis=-3, keepdims=True) + 1e-8)
+		if('rates' in spad_data):
+			rates = np.asarray(spad_data['rates']).astype(np.float32)
+			#(nr, nc, n_bins) = rates.shape
+			rates = rates[np.newaxis,: ]
+			rates = np.transpose(rates, (0, 3, 1, 2))
+			rates = rates / (np.sum(rates, axis=-3, keepdims=True) + 1e-8)
 
 		# simulated spad measurements
 		# Here we need to swap the rows and cols because matlab saves dimensions in a different order.
@@ -215,24 +228,25 @@ class SpadDataset(torch.utils.data.Dataset):
 		spad = np.transpose(spad, (0, 3, 2, 1))
 
 		# # ground truth depths in units of bins
-		bins = np.asarray(spad_data['bin']).astype(np.float32)
+		bins = np.asarray(spad_data['range_bins']).astype(np.float32)
 		bins = bins[np.newaxis, :]
 		bins = normalize_matlab_depth_bins(bins, n_bins)
 
-		# # Estimated lmf depths from spad measurements
-		est_bins_lmf = np.asarray(spad_data['est_range_bins_lmf'])
-		# Normalize the bin indeces
-		est_bins_lmf = est_bins_lmf[np.newaxis,:].astype(np.float32)
-		est_bins_lmf = normalize_matlab_depth_bins(est_bins_lmf, n_bins)
+		if(rates is not None):
+			# # Estimated lmf depths from spad measurements
+			est_bins_lmf = np.asarray(spad_data['est_range_bins_lmf'])
+			# Normalize the bin indeces
+			est_bins_lmf = est_bins_lmf[np.newaxis,:].astype(np.float32)
+			est_bins_lmf = normalize_matlab_depth_bins(est_bins_lmf, n_bins)
 
-		# # Estimated argmax depths from spad measurements
-		est_bins_argmax = np.asarray(spad_data['est_range_bins_argmax'])
-		# Generate hist from bin indeces
-		est_bins_argmax_hist = bins2hist(est_bins_argmax-1, num_bins=n_bins).astype(np.float32)
-		est_bins_argmax_hist = est_bins_argmax_hist[np.newaxis,:]
-		# Normalize the bin indeces
-		est_bins_argmax = est_bins_argmax[np.newaxis,:].astype(np.float32)
-		est_bins_argmax = normalize_matlab_depth_bins(est_bins_argmax, n_bins)
+			# # Estimated argmax depths from spad measurements
+			est_bins_argmax = np.asarray(spad_data['est_range_bins_argmax'])
+			# Generate hist from bin indeces
+			est_bins_argmax_hist = bins2hist(est_bins_argmax-1, num_bins=n_bins).astype(np.float32)
+			est_bins_argmax_hist = est_bins_argmax_hist[np.newaxis,:]
+			# Normalize the bin indeces
+			est_bins_argmax = est_bins_argmax[np.newaxis,:].astype(np.float32)
+			est_bins_argmax = normalize_matlab_depth_bins(est_bins_argmax, n_bins)
 
 		# Compute random crop if neeeded
 		(h, w) = (nr, nc)
@@ -251,38 +265,51 @@ class SpadDataset(torch.utils.data.Dataset):
 			top = np.random.randint(0, h - new_h + 1) 
 			left = np.random.randint(0, w - new_w + 1)
 
-		rates = rates[..., top:top + new_h, left:left + new_w]
 		spad = spad[..., top:top + new_h, left: left + new_w]
 		bins = bins[..., top: top + new_h, left: left + new_w]
 		intensity = intensity[..., top: top + new_h, left: left + new_w]
-		est_bins_lmf = est_bins_lmf[..., top: top + new_h, left: left + new_w]
-		est_bins_argmax = est_bins_argmax[..., top: top + new_h, left: left + new_w]
-		est_bins_argmax_hist = est_bins_argmax_hist[..., top: top + new_h, left: left + new_w]
-		rates = torch.from_numpy(rates)
 		spad = torch.from_numpy(spad)
 		bins = torch.from_numpy(bins)
 		intensity = torch.from_numpy(intensity)
-		est_bins_lmf = torch.from_numpy(est_bins_lmf)
-		est_bins_argmax = torch.from_numpy(est_bins_argmax)
-		est_bins_argmax_hist = torch.from_numpy(est_bins_argmax_hist)
-		# make sure these parameters have a supported data type by dataloader (uint16 is not supported)
 		spad_data['SBR'] = spad_data['SBR'].astype(np.float32)
-		spad_data['mean_signal_photons'] = spad_data['mean_signal_photons'].astype(np.int32)
-		spad_data['mean_background_photons'] = spad_data['mean_background_photons'].astype(np.int32)
 
-		sample = {
-			'rates': rates 
-			, 'spad': spad 
-			, 'bins': bins 
-			, 'intensity': intensity 
-			, 'est_bins_lmf': est_bins_lmf 
-			, 'est_bins_argmax': est_bins_argmax 
-			, 'est_bins_argmax_hist': est_bins_argmax_hist 
-			, 'SBR': spad_data['SBR'][0,0]
-			, 'mean_signal_photons': spad_data['mean_signal_photons'][0,0]
-			, 'mean_background_photons': spad_data['mean_background_photons'][0,0]
-			, 'idx': idx
-			}
+		if(rates is not None):
+			rates = rates[..., top:top + new_h, left:left + new_w]
+			est_bins_lmf = est_bins_lmf[..., top: top + new_h, left: left + new_w]
+			est_bins_argmax = est_bins_argmax[..., top: top + new_h, left: left + new_w]
+			est_bins_argmax_hist = est_bins_argmax_hist[..., top: top + new_h, left: left + new_w]
+			rates = torch.from_numpy(rates)
+			est_bins_lmf = torch.from_numpy(est_bins_lmf)
+			est_bins_argmax = torch.from_numpy(est_bins_argmax)
+			est_bins_argmax_hist = torch.from_numpy(est_bins_argmax_hist)
+			#make sure these parameters have a supported data type by dataloader (uint16 is not supported)
+			spad_data['mean_signal_photons'] = spad_data['mean_signal_photons'].astype(np.int32)
+			spad_data['mean_background_photons'] = spad_data['mean_background_photons'].astype(np.int32)
+
+		if(rates is not None):
+			sample = {
+				'spad': spad 
+				, 'bins': bins 
+				, 'intensity': intensity
+				, 'SBR': spad_data['SBR'][0,0]
+				, 'idx': idx
+				, 'rates': rates 
+				, 'est_bins_lmf': est_bins_lmf 
+				, 'est_bins_argmax': est_bins_argmax 
+				, 'est_bins_argmax_hist': est_bins_argmax_hist 
+				, 'mean_signal_photons': spad_data['mean_signal_photons'][0,0]
+				, 'mean_background_photons': spad_data['mean_background_photons'][0,0]
+				}
+		else:
+			sample = {
+				'spad': spad 
+				, 'bins': bins 
+				, 'intensity': intensity
+        	    , 'tres_ps': self.tres_ps
+        	    , 'data_id': spad_data_fname 
+				, 'SBR': spad_data['SBR'][0,0]
+				, 'idx': idx
+				}
 
 		return sample
 

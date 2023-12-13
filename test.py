@@ -35,9 +35,11 @@ def test(cfg):
 	logger.info("Number of assigned GPUs: {}".format(cfg.params.gpu_num))
 	logger.info("Number of available GPUs: {} {}".format(torch.cuda.device_count(), torch.cuda.get_device_name(torch.cuda.current_device())))
 
-	if(torch.cuda.is_available() and cfg.params.cuda): device = torch.device("cuda:0")
-	else: 
-		device = torch.device("cpu")
+	if(torch.cuda.is_available() and cfg.params.cuda):
+		pass
+		#device = torch.device("cuda")
+	else:
+		#device = torch.device("cpu")
 		cfg.params.cuda = False
 
 	tb_logger = setup_tb_logger() 
@@ -76,7 +78,7 @@ def test(cfg):
 		## If model is a csph3d model, input the encoding kernel dimensions
 		test_data = Lindell2018LinoSpadDataset(cfg.params.test_datalist_fpath, dims=(cfg.dataset.nt,cfg.dataset.nr,cfg.dataset.nc), tres_ps=cfg.dataset.tres_ps, encoding_kernel_dims=encoding_kernel_dims)
 	else:
-		test_data = SpadDataset(cfg.params.test_datalist_fpath, cfg.params.noise_idx, output_size=None, disable_rand_crop=True)
+		test_data = SpadDataset(cfg.params.test_datalist_fpath, cfg.params.noise_idx, output_size=None, disable_rand_crop=True, start=cfg.start_idx, end=cfg.end_idx)
 	
 	
 	test_loader = DataLoader(test_data, batch_size=cfg.params.batch_size, 
@@ -105,9 +107,12 @@ def test(cfg):
 	# h_irf = test_loader.dataset.psf 
 	# irf_layer_new = IRF1DLayer(irf=h_irf, conv_dim=0) 
 	# model.csph3d_layer.irf_layer = irf_layer_new
+	if('sunrgbd' in cfg.dataset.name):
+		predictions = trainer.predict(model, dataloaders=test_loader)
+		print(predictions)
+		return
 
-	trainer.test(model, dataloaders=test_loader)
-
+	trainer.test(model, dataloaders=test_loader)    
 	print("Results for:")
 	print("     Model Name: {}".format(cfg.model_name))
 	print("     Model Dirpath: {}".format(cfg.model_dirpath))

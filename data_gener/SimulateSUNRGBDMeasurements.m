@@ -7,11 +7,12 @@ function SimulateSUNRGBDMeasurements(startidx, endidx)
 	%addpath('/nobackup/bhavya/votenet/sunrgbd/sunrgbd_trainval/')
 	
 	% Set paths
-	base_dirpath = '/srv/home/bgoyal2/Documents/votnet/sunrgbd/sunrgbd_trainval/';
+	base_dirpath = '/srv/home/bgoyal2/Documents/mmdetection3d/data/sunrgbd/sunrgbd_trainval/';
 	dataset_dir = base_dirpath;
 	scenedir = fullfile(base_dirpath, 'image');
 	depthdir = fullfile(base_dirpath, 'depth');
-	out_base_dirpath = fullfile(base_dirpath, 'processed_full_lowflux');
+	out_base_dirpath = fullfile(base_dirpath, 'processed_full_lowfluxlowsbr');
+	%out_base_dirpath = fullfile('/scratch/bhavya', 'processed_full_lowfluxextralow');
 	
 	% Speed of light
 	c = 3e8; 
@@ -38,13 +39,9 @@ function SimulateSUNRGBDMeasurements(startidx, endidx)
 	
 	% Create output directory
 	sim_param_str = ComposeSimParamString(nr, nc, num_bins, bin_size, dark_img_param_idx, psf_img_param_idx);
-	outdir = fullfile(out_base_dirpath, sprintf('%s_%s', dataset_sim_id,sim_param_str));
-	if ~exist(outdir, 'dir')
-	    mkdir(outdir)
-	end
 	
 	% Get all scene names
-	scenes = load(fullfile(base_dirpath, 'val_data_idx.txt'));
+	scenes = load(fullfile(base_dirpath, 'all_data_idx.txt'));
 	% for ss = 1:length(scenes)
 	%     aa = dlmread(fullfile("/nobackup/bhavya/datasets/sunrgbd", SUNRGBDMeta(scenes(ss)).sequenceName, 'intrinsics.txt'));
 	%     focallength(ss) = aa(1,1);
@@ -62,10 +59,10 @@ function SimulateSUNRGBDMeasurements(startidx, endidx)
 	    cx(ss) = K(2, 7); cy(ss) = K(2, 8);
 	end
 	
-	simulation_params_highFlux_medSNR = [ 5, 1; 
-	                                   5, 5;
-	                                  5, 10;
-	                                   5, 50
+	simulation_params_highFlux_medSNR = [ 5, 500; 
+	                                   %5, 5;
+	                                  %5, 10;
+	                                   %1, 100;
 	];
 	simulation_params = [simulation_params_highFlux_medSNR];
 	
@@ -78,11 +75,18 @@ function SimulateSUNRGBDMeasurements(startidx, endidx)
 	
 	startidx = max(startidx, 1);
 	endidx = min(endidx, length(scenes));
+
+	outdir = fullfile(out_base_dirpath, sprintf('%s_%s', dataset_sim_id,sim_param_str));
+	%outdir = fullfile(out_base_dirpath, sprintf('%s_%s_%d', dataset_sim_id,sim_param_str,startidx));
+	if ~exist(outdir, 'dir')
+	    mkdir(outdir)
+	end
+
 	t_s = tic;
 	for ss = startidx:endidx
 	    fprintf('Processing scene %s...\n',scenes{ss});
 	    out_fname = sprintf('spad_%s_%s_%s.mat', scenes{ss}, num2str(simulation_params(end,1)), num2str(simulation_params(end,2)));
-		out_fpath = fullfile(outdir, out_fname)
+	    out_fpath = fullfile(outdir, out_fname)
 	    if exist(out_fpath)
 		    continue
 	    end

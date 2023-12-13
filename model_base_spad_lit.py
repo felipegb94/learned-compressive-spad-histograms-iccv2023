@@ -15,6 +15,7 @@ import pytorch_lightning as pl
 import torchvision
 from IPython.core import debugger
 breakpoint = debugger.set_trace
+import math
 
 #### Local imports
 from losses import criterion_L2, criterion_L1, criterion_KL, criterion_RMSE, criterion_TV
@@ -88,10 +89,33 @@ class LITBaseSPADModel(pl.LightningModule):
 	def get_input_data(self, sample):
 		return sample["spad"]
 	
-	def forward_wrapper(self, sample):
+	def forward_wrapper(self, sample, patches=False):
 		# Input the correct type of data to the model which should output the recovered histogram and depths
 		input_data = self.get_input_data(sample)
-		M_mea_re, rec = self(input_data)
+		if(patches): 
+			nr, nc = input_data.shape[-2:]
+			block_size = 64
+			r1 = block_size - nr%block_size;
+			r2 = block_size - nc%block_size;
+			r1_l = math.floor(r1/2);
+			r1_r = math.ceil(r1/2);
+			r2_l = math.floor(r2/2);
+			r2_r = math.ceil(r2/2);
+			input_data = torch.nn.functional.pad(input_data[:,0], (r2_l, r2_r, r1_l, r1_r), mode='reflect')
+			input_data = input_data[:,None,...]
+			M_mea_re = torch.empty(input_data.shape).squeeze(1)
+			rec = torch.empty(input_data.shape).squeeze(1)
+			for i in range(nr//block_size):
+				for j in range(nc//block_size):
+					input_patch = input_data[...,i*block_size:(i+1)*block_size,j*block_size:(j+1)*block_size]
+					M_mea_re_, rec_ = self(input_patch)
+					M_mea_re[...,i*block_size:(i+1)*block_size,j*block_size:(j+1)*block_size] = M_mea_re_
+					rec[...,i*block_size:(i+1)*block_size,j*block_size:(j+1)*block_size] = rec_
+			M_mea_re = M_mea_re[...,r1_l:-1*r1_r,r2_l:-1*r2_r]        
+			rec = rec[...,r1_l:-1*r1_r,r2_l:-1*r2_r]
+		else:        
+			M_mea_re, rec = self(input_data)
+		#print(M_mea_re.shape, rec.shape)
 		return M_mea_re, rec
 
 	def rec2depth(self, rec):
@@ -231,6 +255,47 @@ class LITBaseSPADModel(pl.LightningModule):
 			for i in range(len(spad_data_ids)):
 				spad_data_ids[i] = 'quantized_{}'.format(spad_data_ids[i])
 		return spad_data_ids
+
+
+	def predict_step(self, sample, batch_idx):
+
+		### Save model outputs in a folder with the dataset name and with a filename equal to the train data filename
+		# First get dataloader to generate the data ids
+		spad_data_ids = sample['data_id']
+		out_rel_dirpath = os.path.dirname(spad_data_ids[0])
+		if(not os.path.exists(out_rel_dirpath)):
+			os.makedirs(out_rel_dirpath, exist_ok=True)
+		#if(os.path.exists(spad_data_ids[0]+'.npz')):
+		#	return
+
+		# Forward pass
+		M_mea_re, rec = self.forward_wrapper(sample, patches=True)
+
+		# recompute rec
+		rec = hist2rec_soft_argmax(M_mea_re)
+
+		# Compute depths
+		dep_re = self.rec2depth(rec).cpu().numpy()
+		#dep = sample["bins"].cpu().numpy()
+
+		# Get tof params to compute depths
+		tres = sample['tres_ps'].cpu().numpy()*1e-12 
+		nt = M_mea_re.shape[-3]
+		tau = nt*tres
+
+		## Save some model outputs
+		for i in range(sample['spad'].shape[0]):
+			out_data_fpath = spad_data_ids[i]
+			np.savez(out_data_fpath, spad_denoised=dep_re[i,:]*(nt-1))
+
+		# Compute depths and RMSE on depths
+		#rec_depths = tof_utils.bin2depth(dep_re*nt, num_bins=nt, tau=tau)
+		#gt_depths = tof_utils.bin2depth(dep*nt, num_bins=nt, tau=tau)
+
+		#return {'rec_depths': rec_depths, 'dep_re': dep_re, 'gt_depths': gt_depths, 'dep': dep}
+		return
+
+
 
 	def test_step(self, sample, batch_idx):
 
