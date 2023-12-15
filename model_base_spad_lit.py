@@ -301,7 +301,7 @@ class LITBaseSPADModel(pl.LightningModule):
 		## Save some model outputs
 		for i in range(sample['spad'].shape[0]):
 			out_data_fpath = spad_data_ids[i]
-			np.savez(out_data_fpath, spad_denoised_softmax=dep_re[i,:]*(nt-1), spad_denoised_argmax=dep_re_argmax[i,:]*(nt-1))
+			np.savez(out_data_fpath, spad_denoised_softmax=dep_re[i,:]*(nt-1), spad_denoised_argmax=dep_re_argmax[i,:])
 
 		# Compute depths and RMSE on depths
 		#rec_depths = tof_utils.bin2depth(dep_re*nt, num_bins=nt, tau=tau)
