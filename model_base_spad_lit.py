@@ -39,6 +39,11 @@ def hist2rec_soft_argmax(hist_img):
 	soft_argmax = weighted_smax.sum(1).unsqueeze(1)
 	return soft_argmax
 
+def hist2rec_argmax(hist_img):
+	amax = hist_img.argmax(-3, keepdims=True)
+	return amax
+
+
 class LITBaseSPADModel(pl.LightningModule):
 	def __init__(self, 
 		backbone_net,
@@ -281,9 +286,11 @@ class LITBaseSPADModel(pl.LightningModule):
 
 		# recompute rec
 		rec = hist2rec_soft_argmax(M_mea_re)
+		rec_argmax = hist2rec_argmax(M_mea_re)
 
 		# Compute depths
 		dep_re = self.rec2depth(rec).cpu().numpy()
+		dep_re_argmax = self.rec2depth(rec_argmax).cpu().numpy()
 		#dep = sample["bins"].cpu().numpy()
 
 		# Get tof params to compute depths
@@ -294,7 +301,7 @@ class LITBaseSPADModel(pl.LightningModule):
 		## Save some model outputs
 		for i in range(sample['spad'].shape[0]):
 			out_data_fpath = spad_data_ids[i]
-			np.savez(out_data_fpath, spad_denoised=dep_re[i,:]*(nt-1))
+			np.savez(out_data_fpath, spad_denoised_softmax=dep_re[i,:]*(nt-1), spad_denoised_argmax=dep_re_argmax[i,:]*(nt-1))
 
 		# Compute depths and RMSE on depths
 		#rec_depths = tof_utils.bin2depth(dep_re*nt, num_bins=nt, tau=tau)

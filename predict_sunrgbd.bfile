@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#SBATCH --array=1-104%8
+#SBATCH --array=1-20%10
 
 #SBATCH --partition=research
 #SBATCH --cpus-per-task=8
@@ -10,8 +10,7 @@
 
 ###SBATCH --nodelist=euler17
 ###SBATCH --exclude=euler09
-###SBATCH --exclude=euler01,euler02,euler05,euler24,euler25,euler26,euler27
-#SBATCH --exclude=euler09,euler21
+#SBATCH --exclude=euler18,euler04,euler05,euler09,euler21,euler24,euler25,euler26,euler27
 
 ###SBATCH -o slurm.%j.%N.out # STDOUT
 ###SBATCH -e slurm.%j.%N.err # STDERR
@@ -23,6 +22,7 @@
 
 ## If any command fails exit.
 set -e 
+sleep $((RANDOM%4))
 
 module load anaconda/mini/4.9.2
 bootstrap_conda
