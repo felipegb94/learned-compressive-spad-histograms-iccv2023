@@ -95,22 +95,30 @@ class LITBaseSPADModel(pl.LightningModule):
 		if(patches): 
 			nr, nc = input_data.shape[-2:]
 			block_size = 64
+			block_pad = 5 # Use bigger block to have overlapping patches and only use center block to avoid errors at the boundary of the patches
 			r1 = block_size - nr%block_size;
 			r2 = block_size - nc%block_size;
-			r1_l = math.floor(r1/2);
-			r1_r = math.ceil(r1/2);
-			r2_l = math.floor(r2/2);
-			r2_r = math.ceil(r2/2);
+			r1_l = math.floor(r1/2) + block_pad;
+			r1_r = math.ceil(r1/2) + block_pad;
+			r2_l = math.floor(r2/2) + block_pad;
+			r2_r = math.ceil(r2/2) + block_pad;
 			input_data = torch.nn.functional.pad(input_data[:,0], (r2_l, r2_r, r1_l, r1_r), mode='reflect')
 			input_data = input_data[:,None,...]
 			M_mea_re = torch.empty(input_data.shape).squeeze(1)
 			rec = torch.empty(input_data.shape).squeeze(1)
-			for i in range(nr//block_size):
-				for j in range(nc//block_size):
-					input_patch = input_data[...,i*block_size:(i+1)*block_size,j*block_size:(j+1)*block_size]
+			for i in range((nr+r1)//block_size):
+				for j in range((nc+r2)//block_size):
+					# t,b,l,r is the block of block_size, but using bigger block with block_size padding
+					# only using the center of output from this to avoid boundary errors
+					t,b = i*block_size+block_pad, (i+1)*block_size+block_pad
+					l,r = j*block_size+block_pad, (j+1)*block_size+block_pad
+					input_patch = input_data[...,t-block_pad:b+block_pad,l-block_pad:r+block_pad]
+
 					M_mea_re_, rec_ = self(input_patch)
-					M_mea_re[...,i*block_size:(i+1)*block_size,j*block_size:(j+1)*block_size] = M_mea_re_
-					rec[...,i*block_size:(i+1)*block_size,j*block_size:(j+1)*block_size] = rec_
+
+					M_mea_re[...,t:b,l:r] = M_mea_re_[...,block_pad:-block_pad,block_pad:-block_pad]
+					rec[...,t:b,l:r] = rec_[...,block_pad:-block_pad,block_pad:-block_pad]
+
 			M_mea_re = M_mea_re[...,r1_l:-1*r1_r,r2_l:-1*r2_r]        
 			rec = rec[...,r1_l:-1*r1_r,r2_l:-1*r2_r]
 		else:        
@@ -265,8 +273,8 @@ class LITBaseSPADModel(pl.LightningModule):
 		out_rel_dirpath = os.path.dirname(spad_data_ids[0])
 		if(not os.path.exists(out_rel_dirpath)):
 			os.makedirs(out_rel_dirpath, exist_ok=True)
-		#if(os.path.exists(spad_data_ids[0]+'.npz')):
-		#	return
+		if(os.path.exists(spad_data_ids[0]+'.npz')):
+		    return
 
 		# Forward pass
 		M_mea_re, rec = self.forward_wrapper(sample, patches=True)
@@ -280,7 +288,7 @@ class LITBaseSPADModel(pl.LightningModule):
 
 		# Get tof params to compute depths
 		tres = sample['tres_ps'].cpu().numpy()*1e-12 
-		nt = M_mea_re.shape[-3]
+		nt = sample['spad'].shape[-3]
 		tau = nt*tres
 
 		## Save some model outputs

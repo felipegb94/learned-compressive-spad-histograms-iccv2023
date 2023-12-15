@@ -203,6 +203,9 @@ class SpadDataset(torch.utils.data.Dataset):
 		spad_data_fname = self.spad_data_fpaths[idx]
 		spad_data = scipy.io.loadmat(spad_data_fname)
 
+		if(os.path.exists(spad_data_fname+'.npz')):
+			return {'data_id': spad_data_fname}
+
 		# print("Loading: {}".format(spad_data_fname))
 
 		# load intensity image
@@ -305,8 +308,8 @@ class SpadDataset(torch.utils.data.Dataset):
 				'spad': spad 
 				, 'bins': bins 
 				, 'intensity': intensity
-        	    , 'tres_ps': self.tres_ps
-        	    , 'data_id': spad_data_fname 
+				, 'tres_ps': self.tres_ps
+				, 'data_id': spad_data_fname 
 				, 'SBR': spad_data['SBR'][0,0]
 				, 'idx': idx
 				}
