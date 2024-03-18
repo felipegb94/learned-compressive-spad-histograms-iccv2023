@@ -2,7 +2,7 @@
 
 This repository contains the code for the [ICCV 2023 paper Learned Compressive Representations for Single-Photon 3D Imaging](https://openaccess.thecvf.com/content/ICCV2023/html/Gutierrez-Barragan_Learned_Compressive_Representations_for_Single-Photon_3D_Imaging_ICCV_2023_paper.html).
 
-> **IMPORTANT NOTE from 2023-11-18:** The code in this repository still needs to be cleaned up and organized for better reproducibility, but we have made it public early. A new release with a simplified codebase will be made available in the next couple months. In the meantime, if you have any questions about the code, please create an issue.
+> **IMPORTANT NOTE from 2024-03-18:** The code in this repository still needs to be cleaned up and organized for better reproducibility, but we have made it public early. A new release with a simplified codebase will be made available in the next couple months. In the meantime, if you have any questions about the code, please create an issue. There is currently on thread that has been started: https://github.com/felipegb94/learned-compressive-spad-histograms-iccv2023/issues/8
 
 To clone: `git clone --recurse-submodules git@github.com:felipegb94/learned-compressive-spad-histograms-iccv2023.git`
 
