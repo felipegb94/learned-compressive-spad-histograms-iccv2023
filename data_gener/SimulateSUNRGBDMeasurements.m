@@ -11,8 +11,8 @@ function SimulateSUNRGBDMeasurements(startidx, endidx)
 	dataset_dir = base_dirpath;
 	scenedir = fullfile(base_dirpath, 'image');
 	depthdir = fullfile(base_dirpath, 'depth');
-	out_base_dirpath = fullfile(base_dirpath, 'processed_full_lowfluxlowsbr');
-	%out_base_dirpath = fullfile('/scratch/bhavya', 'processed_full_lowfluxextralow');
+	out_base_dirpath = fullfile(base_dirpath, 'processed_testing');
+	%out_base_dirpath = fullfile(base_dirpath, 'processed_lowfluxlowsbr_min2');
 	
 	% Speed of light
 	c = 3e8; 
@@ -59,7 +59,7 @@ function SimulateSUNRGBDMeasurements(startidx, endidx)
 	    cx(ss) = K(2, 7); cy(ss) = K(2, 8);
 	end
 	
-	simulation_params_highFlux_medSNR = [ 5, 500; 
+	simulation_params_highFlux_medSNR = [ 50, 500; 
 	                                   %5, 5;
 	                                  %5, 10;
 	                                   %1, 100;
@@ -106,7 +106,11 @@ function SimulateSUNRGBDMeasurements(startidx, endidx)
 	    fprintf('    Min scene depth: %f...\n',min_scene_depth);
 	    size(depth)
 	
-	    mask = depth == dmin;
+	    %mask = depth == dmin;
+	    % inpainting very small depth values too along with nan
+	    % because for some pixels, small depths results in very high signal ppp as it is alpha/dist^2
+	    % so removing about first 22 bins here
+	    mask = depth <= (dmin+2.);
 	    depth(mask) = nan;
 	
 	    depth = full(inpaint_nans(double(depth),5));

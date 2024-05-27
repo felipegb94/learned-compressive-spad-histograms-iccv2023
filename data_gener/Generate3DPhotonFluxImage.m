@@ -31,5 +31,5 @@ function [rates] = Generate3DPhotonFluxImage(PSF_img, signal_ppp, ambient_ppp, r
             rates(jj,kk,:) = circshift(squeeze(rates(jj,kk,:)), circ_amount(jj,kk));
         end
     end
-
+    % TODO: add FOV with gaussian 2d filter
 end

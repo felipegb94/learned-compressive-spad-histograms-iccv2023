@@ -20,6 +20,10 @@ function [spad, detections, rates, range_bins] = SimulateSPADMeasurement(albedo,
 				 
 	% sample the process
 	detections = poissrnd(rates);
+	mdetections = max(detections, [], "all");
+	if mdetections>=25
+	    fprintf(' Max Detections %d...\n',mdetections);
+	end	
 	spad = sparse(reshape(detections, nr*nc, []));
 		
 end

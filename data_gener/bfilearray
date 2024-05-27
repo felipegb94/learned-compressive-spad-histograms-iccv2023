@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+#SBATCH --array=57-57%10
+
+#SBATCH --partition=research
+#SBATCH --cpus-per-task=12
+#SBATCH --mem=50G
+#SBATCH --time=24:0:0
+
+###SBATCH --nodelist=euler21
+###SBATCH --exclude=euler22,euler17,euler18
+#SBATCH --exclude=euler[01-28]
+
+###SBATCH -o slurm.%j.%N.out # STDOUT
+###SBATCH -e slurm.%j.%N.err # STDERR
+#SBATCH -o logs/slurm.%A.%a.%N.out
+#SBATCH -e logs/slurm.%A.%a.%N.err
+
+#SBATCH --job-name=pensim
+#SBATCH --no-requeue
+
+
+module load matlab/r2021b
+
+#START=$1
+#END=$2
+START=$((($SLURM_ARRAY_TASK_ID-1)*100))
+END=$((($SLURM_ARRAY_TASK_ID)*100))
+#START=$((($SLURM_ARRAY_TASK_ID-1)*10+1200))
+#END=$((($SLURM_ARRAY_TASK_ID)*10+1200))
+
+
+
+matlab -nodisplay -nosplash -nodesktop -r 'SimulateSUNRGBDMeasurements('$((START+1))','$END');quit;'
+
+
+
