@@ -1,12 +1,18 @@
-function SimulateSUNRGBDMeasurements(startidx, endidx) 
+function SimulateSUNRGBDMeasurements(startidx, endidx, split) 
 	
 	% Set paths
-	base_dirpath = '/srv/home/bgoyal2/Documents/mmdetection3d/data/sunrgbd/sunrgbd_trainval/';
-	dataset_dir = base_dirpath;
-	scenedir = fullfile(base_dirpath, 'image');
-	depthdir = fullfile(base_dirpath, 'depth');
-	out_base_dirpath = fullfile(base_dirpath, 'processed_testing');
+	%dataset = "sunrgbd";
+	%base_dirpath = '/srv/home/bgoyal2/Documents/mmdetection3d/data/sunrgbd/sunrgbd_trainval/';
+	%scenedir = fullfile(base_dirpath, 'image');
+	%depthdir = fullfile(base_dirpath, 'depth');
+	dataset = "kitti";
+	base_dirpath = fullfile('/srv/home/bgoyal2/datasets/kitti/', split, '/');
+	depthdir = fullfile(base_dirpath, 'velodyne_reduced/');
+
+	%out_base_dirpath = fullfile(base_dirpath, 'processed_testing');
 	%out_base_dirpath = fullfile(base_dirpath, 'processed_lowfluxlowsbr_min2');
+	out_base_dirpath = fullfile(base_dirpath, 'processed_velodyne_reduced_lowfluxlowsbr');
+
 	
 	% Speed of light
 	c = 3e8; 
@@ -19,12 +25,9 @@ function SimulateSUNRGBDMeasurements(startidx, endidx)
 	psf_img_param_idx = 0; % For bright image from which the PSF/pulse wavefor is extracted (see LoadAndPreprocessBightPSFImg.m for options)
 	
 	
-	% IMPORTANT NOTE: NOT ALL SCENES HAVE THE DIMENSIONS BELOW, IN THE INNER
-	% LOOP WE MODIFY THE nr and nc VARIABLES. We just create them here, to
-	% create a dataset name similar to the one created in the train set.
+	% Not all scenes have same dimentions, we modify nr and nc in innner loop.
+	% Just creating here to create a dataset name similar to original training set.
 	nr = 576; nc = 704;
-	lres_factor = 1;
-	nr = nr * lres_factor; nc = nc * lres_factor;
 	
 	% Create output directory
 	sim_param_str = ComposeSimParamString(nr, nc, num_bins, bin_size, dark_img_param_idx, psf_img_param_idx);
@@ -32,16 +35,18 @@ function SimulateSUNRGBDMeasurements(startidx, endidx)
 	% Get all scene names
 	scenes = readlines(fullfile(base_dirpath, 'all_data_idx.txt'),"EmptyLineRule","skip");
 
-	for ss = 1:length(scenes)
-	    K = dlmread(fullfile(base_dirpath, 'calib', sprintf('%s.txt', scenes(ss) )));
-	    allK{ss} = K;
-	    fx(ss) = K(2, 1); fy(ss) = K(2, 5);
-	    cx(ss) = K(2, 7); cy(ss) = K(2, 8);
+	if strcmp(dataset, "sunrgbd")
+		for ss = 1:length(scenes)
+		    K = dlmread(fullfile(base_dirpath, 'calib', sprintf('%s.txt', scenes(ss) )));
+		    allK{ss} = K;
+		    fx(ss) = K(2, 1); fy(ss) = K(2, 5);
+		    cx(ss) = K(2, 7); cy(ss) = K(2, 8);
+		end
 	end
 	
-	simulation_params_highFlux_medSNR = [ 5, 50; 
-	                                   %5, 5;
-	                                  %5, 10;
+	simulation_params_highFlux_medSNR = [ 5, 1; 
+	                                      5, 50;
+	                                      1, 50;
 	                                   %1, 100;
 	];
 	simulation_params = [simulation_params_highFlux_medSNR];
@@ -71,38 +76,61 @@ function SimulateSUNRGBDMeasurements(startidx, endidx)
 		    continue
 	    end
 	
-	    dmin = 0.;
-	    depth = (single(imread(fullfile(depthdir, sprintf('%s.png', scenes(ss))) ) ) + dmin);
-	    depth = depth./1000;
-	    intensity = rgb2gray(im2double(imread(fullfile(scenedir, sprintf('%s.jpg', scenes(ss))))));   
+	    if strcmp(dataset, "sunrgbd")
+	    	dmin = 0.;
+	    	depth = (single(imread(fullfile(depthdir, sprintf('%s.png', scenes(ss))) ) ) + dmin);
+	    	depth = depth./1000;
+	    	intensity = rgb2gray(im2double(imread(fullfile(scenedir, sprintf('%s.jpg', scenes(ss))))));   
+
+	    	max_scene_depth = max(depth(:));
+	    	min_scene_depth = min(depth(:));
+	    	fprintf('    Max scene depth: %f...\n',max_scene_depth);
+	    	fprintf('    Min scene depth: %f...\n',min_scene_depth);
+
+	    	%mask = depth == dmin;
+	    	% inpainting very small depth values too along with nan
+	    	% because for some pixels, small depths results in very high signal ppp as it is alpha/dist^2
+	    	% so removing about first 22 bins here
+	    	mask = depth <= (dmin+2.);
+	    	depth(mask) = nan;
 	
-	    max_scene_depth = max(depth(:));
-	    min_scene_depth = min(depth(:));
-	    fprintf('    Max scene depth: %f...\n',max_scene_depth);
-	    fprintf('    Min scene depth: %f...\n',min_scene_depth);
-	    size(depth)
+	    	depth = full(inpaint_nans(double(depth),5));
 	
-	    %mask = depth == dmin;
-	    % inpainting very small depth values too along with nan
-	    % because for some pixels, small depths results in very high signal ppp as it is alpha/dist^2
-	    % so removing about first 22 bins here
-	    mask = depth <= (dmin+2.);
-	    depth(mask) = nan;
+	    	depth = max(depth, 0);
+	    	intensity = max(intensity, 0);
 	
-	    depth = full(inpaint_nans(double(depth),5));
+	    	[x,y] = meshgrid(1:size(intensity,2),1:size(intensity,1));
+	    	X = (x - cx(ss)).*depth ./ fx(ss);
+	    	Y = (y - cy(ss)).*depth ./ fy(ss);
+	    	dist = sqrt(X.^2 + Y.^2 + depth.^2);
+	    	clear x1 x2 y1 y2 X1 X2 Y1 Y2;
 	
-	    depth = max(depth, 0);
-	    intensity = max(intensity, 0);
-	
-	    [x,y] = meshgrid(1:size(intensity,2),1:size(intensity,1));
-	    X = (x - cx(ss)).*depth ./ fx(ss);
-	    Y = (y - cy(ss)).*depth ./ fy(ss);
-	    dist = sqrt(X.^2 + Y.^2 + depth.^2);
-	    clear x1 x2 y1 y2 X1 X2 Y1 Y2;
-	
-	    % set a number of signal photons per pixel
-	    albedo = intensity;
-	    alpha = albedo .* 1./ dist.^2;
+	    	% set a number of signal photons per pixel
+	    	albedo = intensity;
+	    	alpha = albedo .* 1./ dist.^2;
+
+
+	    elseif strcmp(dataset, "kitti")
+	    	fid = fopen(fullfile(depthdir, sprintf('%s.bin', scenes(ss))));
+	    	xyzr = double(fread(fid, '*float'));
+	    	fclose(fid);
+
+	    	X = xyzr(1:4:end);
+	    	Y = xyzr(2:4:end);
+	    	Z = xyzr(3:4:end);
+	    	r = xyzr(4:4:end);
+	    	[az, el, dist] = cart2sph(X, Y, Z);
+
+	    	max_scene_dist = max(dist(:));
+	    	min_scene_dist = min(dist(:));
+	    	fprintf('    Max scene dist: %f...\n',max_scene_dist);
+	    	fprintf('    Min scene dist: %f...\n',min_scene_dist);
+
+	    	% adding 0.01 to convert r to 0.01 to 1.0
+	    	alpha = r + 0.01;
+	    	intensity = alpha .* dist.^2;
+	    end
+
 	    nr = size(dist, 1); nc = size(dist, 2);
 
 	    % Load the dark count image. If dark_img_param_idx == 0 this is just zeros
@@ -113,11 +141,11 @@ function SimulateSUNRGBDMeasurements(startidx, endidx)
 	    % For the simulation, we will scale each pixel pulse (signal), shift it
 	    % vertically (background level), and shift it horizontally (depth/ToF).
 	    [PSF_img, psf, pulse_len] = LoadAndPreprocessBrightPSFImg(psf_img_param_idx, nr, nc, num_bins);
-	    psf_data_fname = sprintf('PSF_used_for_simulation_nr-%d_nc-%d.mat', nr, nc);
-	    psf_data_fpath = fullfile(outdir, psf_data_fname);
-	    if ~exist(psf_data_fpath)
-	    	save(psf_data_fpath, 'PSF_img', 'psf', 'pulse_len');
-	    end
+	    %psf_data_fname = sprintf('PSF_used_for_simulation_nr-%d_nc-%d.mat', nr, nc);
+	    %psf_data_fpath = fullfile(outdir, psf_data_fname);
+	    %if ~exist(psf_data_fpath)
+	    %	save(psf_data_fpath, 'PSF_img', 'psf', 'pulse_len');
+	    %end
 	
 	    for zz = 1:size(simulation_params,1) 
 	               
@@ -162,12 +190,14 @@ function SimulateSUNRGBDMeasurements(startidx, endidx)
 	
 	        % save sparse spad detections to file
 	        % the 'spad' is the simulated data, 'depth' is the GT 2D depth map,
-	        % which is 72*88, 'depth_hr' is 576*704. 'intensity' is the
-	        % gray image, 72*88. 'rates' is actually the GT 3D histogram.
+	        % 'intensity' is the gray image, 'rates' is actually the GT 3D histogram.
 	        out_fname = sprintf('spad_%s_%s_%s.mat', scenes(ss), num2str(mean_signal_photons), num2str(mean_background_photons));
 	        out_fpath = fullfile(outdir, out_fname);
-	        SaveSimulatedSPADImgSmall(out_fpath, spad, SBR, range_bins, intensity, bin_size, allK{ss}, num_bins)
-	
+	        if strcmp(dataset, "sunrgbd")
+	            SaveSimulatedSPADImgSUNRGBD(out_fpath, spad, SBR, range_bins, intensity, bin_size, allK{ss}, num_bins)
+	        elseif strcmp(dataset, "kitti")
+	            SaveSimulatedSPADImgKITTI(out_fpath, spad, SBR, range_bins, intensity, bin_size, num_bins, az, el)
+	        end
 	    end
 	end
 	t_cost = toc(t_s);
