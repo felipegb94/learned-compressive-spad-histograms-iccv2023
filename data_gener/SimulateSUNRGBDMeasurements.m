@@ -1,23 +1,27 @@
-function SimulateSUNRGBDMeasurements(startidx, endidx, split) 
+function SimulateSUNRGBDMeasurements(startidx, endidx, dataset) 
 	
 	% Set paths
 	%dataset = "sunrgbd";
-	%base_dirpath = '/srv/home/bgoyal2/Documents/mmdetection3d/data/sunrgbd/sunrgbd_trainval/';
-	%scenedir = fullfile(base_dirpath, 'image');
-	%depthdir = fullfile(base_dirpath, 'depth');
-	dataset = "kitti";
-	base_dirpath = fullfile('/srv/home/bgoyal2/datasets/kitti/', split, '/');
-	depthdir = fullfile(base_dirpath, 'velodyne_reduced/');
+	%dataset = "kitti";
 
-	%out_base_dirpath = fullfile(base_dirpath, 'processed_testing');
-	%out_base_dirpath = fullfile(base_dirpath, 'processed_lowfluxlowsbr_min2');
-	out_base_dirpath = fullfile(base_dirpath, 'processed_velodyne_reduced_lowfluxlowsbr');
 
-	
+	if strcmp(dataset, "sunrgbd")
+		base_dirpath = '/srv/home/bgoyal2/Documents/mmdetection3d2/data/sunrgbd/sunrgbd_trainval/';
+		scenedir = fullfile(base_dirpath, 'image');
+		depthdir = fullfile(base_dirpath, 'depth');
+		out_base_dirpath = fullfile(base_dirpath, 'processed_lowfluxlowsbr_min2');
+		num_bins = 1024; 
+	elseif strcmp(dataset, "kitti")
+		base_dirpath = '/srv/home/bgoyal2/datasets/kitti/training/';
+		depthdir = fullfile(base_dirpath, 'velodyne_reduced/');
+		out_base_dirpath = fullfile(base_dirpath, 'processed_velodyne_reduced_lowfluxlowsbr8192_r025_dist10');
+		num_bins = 8192; 
+	end
+
+	out_base_dirpath = fullfile(base_dirpath, 'processed_testing');
+
 	% Speed of light
 	c = 3e8; 
-	% Time bin size, number of bins
-	num_bins = 1024; 
 	repetition_period = 600e-9;
 	bin_size = repetition_period/num_bins; %approximately the bin size (in secs)
 	% Dark and Bright image parameter idx
@@ -44,10 +48,10 @@ function SimulateSUNRGBDMeasurements(startidx, endidx, split)
 		end
 	end
 	
-	simulation_params_highFlux_medSNR = [ 5, 1; 
-	                                      5, 50;
+	simulation_params_highFlux_medSNR = [ 1, 10; 
+	                                      1, 20;
 	                                      1, 50;
-	                                   %1, 100;
+	                                      1, 100;
 	];
 	simulation_params = [simulation_params_highFlux_medSNR];
 	
@@ -126,9 +130,9 @@ function SimulateSUNRGBDMeasurements(startidx, endidx, split)
 	    	fprintf('    Max scene dist: %f...\n',max_scene_dist);
 	    	fprintf('    Min scene dist: %f...\n',min_scene_dist);
 
-	    	% adding 0.01 to convert r to 0.01 to 1.0
-	    	alpha = r + 0.01;
-	    	intensity = alpha .* dist.^2;
+	    	% adding 0.25 to reflectance values and 10 to distances to avoid 0 reflectance and small distances
+	    	alpha = r + 0.25;
+	    	intensity = alpha .* (dist+10).^2;
 	    end
 
 	    nr = size(dist, 1); nc = size(dist, 2);
@@ -196,7 +200,7 @@ function SimulateSUNRGBDMeasurements(startidx, endidx, split)
 	        if strcmp(dataset, "sunrgbd")
 	            SaveSimulatedSPADImgSUNRGBD(out_fpath, spad, SBR, range_bins, intensity, bin_size, allK{ss}, num_bins)
 	        elseif strcmp(dataset, "kitti")
-	            SaveSimulatedSPADImgKITTI(out_fpath, spad, SBR, range_bins, intensity, bin_size, num_bins, az, el)
+	            SaveSimulatedSPADImgKITTI(out_fpath, spad, SBR, range_bins, intensity, bin_size, num_bins, az, el, r)
 	        end
 	    end
 	end

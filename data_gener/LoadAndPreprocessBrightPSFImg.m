@@ -15,8 +15,8 @@ function [PSF_img, psf, pulse_len] = LoadAndPreprocessBrightPSFImg(psf_img_param
         % This is what was used to simulate the Middlebury Test set in
         % Lindell et al. and Peng et al.
         disp("Generating PSF Image from Gaussian Pulse as in Middlebury Test set")
-        bin_size = 600e-9 / nbins; % the temporal res
-        pulse_len = (1760e-12) / bin_size;
+	% hard coding here, comes about 3.003
+        pulse_len = (1760e-12) / ((600e-9) / 1024);
         pulse = normpdf(1:8*pulse_len,(8*pulse_len-1)/2,pulse_len/2);
         pulse = pulse ./ sum(pulse(:),1);
         PSF_img = repmat(reshape(pulse, [1, 1, numel(pulse)]),[nr,nc,1]);
